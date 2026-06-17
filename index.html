@@ -57,6 +57,7 @@
   .combiner-head p{margin:0 0 16px;color:var(--ink-soft);font-size:.92rem}
   .combiner-head p b{color:var(--ink)}
   .combo-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .combo-sep{flex:0 0 1px;align-self:stretch;background:rgba(106,95,84,.22);margin:4px 0}
   .tog{font-family:'IBM Plex Mono',monospace;font-size:.82rem;border:1px solid var(--line);
     background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 13px;cursor:pointer;
     transition:.15s;display:inline-flex;gap:7px;align-items:center}
@@ -200,8 +201,8 @@
     <p class="eyebrow">Osteoporosi · Screening delle forme secondarie</p>
     <h1>Osteoporosi secondaria: dall'esame di primo livello al sospetto diagnostico</h1>
     <div class="thesis">
-      <p class="lead">Quando un <strong>esame di primo livello è alterato</strong>, l'integrazione con il quadro clinico svela la <strong>forma secondaria</strong> sottostante in circa <span class="big">9 casi su 10</span>.</p>
-      <p class="sub">Ogni dato <span class="hl-up">in eccesso&nbsp;▲</span> o <span class="hl-down">in difetto&nbsp;▼</span> è collegato qui sotto agli indizi clinici e alla diagnosi da sospettare.</p>
+      <p class="lead">Nel paziente <strong>senza causa clinica evidente</strong>, la <strong>normalità</strong> degli esami di primo livello esclude circa il <span class="big">90%</span> delle forme secondarie individuabili in laboratorio.</p>
+      <p class="sub">Quando un esame è invece <strong>alterato</strong>, orienta verso le forme più frequenti: ogni dato <span class="hl-up">in eccesso&nbsp;▲</span> o <span class="hl-down">in difetto&nbsp;▼</span> è collegato qui sotto agli indizi clinici e alla diagnosi da sospettare.</p>
     </div>
   </header>
 
@@ -338,6 +339,15 @@ const LAB2 = {
   ridIntroito:["Anamnesi alimentare","Calciuria 24h"],
   farmaciD:["Revisione farmacologica","25-OH-vit D"],
   ridEspos:["Anamnesi esposizione solare","25-OH-vit D"]
+};
+
+// Reperti che, se selezionati, rendono ridondante lo stesso esame nel pannello di II livello.
+// Solo corrispondenze esatte allo stesso test (non test diversi/più specifici).
+const SATISFIES = {
+  pth_up:["PTH"], pth_down:["PTH"],
+  vitd_down:["25-OH-vit D"],
+  cau_up:["Calciuria 24h"], cau_down:["Calciuria 24h"],
+  po4_up:["Fosforemia"], po4_down:["Fosforemia"]
 };
 
 const exams = [
@@ -479,10 +489,24 @@ const selected = new Set();
 const comboChips = document.getElementById("comboChips");
 const comboResult = document.getElementById("comboResult");
 
-comboChips.innerHTML = Object.keys(altIndex).map(id=>{
-  const a = altIndex[id];
-  return `<button class="tog ${a.dir}" type="button" data-id="${id}" aria-pressed="false"><span class="pip"></span>${a.tag}</button>`;
-}).join("");
+const comboGroups = [
+  { label:"Calcio e fosforo", ids:["ca_up","ca_down","po4_up","po4_down","cau_up","cau_down"] },
+  { label:"Paratiroidi e vitamina D", ids:["pth_up","pth_down","vitd_down"] },
+  { label:"Osso · turnover", ids:["alp_up","alp_down"] },
+  { label:"Funzione renale", ids:["egfr_low"] },
+  { label:"Ematologico e flogosi", ids:["ves_up","hb_down","spep_up","spep_down"] },
+  { label:"Tiroide", ids:["tsh_down"] }
+];
+const groupedIds = new Set(comboGroups.flatMap(g=>g.ids));
+const leftoverIds = Object.keys(altIndex).filter(id=>!groupedIds.has(id));
+const comboGroupsFull = leftoverIds.length ? comboGroups.concat([{ label:"Altri", ids:leftoverIds }]) : comboGroups;
+
+comboChips.innerHTML = comboGroupsFull.map(g =>
+  g.ids.map(id=>{
+    const a = altIndex[id];
+    return `<button class="tog ${a.dir}" type="button" data-id="${id}" aria-pressed="false"><span class="pip"></span>${a.tag}</button>`;
+  }).join("")
+).join('<span class="combo-sep" aria-hidden="true"></span>');
 
 function intersect(ids){
   const lists = ids.map(id=>altIndex[id].dx);
@@ -507,16 +531,25 @@ function renderResult(){
   if(dx.length){
     const solo = dx.length===1 ? "solo" : "";
     body = `<div class="result-dx">${dx.map(id=>`<span class="suspect ${solo}">${COND[id]}</span>`).join("")}</div>`;
+    const done = new Set();
+    ids.forEach(id => (SATISFIES[id]||[]).forEach(x => done.add(x)));
+    const freqAll = {};
+    dx.forEach(cid => (LAB2[cid]||[]).forEach(ex => { freqAll[ex] = (freqAll[ex]||0)+1; }));
+    const excluded = Object.keys(freqAll).filter(ex => done.has(ex));
     const freq = {};
-    dx.forEach(cid => (LAB2[cid]||[]).forEach(ex => { freq[ex] = (freq[ex]||0)+1; }));
+    Object.keys(freqAll).forEach(ex => { if(!done.has(ex)) freq[ex] = freqAll[ex]; });
     const ordered = Object.keys(freq).sort((a,b)=> freq[b]-freq[a]);
+    let notes = "";
+    if(dx.length>1) notes += `<p class="panel-note">In evidenza gli esami ad alta resa, comuni a più sospetti.</p>`;
+    if(excluded.length) notes += `<p class="panel-note">Già tra i reperti selezionati, quindi non riproposti: ${excluded.join(", ")}.</p>`;
     if(ordered.length){
       const chips = ordered.map(ex=>{
         const m = freq[ex] > 1;
-        return `<span class="lab2 ${m?'multi':''}"${m?` title="Copre ${freq[ex]} sospetti"`:''}>${ex}${m?` <em>×${freq[ex]}</em>`:''}</span>`;
+        return `<span class="lab2 ${m?'multi':''}"${m?` title="Comune a ${freq[ex]} sospetti"`:''}>${ex}</span>`;
       }).join("");
-      const note = dx.length>1 ? `<p class="panel-note">In evidenza gli esami ad alta resa, comuni a più sospetti.</p>` : "";
-      body += `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p><div class="lab2-list">${chips}</div>${note}</div>`;
+      body += `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p><div class="lab2-list">${chips}</div>${notes}</div>`;
+    } else {
+      body += `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p><p class="panel-note">Gli accertamenti mirati per questi sospetti sono già tra i reperti selezionati.</p></div>`;
     }
   } else {
     body = `<p class="combo-empty">Nessuna forma secondaria spiega da sola tutti i reperti selezionati: valuta cause indipendenti o reperti isolati.</p>`;
