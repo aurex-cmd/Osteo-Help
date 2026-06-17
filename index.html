@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Esami di primo livello · Quando sospettare l'osteoporosi secondaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF3E9; --bg-2:#F3E7D6; --surface:#FFFFFF;
+    --ink:#27221D; --ink-soft:#6A5F54; --line:#EADBC6;
+    --up:#1C6E7E; --up-soft:#DCEEF0; --down:#C0492F; --down-soft:#F8E2DA;
+    --amber:#C98A2B; --suspect-bg:#F4E5D4; --suspect-ink:#824A1E; --focus:#1C6E7E;
+    --accent:#1C6E7E; --accent-soft:#DCEEF0; --warn:#C0492F;
+    --radius:22px; --radius-sm:12px; --shadow:0 12px 34px -18px rgba(60,40,20,.45);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 520px at 8% -8%, #FCEBD8 0%, transparent 60%),
+      radial-gradient(900px 480px at 100% 0%, #F6E6E0 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink); font-family:'Inter',system-ui,sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,48px)}
+
+  /* HERO */
+  .hero{padding:clamp(8px,2vw,16px) 0 clamp(20px,3vw,32px)}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-soft);margin:0 0 14px}
+  h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;line-height:1.04;
+    font-size:clamp(1.95rem,4.6vw,3.1rem);letter-spacing:-.02em;margin:0 0 .6em;max-width:24ch}
+  .thesis{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:clamp(16px,2.4vw,22px) clamp(20px,3vw,28px);margin-top:8px}
+  .thesis .lead{margin:0;font-size:clamp(1.02rem,1.8vw,1.24rem);line-height:1.42;max-width:70ch}
+  .thesis .lead strong{color:var(--ink);font-weight:700}
+  .thesis .big{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;color:var(--accent);
+    font-size:1.18em;letter-spacing:-.02em;white-space:nowrap}
+  .thesis .sub{margin:9px 0 0;color:var(--ink-soft);font-size:.92rem;max-width:70ch}
+  .hl-up{color:var(--up);font-weight:700}
+  .hl-down{color:var(--down);font-weight:700}
+
+  /* SECTION LABELS */
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-soft);display:flex;align-items:center;gap:14px;margin:34px 0 16px}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  /* COMBINER */
+  .combiner{background:linear-gradient(180deg,#FFFDF9,#FAF0E1);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(16px,2.6vw,24px)}
+  .combiner-head h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.18rem;margin:0 0 4px}
+  .combiner-head p{margin:0 0 16px;color:var(--ink-soft);font-size:.92rem}
+  .combiner-head p b{color:var(--ink)}
+  .combo-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .tog{font-family:'IBM Plex Mono',monospace;font-size:.82rem;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 13px;cursor:pointer;
+    transition:.15s;display:inline-flex;gap:7px;align-items:center}
+  .tog .pip{width:8px;height:8px;border-radius:50%;flex:none}
+  .tog.up .pip{background:var(--up)} .tog.down .pip{background:var(--down)}
+  .tog:hover{border-color:var(--ink-soft)}
+  .tog[aria-pressed="true"]{color:#fff}
+  .tog.up[aria-pressed="true"]{background:var(--up);border-color:var(--up)}
+  .tog.down[aria-pressed="true"]{background:var(--down);border-color:var(--down)}
+  .tog[aria-pressed="true"] .pip{background:#fff}
+  .combo-result{margin-top:18px;border-top:1px dashed var(--line);padding-top:16px}
+  .combo-hint{color:var(--ink-soft);font-size:.92rem;margin:0}
+  .result-lead{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px}
+  .result-dx{display:flex;flex-wrap:wrap;gap:8px}
+  .result-dx .suspect{font-size:.94rem;padding:7px 14px}
+  .result-dx .suspect.solo{background:var(--accent);color:#fff}
+  .combo-empty{color:var(--warn);font-size:.92rem;margin:0;font-weight:500}
+  .reset-btn{margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:.78rem;background:none;
+    border:1px solid var(--line);color:var(--ink-soft);border-radius:999px;padding:7px 14px;cursor:pointer}
+  .reset-btn:hover{border-color:var(--ink-soft)}
+  .panel-block{margin-top:16px;border-top:1px dashed var(--line);padding-top:14px}
+  .lab2-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px}
+  .lab2{background:var(--bg-2);color:var(--ink);font-size:.84rem;font-weight:500;border-radius:999px;
+    padding:6px 12px;border:1px solid var(--line)}
+  .lab2.multi{border-color:var(--accent);color:var(--accent);font-weight:600}
+  .lab2 em{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.78em;opacity:.85}
+  .panel-note{font-size:.8rem;color:var(--ink-soft);margin:10px 0 0}
+
+  /* PATTERNS (clickable) */
+  .patterns{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .pattern{background:linear-gradient(180deg,#FFFDF9,#FBF1E2);border:1px solid var(--line);
+    border-radius:var(--radius);padding:18px;text-align:left;width:100%;font-family:inherit;
+    cursor:pointer;transition:.16s;display:block}
+  .pattern:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 10px 24px -16px rgba(28,110,126,.5)}
+  .pattern .combo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.95rem;
+    display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;margin-bottom:10px;color:var(--ink)}
+  .pattern .arrow{color:var(--ink-soft);margin:0 4px}
+  .pattern .dx{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.12rem;
+    line-height:1.15;color:var(--suspect-ink)}
+  .pattern .cta{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--accent);margin-top:11px;opacity:.85}
+  .pattern .hint{font-size:.8rem;color:var(--ink-soft);margin-top:7px;line-height:1.35}
+
+  /* COMPLEMENTARI (II livello) */
+  .comp-wrap{background:#F6EFE3;border:1px solid var(--line);border-radius:var(--radius);
+    padding:clamp(16px,2.5vw,22px)}
+  .comp-intro{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .tier-badge{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;background:var(--ink);color:#fff;border-radius:8px;padding:5px 10px;flex:none}
+  .comp-intro p{margin:0;color:var(--ink-soft);font-size:.92rem;flex:1 1 240px}
+
+  /* EXAM GRID */
+  .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px 20px 8px;display:flex;flex-direction:column}
+  .card-head{display:flex;align-items:flex-start;gap:12px;padding-bottom:14px;
+    border-bottom:1px dashed var(--line);margin-bottom:14px}
+  .ico{font-size:1.6rem;line-height:1;flex:none;filter:saturate(.9)}
+  .card-head .titles{flex:1;min-width:0}
+  .card-head h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.16rem;
+    letter-spacing:-.01em;margin:0}
+  .card-head .screens{color:var(--ink-soft);font-size:.86rem;margin-top:3px}
+  .lab-chip{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.78rem;
+    background:var(--bg-2);color:var(--ink);border-radius:8px;padding:5px 9px;white-space:nowrap;flex:none}
+  .alt{border-left:3px solid var(--line);padding:4px 0 4px 14px;margin:0 0 14px}
+  .alt.up{border-left-color:var(--up)} .alt.down{border-left-color:var(--down)}
+  .alt-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .dir{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.72rem;letter-spacing:.04em;
+    border-radius:6px;padding:3px 8px}
+  .alt.up .dir{background:var(--up-soft);color:var(--up)}
+  .alt.down .dir{background:var(--down-soft);color:var(--down)}
+  .alt-name{font-weight:600;font-size:.98rem}
+  .clue-label,.suspect-label{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-soft);display:block;margin:8px 0 4px}
+  .clues{color:var(--ink-soft);font-size:.92rem;margin:0}
+  .suspects{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .suspect{background:var(--suspect-bg);color:var(--suspect-ink);font-size:.84rem;font-weight:600;
+    border-radius:999px;padding:5px 11px;line-height:1.2}
+  .card-note{font-size:.82rem;color:var(--ink-soft);background:var(--bg);border-radius:var(--radius-sm);
+    padding:9px 12px;margin:2px 0 12px}
+  .card-note b{color:var(--ink)}
+
+  /* CONTROLS */
+  .controls{position:sticky;top:0;z-index:20;margin:0 0 22px;padding:12px;
+    background:rgba(250,243,233,.86);backdrop-filter:blur(8px);border:1px solid var(--line);
+    border-radius:var(--radius);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .search{flex:1 1 260px;display:flex;align-items:center;gap:10px;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 14px}
+  .search svg{flex:none;color:var(--ink-soft)}
+  .search input{border:0;outline:0;background:transparent;width:100%;font-family:'Inter',sans-serif;
+    font-size:1rem;color:var(--ink)}
+  .filters{display:flex;gap:8px;flex-wrap:wrap}
+  .chip-btn{font-family:'IBM Plex Mono',monospace;font-size:.82rem;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink-soft);border-radius:999px;padding:9px 15px;cursor:pointer;transition:.18s}
+  .chip-btn:hover{border-color:var(--ink-soft)}
+  .chip-btn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip-btn.up[aria-pressed="true"]{background:var(--up);border-color:var(--up)}
+  .chip-btn.down[aria-pressed="true"]{background:var(--down);border-color:var(--down)}
+  .no-results{display:none;text-align:center;color:var(--ink-soft);padding:40px;font-size:1.05rem}
+  .no-results.show{display:block}
+
+  /* FOOTER */
+  footer{margin-top:46px;border-top:1px solid var(--line);padding-top:26px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.82rem;
+    color:var(--ink-soft);margin-bottom:22px}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .dot.up{background:var(--up)} .dot.down{background:var(--down)}
+  .next{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+  .next h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.1rem;margin:0 0 10px}
+  .next p{margin:0 0 8px;font-size:.95rem;color:var(--ink-soft)}
+  .next .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .next .tags span{background:var(--accent-soft);color:var(--accent);font-size:.82rem;font-weight:600;
+    border-radius:999px;padding:5px 11px}
+  .source{font-size:.8rem;color:var(--ink-soft);margin-top:22px;line-height:1.55}
+  .refs{margin-top:24px}
+  .refs h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1rem;margin:0 0 10px}
+  .refs ol{margin:0;padding-left:1.2em;color:var(--ink-soft);font-size:.82rem;line-height:1.55}
+  .refs ol li{margin-bottom:7px}
+  .refs ol li i{font-style:italic;color:var(--ink)}
+  .refs-sub{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:16px 0 8px}
+  .ref-for{color:var(--ink-soft);font-style:italic}
+  .refs-foot{font-size:.78rem;color:var(--ink-soft);margin:14px 0 0;line-height:1.55}
+
+  @media (max-width:560px){.grid{grid-template-columns:1fr}}
+  :focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+  @media print{
+    body{background:#fff}
+    .controls,.no-results,.combiner,.pattern .cta{display:none!important}
+    .card,.pattern,.thesis,.next{box-shadow:none;break-inside:avoid}
+    .alt{display:block!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Osteoporosi · Screening delle forme secondarie</p>
+    <h1>Osteoporosi secondaria: dall'esame di primo livello al sospetto diagnostico</h1>
+    <div class="thesis">
+      <p class="lead">Quando un <strong>esame di primo livello è alterato</strong>, l'integrazione con il quadro clinico svela la <strong>forma secondaria</strong> sottostante in circa <span class="big">9 casi su 10</span>.</p>
+      <p class="sub">Ogni dato <span class="hl-up">in eccesso&nbsp;▲</span> o <span class="hl-down">in difetto&nbsp;▼</span> è collegato qui sotto agli indizi clinici e alla diagnosi da sospettare.</p>
+    </div>
+  </header>
+
+  <p class="section-label">Combina i reperti</p>
+  <section class="combiner" id="combiner">
+    <div class="combiner-head">
+      <h2>Combinatore diagnostico</h2>
+      <p>Seleziona i reperti alterati: compaiono le forme secondarie compatibili con <b>tutti</b> quelli scelti. Più reperti aggiungi, più la rosa si restringe — e per i sospetti emersi viene proposto il <b>pannello di II livello mirato</b>.</p>
+    </div>
+    <div class="combo-chips" id="comboChips"></div>
+    <div class="combo-result" id="comboResult"></div>
+  </section>
+
+  <p class="section-label">Pattern da riconoscere · tocca per caricare</p>
+  <div class="patterns" id="patterns"></div>
+
+  <p class="section-label">Esame per esame</p>
+  <div class="controls">
+    <label class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="Cerca esame, sintomo o sospetto diagnostico…" autocomplete="off" aria-label="Cerca">
+    </label>
+    <div class="filters" role="group" aria-label="Filtra per direzione">
+      <button class="chip-btn" data-dir="all" aria-pressed="true">Tutti</button>
+      <button class="chip-btn up" data-dir="up" aria-pressed="false">Solo eccesso ▲</button>
+      <button class="chip-btn down" data-dir="down" aria-pressed="false">Solo difetto ▼</button>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="no-results" id="noResults">Nessuna corrispondenza. Prova con un altro termine.</div>
+
+  <p class="section-label">Complementari</p>
+  <section class="comp-wrap">
+    <div class="comp-intro">
+      <span class="tier-badge">II livello</span>
+      <p>PTH e TSH non fanno parte del pannello di primo livello, ma sono spesso dirimenti se letti con la calcemia. Restano inclusi nel combinatore qui sopra.</p>
+    </div>
+    <div class="grid" id="gridComp"></div>
+  </section>
+
+  <footer>
+    <div class="legend">
+      <span><i class="dot up"></i> ▲ aumento / eccesso</span>
+      <span><i class="dot down"></i> ▼ riduzione / difetto</span>
+    </div>
+    <div class="next">
+      <h3>Primo livello alterato → secondo livello mirato</h3>
+      <p>Quando un esame di primo livello risulta alterato, l'approfondimento va orientato sul sospetto specifico. Esempi di accertamenti di secondo livello:</p>
+      <div class="tags">
+        <span>PTH</span><span>Immunofissazione · catene leggere</span><span>Anti-transglutaminasi (celiachia)</span>
+        <span>Cortisoluria 24h · test al desametasone</span><span>Testosterone (uomo)</span>
+        <span>Magnesemia</span><span>FGF23</span><span>Frazioni ALP · GGT</span>
+      </div>
+    </div>
+    <p class="source">Strumento di ragionamento clinico, non sostitutivo del giudizio specialistico. Il combinatore mostra le forme compatibili con <b>tutti</b> i reperti selezionati (logica di intersezione): è un ausilio, non un algoritmo diagnostico. Le alterazioni sono espresse in senso direzionale (▲/▼) senza soglie numeriche, da adattare ai range del tuo laboratorio e alla versione delle linee guida che citi.</p>
+
+    <div class="refs">
+      <h3>Bibliografia</h3>
+      <ol>
+        <li>Commissione Intersocietaria per l'Osteoporosi (SIE, SIGG, SIMFER, SIMG, SIMI, SIOMMMS, SIR, SIOT). <i>Linee guida per la gestione dell'osteoporosi e delle fratture da fragilità</i>, 2023 (processo di validazione ISS – Sistema Nazionale Linee Guida, SNLG).</li>
+        <li>SIOMMMS. <i>Linee guida per la diagnosi, prevenzione e terapia dell'osteoporosi</i>, Reumatismo 2016 (aggiornamento di Adami S. et al., Reumatismo 2009;61(4):1-25).</li>
+        <li>SIOMMMS. <i>Raccomandazioni per la gestione della carenza di vitamina D</i>, 2022.</li>
+        <li>Kanis JA, Cooper C, Rizzoli R, Reginster JY — IOF/ESCEO. <i>European guidance for the diagnosis and management of osteoporosis in postmenopausal women</i>. Osteoporos Int 2019; DOI 10.1007/s00198-018-4704-5.</li>
+      </ol>
+      <p class="refs-sub">Per le forme specifiche</p>
+      <ol start="5">
+        <li>Rajkumar SV, Dimopoulos MA, Palumbo A, et al. <i>International Myeloma Working Group updated criteria for the diagnosis of multiple myeloma</i>. Lancet Oncol 2014;15(12):e538-e548. DOI 10.1016/S1470-2045(14)70442-5. <span class="ref-for">— mieloma multiplo / MGUS (immunofissazione, catene leggere)</span></li>
+        <li>Coleman R, Hadji P, Body J-J, et al. <i>Bone health in cancer: ESMO Clinical Practice Guidelines</i>. Ann Oncol 2020;31(12):1650-1663. DOI 10.1016/j.annonc.2020.07.019. <span class="ref-for">— neoplasia / metastasi ossee</span></li>
+        <li>Crouser ED, Maier LA, Wilson KC, et al. <i>Diagnosis and Detection of Sarcoidosis. An Official ATS Clinical Practice Guideline</i>. Am J Respir Crit Care Med 2020;201(8):e26-e51. DOI 10.1164/rccm.202002-0251ST. <span class="ref-for">— sarcoidosi / granulomatosi (ACE, 1,25(OH)₂D)</span></li>
+        <li>Bilezikian JP, Khan AA, Silverberg SJ, et al. <i>Evaluation and management of primary hyperparathyroidism: summary statement and guidelines from the Fifth International Workshop</i>. J Bone Miner Res 2022;37(11):2293-2314. DOI 10.1002/jbmr.4677. <span class="ref-for">— iperparatiroidismo primario / FHH (clearance Ca/creatinina)</span></li>
+        <li>Khan AA, Bilezikian JP, Brandi ML, et al. <i>Evaluation and management of hypoparathyroidism: summary statement and guidelines from the Second International Workshop</i>. J Bone Miner Res 2022;37(12):2568-2585. DOI 10.1002/jbmr.4691. <span class="ref-for">— ipoparatiroidismo</span></li>
+        <li>Whyte MP. <i>Hypophosphatasia — aetiology, nosology, pathogenesis, diagnosis and treatment</i>. Nat Rev Endocrinol 2016;12(4):233-246. DOI 10.1038/nrendo.2016.14. <span class="ref-for">— ipofosfatasia (PLP, fosfoetanolaminuria, ALPL)</span></li>
+        <li>Jan de Beur SM, et al. <i>Global guidance for the recognition, diagnosis, and management of tumor-induced osteomalacia</i>. J Intern Med 2023; DOI 10.1111/joim.13593. <span class="ref-for">— osteomalacia ipofosfatemica/oncogenica (FGF23, TmP/GFR)</span></li>
+        <li>Ralston SH, Corral-Gudino L, Cooper C, et al. <i>Diagnosis and Management of Paget's Disease of Bone in Adults: A Clinical Guideline</i>. J Bone Miner Res 2019;34(4):579-604. DOI 10.1002/jbmr.3657. <span class="ref-for">— malattia di Paget</span></li>
+        <li>KDIGO CKD-MBD Update Work Group. <i>KDIGO 2017 Clinical Practice Guideline Update for the Diagnosis, Evaluation, Prevention, and Treatment of CKD-MBD</i>. Kidney Int Suppl 2017;7(1):1-59. <span class="ref-for">— IRC / CKD-MBD</span></li>
+        <li>European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines: management of cholestatic liver diseases</i>. J Hepatol 2009;51(2):237-267. DOI 10.1016/j.jhep.2009.04.009. <span class="ref-for">— epatopatia colestatica</span></li>
+        <li>Rubio-Tapia A, Hill ID, Semrad C, et al. <i>ACG Guidelines Update: Diagnosis and Management of Celiac Disease</i>. Am J Gastroenterol 2023;118(1):59-76. DOI 10.14309/ajg.0000000000002075. <span class="ref-for">— malassorbimento / celiachia (anti-tTG + IgA totali)</span></li>
+        <li>Ross DS, Burch HB, Cooper DS, et al. <i>2016 American Thyroid Association Guidelines for Diagnosis and Management of Hyperthyroidism and Other Causes of Thyrotoxicosis</i>. Thyroid 2016;26(10):1343-1421. DOI 10.1089/thy.2016.0229. <span class="ref-for">— ipertiroidismo</span></li>
+        <li>Jonklaas J, Bianco AC, Bauer AJ, et al. <i>Guidelines for the Treatment of Hypothyroidism (ATA)</i>. Thyroid 2014;24(12):1670-1751. DOI 10.1089/thy.2014.0028. <span class="ref-for">— ipotiroidismo</span></li>
+      </ol>
+      <p class="refs-foot">Carenza/intossicazione di vitamina D, ridotta esposizione solare, farmaci (anticonvulsivanti) e ridotto introito di calcio sono coperti dalle fonti generali su vitamina D e calcio (rif. 3 e 4). Ipomagnesiemia, sindrome di Fanconi, acidosi tubulare renale, sindrome nefrosica, ipercalciuria idiopatica, malnutrizione, immobilizzazione e flogosi/connettiviti non dispongono di una linea guida dedicata in questo contesto: il relativo work-up segue la pratica internistica e le linee guida specialistiche d'organo (nefrologiche, reumatologiche, nutrizionali).</p>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const COND = {
+  iperpara:"Iperparatiroidismo primario", mieloma:"Mieloma multiplo", mgus:"MGUS",
+  neoplasia:"Neoplasia / metastasi ossee", sarcoidosi:"Sarcoidosi / granulomatosi",
+  ipertiroid:"Ipertiroidismo", intoxD:"Intossicazione da vit D", farmaciCa:"Farmaci (tiazidici, litio)",
+  fhh:"Ipercalcemia ipocalciurica familiare", deficitD:"Carenza vit D / Osteomalacia",
+  osteomalIpoP:"Osteomalacia ipofosfatemica (FGF23)", malassorb:"Malassorbimento (celiachia, IBD, bariatrica)",
+  ipopara:"Ipoparatiroidismo", irc:"IRC / CKD-MBD", ipomagne:"Ipomagnesiemia",
+  fanconi:"Tubulopatia (s. di Fanconi)", paget:"Malattia di Paget", colestasi:"Epatopatia colestatica",
+  epatopatia:"Epatopatia", nefrosica:"Sindrome nefrosica", ipofosfatasia:"Ipofosfatasia",
+  ipotiroid:"Ipotiroidismo", malnutriz:"Malnutrizione (deficit Mg/Zn)",
+  ipercalciuriaId:"Ipercalciuria idiopatica", acidosiTub:"Acidosi tubulare renale",
+  immobiliz:"Immobilizzazione", flogosi:"Flogosi / malattia cronica", connettiv:"Connettivite",
+  ridIntroito:"Ridotto introito di calcio", farmaciD:"Farmaci (anticonvulsivanti)",
+  ridEspos:"Ridotta esposizione solare"
+};
+
+// Pannello di II livello mirato per ciascuna forma secondaria
+const LAB2 = {
+  iperpara:["PTH","Calcio ionizzato","Calciuria 24h","Ecografia/scintigrafia paratiroidi"],
+  mieloma:["Immunofissazione siero/urine","Catene leggere libere (FLC)","β2-microglobulina","Valutazione ematologica"],
+  mgus:["Immunofissazione siero/urine","Catene leggere libere (FLC)","β2-microglobulina"],
+  neoplasia:["Scintigrafia ossea / PET-TC","PTHrP (se ipercalcemia)","Ricerca primitività","Markers mirati"],
+  sarcoidosi:["ACE sierico","1,25(OH)₂-vit D","TC torace","Calciuria 24h"],
+  ipertiroid:["FT4","FT3","TRAb / anti-TPO"],
+  intoxD:["25-OH-vit D","1,25(OH)₂-vit D","Calciuria 24h","Anamnesi integratori"],
+  farmaciCa:["Revisione farmacologica","Litiemia"],
+  fhh:["Clearance Ca/creatinina (CCCR)","PTH","Test genetico CASR"],
+  deficitD:["25-OH-vit D","PTH","Screening malassorbimento"],
+  osteomalIpoP:["FGF23","Fosfaturia (TmP/GFR)","1,25(OH)₂-vit D","DOTATOC-PET (se oncogenica)"],
+  malassorb:["Anti-transglutaminasi (tTG) + IgA totali","Calprotectina fecale","EGDS/biopsia duodenale (se indicato)"],
+  ipopara:["PTH","Magnesemia","Fosforemia","Calciuria 24h"],
+  irc:["PTH","Fosforemia","25-OH-vit D","Esame urine / proteinuria","Ecografia renale"],
+  ipomagne:["Magnesemia","Magnesuria","Revisione farmaci (PPI, diuretici)"],
+  fanconi:["Fosfaturia","Glicosuria normoglicemica","Aminoaciduria","EGA / bicarbonatemia"],
+  paget:["Scintigrafia ossea","Rx mirata","Markers di turnover osseo"],
+  colestasi:["GGT","ALP frazionata","Bilirubina","Anticorpi AMA"],
+  epatopatia:["Transaminasi","GGT","Bilirubina","Ecografia epatica"],
+  nefrosica:["Proteinuria 24h","Albuminemia","Esame urine"],
+  ipofosfatasia:["PLP (vit B6) sierico","Fosfoetanolammina urinaria","Test genetico ALPL"],
+  ipotiroid:["FT4","Anti-TPO"],
+  malnutriz:["Albumina / prealbumina","Magnesemia","Zinchemia"],
+  ipercalciuriaId:["Calciuria 24h","PTH","Ca/creatinina urinario"],
+  acidosiTub:["EGA venosa","pH urinario","Bicarbonatemia","Potassiemia"],
+  immobiliz:["Quadro clinico / anamnesi","Calciuria 24h","Markers di turnover osseo"],
+  flogosi:["PCR","Ricerca focolaio","Autoimmunità (se indicato)"],
+  connettiv:["ANA / ENA","Anti-dsDNA","Complemento (C3/C4)"],
+  ridIntroito:["Anamnesi alimentare","Calciuria 24h"],
+  farmaciD:["Revisione farmacologica","25-OH-vit D"],
+  ridEspos:["Anamnesi esposizione solare","25-OH-vit D"]
+};
+
+const exams = [
+  { ico:"⏱️", name:"VES", chip:"VES", screens:"Indice di flogosi", alts:[
+    { id:"ves_up", dir:"up", tag:"VES ▲", name:"VES elevata",
+      clues:"Dolore osseo, astenia, calo ponderale, febbricola",
+      dx:["mieloma","mgus","neoplasia","flogosi","connettiv"] } ] },
+
+  { ico:"🩸", name:"Emocromo", chip:"Hb", screens:"Anemia, sospetto ematologico", alts:[
+    { id:"hb_down", dir:"down", tag:"Anemia", name:"Anemia",
+      clues:"Astenia, pallore, dolore osseo",
+      dx:["mieloma","neoplasia","malassorb","flogosi"] } ] },
+
+  { ico:"📈", name:"Elettroforesi proteica", chip:"SPEP",
+    screens:"Componente monoclonale, assetto proteico",
+    note:"Correggere sempre la <b>calcemia per l'albumina</b>.", alts:[
+    { id:"spep_up", dir:"up", tag:"Picco M", name:"Componente monoclonale (picco)",
+      clues:"Dolore osseo, fratture patologiche, IRC, ipercalcemia",
+      dx:["mieloma","mgus"] },
+    { id:"spep_down", dir:"down", tag:"Albumina ▼", name:"Ipoalbuminemia",
+      clues:"Edemi, calo ponderale, segni di malassorbimento",
+      dx:["malassorb","malnutriz","epatopatia","nefrosica"] } ] },
+
+  { ico:"🧪", name:"Calcemia (corretta)", chip:"Ca²⁺", screens:"Equilibrio del calcio", alts:[
+    { id:"ca_up", dir:"up", tag:"Ca ▲", name:"Ipercalcemia",
+      clues:"Poliuria/polidipsia, stipsi, astenia, nefrolitiasi, confusione",
+      dx:["iperpara","neoplasia","mieloma","sarcoidosi","ipertiroid","intoxD","farmaciCa","fhh"] },
+    { id:"ca_down", dir:"down", tag:"Ca ▼", name:"Ipocalcemia",
+      clues:"Parestesie, crampi, tetania, Chvostek/Trousseau",
+      dx:["deficitD","malassorb","ipopara","irc","ipomagne"] } ] },
+
+  { ico:"⚗️", name:"Fosforemia", chip:"PO₄", screens:"Metabolismo del fosfato", alts:[
+    { id:"po4_down", dir:"down", tag:"PO₄ ▼", name:"Ipofosforemia",
+      clues:"Debolezza muscolare, dolore osseo, astenia",
+      dx:["iperpara","deficitD","osteomalIpoP","malassorb","fanconi"] },
+    { id:"po4_up", dir:"up", tag:"PO₄ ▲", name:"Iperfosforemia",
+      clues:"Prurito, sintomi uremici",
+      dx:["irc","ipopara"] } ] },
+
+  { ico:"📊", name:"Fosfatasi alcalina totale", chip:"ALP", screens:"Turnover osseo (e colestasi)",
+    note:"L'<b>ALP ridotta</b> è spesso trascurata ma rilevante: valutarla prima di iniziare un antiriassorbitivo.", alts:[
+    { id:"alp_up", dir:"up", tag:"ALP ▲", name:"ALP elevata",
+      clues:"Dolore osseo, deformità, ipoacusia (Paget), frattura recente",
+      dx:["deficitD","paget","neoplasia","iperpara","colestasi"] },
+    { id:"alp_down", dir:"down", tag:"ALP ▼", name:"ALP ridotta",
+      clues:"Fratture atipiche, scarsa mineralizzazione, anamnesi familiare",
+      dx:["ipofosfatasia","ipotiroid","malnutriz"] } ] },
+
+  { ico:"🫘", name:"Creatininemia → eGFR", chip:"eGFR", screens:"Funzione renale",
+    note:"Condiziona l'interpretazione di <b>Ca / PO₄ / PTH / vit D</b> e la scelta terapeutica.", alts:[
+    { id:"egfr_low", dir:"down", tag:"eGFR ▼", name:"Creatinina ↑ / eGFR ↓",
+      clues:"Edemi, ipertensione, sintomi uremici, anemia",
+      dx:["irc"] } ] },
+
+  { ico:"💧", name:"Calciuria 24h", chip:"Ca/U", screens:"Bilancio renale del calcio", alts:[
+    { id:"cau_up", dir:"up", tag:"Ca/U ▲", name:"Ipercalciuria",
+      clues:"Nefrolitiasi, ematuria, coliche renali",
+      dx:["ipercalciuriaId","iperpara","intoxD","ipertiroid","acidosiTub","immobiliz"] },
+    { id:"cau_down", dir:"down", tag:"Ca/U ▼", name:"Ipocalciuria",
+      clues:"Spesso asintomatica, anamnesi familiare",
+      dx:["malassorb","deficitD","ridIntroito","fhh"] } ] },
+
+  { ico:"☀️", name:"25-OH-vitamina D", chip:"25-OH-D", screens:"Stato vitaminico D / mineralizzazione", alts:[
+    { id:"vitd_down", dir:"down", tag:"25-OH-D ▼", name:"Ipovitaminosi D",
+      clues:"Dolore osseo diffuso, debolezza muscolare prossimale, cadute, miopatia",
+      dx:["deficitD","malassorb","epatopatia","irc","farmaciD","ridEspos"] } ] }
+];
+
+const complementari = [
+  { ico:"🔑", name:"Paratormone (PTH)", chip:"PTH", screens:"Asse calcio-PTH · chiave di lettura",
+    note:"Sempre interpretato con la calcemia: <b>PTH↑ + Ca↑</b> → iperPTH primario; <b>PTH↑ + Ca↓/N</b> → iperPTH secondario; <b>PTH↓ + Ca↑</b> → ipercalcemia PTH-indipendente.", alts:[
+    { id:"pth_up", dir:"up", tag:"PTH ▲", name:"PTH elevato",
+      clues:"Da leggere con la calcemia · dolore osseo, nefrolitiasi se primario",
+      dx:["iperpara","deficitD","malassorb","irc"] },
+    { id:"pth_down", dir:"down", tag:"PTH ▼", name:"PTH soppresso",
+      clues:"Da leggere con la calcemia · sintomi della causa di base",
+      dx:["ipopara","ipomagne","neoplasia","mieloma","sarcoidosi","intoxD","ipertiroid"] } ] },
+
+  { ico:"🦋", name:"TSH", chip:"TSH", screens:"Funzione tiroidea", alts:[
+    { id:"tsh_down", dir:"down", tag:"TSH ▼", name:"TSH soppresso",
+      clues:"Cardiopalmo, calo ponderale, tremori, intolleranza al caldo",
+      dx:["ipertiroid"] } ] }
+];
+
+const patterns = [
+  { ids:["pth_up","ca_up"], dx:"Iperparatiroidismo primario", hint:"PTH↑ con Ca↑ e vit D normale" },
+  { ids:["pth_up","vitd_down"], dx:"Iperparatiroidismo secondario", hint:"PTH↑ con vit D↓ e Ca normale/bassa" },
+  { ids:["pth_down","ca_down"], dx:"Ipoparatiroidismo (o ipomagnesiemia)" },
+  { ids:["ca_down","po4_down","alp_up","vitd_down"], dx:"Osteomalacia" },
+  { ids:["ca_up","cau_down"], dx:"Ipercalcemia ipocalciurica familiare" },
+  { ids:["ves_up","hb_down","spep_up"], dx:"Mieloma multiplo" },
+  { ids:["egfr_low","po4_up"], dx:"CKD-MBD / Osteodistrofia renale" }
+];
+
+const dirLabel = { up:"▲ ECCESSO", down:"▼ DIFETTO" };
+
+// index alterations by id (first level + complementari)
+const allExams = exams.concat(complementari);
+const altIndex = {};
+allExams.forEach(e => e.alts.forEach(a => { altIndex[a.id] = Object.assign({}, a, { examName:e.name }); }));
+
+// render patterns (clickable buttons)
+document.getElementById("patterns").innerHTML = patterns.map(p=>`
+  <button class="pattern" type="button" data-ids="${p.ids.join(',')}">
+    <div class="combo">${p.ids.map((id,i)=>
+      `<span>${altIndex[id].tag}</span>${i<p.ids.length-1?'<span class="arrow">+</span>':''}`).join("")}
+      <span class="arrow">→</span></div>
+    <div class="dx">${p.dx}</div>
+    ${p.hint?`<div class="hint">${p.hint}</div>`:""}
+    <div class="cta">Carica nel combinatore ↑</div>
+  </button>`).join("");
+
+// render exam cards (first level + complementari)
+const cardHTML = list => list.map(e=>`
+  <article class="card" data-dirs="${e.alts.map(a=>a.dir).join(' ')}">
+    <div class="card-head">
+      <span class="ico">${e.ico}</span>
+      <div class="titles"><h2>${e.name}</h2><div class="screens">${e.screens}</div></div>
+      <span class="lab-chip">${e.chip}</span>
+    </div>
+    ${e.alts.map(a=>`
+      <div class="alt ${a.dir}" data-dir="${a.dir}">
+        <div class="alt-head">
+          <span class="dir">${dirLabel[a.dir]}</span>
+          <span class="alt-name">${a.name}</span>
+        </div>
+        <span class="clue-label">Indizi clinici</span>
+        <p class="clues">${a.clues}</p>
+        <span class="suspect-label">Sospetta</span>
+        <div class="suspects">${a.dx.map(id=>`<span class="suspect">${COND[id]}</span>`).join("")}</div>
+      </div>`).join("")}
+    ${e.note?`<div class="card-note">${e.note}</div>`:""}
+  </article>`).join("");
+document.getElementById("grid").innerHTML = cardHTML(exams);
+document.getElementById("gridComp").innerHTML = cardHTML(complementari);
+
+// ---- COMBINER ----
+const selected = new Set();
+const comboChips = document.getElementById("comboChips");
+const comboResult = document.getElementById("comboResult");
+
+comboChips.innerHTML = Object.keys(altIndex).map(id=>{
+  const a = altIndex[id];
+  return `<button class="tog ${a.dir}" type="button" data-id="${id}" aria-pressed="false"><span class="pip"></span>${a.tag}</button>`;
+}).join("");
+
+function intersect(ids){
+  const lists = ids.map(id=>altIndex[id].dx);
+  if(!lists.length) return [];
+  return lists.reduce((acc,l)=>acc.filter(x=>l.includes(x)));
+}
+
+function syncChips(){
+  comboChips.querySelectorAll(".tog").forEach(b=>b.setAttribute("aria-pressed", selected.has(b.dataset.id)));
+}
+
+function renderResult(){
+  const ids = [...selected];
+  if(!ids.length){
+    comboResult.innerHTML = `<p class="combo-hint">Seleziona uno o più reperti per vedere le forme compatibili.</p>`;
+    return;
+  }
+  const dx = intersect(ids);
+  const n = ids.length;
+  const lead = `<p class="result-lead">${n} repert${n>1?'i':'o'} selezionat${n>1?'i':'o'} · forme compatibili</p>`;
+  let body;
+  if(dx.length){
+    const solo = dx.length===1 ? "solo" : "";
+    body = `<div class="result-dx">${dx.map(id=>`<span class="suspect ${solo}">${COND[id]}</span>`).join("")}</div>`;
+    const freq = {};
+    dx.forEach(cid => (LAB2[cid]||[]).forEach(ex => { freq[ex] = (freq[ex]||0)+1; }));
+    const ordered = Object.keys(freq).sort((a,b)=> freq[b]-freq[a]);
+    if(ordered.length){
+      const chips = ordered.map(ex=>{
+        const m = freq[ex] > 1;
+        return `<span class="lab2 ${m?'multi':''}"${m?` title="Copre ${freq[ex]} sospetti"`:''}>${ex}${m?` <em>×${freq[ex]}</em>`:''}</span>`;
+      }).join("");
+      const note = dx.length>1 ? `<p class="panel-note">In evidenza gli esami ad alta resa, comuni a più sospetti.</p>` : "";
+      body += `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p><div class="lab2-list">${chips}</div>${note}</div>`;
+    }
+  } else {
+    body = `<p class="combo-empty">Nessuna forma secondaria spiega da sola tutti i reperti selezionati: valuta cause indipendenti o reperti isolati.</p>`;
+  }
+  comboResult.innerHTML = lead + body + `<button class="reset-btn" type="button" id="resetCombo">Azzera selezione</button>`;
+  document.getElementById("resetCombo").onclick = ()=>{ selected.clear(); syncChips(); renderResult(); };
+}
+
+comboChips.querySelectorAll(".tog").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    const id = b.dataset.id;
+    selected.has(id) ? selected.delete(id) : selected.add(id);
+    syncChips(); renderResult();
+  });
+});
+
+document.querySelectorAll(".pattern").forEach(p=>{
+  p.addEventListener("click", ()=>{
+    selected.clear();
+    p.dataset.ids.split(',').forEach(id=>selected.add(id));
+    syncChips(); renderResult();
+    document.getElementById("combiner").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+});
+
+renderResult();
+
+// ---- SEARCH + DIRECTION FILTER (cards) ----
+const q = document.getElementById("q");
+const grid = document.getElementById("grid");
+const noResults = document.getElementById("noResults");
+let activeDir = "all";
+
+function apply(){
+  const term = q.value.trim().toLowerCase();
+  let visible = 0;
+  document.querySelectorAll("#grid .card, #gridComp .card").forEach(card=>{
+    let cardHas = false;
+    card.querySelectorAll(".alt").forEach(alt=>{
+      const matchDir = activeDir==="all" || alt.dataset.dir===activeDir;
+      const matchText = !term || (card.querySelector("h2").textContent + " " + alt.textContent).toLowerCase().includes(term);
+      const show = matchDir && matchText;
+      alt.style.display = show ? "" : "none";
+      if(show) cardHas = true;
+    });
+    card.style.display = cardHas ? "" : "none";
+    if(cardHas) visible++;
+  });
+  noResults.classList.toggle("show", visible===0);
+}
+
+q.addEventListener("input", apply);
+document.querySelectorAll(".chip-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    activeDir = btn.dataset.dir;
+    document.querySelectorAll(".chip-btn").forEach(b=>b.setAttribute("aria-pressed", b===btn));
+    apply();
+  });
+});
+</script>
+</body>
+</html>
