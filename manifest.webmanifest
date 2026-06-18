@@ -1,0 +1,15 @@
+{
+  "name": "Osteo Help",
+  "short_name": "Osteo Help",
+  "description": "Osteoporosi secondaria: dall'esame di primo livello al sospetto diagnostico.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF3E9",
+  "theme_color": "#FAF3E9",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

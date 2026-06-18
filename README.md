@@ -1,4 +1,4 @@
-# Osteoporosi secondaria — Esami di primo livello
+# Osteo Help — Osteoporosi secondaria
 
 Strumento interattivo di ragionamento clinico per orientarsi dalle **alterazioni degli esami di primo livello** al **sospetto di osteoporosi secondaria**, fino al **pannello di accertamenti di secondo livello** mirato.
 
@@ -22,14 +22,23 @@ Applicazione web autocontenuta (un solo file `index.html`, nessuna dipendenza da
 
 ## Pubblicazione su GitHub Pages
 
-1. Crea un nuovo repository (es. `osteoporosi-secondaria`).
-2. Carica nella *root* del repository i file: `index.html`, `README.md`, `.nojekyll`.
+1. Crea un nuovo repository (es. `osteo-help`).
+2. Carica nella *root* del repository tutti i file:
+   `index.html`, `manifest.webmanifest`, `icon-192.png`, `icon-512.png`, `apple-touch-icon-180.png`, `favicon-32.png`, `README.md` (e, se vuoi, `.nojekyll`).
 3. Vai in **Settings → Pages**.
 4. In **Source** scegli il branch `main` e la cartella `/ (root)`, poi **Save**.
 5. Dopo qualche minuto l'app sarà online all'indirizzo:
-   `https://<tuo-utente>.github.io/osteoporosi-secondaria/`
+   `https://<tuo-utente>.github.io/osteo-help/`
 
-Il file `.nojekyll` (vuoto) serve a far servire il sito così com'è, senza l'elaborazione Jekyll di GitHub Pages.
+## Installazione come app (PWA)
+
+Una volta online (su HTTPS, come GitHub Pages), l'app è installabile sul dispositivo con nome **Osteo Help** e icona dedicata:
+
+- **iPhone/iPad (Safari)**: apri il sito → *Condividi* → **Aggiungi alla schermata Home**. Si apre a tutto schermo come un'app.
+- **Android (Chrome)**: menu ⋮ → **Installa app** / *Aggiungi a schermata Home*.
+- **Desktop (Chrome/Edge)**: icona di installazione nella barra degli indirizzi.
+
+I file `manifest.webmanifest` e le icone devono stare nella stessa cartella di `index.html`. Senza service worker l'app non funziona offline (richiede connessione per i web font), ma resta installabile e a tutto schermo.
 
 ## Avvertenze
 
