@@ -84,7 +84,6 @@
   .lab2{background:var(--bg-2);color:var(--ink);font-size:.84rem;font-weight:500;border-radius:999px;
     padding:6px 12px;border:1px solid var(--line)}
   .lab2.multi{border-color:var(--accent);color:var(--accent);font-weight:600}
-  .lab2 em{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.78em;opacity:.85}
   .panel-note{font-size:.8rem;color:var(--ink-soft);margin:10px 0 0}
 
   /* PATTERNS (clickable) */
@@ -291,7 +290,7 @@
 
 <script>
 const COND = {
-  iperpara:"Iperparatiroidismo primario", mieloma:"Mieloma multiplo", mgus:"MGUS",
+  iperpara:"Iperparatiroidismo primario", mieloma:"Mieloma multiplo", mgus:"MGUS", talassemia:"Talassemia",
   neoplasia:"Neoplasia / metastasi ossee", sarcoidosi:"Sarcoidosi / granulomatosi",
   ipertiroid:"Ipertiroidismo", intoxD:"Intossicazione da vit D", farmaciCa:"Farmaci (tiazidici, litio)",
   fhh:"Ipercalcemia ipocalciurica familiare", deficitD:"Carenza vit D / Osteomalacia",
@@ -311,13 +310,14 @@ const LAB2 = {
   iperpara:["PTH","Calcio ionizzato","Calciuria 24h","Ecografia/scintigrafia paratiroidi"],
   mieloma:["Immunofissazione siero/urine","Catene leggere libere (FLC)","β2-microglobulina","Valutazione ematologica"],
   mgus:["Immunofissazione siero/urine","Catene leggere libere (FLC)","β2-microglobulina"],
+  talassemia:["Elettroforesi dell'emoglobina","Assetto marziale (ferritina, sat. transferrina)"],
   neoplasia:["Scintigrafia ossea / PET-TC","PTHrP (se ipercalcemia)","Ricerca primitività","Markers mirati"],
   sarcoidosi:["ACE sierico","1,25(OH)₂-vit D","TC torace","Calciuria 24h"],
   ipertiroid:["FT4","FT3","TRAb / anti-TPO"],
   intoxD:["25-OH-vit D","1,25(OH)₂-vit D","Calciuria 24h","Anamnesi integratori"],
   farmaciCa:["Revisione farmacologica","Litiemia"],
   fhh:["Clearance Ca/creatinina (CCCR)","PTH","Test genetico CASR"],
-  deficitD:["25-OH-vit D","PTH","Screening malassorbimento"],
+  deficitD:["25-OH-vit D","PTH","Anti-transglutaminasi (tTG) + IgA totali"],
   osteomalIpoP:["FGF23","Fosfaturia (TmP/GFR)","1,25(OH)₂-vit D","DOTATOC-PET (se oncogenica)"],
   malassorb:["Anti-transglutaminasi (tTG) + IgA totali","Calprotectina fecale","EGDS/biopsia duodenale (se indicato)"],
   ipopara:["PTH","Magnesemia","Fosforemia","Calciuria 24h"],
@@ -341,14 +341,12 @@ const LAB2 = {
   ridEspos:["Anamnesi esposizione solare","25-OH-vit D"]
 };
 
-// Reperti che, se selezionati, rendono ridondante lo stesso esame nel pannello di II livello.
-// Solo corrispondenze esatte allo stesso test (non test diversi/più specifici).
+// Reperto di II livello (PTH): se selezionato, non lo si ripropone nel pannello.
 const SATISFIES = {
-  pth_up:["PTH"], pth_down:["PTH"],
-  vitd_down:["25-OH-vit D"],
-  cau_up:["Calciuria 24h"], cau_down:["Calciuria 24h"],
-  po4_up:["Fosforemia"], po4_down:["Fosforemia"]
+  pth_up:["PTH"], pth_down:["PTH"]
 };
+// Esami di primo livello: mai riproposti nel pannello di II livello (già disponibili).
+const FIRST_LEVEL = new Set(["Fosforemia","Calciuria 24h","25-OH-vit D"]);
 
 const exams = [
   { ico:"⏱️", name:"VES", chip:"VES", screens:"Indice di flogosi", alts:[
@@ -359,7 +357,7 @@ const exams = [
   { ico:"🩸", name:"Emocromo", chip:"Hb", screens:"Anemia, sospetto ematologico", alts:[
     { id:"hb_down", dir:"down", tag:"Anemia", name:"Anemia",
       clues:"Astenia, pallore, dolore osseo",
-      dx:["mieloma","neoplasia","malassorb","flogosi"] } ] },
+      dx:["mieloma","neoplasia","malassorb","flogosi","talassemia"] } ] },
 
   { ico:"📈", name:"Elettroforesi proteica", chip:"SPEP",
     screens:"Componente monoclonale, assetto proteico",
@@ -537,7 +535,7 @@ function renderResult(){
     dx.forEach(cid => (LAB2[cid]||[]).forEach(ex => { freqAll[ex] = (freqAll[ex]||0)+1; }));
     const excluded = Object.keys(freqAll).filter(ex => done.has(ex));
     const freq = {};
-    Object.keys(freqAll).forEach(ex => { if(!done.has(ex)) freq[ex] = freqAll[ex]; });
+    Object.keys(freqAll).forEach(ex => { if(!done.has(ex) && !FIRST_LEVEL.has(ex)) freq[ex] = freqAll[ex]; });
     const ordered = Object.keys(freq).sort((a,b)=> freq[b]-freq[a]);
     let notes = "";
     if(dx.length>1) notes += `<p class="panel-note">In evidenza gli esami ad alta resa, comuni a più sospetti.</p>`;
