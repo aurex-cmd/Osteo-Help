@@ -365,7 +365,10 @@ const exams = [
   { ico:"🩸", name:"Emocromo", chip:"Hb", screens:"Anemia, sospetto ematologico", alts:[
     { id:"hb_down", dir:"down", tag:"Anemia", name:"Anemia",
       clues:"Astenia, pallore, dolore osseo",
-      dx:["mieloma","neoplasia","malassorb","flogosi","talassemia"] } ] },
+      dx:["mieloma","neoplasia","malassorb","flogosi","talassemia"] },
+    { id:"mcv_down", dir:"down", tag:"MCV ▼", name:"MCV",
+      clues:"Microcitosi, anche senza anemia",
+      dx:["talassemia"] } ] },
 
   { ico:"📈", name:"Elettroforesi proteica", chip:"SPEP",
     screens:"Componente monoclonale, assetto proteico",
@@ -500,7 +503,7 @@ const comboGroups = [
   { label:"Paratiroidi e vitamina D", ids:["pth_up","pth_down","vitd_down"] },
   { label:"Osso · turnover", ids:["alp_up","alp_down"] },
   { label:"Funzione renale", ids:["egfr_low"] },
-  { label:"Ematologico e flogosi", ids:["ves_up","hb_down","spep_up","spep_down"] },
+  { label:"Ematologico e flogosi", ids:["ves_up","hb_down","mcv_down","spep_up","spep_down"] },
   { label:"Tiroide", ids:["tsh_down"] }
 ];
 const groupedIds = new Set(comboGroups.flatMap(g=>g.ids));
