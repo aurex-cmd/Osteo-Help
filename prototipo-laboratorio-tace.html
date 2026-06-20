@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Osteo Help · Il laboratorio tace (prototipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF3E9; --bg-2:#F3E7D6; --surface:#FFFFFF;
+    --ink:#27221D; --ink-soft:#6A5F54; --line:#EADBC6;
+    --strong:#1C6E7E; --strong-soft:#DCEEF0; --weak:#C98A2B; --weak-soft:#F6E8CE;
+    --accent:#1C6E7E; --accent-soft:#DCEEF0; --coral:#C0492F;
+    --suspect-bg:#F4E5D4; --suspect-ink:#824A1E;
+    --radius:22px; --radius-sm:12px; --shadow:0 12px 34px -18px rgba(60,40,20,.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(1100px 520px at 8% -8%, #FCEBD8 0%, transparent 60%),
+      radial-gradient(900px 480px at 100% 0%, #F6E6E0 0%, transparent 55%), var(--bg);
+    color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,48px)}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.76rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-soft);margin:0 0 14px}
+
+  /* TABS */
+  .tabs{display:flex;gap:8px;margin-bottom:18px}
+  .tab{font-family:'IBM Plex Mono',monospace;font-size:.84rem;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink-soft);border-radius:999px;padding:10px 16px;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tab-note{font-size:.85rem;color:var(--ink-soft);margin:0 0 18px;display:none}
+  .tab-note.show{display:block}
+
+  h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;line-height:1.04;
+    font-size:clamp(1.9rem,4.4vw,3rem);letter-spacing:-.02em;margin:0 0 .5em;max-width:20ch}
+  .thesis{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:clamp(16px,2.4vw,22px) clamp(20px,3vw,28px);margin-bottom:8px}
+  .thesis p{margin:0;font-size:clamp(1rem,1.7vw,1.18rem);line-height:1.45;max-width:70ch}
+  .thesis strong{color:var(--ink)}
+
+  /* CONTROLS */
+  .controls{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:24px 0 8px}
+  .ctl-group{display:flex;align-items:center;gap:8px}
+  .ctl-label{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-soft)}
+  .pill{font-family:'IBM Plex Mono',monospace;font-size:.82rem;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .pill:hover{border-color:var(--ink-soft)}
+  .pill[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-soft);display:flex;align-items:center;gap:14px;margin:30px 0 14px}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  /* LAYOUT: intake + differential */
+  .grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:start}
+  @media (max-width:820px){.grid2{grid-template-columns:1fr}}
+
+  .intake{}
+  .axis{border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:10px;background:var(--surface);overflow:hidden}
+  .axis:last-child{margin-bottom:0}
+  .axis-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:none;border:0;cursor:pointer;padding:13px 15px;font:inherit;color:var(--ink);text-align:left}
+  .axis-head:hover{background:var(--bg)}
+  .axis-label{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink);margin:0}
+  .axis-meta{display:flex;align-items:center;gap:10px;flex:none}
+  .axis-count{font-size:.72rem;font-weight:700;color:var(--accent)}
+  .chev{color:var(--ink-soft);transition:transform .18s;font-size:.9rem}
+  .axis.open .chev{transform:rotate(90deg)}
+  .axis-body{display:none;padding:0 15px 15px}
+  .axis.open .axis-body{display:block}
+  .feats-row{display:flex;flex-wrap:wrap;gap:8px}
+  .sub-label{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--accent);font-weight:600;margin:16px 0 8px}
+  .sub-label:first-child{margin-top:2px}
+  .diff-section{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:.9rem;
+    color:var(--strong);margin:18px 2px 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .diff-section:first-child{margin-top:0}
+  .ref-search{width:100%;max-width:440px;display:block;font:inherit;font-size:.95rem;
+    padding:11px 16px;margin:0 0 16px;border:1px solid var(--line);border-radius:999px;
+    background:var(--surface);color:var(--ink)}
+  .ref-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .feat{font-size:.86rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);
+    border-radius:999px;padding:8px 13px;cursor:pointer;transition:.15s;line-height:1.2;text-align:left}
+  .feat:hover{border-color:var(--ink-soft)}
+  .feat[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* differential */
+  .diff{position:sticky;top:16px}
+  .diff-empty{color:var(--ink-soft);font-size:.95rem;background:var(--surface);border:1px dashed var(--line);
+    border-radius:var(--radius);padding:26px;text-align:center}
+  .fcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:18px 18px 16px;margin-bottom:14px}
+  .fcard-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .fcard h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.12rem;margin:0}
+  .fcat{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+  .badge{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;
+    border-radius:6px;padding:3px 8px;margin-left:auto;flex:none}
+  .badge.forte{background:var(--strong-soft);color:var(--strong)}
+  .badge.lieve{background:var(--weak-soft);color:var(--weak)}
+  .row-label{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-soft);display:block;margin:11px 0 5px}
+  .why{display:flex;flex-wrap:wrap;gap:6px}
+  .why span{background:var(--bg-2);color:var(--ink);font-size:.8rem;border-radius:999px;padding:4px 10px}
+  .why span.f{border:1px solid var(--strong);color:var(--strong);background:#fff;font-weight:600}
+  .why span.off{background:transparent;color:var(--ink-soft);border:1px dashed var(--line)}
+  .conf{display:flex;flex-wrap:wrap;gap:6px}
+  .conf span{background:var(--suspect-bg);color:var(--suspect-ink);font-size:.83rem;font-weight:600;border-radius:999px;padding:5px 11px}
+  .fnote{font-size:.82rem;color:var(--ink-soft);background:var(--bg);border-radius:var(--radius-sm);padding:9px 12px;margin-top:11px}
+
+  /* reference mode reuse fcard, show all triggers with weights */
+  .trig{display:flex;flex-wrap:wrap;gap:6px}
+  .trig span{font-size:.8rem;border-radius:999px;padding:4px 10px;border:1px solid var(--line);background:var(--bg)}
+  .trig span.forte{border-color:var(--strong);color:var(--strong);font-weight:600}
+  .trig span .w{font-family:'IBM Plex Mono',monospace;font-size:.72em;opacity:.8;margin-left:4px}
+
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:22px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--ink-soft);margin-bottom:16px}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:middle}
+  .source{font-size:.8rem;color:var(--ink-soft);line-height:1.55}
+  .source b{color:var(--ink)}
+  .refs{margin-top:26px}
+  .refs h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1rem;margin:0 0 10px;color:var(--ink)}
+  .refs ol{margin:0;padding-left:1.2em;color:var(--ink-soft);font-size:.82rem;line-height:1.55}
+  .refs ol li{margin-bottom:7px}
+  .refs ol li i{font-style:italic;color:var(--ink)}
+  .refs-sub{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:16px 0 8px}
+  .ref-for{color:var(--ink-soft);font-style:italic}
+  .refs-foot{font-size:.78rem;color:var(--ink-soft);margin:14px 0 0;line-height:1.55}
+  .credit{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--ink-soft);margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+  .credit b{color:var(--ink);font-weight:600}
+  .drawer{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);margin:14px 0;overflow:hidden}
+  .drawer>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px}
+  .drawer>summary::-webkit-details-marker{display:none}
+  .draw-title{font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  .drawer .chev{margin-left:auto}
+  .drawer[open] .chev{transform:rotate(180deg)}
+  .drawer-body{padding:2px 16px 18px}
+  .drawer .refs{margin-top:2px}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Osteo Help · prototipo seconda scheda</p>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="false" id="tabParla">Il laboratorio parla</button>
+    <button class="tab" role="tab" aria-selected="true" id="tabTace">Il laboratorio tace</button>
+  </div>
+  <p class="tab-note" id="parlaNote">"Il laboratorio parla" è l'app principale (Osteo Help): parte da un'alterazione di primo livello. Qui siamo nella scheda complementare.</p>
+
+  <h1>Il laboratorio tace</h1>
+  <div class="thesis">
+    <p>Osteoporosi con <strong>esami di primo livello normali</strong>: la diagnosi non parte da un dato, ma dal <strong>quadro clinico</strong>. Spunta i reperti del paziente: emergono separatamente le <strong>cause note presenti</strong> e i <strong>sospetti diagnostici da approfondire</strong>, ciascuno con il relativo test di conferma.</p>
+  </div>
+
+  <div class="controls">
+    <div class="ctl-group">
+      <span class="ctl-label">Sesso</span>
+      <button class="pill" data-sex="donna" aria-pressed="false">Donna</button>
+      <button class="pill" data-sex="uomo" aria-pressed="false">Uomo</button>
+    </div>
+    <div class="ctl-group">
+      <span class="ctl-label">Modalità</span>
+      <button class="pill" data-mode="intake" aria-pressed="true">Intake</button>
+      <button class="pill" data-mode="ref" aria-pressed="false">Per sospetto</button>
+    </div>
+  </div>
+
+  <!-- INTAKE MODE -->
+  <div id="modeIntake">
+    <div class="grid2">
+      <div>
+        <p class="section-label">Reperti del paziente</p>
+        <div class="intake" id="intake"></div>
+      </div>
+      <div>
+        <p class="section-label">Differenziale</p>
+        <div class="diff" id="diff"></div>
+      </div>
+    </div>
+  <details class="drawer">
+    <summary><span class="draw-title">Bibliografia</span><span class="chev">▾</span></summary>
+    <div class="drawer-body">
+    <div class="refs">
+      <ol>
+        <li>Commissione Intersocietaria per l'Osteoporosi (SIE, SIGG, SIMFER, SIMG, SIMI, SIOMMMS, SIR, SIOT). <i>Linee guida per la gestione dell'osteoporosi e delle fratture da fragilità</i>, 2023 (validazione ISS – Sistema Nazionale Linee Guida, SNLG).</li>
+        <li>SIOMMMS. <i>Linee guida per la diagnosi, prevenzione e terapia dell'osteoporosi</i>, Reumatismo 2016 (aggiornamento di Adami S. et al., Reumatismo 2009;61(4):1-25).</li>
+        <li>SIOMMMS. <i>Raccomandazioni per la gestione della carenza di vitamina D</i>, 2022.</li>
+        <li>Kanis JA, Cooper C, Rizzoli R, Reginster JY — IOF/ESCEO. <i>European guidance for the diagnosis and management of osteoporosis in postmenopausal women</i>. Osteoporos Int 2019; DOI 10.1007/s00198-018-4704-5.</li>
+      </ol>
+      <p class="refs-sub">Per le forme specifiche</p>
+      <ol start="5">
+        <li>Humphrey MB, Russell L, Danila MI, et al. <i>2022 American College of Rheumatology Guideline for the Prevention and Treatment of Glucocorticoid-Induced Osteoporosis</i>. Arthritis Rheumatol 2023;75(12):2088-2102. DOI 10.1002/art.42646. <span class="ref-for">— osteoporosi da glucocorticoidi</span></li>
+        <li>Coleman R, Hadji P, Body J-J, et al. <i>Bone health in cancer: ESMO Clinical Practice Guidelines</i>. Ann Oncol 2020;31(12):1650-1663. DOI 10.1016/j.annonc.2020.07.019. <span class="ref-for">— inibitori dell'aromatasi / deprivazione androgenica</span></li>
+        <li>Bhasin S, Brito JP, Cunningham GR, et al. <i>Testosterone Therapy in Men With Hypogonadism: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2018;103(5):1715-1744. DOI 10.1210/jc.2018-00229. <span class="ref-for">— ipogonadismo maschile</span></li>
+        <li>Panay N, Anderson RA, Bennie A, et al. <i>Evidence-based guideline: premature ovarian insufficiency</i>. Hum Reprod Open 2024;2024(4):hoae065. DOI 10.1093/hropen/hoae065. <span class="ref-for">— insufficienza ovarica primaria / menopausa precoce</span></li>
+        <li>Nieman LK, Biller BMK, Findling JW, et al. <i>The Diagnosis of Cushing's Syndrome: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2008;93(5):1526-1540. DOI 10.1210/jc.2008-0125. <span class="ref-for">— sindrome di Cushing</span></li>
+        <li>Katznelson L, Laws ER, Melmed S, et al. <i>Acromegaly: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2014;99(11):3933-3951. DOI 10.1210/jc.2014-2700. <span class="ref-for">— acromegalia</span></li>
+        <li>Melmed S, Casanueva FF, Hoffman AR, et al. <i>Diagnosis and Treatment of Hyperprolactinemia: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2011;96(2):273-288. DOI 10.1210/jc.2010-1692. <span class="ref-for">— iperprolattinemia</span></li>
+        <li>Molitch ME, Clemmons DR, Malozowski S, et al. <i>Evaluation and Treatment of Adult Growth Hormone Deficiency: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2011;96(6):1587-1609. <span class="ref-for">— deficit di GH dell'adulto</span></li>
+        <li>Ross DS, Burch HB, Cooper DS, et al. <i>2016 American Thyroid Association Guidelines for Diagnosis and Management of Hyperthyroidism and Other Causes of Thyrotoxicosis</i>. Thyroid 2016;26(10):1343-1421. DOI 10.1089/thy.2016.0229. <span class="ref-for">— ipertiroidismo / soppressione da L-tiroxina</span></li>
+        <li>Rudwaleit M, van der Heijde D, Landewé R, et al. <i>The development of ASAS classification criteria for axial spondyloarthritis (part II): validation and final selection</i>. Ann Rheum Dis 2009;68(6):777-783. DOI 10.1136/ard.2009.108233. <span class="ref-for">— spondiloartrite assiale</span></li>
+        <li>Valent P, Akin C, Hartmann K, et al. <i>Updated Diagnostic Criteria and Classification of Mast Cell Disorders: A Consensus Proposal</i>. HemaSphere 2021;5(11):e646. DOI 10.1097/HS9.0000000000000646. <span class="ref-for">— mastocitosi sistemica</span></li>
+        <li>Marini JC, Forlino A, Bächinger HP, et al. <i>Osteogenesis imperfecta</i>. Nat Rev Dis Primers 2017;3:17052. DOI 10.1038/nrdp.2017.52. <span class="ref-for">— osteogenesi imperfetta</span></li>
+        <li>Loeys BL, Dietz HC, Braverman AC, et al. <i>The revised Ghent nosology for the Marfan syndrome</i>. J Med Genet 2010;47(7):476-485. DOI 10.1136/jmg.2009.072785. <span class="ref-for">— sindrome di Marfan (criteri di Ghent)</span></li>
+        <li>Malfait F, Francomano C, Byers P, et al. <i>The 2017 international classification of the Ehlers-Danlos syndromes</i>. Am J Med Genet C Semin Med Genet 2017;175(1):8-26. DOI 10.1002/ajmg.c.31552. <span class="ref-for">— sindromi di Ehlers-Danlos</span></li>
+        <li>Whyte MP. <i>Hypophosphatasia — aetiology, nosology, pathogenesis, diagnosis and treatment</i>. Nat Rev Endocrinol 2016;12(4):233-246. DOI 10.1038/nrendo.2016.14. <span class="ref-for">— ipofosfatasia</span></li>
+        <li>Kowdley KV, Brown KE, Ahn J, Sundaram V. <i>ACG Clinical Guideline: Hereditary Hemochromatosis</i>. Am J Gastroenterol 2019;114(8):1202-1218. DOI 10.14309/ajg.0000000000000315. <span class="ref-for">— emocromatosi ereditaria</span></li>
+        <li>Rubio-Tapia A, Hill ID, Semrad C, et al. <i>ACG Guidelines Update: Diagnosis and Management of Celiac Disease</i>. Am J Gastroenterol 2023;118(1):59-76. DOI 10.14309/ajg.0000000000002075. <span class="ref-for">— celiachia</span></li>
+        <li>Mountjoy M, Ackerman KE, Bailey DM, et al. <i>2023 IOC consensus statement on Relative Energy Deficiency in Sport (REDs)</i>. Br J Sports Med 2023;57(17):1073-1097. DOI 10.1136/bjsports-2023-106994. <span class="ref-for">— amenorrea ipotalamica funzionale / RED-S</span></li>
+      </ol>
+      <p class="refs-foot">Le forme da farmaci (anticonvulsivanti, eparina, inibitori della calcineurina, chemioterapici, diuretici dell'ansa, PPI, SSRI, glitazoni, SGLT2, tenofovir, methotrexate), il diabete, le cause gastro-epatiche (IBD, chirurgia bariatrica, gastrectomia, epatopatia cronica), l'acidosi tubulare renale, le cause neurologiche (ictus, lesione midollare, Parkinson, sclerosi multipla, epilessia), gli stili di vita (anoressia, alcol, fumo, immobilizzazione, basso peso), HIV, BPCO, fibrosi cistica, trapianto d'organo e l'osteoporosi di gravidanza/allattamento sono coperte dalle linee guida generali (rif. 1-4) e dalle linee guida specialistiche d'organo: per molte l'osteoporosi è un fattore di rischio riconosciuto senza una linea guida dedicata al work-up scheletrico.</p>
+    </div>
+    </div>
+  </details>
+  </div>
+
+  <!-- REFERENCE MODE -->
+  <div id="modeRef" style="display:none">
+    <p class="section-label">Catalogo delle forme · riferimento</p>
+    <input id="refSearch" type="search" class="ref-search" placeholder="Cerca una condizione…" autocomplete="off">
+    <div id="refList"></div>
+  </div>
+
+  <footer>
+    <div class="legend">
+      <span><i style="background:var(--strong)"></i>trigger forte (basta da solo)</span>
+      <span><i style="background:var(--weak)"></i>trigger lieve (conta se si somma)</span>
+    </div>
+    <p class="source"><b>Strumento di ragionamento clinico</b>, non sostitutivo del giudizio specialistico: motore a flag pesati (forte/lieve), un ausilio e non un algoritmo diagnostico. Trigger e pesi sono una proposta ragionata, da validare nella pratica.</p>
+    <p class="credit">Creato dal <b>Dr. Aurelio Guarnaccia</b></p>
+  </footer>
+</div>
+
+<script>
+// ---- FEATURES (intake), raggruppate per asse ----
+const AXES = [
+  { label:"Farmaci", groups:[
+    { sub:"Oncologia e deprivazione ormonale", feats:[
+      ["chemio","Chemioterapici"],
+      ["mtx","Metotrexato ad alte dosi"],
+      ["aromatasi","Inibitori dell'aromatasi","donna"],
+      ["adt","Deprivazione androgenica (ADT)","uomo"],
+      ["gnrh","Analoghi / antagonisti del GnRH"]
+    ]},
+    { sub:"Endocrinologia e diabetologia", feats:[
+      ["glucocorticoidi","Glucocorticoidi sistemici"],
+      ["tiroxina_soppr","L-tiroxina a dose TSH-soppressiva"],
+      ["glitazoni","Glitazoni (tiazolidinedioni)"],
+      ["sglt2","SGLT2-inibitori"]
+    ]},
+    { sub:"Neurologia e psichiatria", feats:[
+      ["anticonvulsivanti","Antiepilettici"],
+      ["ssri","SSRI"]
+    ]},
+    { sub:"Cardiovascolare ed ematologia", feats:[
+      ["eparina","Anticoagulanti"],
+      ["diuretici_ansa","Diuretici dell'ansa"]
+    ]},
+    { sub:"Gastroenterologia", feats:[
+      ["ipp","Inibitori di pompa protonica"]
+    ]},
+    { sub:"Immunosoppressione e infettivologia", feats:[
+      ["ciclosporina","Inibitori della calcineurina (ciclosporina/tacrolimus)"],
+      ["tenofovir","Tenofovir (TDF)"]
+    ]}
+  ]},
+  { label:"Comorbidità", groups:[
+    { sub:"Endocrino-metaboliche", feats:[
+      ["diabete_t2","Diabete tipo 2"],
+      ["diabete_t1","Diabete tipo 1"],
+      ["obesita","Obesità"],
+      ["ipopituitarismo","Ipopituitarismo / deficit ipofisari noti"]
+    ]},
+    { sub:"Reumatologiche e infiammatorie", feats:[
+      ["artrite_reumatoide","Artrite reumatoide"],
+      ["spondilite","Spondilite anchilosante / spondiloartrite assiale"],
+      ["les","Lupus eritematoso sistemico (LES)"],
+      ["artrite_psoriasica","Artrite psoriasica"],
+      ["sclerodermia","Sclerosi sistemica (sclerodermia)"]
+    ]},
+    { sub:"Gastro-epatiche e nutrizionali", feats:[
+      ["mici","Malattia infiammatoria cronica intestinale (Crohn / RCU)"],
+      ["celiachia_nota","Celiachia nota (anche in dieta aglutinata)"],
+      ["epatopatia","Epatopatia cronica / cirrosi"]
+    ]},
+    { sub:"Renali", feats:[] },
+    { sub:"Neurologiche", feats:[
+      ["ictus_emiplegia","Ictus / emiplegia"],
+      ["lesione_midollare","Lesione midollare / para-tetraplegia"],
+      ["parkinson","Malattia di Parkinson"],
+      ["sclerosi_multipla","Sclerosi multipla"],
+      ["epilessia","Epilessia"]
+    ]},
+    { sub:"Respiratorie e altre", feats:[
+      ["hiv","Infezione da HIV"],
+      ["bpco","BPCO"],
+      ["fibrosi_cistica","Fibrosi cistica"],
+      ["emocromatosi","Emocromatosi / sovraccarico di ferro"]
+    ]}
+  ]},
+  { label:"Sintomi e segni", groups:[
+    { sub:"Cute e reazioni allergiche", feats:[
+      ["flushing","Flushing"],
+      ["orticaria_pigmentosa","Orticaria pigmentosa"],
+      ["prurito","Prurito"],
+      ["strie_rubre","Strie rubre"],
+      ["fragilita_cutanea","Fragilità cutanea"],
+      ["ecchimosi","Ecchimosi facili"],
+      ["anafilassi","Anafilassi ricorrente / idiopatica"],
+      ["anafilassi_imenotteri","Anafilassi da puntura di imenotteri"],
+      ["dermatite_erpetiforme","Dermatite erpetiforme"],
+      ["iperpigmentazione","Iperpigmentazione cutanea (bronzina)"]
+    ]},
+    { sub:"Endocrino e riproduttivo", feats:[
+      ["m_libido","Calo della libido","uomo"],
+      ["disf_erettile","Disfunzione erettile","uomo"],
+      ["m_testicoli","Testicoli piccoli / ipotrofici","uomo"],
+      ["ginecomastia","Ginecomastia","uomo"],
+      ["galattorrea","Galattorrea"],
+      ["amenorrea","Amenorrea / oligomenorrea","donna"]
+    ]},
+    { sub:"Neurologico e visivo", feats:[
+      ["cefalea","Cefalea"],
+      ["disturbi_visivi","Disturbi del campo visivo"],
+      ["lussazione_cristallino","Lussazione del cristallino (ectopia lentis)"]
+    ]},
+    { sub:"Muscolo-scheletrico e connettivo", feats:[
+      ["miopatia","Miopatia prossimale"],
+      ["sarcopenia","Sarcopenia / perdita di massa muscolare"],
+      ["sclere_blu","Sclere blu"],
+      ["dentinogenesi","Dentinogenesi imperfetta"],
+      ["perdita_denti_precoce","Perdita precoce dei denti (radice integra)"],
+      ["ipoacusia","Ipoacusia precoce"],
+      ["lombalgia_infiammatoria","Lombalgia infiammatoria (esordio <45 anni, notturna, rigidità mattutina, migliora col movimento)"],
+      ["artropatia_mcf","Artropatia delle metacarpo-falangee (2ª–3ª)"],
+      ["ipermobilita","Ipermobilità articolare marcata"]
+    ]},
+    { sub:"Gastrointestinale", feats:[
+      ["sintomi_gi","Sintomi GI ricorrenti (dolore addominale, diarrea)"],
+      ["diarrea_steatorrea","Diarrea cronica / steatorrea"],
+      ["meteorismo","Meteorismo / dolore addominale ricorrente"]
+    ]},
+    { sub:"Generali e habitus", feats:[
+      ["astenia","Astenia"],
+      ["facies_cushingoide","Facies cushingoide"],
+      ["obesita_centrale","Obesità centrale"],
+      ["tratti_acromegalici","Tratti acromegalici (mani/piedi, prognatismo)"],
+      ["bassa_statura","Bassa statura"],
+      ["habitus_marfanoide","Habitus marfanoide (alta statura, arti lunghi, aracnodattilia)"]
+    ]}
+  ]},
+  { label:"Anamnesi e pattern fratturativo", groups:[
+    { sub:"Pattern fratturativo", feats:[
+      ["frattura_inspiegata","Osteoporosi/Fratture inspiegate in giovani"],
+      ["vertebrali_giovane","Fratture vertebrali in soggetto giovane"],
+      ["fratture_infanzia","Fratture multiple fin dall'infanzia"],
+      ["familiarita_fratture","Familiarità per fratture"]
+    ]},
+    { sub:"Storia riproduttiva", feats:[
+      ["menopausa_precoce","Menopausa prima dei 45 anni","donna"],
+      ["ovariectomia","Ovariectomia bilaterale","donna"],
+      ["gravidanza_allattamento","Osteoporosi/frattura in gravidanza o allattamento","donna"]
+    ]},
+    { sub:"Interventi e storia clinica", feats:[
+      ["storia_ipofisaria","Patologia/chirurgia/radioterapia ipofisaria"],
+      ["bariatrica","Pregressa chirurgia bariatrica"],
+      ["gastrectomia","Pregressa gastrectomia / chirurgia gastrica"],
+      ["trapianto","Trapianto d'organo (rene, altro organo solido o midollo)"],
+      ["nefrolitiasi_ricorrente","Nefrolitiasi calcica ricorrente / nefrocalcinosi"],
+      ["tromboembolismo_giovanile","Tromboembolismo in età giovanile"]
+    ]},
+    { sub:"Stile di vita e nutrizione", feats:[
+      ["calo_ponderale","Calo ponderale rapido/marcato"],
+      ["anoressia_dca","Anoressia nervosa / disturbo alimentare noto"],
+      ["alcol","Abuso cronico di alcol"],
+      ["fumo","Tabagismo"],
+      ["immobilizzazione","Immobilizzazione prolungata / allettamento"],
+      ["basso_peso","Basso peso corporeo / magrezza marcata"],
+      ["esercizio_intenso","Attività fisica intensa / bassa disponibilità energetica","donna"]
+    ]}
+  ]}
+];
+function axisFeats(a){ return a.groups ? a.groups.flatMap(g=>g.feats) : a.feats; }
+const FEATLABEL = {}, FEATSEX = {};
+AXES.forEach(a=>axisFeats(a).forEach(f=>{ FEATLABEL[f[0]]=f[1]; if(f[2]) FEATSEX[f[0]]=f[2]; }));
+
+// ---- FORME (seed) ----
+const FORME = [
+  { kind:"sospetto", id:"ipogonadismo", nome:"Ipogonadismo maschile", cat:"Endocrina", sesso:"uomo",
+    suppressedBy:["adt"],
+    trigger:[["m_libido","forte"],["disf_erettile","forte"],["m_testicoli","forte"],["ginecomastia","forte"],["astenia","lieve"],["sarcopenia","lieve"],["frattura_inspiegata","lieve"]],
+    conferma:["Testosterone totale mattutino (×2)","LH / FSH (primario vs centrale)","Se centrale: PRL, ferritina/sat. transferrina, valutazione ipofisaria"],
+    nota:"Il deficit androgenico rimuove il freno al riassorbimento osseo. Causa frequente e trattabile nell'uomo." },
+  { id:"gio", nome:"Osteoporosi indotta da glucocorticoidi", cat:"Farmaci",
+    trigger:[["glucocorticoidi","forte"]],
+    conferma:["≥5 mg/die di prednisone-equivalente per >3 mesi"],
+    nota:"Deprimono la formazione ossea (apoptosi osteoblastica) e l'assorbimento intestinale di calcio, con aumento precoce del riassorbimento. Rischio precoce e dose-dipendente; la BMD sottostima il rischio." },
+  { id:"ipo_adt", nome:"Ipogonadismo iatrogeno (ADT)", cat:"Farmaci", sesso:"uomo",
+    trigger:[["adt","forte"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"La soppressione androgenica accelera il turnover osseo. Esempi: agonisti del GnRH (leuprorelina, goserelina, triptorelina), antagonisti (degarelix), orchiectomia. Perdita ossea rapida nel ca. prostatico." },
+  { id:"tiroxina", nome:"Osteoporosi da L-tiroxina soppressiva", cat:"Farmaci",
+    trigger:[["tiroxina_soppr","forte"]],
+    conferma:["TSH soppresso in corso di L-tiroxina"],
+    nota:"L'eccesso di ormone tiroideo accelera il turnover osseo. Si parla di dose soppressiva con TSH stabilmente sotto il limite inferiore di norma (~<0,4 mU/L); il rischio osseo è rilevante soprattutto con TSH <0,1 mU/L, in particolare nella donna in postmenopausa." },
+  { id:"ipo_aromatasi", nome:"Osteoporosi da inibitori dell'aromatasi", cat:"Farmaci", sesso:"donna",
+    trigger:[["aromatasi","forte"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"Bloccano la sintesi di estrogeni con deprivazione estrogenica e aumento del riassorbimento. Esempi: anastrozolo, letrozolo, exemestane. Profilassi ossea raccomandata." },
+  { id:"ipo_gnrh", nome:"Ipogonadismo iatrogeno da analoghi GnRH", cat:"Farmaci",
+    trigger:[["gnrh","forte"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"La deprivazione estrogenica/androgenica indotta accelera il turnover osseo. Esempi: leuprorelina, triptorelina, goserelina (endometriosi, fibromi, neoplasie ormono-sensibili)." },
+  { id:"anticonv", nome:"Osteoporosi da anticonvulsivanti", cat:"Farmaci",
+    trigger:[["anticonvulsivanti","forte"]],
+    conferma:["25-OH-vitamina D (spesso ridotta)"],
+    nota:"Gli antiepilettici induttori enzimatici — fenitoina, fenobarbital, carbamazepina, primidone, oxcarbazepina — accelerano il catabolismo epatico della vitamina D, con iperparatiroidismo secondario e rischio di osteomalacia. Il valproato si associa a riduzione della BMD con meccanismo distinto, non enzimatico." },
+  { id:"op_eparina", nome:"Osteoporosi da anticoagulanti", cat:"Farmaci",
+    trigger:[["eparina","lieve"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"L'eparina non frazionata a lungo termine (es. in gravidanza) deprime la formazione e aumenta il riassorbimento; minore con EBPM. Il warfarin (antagonista della vitamina K) ha associazione modesta e discussa. I NAO/DOAC (apixaban, rivaroxaban, dabigatran, edoxaban) appaiono neutri o piu sicuri sull'osso." },
+  { id:"op_cni", nome:"Osteoporosi da inibitori della calcineurina", cat:"Farmaci",
+    trigger:[["ciclosporina","forte"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"Aumentano il turnover osseo a prevalente riassorbimento; nel trapiantato l'effetto si somma agli steroidi. Esempi: ciclosporina, tacrolimus." },
+  { id:"op_chemio", nome:"Osteoporosi da chemioterapici", cat:"Farmaci",
+    trigger:[["chemio","forte"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"Tossicità ossea diretta e insufficienza gonadica indotta (ipogonadismo/menopausa precoce). Esempi: alchilanti (ciclofosfamide, ifosfamide), derivati del platino." },
+  { id:"op_diuretici", nome:"Osteoporosi da diuretici dell'ansa", cat:"Farmaci",
+    trigger:[["diuretici_ansa","forte"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"Aumentano l'escrezione urinaria di calcio (al contrario dei tiazidici), con bilancio calcico negativo. Esempi: furosemide, torasemide, bumetanide." },
+  { id:"op_ipp", nome:"Osteoporosi da inibitori di pompa protonica", cat:"Farmaci",
+    trigger:[["ipp","lieve"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"La ridotta acidità gastrica può ridurre l'assorbimento del calcio; associazione modesta, rilevante nell'uso cronico. Esempi: omeprazolo, esomeprazolo, pantoprazolo, lansoprazolo." },
+  { id:"op_ssri", nome:"Osteoporosi da SSRI", cat:"Farmaci",
+    trigger:[["ssri","lieve"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"La serotonina modula gli osteoblasti (recettori 5-HT) riducendo la formazione ossea; in più aumentano le cadute. Esempi: sertralina, paroxetina, fluoxetina, citalopram, escitalopram." },
+  { id:"op_glitazoni", nome:"Osteoporosi da glitazoni", cat:"Farmaci",
+    trigger:[["glitazoni","forte"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"L'attivazione di PPAR-gamma devia le staminali mesenchimali verso l'adipocita anziché l'osteoblasta, riducendo la formazione ossea. Esempi: pioglitazone, rosiglitazone. Rischio maggiore nella donna." },
+  { id:"op_sglt2", nome:"Osteoporosi da SGLT2-inibitori", cat:"Farmaci",
+    trigger:[["sglt2","lieve"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"Dati controversi; possibili alterazioni del metabolismo calcio-fosforo e aumento delle cadute (deplezione di volume). Esempi: canagliflozin (segnale di fratture), dapagliflozin, empagliflozin." },
+  { id:"op_tenofovir", nome:"Osteoporosi da tenofovir (TDF)", cat:"Farmaci",
+    trigger:[["tenofovir","forte"]],
+    conferma:["Fosforemia / fosfaturia (perdita renale di fosfato)"],
+    nota:"Il tenofovir disoproxil (TDF) causa tubulopatia prossimale con perdita renale di fosfato e calo della BMD; il tenofovir alafenamide (TAF) ha impatto osseo nettamente minore." },
+  { id:"op_mtx", nome:"Osteopatia da metotrexato", cat:"Farmaci",
+    trigger:[["mtx","lieve"]],
+    conferma:["Nessun test: legata al farmaco assunto"],
+    nota:"Ad alte dosi inibisce la proliferazione osteoblastica ('osteopatia da metotrexato': dolore osseo, osteoporosi, fratture, tipicamente agli arti inferiori). A basse dosi reumatologiche l'associazione è incerta e verosimilmente minima." },
+  { kind:"sospetto", id:"mastocitosi", nome:"Mastocitosi sistemica", cat:"Ematologica / sistemica",
+    trigger:[["flushing","forte"],["orticaria_pigmentosa","forte"],["anafilassi_imenotteri","forte"],["anafilassi","forte"],["prurito","lieve"],["sintomi_gi","lieve"],["vertebrali_giovane","lieve"],["frattura_inspiegata","lieve"]],
+    conferma:["Triptasi sierica basale","Se elevata: biopsia osteomidollare, mutazione KIT D816V"],
+    nota:"I mastociti rilasciano mediatori (istamina, eparina, citochine) che attivano gli osteoclasti. Red flag: anafilassi grave da imenotteri (specie con ipotensione, senza orticaria) o anafilassi ricorrente idiopatica → dosare la triptasi basale. Spesso silente al primo livello." },
+  { kind:"sospetto", id:"oi", nome:"Osteogenesi imperfetta", cat:"Genetica / del collagene",
+    trigger:[["sclere_blu","forte"],["fratture_infanzia","forte"],["familiarita_fratture","forte"],["dentinogenesi","forte"],["ipoacusia","lieve"],["bassa_statura","lieve"]],
+    conferma:["Valutazione clinico-genetica (COL1A1/COL1A2)","Anamnesi familiare strutturata"],
+    nota:"Difetto qualitativo del collagene di tipo I (COL1A1/COL1A2), osso fragile. Forme lievi diagnosticate in età adulta." },
+  { id:"diabete", nome:"Diabete tipo 2 — rischio sottostimato dalla BMD", cat:"Endocrina",
+    trigger:[["diabete_t2","forte"],["obesita","lieve","supp"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Alterazione della qualità ossea (accumulo di AGEs, basso turnover, microarchitettura) con BMD normale/elevata che sottostima il rischio." },
+  { kind:"sospetto", id:"cushing", nome:"Ipercortisolismo endogeno (Cushing)", cat:"Endocrina",
+    trigger:[["facies_cushingoide","forte"],["strie_rubre","forte"],["obesita_centrale","lieve"],["fragilita_cutanea","lieve"],["ecchimosi","lieve"],["miopatia","lieve"]],
+    conferma:["Prima linea (1–2 test, non in un'unica volta): cortisolo libero urinario 24h, cortisolo salivare notturno, soppressione overnight con desametasone 1 mg","Desametasone overnight: 1 mg alle ore 23, cortisolo sierico alle 8 — normale se <1,8 µg/dL (50 nmol/L); mancata soppressione = positivo","Diagnosi su due test concordanti di tipo diverso, poi inquadramento ACTH"],
+    nota:"L'eccesso di cortisolo deprime osteoblasti e assorbimento di calcio, come nella forma iatrogena. Forme endogene: adenoma ipofisario ACTH-secernente, adenoma surrenalico, secrezione ectopica." },
+  { kind:"sospetto", id:"acromegalia", nome:"Acromegalia", cat:"Endocrina",
+    trigger:[["tratti_acromegalici","forte"],["cefalea","lieve"],["disturbi_visivi","lieve"]],
+    conferma:["IGF-1; se elevata, GH durante OGTT; RMN ipofisi"],
+    nota:"L'eccesso di GH/IGF-1 aumenta il turnover osseo: la BMD può essere conservata ma la qualità vertebrale è ridotta, con rischio di fratture vertebrali. Causa: adenoma ipofisario GH-secernente." },
+  { kind:"sospetto", id:"iperprl", nome:"Iperprolattinemia", cat:"Endocrina",
+    trigger:[["galattorrea","forte"],["amenorrea","forte"],["m_libido","lieve"],["cefalea","lieve"],["disturbi_visivi","lieve"]],
+    conferma:["Prolattina sierica (escludere farmaci, ipotiroidismo, gravidanza, macroprolattina); se confermata, RMN ipofisi"],
+    nota:"La prolattina elevata induce ipogonadismo ipogonadotropo, con deprivazione estrogenica/androgenica e perdita ossea. Cause: prolattinoma, farmaci (antipsicotici, metoclopramide), ipotiroidismo." },
+  { kind:"sospetto", id:"deficit_gh", nome:"Deficit di GH dell'adulto", cat:"Endocrina",
+    trigger:[["ipopituitarismo","forte"],["storia_ipofisaria","forte"],["astenia","lieve"],["sarcopenia","lieve"]],
+    conferma:["IGF-1 (un valore normale non esclude); diagnosi con test di stimolo del GH (ipoglicemia insulinica o GHRH-arginina)"],
+    nota:"Il deficit di GH dell'adulto riduce massa e densità ossea. Sospettare in ipopituitarismo, dopo chirurgia/radioterapia ipofisaria o trauma cranico." },
+  { id:"dm1", nome:"Diabete mellito tipo 1", cat:"Endocrina",
+    trigger:[["diabete_t1","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"A differenza del tipo 2 la BMD è spesso ridotta: il deficit insulinico, anabolico per l'osso, compromette la formazione ossea fin dalla giovane età. Rischio fratturativo elevato." },
+  { kind:"sospetto", id:"poi", nome:"Insufficienza ovarica primaria (POI) / menopausa precoce", cat:"Endocrina", sesso:"donna",
+    trigger:[["menopausa_precoce","forte"],["ovariectomia","forte"]],
+    conferma:["POI (<40 anni): FSH >25 UI/L confermato su due dosaggi a ≥4 settimane + amenorrea/oligomenorrea ≥4 mesi, estradiolo basso a supporto","Menopausa precoce: cessazione mestruale tra 40 e 45 anni"],
+    nota:"La carenza estrogenica precoce accelera il riassorbimento osseo. Cause: idiopatica, genetica (sindrome di Turner, premutazione FMR1), autoimmune, iatrogena (chemio/radioterapia, ovariectomia bilaterale)." },
+  { id:"op_calo", nome:"Calo ponderale marcato", cat:"Endocrina",
+    trigger:[["calo_ponderale","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Il calo ponderale rapido (dieta fortemente ipocalorica, restrizione marcata) riduce la massa ossea per minor carico meccanico e ridotto introito di calcio e proteine. La perdita ossea post-chirurgia bariatrica è trattata tra le forme gastrointestinali/nutrizionali." },
+
+  { id:"reuma_ar", nome:"Artrite reumatoide", cat:"Reumatologica",
+    trigger:[["artrite_reumatoide","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"L'infiammazione cronica (TNF-α, IL-6) aumenta l'espressione di RANKL con attivazione osteoclastica e perdita ossea sia periarticolare sia generalizzata; il rischio fratturativo correla con l'attività di malattia e si somma all'effetto dei glucocorticoidi. È un fattore di rischio indipendente." },
+  { id:"reuma_spa", nome:"Spondilite anchilosante / spondiloartrite assiale", cat:"Reumatologica",
+    trigger:[["spondilite","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"L'infiammazione cronica causa perdita di osso trabecolare vertebrale, paradossalmente associata a neoformazione ossea (sindesmofiti, anchilosi); le fratture vertebrali sono frequenti e spesso misconosciute. La BMD lombare in proiezione antero-posteriore è inaffidabile perché sovrastimata dalle calcificazioni: preferire il femore o la proiezione laterale." },
+  { id:"reuma_les", nome:"Lupus eritematoso sistemico (LES)", cat:"Reumatologica",
+    trigger:[["les","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Concorrono l'infiammazione cronica, l'uso frequente e prolungato di glucocorticoidi, la ridotta esposizione solare (fotoprotezione → ipovitaminosi D) e, nelle forme trattate con ciclofosfamide, l'insufficienza ovarica precoce. Il rischio fratturativo è in parte indipendente dalla dose steroidea." },
+  { id:"reuma_psa", nome:"Artrite psoriasica", cat:"Reumatologica",
+    trigger:[["artrite_psoriasica","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"L'infiammazione sistemica (asse TNF / IL-17–23) contribuisce alla perdita ossea; i dati sono più eterogenei rispetto all'artrite reumatoide, ma è descritto un aumento del rischio fratturativo, cui si sommano le comorbidità metaboliche e l'eventuale uso di glucocorticoidi." },
+  { id:"reuma_ssc", nome:"Sclerosi sistemica (sclerodermia)", cat:"Reumatologica",
+    trigger:[["sclerodermia","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Concorrono infiammazione cronica, malassorbimento da interessamento gastrointestinale (ipovitaminosi D), ridotta mobilità per contratture cutanee e articolari, basso peso corporeo e danno microvascolare; sono descritti riduzione della BMD e aumento del rischio di frattura." },
+
+  { id:"gi_mici", nome:"Malattia infiammatoria cronica intestinale (IBD)", cat:"Gastro-epatica",
+    trigger:[["mici","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"L'infiammazione cronica intestinale (citochine pro-infiammatorie → RANKL) si somma al malassorbimento di calcio e vitamina D (soprattutto nel Crohn con interessamento ileale o resezioni), all'uso di glucocorticoidi e al basso peso corporeo. Il rischio è maggiore nella malattia attiva e di lunga durata." },
+  { id:"gi_celiachia", nome:"Celiachia", cat:"Gastro-epatica",
+    trigger:[["celiachia_nota","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Anche in dieta aglutinata può persistere un deficit osseo acquisito: l'atrofia dei villi riduce l'assorbimento di calcio e vitamina D con iperparatiroidismo secondario, cui si aggiunge una componente infiammatoria/immunitaria. Se la celiachia non è ancora nota, lo screening è sierologico e di laboratorio (forme che il primo livello intercetta)." },
+  { id:"gi_epatopatia", nome:"Epatopatia cronica / cirrosi", cat:"Gastro-epatica",
+    trigger:[["epatopatia","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Osteodistrofia epatica: ridotta idrossilazione epatica della vitamina D, calo di IGF-1, ipogonadismo, effetto diretto di bilirubina e acidi biliari sugli osteoblasti, basso peso corporeo. Massima nelle forme colestatiche (es. colangite biliare primitiva) e nella cirrosi avanzata." },
+  { id:"gi_bariatrica", nome:"Osteopatia post-chirurgia bariatrica", cat:"Gastro-epatica",
+    trigger:[["bariatrica","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Le procedure malassorbitive (bypass gastrico, diversione biliopancreatica) riducono l'assorbimento di calcio e vitamina D con iperparatiroidismo secondario; vi si aggiungono il calo ponderale rapido e lo scarico meccanico. Rischio minore nelle procedure puramente restrittive (sleeve, bendaggio)." },
+  { id:"gi_gastrectomia", nome:"Malattia ossea post-gastrectomia", cat:"Gastro-epatica",
+    trigger:[["gastrectomia","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"La riduzione dell'acidità gastrica e l'accelerato transito compromettono l'assorbimento di calcio e vitamina D; la malattia ossea post-gastrectomia combina osteoporosi e osteomalacia. Più marcata dopo gastrectomia totale." },
+
+  { kind:"sospetto", id:"gi_celiachia_occulta", nome:"Celiachia", cat:"Gastro-epatica",
+    trigger:[["dermatite_erpetiforme","forte"],["diarrea_steatorrea","lieve"],["meteorismo","lieve"],["calo_ponderale","lieve"],["frattura_inspiegata","lieve"]],
+    conferma:["Anti-transglutaminasi (tTG) IgA + IgA totali","Anti-endomisio (EMA) IgA a conferma","Biopsia duodenale (diagnosi nell'adulto)"],
+    nota:"La celiachia silente o atipica può manifestarsi come osteoporosi isolata con primo livello normale: il malassorbimento subclinico di calcio e vitamina D riduce la massa ossea. Gli indizi sono clinici (cutanei e gastrointestinali), la conferma è sierologica." },
+
+  { kind:"sospetto", id:"reuma_spa_occulta", nome:"Spondiloartrite assiale", cat:"Reumatologica",
+    trigger:[["lombalgia_infiammatoria","forte"],["vertebrali_giovane","lieve"],["frattura_inspiegata","lieve"]],
+    conferma:["RM delle sacroiliache (± Rx bacino)","HLA-B27","Invio reumatologico"],
+    nota:"Può precedere di anni la diagnosi reumatologica e presentarsi con fratture vertebrali nel giovane: l'infiammazione cronica erode l'osso trabecolare vertebrale, mentre la lombalgia infiammatoria viene a lungo attribuita a cause meccaniche. La BMD lombare in proiezione antero-posteriore è inaffidabile (sovrastimata da sindesmofiti e calcificazioni): preferire il femore o la proiezione laterale." },
+
+  { id:"altre_hiv", nome:"Infezione da HIV", cat:"Infettiva / sistemica",
+    trigger:[["hiv","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"L'infezione cronica (attivazione immunitaria e infiammazione persistente), il basso peso, l'ipogonadismo e l'ipovitaminosi D riducono la massa ossea, cui si somma l'effetto della terapia antiretrovirale, in particolare tenofovir (TDF) e alcuni inibitori delle proteasi. Il calo di BMD è spesso accentuato all'avvio della ART." },
+  { id:"altre_bpco", nome:"BPCO", cat:"Respiratoria",
+    trigger:[["bpco","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Osteoporosi molto frequente nella BPCO: concorrono infiammazione sistemica, glucocorticoidi (orali e, ad alte dosi, in parte inalatori), fumo, basso peso e cachessia, ipovitaminosi D, ridotta attività fisica e ipossiemia. Il rischio cresce con la gravità della malattia." },
+  { id:"altre_cf", nome:"Fibrosi cistica", cat:"Respiratoria / genetica",
+    trigger:[["fibrosi_cistica","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Malattia ossea CF-correlata: malassorbimento di vitamina D e K da insufficienza pancreatica, infiammazione e infezione cronica, glucocorticoidi, basso peso, ipogonadismo e ritardo puberale, ridotta attività fisica; contribuisce un effetto diretto del CFTR sull'osso." },
+  { id:"altre_emocromatosi", nome:"Emocromatosi / sovraccarico di ferro", cat:"Metabolica / genetica",
+    trigger:[["emocromatosi","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Il sovraccarico di ferro danneggia direttamente gli osteoblasti e, depositandosi a livello ipofisario e gonadico, induce ipogonadismo ipogonadotropo; concorrono diabete ed epatopatia. L'osteoporosi può precedere la diagnosi." },
+  { kind:"sospetto", id:"plo", nome:"Osteoporosi della gravidanza e allattamento (PLO)", cat:"Della gravidanza/allattamento", sesso:"donna",
+    trigger:[["gravidanza_allattamento","forte"],["vertebrali_giovane","lieve"]],
+    conferma:["DXA + imaging vertebrale","Esclusione di altre cause secondarie di osteoporosi"],
+    nota:"Forma rara: fratture da fragilità, tipicamente vertebrali, nel terzo trimestre o nel postpartum/allattamento, in giovani donne spesso senza fattori di rischio noti. Concorrono l'aumentata richiesta di calcio, il PTHrP di origine mammaria e una possibile bassa massa ossea di partenza. Diagnosi clinica, dopo esclusione di altre cause." },
+
+  { kind:"sospetto", id:"emocromatosi_occulta", nome:"Emocromatosi", cat:"Metabolica / genetica",
+    trigger:[["artropatia_mcf","forte"],["iperpigmentazione","lieve"],["astenia","lieve"]],
+    conferma:["Saturazione della transferrina + ferritina","Se aumentate, test genetico HFE (C282Y/H63D)"],
+    nota:"Può presentarsi con osteoporosi prima della diagnosi: il sovraccarico di ferro danneggia gli osteoblasti e induce ipogonadismo ipogonadotropo (deposito ipofisario e gonadico). Indizi extra-scheletrici: artropatia delle 2ª–3ª metacarpo-falangee, iperpigmentazione bronzina, astenia, eventuale diabete o epatopatia. L'assetto marziale non è nel primo livello, quindi va richiesto." },
+
+  { id:"renale_trapianto", nome:"Osteoporosi post-trapianto d'organo", cat:"Post-trapianto",
+    trigger:[["trapianto","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Perdita ossea reale e precoce (massima nei primi 6–12 mesi) dopo trapianto d'organo solido o di midollo: concorrono l'immunosoppressione (glucocorticoidi e inibitori della calcineurina), l'iperparatiroidismo persistente e l'osteodistrofia renale pregressa, con frequente ipofosfatemia post-trapianto." },
+  { kind:"sospetto", id:"renale_rta", nome:"Acidosi tubulare distale incompleta", cat:"Renale",
+    trigger:[["nefrolitiasi_ricorrente","forte"]],
+    conferma:["pH urinario e test da carico acido (NH4Cl): incapacità di acidificare","Ipocitraturia a supporto"],
+    nota:"«Incompleta» perché il bicarbonato sierico è normale (nessuna acidosi manifesta): il difetto di acidificazione delle urine emerge solo sotto carico acido. Pur senza acidosi conclamata si hanno nefrolitiasi calcica ricorrente/nefrocalcinosi e malattia ossea (osteomalacia/osteoporosi), per la lieve acidosi cronica tamponata dall'osso e l'ipocitraturia. Diagnosi con test da carico acido." },
+
+  { kind:"sospetto", id:"gen_marfan", nome:"Sindrome di Marfan", cat:"Genetica",
+    trigger:[["habitus_marfanoide","forte"],["lussazione_cristallino","lieve"],["ipermobilita","lieve"]],
+    conferma:["Criteri di Ghent: dilatazione della radice aortica (ecocardiogramma, Z-score ≥2) ed ectopia lentis (visita oculistica) sono i due criteri cardinali","Valutazione genetica FBN1"],
+    nota:"Disordine del connettivo da difetto della fibrillina-1 (FBN1): habitus marfanoide, lussazione del cristallino verso l'alto, dilatazione della radice aortica. La ridotta densità ossea è descritta e può precedere la diagnosi nelle forme lievi." },
+  { kind:"sospetto", id:"gen_eds", nome:"Sindrome di Ehlers-Danlos", cat:"Genetica",
+    trigger:[["ipermobilita","forte"],["fragilita_cutanea","lieve"],["ecchimosi","lieve"]],
+    conferma:["Criteri clinici (score di Beighton per l'ipermobilità)","Genetica secondo il sottotipo sospettato"],
+    nota:"Gruppo eterogeneo di disordini del connettivo: ipermobilità articolare, iperestensibilità e fragilità cutanea, ecchimosi facili, cicatrici atrofiche. In alcuni sottotipi sono descritte riduzione della BMD e fratture." },
+  { kind:"sospetto", id:"gen_omocistinuria", nome:"Omocistinuria", cat:"Genetica",
+    trigger:[["habitus_marfanoide","forte"],["lussazione_cristallino","lieve"],["tromboembolismo_giovanile","lieve"]],
+    conferma:["Omocisteina plasmatica/urinaria elevata","Genetica (CBS)"],
+    nota:"Errore congenito del metabolismo (deficit di cistationina-β-sintasi): habitus marfanoide ma con lussazione del cristallino verso il basso, tromboembolismo, possibile ritardo cognitivo, osteoporosi e scoliosi. Si distingue dalla Marfan per la trombofilia e la direzione della lussazione." },
+
+  { id:"vita_anoressia", nome:"Anoressia nervosa / disturbo alimentare", cat:"Stile di vita / nutrizione",
+    trigger:[["anoressia_dca","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Osteoporosi frequente e precoce: ipogonadismo ipotalamico (amenorrea), ipercortisolismo, basso IGF-1, basso peso e malnutrizione riducono la massa ossea, con recupero spesso incompleto anche dopo la rialimentazione." },
+  { id:"vita_alcol", nome:"Abuso cronico di alcol", cat:"Stile di vita / nutrizione",
+    trigger:[["alcol","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Effetto tossico diretto sugli osteoblasti, ipogonadismo, malnutrizione, epatopatia e aumentato rischio di cadute concorrono alla perdita ossea." },
+  { id:"vita_fumo", nome:"Tabagismo", cat:"Stile di vita / nutrizione",
+    trigger:[["fumo","lieve"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Fattore di rischio indipendente ma di entità modesta: ridotta funzione osteoblastica, minori livelli estrogenici ed effetti vascolari; il rischio si somma agli altri fattori." },
+  { id:"vita_immobilizzazione", nome:"Immobilizzazione prolungata", cat:"Stile di vita / nutrizione",
+    trigger:[["immobilizzazione","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Osteoporosi da disuso: l'assenza di carico meccanico accelera il riassorbimento osseo; la perdita è rapida già nelle prime settimane di allettamento o paralisi." },
+  { id:"vita_basso_peso", nome:"Basso peso corporeo / magrezza marcata", cat:"Stile di vita / nutrizione",
+    trigger:[["basso_peso","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Fattore di rischio indipendente forte: minore massa ossea di base, ridotto carico meccanico e spesso minor introito nutrizionale." },
+  { kind:"sospetto", id:"vita_fha", nome:"Amenorrea ipotalamica funzionale / bassa disponibilità energetica", cat:"Stile di vita / nutrizione", sesso:"donna",
+    trigger:[["esercizio_intenso","forte"],["amenorrea","lieve"],["basso_peso","lieve"]],
+    conferma:["LH/FSH bassi o inappropriatamente normali, estradiolo basso","Esclusione di gravidanza, iperprolattinemia, disfunzione tiroidea e POI"],
+    nota:"Nella giovane donna con bassa disponibilità energetica (restrizione e/o attività fisica intensa) la soppressione dell'asse ipotalamo-ipofisi-gonadi causa ipogonadismo ipoestrogenico e perdita ossea (triade dell'atleta / RED-S). È l'analogo non diagnosticato dell'anoressia: va sospettata davanti a osteoporosi o fratture da stress con amenorrea. In parte reversibile ripristinando il bilancio energetico." },
+  { kind:"sospetto", id:"gen_ipofosfatasia", nome:"Ipofosfatasia dell'adulto (HPP)", cat:"Genetica",
+    trigger:[["perdita_denti_precoce","forte"],["frattura_inspiegata","lieve"]],
+    conferma:["Fosfatasi alcalina (ALP) bassa e ripetutamente confermata","Vitamina B6 (piridossal-5-fosfato) elevata","Gene ALPL"],
+    nota:"Causa sotto-diagnosticata di fratture nel giovane-adulto: fratture e pseudofratture ricorrenti (metatarsi, femore), perdita precoce dei denti a radice integra, condrocalcinosi. La spia è la fosfatasi alcalina persistentemente bassa, spesso ignorata perché i referti segnalano i valori alti. Va riconosciuta perché gli antiriassorbitivi (bifosfonati, denosumab) sono controindicati — rischio di fratture atipiche — e perché esiste una terapia enzimatica sostitutiva (asfotase alfa)." },
+
+  { id:"neuro_ictus", nome:"Ictus / emiplegia", cat:"Neurologica",
+    trigger:[["ictus_emiplegia","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Osteoporosi da disuso accentuata sul lato paretico: la riduzione del carico e l'aumentato rischio di cadute aumentano le fratture, in particolare di femore." },
+  { id:"neuro_midollo", nome:"Lesione midollare / para-tetraplegia", cat:"Neurologica",
+    trigger:[["lesione_midollare","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Perdita ossea sottolesionale rapida e marcata nei primi 12-18 mesi, soprattutto agli arti inferiori, con elevato rischio di fratture da traumi minori." },
+  { id:"neuro_parkinson", nome:"Malattia di Parkinson", cat:"Neurologica",
+    trigger:[["parkinson","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Immobilità, rigidità, instabilità posturale e cadute, spesso con ipovitaminosi D, determinano bassa BMD ed elevato rischio di frattura di femore." },
+  { id:"neuro_sm", nome:"Sclerosi multipla", cat:"Neurologica",
+    trigger:[["sclerosi_multipla","forte"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Ridotta mobilità, cadute, ipovitaminosi D e i cicli di glucocorticoidi concorrono alla perdita ossea." },
+  { id:"neuro_epilessia", nome:"Epilessia", cat:"Neurologica",
+    trigger:[["epilessia","lieve"]],
+    conferma:["Nessun test: condizione già nota"],
+    nota:"Il rischio di frattura deriva soprattutto dai traumi durante le crisi e, in misura maggiore, dagli antiepilettici (vedi sezione Farmaci); la malattia di per sé è un fattore aggiuntivo." }
+];
+
+const W = { forte:2, lieve:1 };
+let sex = null, mode = "intake", refQuery = "";
+const selected = new Set();
+const openAxes = new Set();
+const openRefCats = new Set();
+
+function visibleForms(){ return FORME.filter(f=>!f.sesso || !sex || f.sesso===sex); }
+
+// ---- render intake ----
+const intake = document.getElementById("intake");
+function featVisible(id){ return !FEATSEX[id] || !sex || FEATSEX[id]===sex; }
+function chip(f){ return `<button class="feat" type="button" data-feat="${f[0]}" aria-pressed="${selected.has(f[0])}">${f[1]}</button>`; }
+function renderIntake(){
+  intake.innerHTML = AXES.map((a,i)=>{
+    const all = axisFeats(a).filter(f=>featVisible(f[0]));
+    if(!all.length) return "";
+    const nsel = all.filter(f=>selected.has(f[0])).length;
+    const open = openAxes.has(i);
+    let body;
+    if(a.groups){
+      body = a.groups.map(g=>{
+        const fs = g.feats.filter(f=>featVisible(f[0]));
+        return fs.length ? `<p class="sub-label">${g.sub}</p><div class="feats-row">${fs.map(chip).join("")}</div>` : "";
+      }).join("");
+    } else {
+      body = `<div class="feats-row">${all.map(chip).join("")}</div>`;
+    }
+    return `<div class="axis ${open?'open':''}">
+      <button class="axis-head" type="button" data-axis="${i}" aria-expanded="${open}">
+        <span class="axis-label">${a.label}</span>
+        <span class="axis-meta">${nsel?`<span class="axis-count">${nsel} selez.</span>`:""}<span class="chev">▸</span></span>
+      </button>
+      <div class="axis-body">${body}</div>
+    </div>`;
+  }).join("");
+  intake.querySelectorAll(".axis-head").forEach(b=>b.addEventListener("click",()=>{
+    const i=+b.dataset.axis; openAxes.has(i)?openAxes.delete(i):openAxes.add(i); renderIntake();
+  }));
+  intake.querySelectorAll(".feat").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.feat; selected.has(id)?selected.delete(id):selected.add(id);
+    renderIntake(); renderDiff();
+  }));
+}
+
+// ---- differential ----
+const diff = document.getElementById("diff");
+function renderDiff(){
+  const matched = visibleForms().map(f=>{
+    const fired = f.trigger.filter(t=>selected.has(t[0]));
+    const primary = fired.filter(t=>t[2]!=="supp");
+    const score = fired.reduce((s,t)=>s+W[t[1]],0);
+    const hasForte = primary.some(t=>t[1]==="forte");
+    return {f, fired, primary, score, hasForte};
+  }).filter(x=>x.primary.length>0 && !(x.f.suppressedBy && x.f.suppressedBy.some(id=>selected.has(id))));
+
+  if(!matched.length){
+    diff.innerHTML = `<div class="diff-empty">Spunta i reperti del paziente: qui compariranno separatamente le cause note presenti e i sospetti diagnostici da approfondire.</div>`;
+    return;
+  }
+  const byScore = (a,b)=> b.score-a.score || b.hasForte-a.hasForte;
+  const note     = matched.filter(x=>x.f.kind!=="sospetto").sort(byScore);
+  const sospetti = matched.filter(x=>x.f.kind==="sospetto").sort(byScore);
+
+  const confRow = f => f.conferma&&f.conferma.length
+    ? `<span class="row-label">Conferma</span><div class="conf">${f.conferma.map(c=>`<span>${c}</span>`).join("")}</div>` : "";
+
+  const whyHtml = (f,fired)=>
+    fired.map(t=>`<span class="${t[1]==='forte'?'f':''}">${FEATLABEL[t[0]]}</span>`).join("")
+    + f.trigger.filter(t=>t[2]!=="supp" && !selected.has(t[0])).map(t=>`<span class="off">${FEATLABEL[t[0]]}</span>`).join("");
+
+  const cardNota = ({f,fired,hasForte})=>`
+    <div class="fcard">
+      <div class="fcard-head">
+        <h3>${f.nome}</h3><span class="fcat">${f.cat}</span>
+        <span class="badge ${hasForte?'forte':'lieve'}">${hasForte?'causa riconosciuta':'associazione possibile'}</span>
+      </div>
+      <span class="row-label">Presente</span>
+      <div class="why">${whyHtml(f,fired)}</div>
+      ${confRow(f)}
+      ${f.nota?`<div class="fnote">${f.nota}</div>`:""}
+    </div>`;
+
+  const cardSosp = ({f,fired,hasForte})=>`
+    <div class="fcard">
+      <div class="fcard-head">
+        <h3>${f.nome}</h3><span class="fcat">${f.cat}</span>
+        <span class="badge ${hasForte?'forte':'lieve'}">${hasForte?'sospetto forte':'da considerare'}</span>
+      </div>
+      <span class="row-label">Perché</span>
+      <div class="why">${whyHtml(f,fired)}</div>
+      ${confRow(f)}
+      ${f.nota?`<div class="fnote">${f.nota}</div>`:""}
+    </div>`;
+
+  let html = "";
+  if(note.length)     html += `<p class="diff-section">Cause note presenti</p>` + note.map(cardNota).join("");
+  if(sospetti.length) html += `<p class="diff-section">Sospetti da approfondire</p>` + sospetti.map(cardSosp).join("");
+  diff.innerHTML = html;
+}
+
+// ---- reference mode ----
+const refList = document.getElementById("refList");
+const REF_ORDER = ["DA FARMACI","ENDOCRINO-METABOLICHE","REUMATOLOGICHE / INFIAMMATORIE","GASTRO-EPATICHE / NUTRIZIONALI","RENALI","NEUROLOGICHE","EMATOLOGICHE","GENETICHE","STILI DI VITA E NUTRIZIONE","ALTRE CONDIZIONI"];
+const REF_MACRO = {
+  "Farmaci":"DA FARMACI",
+  "Endocrina":"ENDOCRINO-METABOLICHE",
+  "Reumatologica":"REUMATOLOGICHE / INFIAMMATORIE",
+  "Gastro-epatica":"GASTRO-EPATICHE / NUTRIZIONALI",
+  "Ematologica / sistemica":"EMATOLOGICHE",
+  "Post-trapianto":"ALTRE CONDIZIONI",
+  "Renale":"RENALI",
+  "Genetica / del collagene":"GENETICHE",
+  "Genetica":"GENETICHE",
+  "Stile di vita / nutrizione":"STILI DI VITA E NUTRIZIONE",
+  "Neurologica":"NEUROLOGICHE"
+};
+const macroOf = f => REF_MACRO[f.cat] || "ALTRE CONDIZIONI";
+function refCard(f){ return `
+    <div class="fcard">
+      <div class="fcard-head"><h3>${f.nome}</h3><span class="fcat">${f.cat}</span></div>
+      <span class="row-label">Quando considerarla</span>
+      <div class="trig">${f.trigger.filter(t=>t[2]!=="supp").map(t=>`<span class="${t[1]}">${FEATLABEL[t[0]]}<span class="w">${t[1]}</span></span>`).join("")}</div>
+      ${f.conferma&&f.conferma.length?`<span class="row-label">Conferma</span>
+      <div class="conf">${f.conferma.map(c=>`<span>${c}</span>`).join("")}</div>`:""}
+      ${f.nota?`<div class="fnote">${f.nota}</div>`:""}
+    </div>`; }
+function renderRef(){
+  const q = refQuery.trim().toLowerCase();
+  const list = visibleForms().filter(f=>{
+    if(!q) return true;
+    const hay = (f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"")).toLowerCase();
+    return hay.includes(q);
+  });
+  if(!list.length){ refList.innerHTML = `<div class="diff-empty">Nessuna condizione trovata.</div>`; return; }
+  const groups = {};
+  list.forEach(f=>{ const k=macroOf(f); (groups[k]=groups[k]||[]).push(f); });
+  const cats = REF_ORDER.filter(c=>groups[c]);
+  refList.innerHTML = cats.map(c=>{
+    const open = q ? true : openRefCats.has(c);
+    const note = groups[c].filter(f=>f.kind!=="sospetto");
+    const sosp = groups[c].filter(f=>f.kind==="sospetto");
+    const body = (note.length?`<p class="sub-label">Cause note</p>`+note.map(refCard).join(""):"")
+               + (sosp.length?`<p class="sub-label">Cause non note</p>`+sosp.map(refCard).join(""):"");
+    return `<div class="axis ${open?'open':''}">
+      <button class="axis-head" type="button" data-refcat="${c}" aria-expanded="${open}">
+        <span class="axis-label">${c}</span>
+        <span class="axis-meta"><span class="axis-count">${groups[c].length}</span><span class="chev">▸</span></span>
+      </button>
+      <div class="axis-body">${body}</div>
+    </div>`;
+  }).join("");
+  refList.querySelectorAll(".axis-head").forEach(b=>b.addEventListener("click",()=>{
+    const c=b.dataset.refcat; openRefCats.has(c)?openRefCats.delete(c):openRefCats.add(c); renderRef();
+  }));
+}
+document.getElementById("refSearch").addEventListener("input", e=>{ refQuery = e.target.value; renderRef(); });
+
+// ---- controls ----
+document.querySelectorAll("[data-sex]").forEach(b=>b.addEventListener("click",()=>{
+  const v=b.dataset.sex; sex = (sex===v)?null:v;
+  document.querySelectorAll("[data-sex]").forEach(x=>x.setAttribute("aria-pressed", x.dataset.sex===sex));
+  [...selected].forEach(id=>{ if(!featVisible(id)) selected.delete(id); });
+  renderIntake(); renderDiff(); renderRef();
+}));
+document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>{
+  mode=b.dataset.mode;
+  document.querySelectorAll("[data-mode]").forEach(x=>x.setAttribute("aria-pressed", x.dataset.mode===mode));
+  document.getElementById("modeIntake").style.display = mode==="intake"?"":"none";
+  document.getElementById("modeRef").style.display = mode==="ref"?"":"none";
+  if(mode==="ref") renderRef();
+}));
+// tabs (prototype: only "tace" active here)
+document.getElementById("tabParla").addEventListener("click",()=>{
+  document.getElementById("parlaNote").classList.add("show");
+});
+
+renderIntake(); renderDiff(); renderRef();
+</script>
+</body>
+</html>
