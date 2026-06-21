@@ -147,12 +147,7 @@
 <body>
 <div class="wrap">
 
-  <p class="eyebrow">Osteo Help · prototipo seconda scheda</p>
-  <div class="tabs" role="tablist">
-    <button class="tab" role="tab" aria-selected="false" id="tabParla">Il laboratorio parla</button>
-    <button class="tab" role="tab" aria-selected="true" id="tabTace">Il laboratorio tace</button>
-  </div>
-  <p class="tab-note" id="parlaNote">"Il laboratorio parla" è l'app principale (Osteo Help): parte da un'alterazione di primo livello. Qui siamo nella scheda complementare.</p>
+  <p class="eyebrow">Osteoporosi · Forme secondarie a laboratorio normale</p>
 
   <h1>Il laboratorio tace</h1>
   <div class="thesis">
@@ -825,11 +820,6 @@ document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",(
   document.getElementById("modeRef").style.display = mode==="ref"?"":"none";
   if(mode==="ref") renderRef();
 }));
-// tabs (prototype: only "tace" active here)
-document.getElementById("tabParla").addEventListener("click",()=>{
-  document.getElementById("parlaNote").classList.add("show");
-});
-
 renderIntake(); renderDiff(); renderRef();
 </script>
 </body>
