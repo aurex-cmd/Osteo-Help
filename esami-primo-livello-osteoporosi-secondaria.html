@@ -85,6 +85,15 @@
   .result-dx .suspect{font-size:.94rem;padding:7px 14px}
   .result-dx .suspect.solo{background:var(--accent);color:#fff}
   .combo-empty{color:var(--warn);font-size:.92rem;margin:0;font-weight:500}
+  .combo-multi{color:var(--ink);font-size:.92rem;margin:0 0 8px;font-weight:500}
+  .combo-multi b{color:var(--accent)}
+  .multi-causes{display:flex;flex-direction:column;gap:8px;margin:2px 0}
+  .mc-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .mc-row .suspect{font-size:.94rem;padding:7px 14px}
+  .mc-for{font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--ink-soft)}
+  .l2-cause{margin-top:12px}
+  .l2-cause-label{display:block;font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.04em;color:var(--ink-soft);margin:0 0 6px}
+  .l2-cause-label b{color:var(--ink);font-weight:600}
   .reset-btn{margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:.78rem;background:none;
     border:1px solid var(--line);color:var(--ink-soft);border-radius:999px;padding:7px 14px;cursor:pointer}
   .reset-btn:hover{border-color:var(--ink-soft)}
@@ -620,6 +629,7 @@ const chipBtn = id => {
   const a = altIndex[id];
   return `<button class="tog ${a.dir}" type="button" data-id="${id}" aria-pressed="false"><span class="pip"></span>${a.tag}</button>`;
 };
+const SIBLING = {};
 {
   const flatIds = comboGroupsFull.flatMap(g => g.ids);
   const order = [], byBase = {};
@@ -627,6 +637,14 @@ const chipBtn = id => {
     const base = id.replace(/_(up|down|low|high)$/, "");
     if(!byBase[base]){ byBase[base] = []; order.push(base); }
     byBase[base].push(id);
+  });
+  order.forEach(base => {
+    const a = byBase[base];
+    if(a.length === 2){
+      const t0 = altIndex[a[0]].tag.replace(/[▲▼]/g, "").trim();
+      const t1 = altIndex[a[1]].tag.replace(/[▲▼]/g, "").trim();
+      if(t0 === t1){ SIBLING[a[0]] = a[1]; SIBLING[a[1]] = a[0]; }
+    }
   });
   // analiti con sia eccesso (▲) sia carenza (▼): chip affiancati in coppia indivisibile
   comboChips.innerHTML = order.map(base => {
@@ -647,6 +665,71 @@ function syncChips(){
   comboChips.querySelectorAll(".tog").forEach(b=>b.setAttribute("aria-pressed", selected.has(b.dataset.id)));
 }
 
+function multiCause(ids){
+  const condCovers = {};
+  ids.forEach(id => (altIndex[id].dx||[]).forEach(cid => {
+    (condCovers[cid] = condCovers[cid] || new Set()).add(id);
+  }));
+  const uncovered = new Set(ids.filter(id => (altIndex[id].dx||[]).length));
+  const chosen = [];
+  while(uncovered.size){
+    let best=null, bestN=0, bestTot=0;
+    Object.keys(condCovers).forEach(cid=>{
+      let n=0; condCovers[cid].forEach(id=>{ if(uncovered.has(id)) n++; });
+      const tot = condCovers[cid].size;
+      if(n>bestN || (n===bestN && n>0 && tot>bestTot)){ best=cid; bestN=n; bestTot=tot; }
+    });
+    if(!best || bestN===0) break;
+    const covers = [...condCovers[best]].filter(id=>uncovered.has(id));
+    chosen.push({cid:best, covers});
+    covers.forEach(id=>uncovered.delete(id));
+  }
+  return { chosen, leftover: ids.filter(id => !(altIndex[id].dx||[]).length) };
+}
+
+function levelTwoPanel(ids, cids){
+  const done = new Set();
+  ids.forEach(id => (SATISFIES[id]||[]).forEach(x => done.add(x)));
+  const freqAll = {};
+  cids.forEach(cid => (LAB2[cid]||[]).forEach(ex => { freqAll[ex] = (freqAll[ex]||0)+1; }));
+  const excluded = Object.keys(freqAll).filter(ex => done.has(ex));
+  const freq = {};
+  Object.keys(freqAll).forEach(ex => { if(!done.has(ex) && !FIRST_LEVEL.has(ex)) freq[ex] = freqAll[ex]; });
+  const ordered = Object.keys(freq).sort((a,b)=> freq[b]-freq[a]);
+  let notes = "";
+  if(cids.length>1) notes += `<p class="panel-note">In evidenza gli esami ad alta resa, comuni a più sospetti.</p>`;
+  if(excluded.length) notes += `<p class="panel-note">Già tra i reperti selezionati, quindi non riproposti: ${excluded.join(", ")}.</p>`;
+  if(ordered.length){
+    const chips = ordered.map(ex=>{
+      const m = freq[ex] > 1;
+      return `<span class="lab2 ${m?'multi':''}"${m?` title="Comune a ${freq[ex]} sospetti"`:''}>${ex}</span>`;
+    }).join("");
+    return `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p><div class="lab2-list">${chips}</div>${notes}</div>`;
+  }
+  return `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p><p class="panel-note">Gli accertamenti mirati per questi sospetti sono già tra i reperti selezionati.</p></div>`;
+}
+
+function levelTwoPanelPerCause(ids, cids){
+  const done = new Set();
+  ids.forEach(id => (SATISFIES[id]||[]).forEach(x => done.add(x)));
+  const excludedSet = new Set();
+  const blocks = cids.map(cid => {
+    const show = [];
+    (LAB2[cid]||[]).forEach(ex => {
+      if(done.has(ex)) excludedSet.add(ex);
+      else if(!FIRST_LEVEL.has(ex)) show.push(ex);
+    });
+    const list = show.length
+      ? `<div class="lab2-list">${show.map(ex=>`<span class="lab2">${ex}</span>`).join("")}</div>`
+      : `<p class="panel-note">Accertamenti mirati già tra i reperti selezionati.</p>`;
+    return `<div class="l2-cause"><span class="l2-cause-label">per <b>${COND[cid]}</b></span>${list}</div>`;
+  }).join("");
+  const exNote = excludedSet.size
+    ? `<p class="panel-note">Già tra i reperti selezionati, quindi non riproposti: ${[...excludedSet].join(", ")}.</p>`
+    : "";
+  return `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p>${blocks}${exNote}</div>`;
+}
+
 function renderResult(){
   const ids = [...selected];
   if(!ids.length){
@@ -655,35 +738,29 @@ function renderResult(){
     return;
   }
   const dx = intersect(ids);
-  renderSchede(dx);
   const n = ids.length;
   const lead = `<p class="result-lead">${n} repert${n>1?'i':'o'} selezionat${n>1?'i':'o'} · forme compatibili</p>`;
   let body;
   if(dx.length){
+    renderSchede(dx);
     const solo = dx.length===1 ? "solo" : "";
     body = `<div class="result-dx">${dx.map(id=>`<span class="suspect ${solo}">${COND[id]}</span>`).join("")}</div>`;
-    const done = new Set();
-    ids.forEach(id => (SATISFIES[id]||[]).forEach(x => done.add(x)));
-    const freqAll = {};
-    dx.forEach(cid => (LAB2[cid]||[]).forEach(ex => { freqAll[ex] = (freqAll[ex]||0)+1; }));
-    const excluded = Object.keys(freqAll).filter(ex => done.has(ex));
-    const freq = {};
-    Object.keys(freqAll).forEach(ex => { if(!done.has(ex) && !FIRST_LEVEL.has(ex)) freq[ex] = freqAll[ex]; });
-    const ordered = Object.keys(freq).sort((a,b)=> freq[b]-freq[a]);
-    let notes = "";
-    if(dx.length>1) notes += `<p class="panel-note">In evidenza gli esami ad alta resa, comuni a più sospetti.</p>`;
-    if(excluded.length) notes += `<p class="panel-note">Già tra i reperti selezionati, quindi non riproposti: ${excluded.join(", ")}.</p>`;
-    if(ordered.length){
-      const chips = ordered.map(ex=>{
-        const m = freq[ex] > 1;
-        return `<span class="lab2 ${m?'multi':''}"${m?` title="Comune a ${freq[ex]} sospetti"`:''}>${ex}</span>`;
-      }).join("");
-      body += `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p><div class="lab2-list">${chips}</div>${notes}</div>`;
-    } else {
-      body += `<div class="panel-block"><p class="result-lead">Pannello di II livello consigliato</p><p class="panel-note">Gli accertamenti mirati per questi sospetti sono già tra i reperti selezionati.</p></div>`;
-    }
+    body += levelTwoPanel(ids, dx);
   } else {
-    body = `<p class="combo-empty">Nessuna forma secondaria spiega da sola tutti i reperti selezionati: valuta cause indipendenti o reperti isolati.</p>`;
+    const cover = multiCause(ids);
+    if(cover.chosen.length){
+      renderSchede(cover.chosen.map(c=>c.cid));
+      const rows = cover.chosen.map(c=>
+        `<div class="mc-row"><span class="suspect">${COND[c.cid]}</span><span class="mc-for">spiega ${c.covers.map(id=>altIndex[id].tag).join(" · ")}</span></div>`
+      ).join("");
+      const leftover = cover.leftover.length
+        ? `<p class="panel-note">Reperti non spiegati da forme note: ${cover.leftover.map(id=>altIndex[id].tag).join(", ")}.</p>`
+        : "";
+      body = `<p class="combo-multi">Nessuna forma <b>singola</b> spiega tutti i reperti: quadro compatibile con <b>più cause indipendenti</b>.</p><div class="multi-causes">${rows}</div>${leftover}` + levelTwoPanelPerCause(ids, cover.chosen.map(c=>c.cid));
+    } else {
+      renderSchede([]);
+      body = `<p class="combo-empty">Nessuna forma nota spiega i reperti selezionati: valuta reperti isolati o cause non in elenco.</p>`;
+    }
   }
   comboResult.innerHTML = lead + body + `<button class="reset-btn" type="button" id="resetCombo">Azzera selezione</button>`;
   document.getElementById("resetCombo").onclick = ()=>{ selected.clear(); syncChips(); renderResult(); };
@@ -692,7 +769,13 @@ function renderResult(){
 comboChips.querySelectorAll(".tog").forEach(b=>{
   b.addEventListener("click", ()=>{
     const id = b.dataset.id;
-    selected.has(id) ? selected.delete(id) : selected.add(id);
+    if(selected.has(id)){
+      selected.delete(id);
+    } else {
+      const sib = SIBLING[id];
+      if(sib && selected.has(sib)) selected.delete(sib);
+      selected.add(id);
+    }
     syncChips(); renderResult();
   });
 });
