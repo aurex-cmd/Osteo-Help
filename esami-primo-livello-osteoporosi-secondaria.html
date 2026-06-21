@@ -514,12 +514,10 @@ const cardHTML = list => list.map(e=>`
     <div class="card-head">
       <span class="ico">${e.ico}</span>
       <div class="titles"><h2>${e.name}</h2><div class="screens">${e.screens}</div></div>
-      <span class="lab-chip">${e.chip}</span>
     </div>
     ${e.alts.map(a=>`
       <div class="alt ${a.dir}" data-dir="${a.dir}">
         <div class="alt-head">
-          <span class="dir">${dirLabel[a.dir]}</span>
           <span class="alt-name">${a.name}</span>
         </div>
         <span class="clue-label">Indizi clinici</span>
@@ -538,7 +536,7 @@ const GRID_GROUPS = [
 ];
 const examByName = {}; exams.forEach(e=>{ examByName[e.name]=e; });
 document.getElementById("grid").innerHTML = GRID_GROUPS.map(g=>
-  `<div class="grid-group"><p class="grid-group-label">${g.label}</p><div class="grid-group-cards">`
+  `<div class="grid-group">${g.names.length>1?`<p class="grid-group-label">${g.label}</p>`:""}<div class="grid-group-cards">`
   + g.names.map(n=>examByName[n]?cardHTML([examByName[n]]):"").join("")
   + `</div></div>`
 ).join("");
