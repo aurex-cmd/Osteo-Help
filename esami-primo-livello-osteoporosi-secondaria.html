@@ -748,7 +748,7 @@ function renderResult(){
     renderSchede(dx);
     const solo = dx.length===1 ? "solo" : "";
     body = `<div class="result-dx">${dx.map(id=>`<span class="suspect ${solo}">${COND[id]}</span>`).join("")}</div>`;
-    body += levelTwoPanel(ids, dx);
+    body += (dx.length > 1) ? levelTwoPanelPerCause(ids, dx) : levelTwoPanel(ids, dx);
   } else {
     const cover = multiCause(ids);
     if(cover.chosen.length){
