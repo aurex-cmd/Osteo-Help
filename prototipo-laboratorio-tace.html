@@ -110,6 +110,20 @@
   .conf{display:flex;flex-wrap:wrap;gap:6px}
   .conf span{background:var(--suspect-bg);color:var(--suspect-ink);font-size:.83rem;font-weight:600;border-radius:999px;padding:5px 11px}
   .fnote{font-size:.82rem;color:var(--ink-soft);background:var(--bg);border-radius:var(--radius-sm);padding:9px 12px;margin-top:11px}
+  .vcalc{margin-top:11px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--bg);overflow:hidden}
+  .vcalc>summary{list-style:none;cursor:pointer;padding:10px 13px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--strong)}
+  .vcalc>summary::-webkit-details-marker{display:none}
+  .vcalc-body{padding:2px 13px 13px}
+  .vrow{display:flex;align-items:center;gap:8px;margin:7px 0}
+  .vrow label{flex:0 0 8.4em;font-size:.8rem;color:var(--ink-soft)}
+  .vin{flex:1 1 auto;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:.86rem;font-family:'IBM Plex Mono',monospace;background:var(--surface);color:var(--ink)}
+  .vunit{flex:0 0 auto;border:1px solid var(--line);border-radius:8px;padding:6px;background:var(--surface);font-size:.76rem;color:var(--ink-soft)}
+  .vunit-fix{flex:0 0 auto;font-size:.76rem;color:var(--ink-soft)}
+  .vout{margin-top:9px;font-size:.84rem;color:var(--ink-soft);background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:9px 11px}
+  .vout-on{border-style:solid;border-color:var(--strong-soft);color:var(--ink)}
+  .vres{margin:2px 0}
+  .vres b{color:var(--strong)}
+  .vnote{margin:9px 0 0;font-size:.74rem;color:var(--ink-soft);line-height:1.5}
 
   /* reference mode reuse fcard, show all triggers with weights */
   .trig{display:flex;flex-wrap:wrap;gap:6px}
@@ -387,10 +401,10 @@ AXES.forEach(a=>axisFeats(a).forEach(f=>{ FEATLABEL[f[0]]=f[1]; if(f[2]) FEATSEX
 
 // ---- FORME (seed) ----
 const FORME = [
-  { kind:"sospetto", id:"ipogonadismo", nome:"Ipogonadismo maschile", cat:"Endocrina", sesso:"uomo",
+  { kind:"sospetto", id:"ipogonadismo", nome:"Ipogonadismo maschile", cat:"Endocrina", sesso:"uomo", calc:"vermeulen",
     suppressedBy:["adt"],
     trigger:[["m_libido","forte"],["disf_erettile","forte"],["m_testicoli","forte"],["ginecomastia","forte"],["astenia","lieve"],["sarcopenia","lieve"],["frattura_inspiegata","lieve"]],
-    conferma:["Testosterone totale mattutino (×2)","LH / FSH (primario vs centrale)","Se centrale: PRL, ferritina/sat. transferrina, valutazione ipofisaria"],
+    conferma:["Testosterone totale mattutino (×2)","SHBG (+ albumina) → testosterone libero calcolato, se totale borderline o SHBG alterata; il libero in immunoassay diretto è inaffidabile (calcolatore sotto)","LH / FSH (primario vs centrale)","Se centrale: PRL, ferritina/sat. transferrina, valutazione ipofisaria"],
     nota:"Il deficit androgenico rimuove il freno al riassorbimento osseo. Causa frequente e trattabile nell'uomo." },
   { id:"gio", nome:"Osteoporosi indotta da glucocorticoidi", cat:"Farmaci",
     trigger:[["glucocorticoidi","forte"]],
@@ -458,12 +472,12 @@ const FORME = [
     nota:"Ad alte dosi inibisce la proliferazione osteoblastica ('osteopatia da metotrexato': dolore osseo, osteoporosi, fratture, tipicamente agli arti inferiori). A basse dosi reumatologiche l'associazione è incerta e verosimilmente minima." },
   { kind:"sospetto", id:"mastocitosi", nome:"Mastocitosi sistemica", cat:"Ematologica / sistemica",
     trigger:[["flushing","forte"],["orticaria_pigmentosa","forte"],["anafilassi_imenotteri","forte"],["anafilassi","forte"],["prurito","lieve"],["sintomi_gi","lieve"],["vertebrali_giovane","lieve"],["frattura_inspiegata","lieve"]],
-    conferma:["Triptasi sierica basale","Se elevata: biopsia osteomidollare, mutazione KIT D816V"],
-    nota:"I mastociti rilasciano mediatori (istamina, eparina, citochine) che attivano gli osteoclasti. Red flag: anafilassi grave da imenotteri (specie con ipotensione, senza orticaria) o anafilassi ricorrente idiopatica → dosare la triptasi basale. Spesso silente al primo livello." },
+    conferma:["Triptasi sierica basale","Se elevata: biopsia osteomidollare, mutazione KIT D816V","Triptasi alta non è specifica: escludere l'alfa-triptasemia ereditaria (HαT)"],
+    nota:"I mastociti rilasciano mediatori (istamina, eparina, citochine) che attivano gli osteoclasti. Red flag: anafilassi grave da imenotteri (specie con ipotensione, senza orticaria) o anafilassi ricorrente idiopatica → dosare la triptasi basale. Spesso silente al primo livello. Importante: una triptasi basale elevata non è specifica — l'<b>alfa-triptasemia ereditaria (HαT)</b> è un tratto autosomico dominante da duplicazione del gene TPSAB1, presente in circa il 5% della popolazione, che dà triptasi alta senza mastocitosi; va esclusa (conteggio delle copie di TPSAB1) prima di attribuire l'aumento al mastocita." },
   { kind:"sospetto", id:"oi", nome:"Osteogenesi imperfetta", cat:"Genetica / del collagene",
     trigger:[["sclere_blu","forte"],["fratture_infanzia","forte"],["familiarita_fratture","forte"],["dentinogenesi","forte"],["ipoacusia","lieve"],["bassa_statura","lieve"]],
-    conferma:["Valutazione clinico-genetica (COL1A1/COL1A2)","Anamnesi familiare strutturata"],
-    nota:"Difetto qualitativo del collagene di tipo I (COL1A1/COL1A2), osso fragile. Forme lievi diagnosticate in età adulta." },
+    conferma:["Valutazione clinico-genetica (COL1A1/COL1A2; pannello esteso se negativo)","Anamnesi familiare strutturata"],
+    nota:"Difetto qualitativo del collagene di tipo I (COL1A1/COL1A2), osso fragile. Forme lievi diagnosticate in età adulta. COL1A1/COL1A2 coprono ~85-90% dei casi: una genetica negativa non esclude (forme recessive o COL1-negative) e la diagnosi può restare clinica — utile l'invio al genetista per consulenza e pannello esteso." },
   { id:"diabete", nome:"Diabete tipo 2 — rischio sottostimato dalla BMD", cat:"Endocrina",
     trigger:[["diabete_t2","forte"],["obesita","lieve","supp"]],
     conferma:["Nessun test: condizione già nota"],
@@ -594,7 +608,7 @@ const FORME = [
     nota:"Gruppo eterogeneo di disordini del connettivo: ipermobilità articolare, iperestensibilità e fragilità cutanea, ecchimosi facili, cicatrici atrofiche. In alcuni sottotipi sono descritte riduzione della BMD e fratture." },
   { kind:"sospetto", id:"gen_omocistinuria", nome:"Omocistinuria", cat:"Genetica",
     trigger:[["habitus_marfanoide","forte"],["lussazione_cristallino","lieve"],["tromboembolismo_giovanile","lieve"]],
-    conferma:["Omocisteina plasmatica/urinaria elevata","Genetica (CBS)"],
+    conferma:["Omocisteina plasmatica/urinaria elevata","Metionina (elevata nella forma classica da deficit di CBS)","Genetica (CBS)"],
     nota:"Errore congenito del metabolismo (deficit di cistationina-β-sintasi): habitus marfanoide ma con lussazione del cristallino verso il basso, tromboembolismo, possibile ritardo cognitivo, osteoporosi e scoliosi. Si distingue dalla Marfan per la trombofilia e la direzione della lussazione." },
 
   { id:"vita_anoressia", nome:"Anoressia nervosa / disturbo alimentare", cat:"Stile di vita / nutrizione",
@@ -694,6 +708,40 @@ function renderIntake(){
 
 // ---- differential ----
 const diff = document.getElementById("diff");
+function vermeulenWidget(){
+  return `<details class="vcalc">
+    <summary>Testosterone libero calcolato (Vermeulen)</summary>
+    <div class="vcalc-body">
+      <div class="vrow"><label>Testosterone totale</label><input type="number" step="any" inputmode="decimal" class="vin" id="vT" oninput="vermeulen()"><select class="vunit" id="vTu" onchange="vermeulen()"><option value="nmol">nmol/L</option><option value="ngdl">ng/dL</option><option value="ngml">ng/mL</option></select></div>
+      <div class="vrow"><label>SHBG</label><input type="number" step="any" inputmode="decimal" class="vin" id="vS" oninput="vermeulen()"><span class="vunit-fix">nmol/L</span></div>
+      <div class="vrow"><label>Albumina</label><input type="number" step="any" inputmode="decimal" class="vin" id="vA" value="4.3" oninput="vermeulen()"><select class="vunit" id="vAu" onchange="vermeulen()"><option value="gdl">g/dL</option><option value="gl">g/L</option></select></div>
+      <div class="vout" id="vOut">Inserisci testosterone totale e SHBG.</div>
+      <p class="vnote">Formula di Vermeulen (T totale + SHBG + albumina; default albumina 4,3 g/dL). Il libero in immunoassay diretto è inaffidabile: usare il calcolato; il cutoff di normalità va letto sul referto.</p>
+      <p class="vnote"><b>Quando calcolarlo</b>: il totale (×2) basta se netto — ipogonadismo improbabile oltre ~12 nmol/L (~350 ng/dL), supportato sotto ~8 nmol/L (~230 ng/dL). Serve il libero nella zona grigia (~8–12 nmol/L, intorno a ~9,2 nmol/L / 264 ng/dL) o quando l'SHBG è alterata: l'età avanzata la alza (totale normale ma libero basso), obesità e diabete la abbassano (totale basso ma libero spesso normale).</p>
+    </div>
+  </details>`;
+}
+function vermeulen(){
+  const g=id=>document.getElementById(id);
+  const num=el=>parseFloat((el.value||"").replace(",","."));
+  const T=g("vT"),S=g("vS"),A=g("vA"),out=g("vOut");
+  if(!T||!S||!A||!out) return;
+  const tv=num(T), sv=num(S); let av=num(A); if(!(av>0)) av=4.3;
+  if(!(tv>0)||!(sv>0)){ out.className="vout"; out.textContent="Inserisci testosterone totale e SHBG."; return; }
+  const Tu=g("vTu").value, Au=g("vAu").value;
+  const Tmol = Tu==="nmol"? tv*1e-9 : Tu==="ngdl"? tv*0.03467e-9 : tv*3.467e-9;
+  const Smol = sv*1e-9;
+  const albGL = Au==="gdl"? av*10 : av;
+  const Amol = albGL/66430;
+  const Ka=3.6e4, Kt=1.0e9, N=Ka*Amol+1, a=N*Kt, b=N+Kt*(Smol-Tmol);
+  const FT=(-b+Math.sqrt(b*b+4*a*Tmol))/(2*a);
+  if(!(FT>0)){ out.className="vout"; out.textContent="Valori non plausibili: controlla le unità."; return; }
+  const FTnmol=FT*1e9, FTpgml=FTnmol*288.4, FTpct=FT/Tmol*100, Bionmol=N*FT*1e9, Biopct=N*FT/Tmol*100;
+  out.className="vout vout-on";
+  out.innerHTML='<div class="vres"><b>Libero</b>: '+FTnmol.toFixed(3)+' nmol/L · '+FTpgml.toFixed(1)+' pg/mL ('+FTpct.toFixed(1)+'%)</div>'
+    +'<div class="vres"><b>Biodisponibile</b>: '+Bionmol.toFixed(2)+' nmol/L ('+Biopct.toFixed(0)+'%)</div>';
+}
+
 function renderDiff(){
   const matched = visibleForms().map(f=>{
     const fired = f.trigger.filter(t=>selected.has(t[0]));
@@ -740,6 +788,7 @@ function renderDiff(){
       <div class="why">${whyHtml(f,fired)}</div>
       ${confRow(f)}
       ${f.nota?`<div class="fnote">${f.nota}</div>`:""}
+      ${f.calc==="vermeulen"?vermeulenWidget():""}
     </div>`;
 
   let html = "";
