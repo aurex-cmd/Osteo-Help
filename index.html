@@ -19,7 +19,6 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{display:flex;flex-direction:column;min-height:100%;background:var(--bg);font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
-  .topbar{display:flex;align-items:center;justify-content:flex-start;padding:9px 16px;padding-top:max(9px,env(safe-area-inset-top));background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
   .tabbar{display:flex;justify-content:center;padding:8px 16px;padding-bottom:max(8px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line);position:sticky;bottom:0;z-index:10}
   .brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.14rem;color:var(--ink);letter-spacing:-.01em;margin-right:2px}
   .brand-accent{color:#E8836F}
@@ -33,9 +32,6 @@
 </style>
 </head>
 <body>
-  <header class="topbar">
-    <span class="brand">Osteo <span class="brand-accent">Help</span></span>
-  </header>
   <main class="frames">
     <iframe id="parla" title="Esami alterati" src="esami-primo-livello-osteoporosi-secondaria.html"></iframe>
     <iframe id="tace" title="Esami normali" src="prototipo-laboratorio-tace.html" hidden></iframe>
