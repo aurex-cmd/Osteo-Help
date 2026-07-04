@@ -39,11 +39,13 @@
   .wrap{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,48px)}
 
   /* HERO */
-  .hero{padding:clamp(8px,2vw,16px) 0 clamp(20px,3vw,32px);text-align:left}
+  .hero{padding:clamp(8px,2vw,16px) 0 clamp(20px,3vw,32px)}
   .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.16em;
     text-transform:uppercase;color:var(--ink-soft);margin:0 0 14px}
-  h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;line-height:1.04;color:#1E2E3D;
-    font-size:clamp(1.95rem,4.6vw,3.1rem);letter-spacing:-.02em;margin:0 0 .6em;max-width:24ch}
+  body{text-align:justify;-webkit-hyphens:auto;hyphens:auto}
+  h1,.h1-sub{text-align:left;hyphens:manual}
+  h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;line-height:1.04;color:#305277;
+    font-size:clamp(2.5rem,6vw,4rem);letter-spacing:-.02em;margin:0 0 .6em;max-width:24ch}
   .h1-sub{display:block;font-family:'Inter',system-ui,sans-serif;font-weight:400;font-size:clamp(.98rem,2.1vw,1.32rem);letter-spacing:0;line-height:1.3;color:#6B7480;margin-top:.5em;max-width:34ch}
   .thesis{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
     box-shadow:var(--shadow);padding:clamp(16px,2.4vw,22px) clamp(20px,3vw,28px);margin-top:8px;display:flex;gap:clamp(14px,2.5vw,18px);align-items:center}
@@ -116,14 +118,17 @@
   .schede{display:grid;gap:14px}
   .sched-hint{color:var(--ink-soft);font-size:.92rem;background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius-sm);padding:14px 16px;margin:0}
   .scheda{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
-  .scheda h3{margin:0 0 6px;font-size:1.05rem;color:var(--ink)}
-  .scheda .row-label{display:block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:12px 0 6px}
+  .scheda h3{margin:0 0 8px;font-size:1.3rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+  .scheda .row-label{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 7px}
+  .scheda .rl-ic{display:inline-flex;color:var(--accent)}
   .scheda .reps{display:flex;flex-wrap:wrap;gap:6px}
   .scheda .rep{font-size:.82rem;border-radius:8px;padding:4px 11px;border:1px solid transparent}
   .scheda .rep.up{background:var(--up-soft);color:var(--up)}
   .scheda .rep.down{background:var(--down-soft);color:var(--down)}
   .scheda .rep.off{background:transparent;color:var(--ink-soft);border:1px dashed var(--line)}
-  .scheda .sched-note{margin:12px 0 0;font-size:.9rem;color:var(--ink-soft);line-height:1.5}
+  .scheda .sched-note{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;background:var(--accent-soft);border:1px solid #CFE6E9;border-radius:12px;padding:11px 13px}
+  .scheda .sched-note p{margin:0;font-size:.9rem;color:var(--ink-soft);line-height:1.5}
+  .scheda .sn-ic{flex:0 0 auto;color:var(--accent);margin-top:1px}
   .drawer{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);margin:14px 0;overflow:hidden}
   .drawer>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px}
   .drawer>summary::-webkit-details-marker{display:none}
@@ -254,7 +259,7 @@
 <div class="wrap">
 
   <header class="hero">
-    <h1>Osteoporosi secondaria:<span class="h1-sub">dall'esame di primo livello al sospetto diagnostico</span></h1>
+    <h1>Osteoporosi<br>secondaria:<span class="h1-sub">dall'esame di primo livello<br>al sospetto diagnostico</span></h1>
     <div class="thesis">
       <span class="thesis-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
       <p class="lead">Un esame di primo livello alterato restringe il campo alle forme secondarie più frequenti: seleziona i valori <span class="hl-up">in eccesso&nbsp;▲</span> o <span class="hl-down">in difetto&nbsp;▼</span> e sotto trovi gli indizi clinici e le diagnosi da sospettare.</p>
@@ -614,10 +619,10 @@ function renderSchede(dx){
     const chip = (id,off)=>`<span class="rep ${off?'off':altIndex[id].dir}">${altIndex[id].tag}</span>`;
     const reps = sel.map(id=>chip(id,false)).join("") + oth.map(id=>chip(id,true)).join("");
     const lab2 = (LAB2[cid]||[]).map(x=>`<span class="lab2">${x}</span>`).join("");
-    const note = NOTES[cid] ? `<p class="sched-note">${NOTES[cid]}</p>` : "";
+    const note = NOTES[cid] ? `<div class="sched-note"><span class="sn-ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg></span><p>${NOTES[cid]}</p></div>` : "";
     return `<article class="scheda"><h3>${COND[cid]}</h3>`
-      + `<span class="row-label">Reperti correlati</span><div class="reps">${reps}</div>`
-      + `<span class="row-label">II livello mirato</span><div class="lab2-list">${lab2}</div>`
+      + `<span class="row-label"><span class="rl-ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></span>Reperti correlati</span><div class="reps">${reps}</div>`
+      + `<span class="row-label"><span class="rl-ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></span>II livello mirato</span><div class="lab2-list">${lab2}</div>`
       + note + `</article>`;
   }).join("");
 }
