@@ -20,7 +20,8 @@
   html,body{margin:0;height:100%}
   body{display:flex;flex-direction:column;min-height:100%;background:var(--bg);font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
   .tabbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
-  .brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.02rem;color:var(--ink);letter-spacing:-.01em;margin-right:2px}
+  .brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.14rem;color:var(--ink);letter-spacing:-.01em;margin-right:2px}
+  .brand-accent{color:#E8836F}
   .tabs{display:flex;gap:6px;flex-wrap:wrap}
   .tab{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.01em;padding:8px 14px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
   .tab:hover{border-color:var(--ink-soft)}
@@ -32,15 +33,15 @@
 </head>
 <body>
   <header class="tabbar">
-    <span class="brand">Osteo Help</span>
+    <span class="brand">Osteo <span class="brand-accent">Help</span></span>
     <div class="tabs" role="tablist" aria-label="Strumenti">
-      <button class="tab" role="tab" id="tab-parla" aria-controls="parla" aria-selected="true" data-target="parla">Il laboratorio parla</button>
-      <button class="tab" role="tab" id="tab-tace" aria-controls="tace" aria-selected="false" data-target="tace">Il laboratorio tace</button>
+      <button class="tab" role="tab" id="tab-parla" aria-controls="parla" aria-selected="true" data-target="parla">Esami alterati</button>
+      <button class="tab" role="tab" id="tab-tace" aria-controls="tace" aria-selected="false" data-target="tace">Esami normali</button>
     </div>
   </header>
   <main class="frames">
-    <iframe id="parla" title="Il laboratorio parla" src="esami-primo-livello-osteoporosi-secondaria.html"></iframe>
-    <iframe id="tace" title="Il laboratorio tace" src="prototipo-laboratorio-tace.html" hidden></iframe>
+    <iframe id="parla" title="Esami alterati" src="esami-primo-livello-osteoporosi-secondaria.html"></iframe>
+    <iframe id="tace" title="Esami normali" src="prototipo-laboratorio-tace.html" hidden></iframe>
   </main>
   <script>
     (function(){
