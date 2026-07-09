@@ -870,10 +870,8 @@ function renderFab(cids, multi){
 function syncFab(){
   const fab=document.getElementById("comboFab"); if(!fab||!fab._has){ if(fab)fab.classList.remove("show"); return; }
   const r=comboResult.getBoundingClientRect();
-  const reached = r.top < window.innerHeight*0.82 && r.bottom > 0;
-  const schedeEl = document.getElementById("schede");
-  const pastAll = schedeEl ? schedeEl.getBoundingClientRect().bottom <= 0 : false;
-  fab.classList.toggle("show", !reached && !pastAll);
+  const reached = r.top < window.innerHeight*0.82;
+  fab.classList.toggle("show", !reached);
 }
 window.addEventListener("scroll", syncFab, {passive:true});
 window.addEventListener("resize", syncFab);
