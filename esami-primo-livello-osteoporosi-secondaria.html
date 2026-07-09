@@ -253,6 +253,15 @@
   .card-note{font-size:.82rem;color:var(--ink-soft);background:var(--bg);border-radius:var(--radius-sm);
     padding:9px 12px;margin:2px 0 12px}
   .card-note b{color:var(--ink)}
+  .cc-calc{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:flex-end}
+  .cc-calc label{display:flex;flex-direction:column;gap:3px;font-size:.76rem;color:var(--ink-soft);flex:1 1 120px}
+  .cc-calc label span{font-weight:400}
+  .cc-calc input{font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);
+    border:1px solid var(--line);border-radius:9px;padding:7px 9px;width:100%}
+  .cc-calc input:focus{outline:none;border-color:var(--accent)}
+  .cc-out{flex:1 1 100%;font-size:.86rem;color:var(--ink);background:var(--accent-soft);
+    border-radius:9px;padding:8px 10px;margin-top:2px}
+  .cc-out b{color:var(--accent);font-size:1.02em}
 
   /* CONTROLS */
   .controls{position:sticky;top:0;z-index:20;margin:0 0 22px;padding:12px;
@@ -372,14 +381,6 @@
   <hr class="dash-sep">
 
   <details class="drawer">
-    <summary><span class="dr-ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span><span class="draw-title">Pattern generali da riconoscere</span><span class="chev">▾</span></summary>
-    <div class="drawer-body">
-      <p class="drawer-hint">Tocca un pattern per caricarlo qui sopra.</p>
-      <div class="patterns" id="patterns"></div>
-    </div>
-  </details>
-
-  <details class="drawer">
     <summary><span class="dr-ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6.5L5 18a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-8.5V3"/><path d="M7.5 14h9"/></svg></span><span class="draw-title">Esame per esame: cosa sospettare</span><span class="chev">▾</span></summary>
     <div class="drawer-body">
   <div class="controls">
@@ -404,6 +405,26 @@
     </div>
     <div class="grid" id="gridComp"></div>
   </section>
+    </div>
+  </details>
+
+  <details class="drawer">
+    <summary><span class="dr-ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span><span class="draw-title">Pattern generali da riconoscere</span><span class="chev">▾</span></summary>
+    <div class="drawer-body">
+      <p class="drawer-hint">Tocca un pattern per caricarlo qui sopra.</p>
+      <div class="patterns" id="patterns"></div>
+    </div>
+  </details>
+
+  <details class="drawer">
+    <summary><span class="dr-ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8 6.5h8M8 10.5h2M12.5 10.5h2M17 10.5h0M8 14h2M12.5 14h2M17 14h0M8 17.5h2M12.5 17.5h2M17 17.5h0"/></svg></span><span class="draw-title">Calcolo calcemia corretta per albumina</span><span class="chev">▾</span></summary>
+    <div class="drawer-body">
+      <p class="drawer-hint">Ca corretto (mg/dL) = Ca misurato + 0,8 × (4 − Albumina g/dL).</p>
+      <div class="cc-calc">
+        <label>Calcio misurato <span>(mg/dL)</span><input type="number" step="0.1" inputmode="decimal" class="cc-in" data-k="ca" placeholder="es. 8.5"></label>
+        <label>Albumina <span>(g/dL)</span><input type="number" step="0.1" inputmode="decimal" class="cc-in" data-k="alb" placeholder="es. 3.0"></label>
+        <div class="cc-out">Calcio corretto: <b class="cc-res">—</b> mg/dL</div>
+      </div>
     </div>
   </details>
 
@@ -525,8 +546,7 @@ const exams = [
       dx:["talassemia"] } ] },
 
   { ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 2.5L21 7"/></svg>', name:"Elettroforesi proteica", chip:"SPEP",
-    screens:"Componente monoclonale, assetto proteico",
-    note:"Correggere sempre la <b>calcemia per l'albumina</b>.", alts:[
+    screens:"Componente monoclonale, assetto proteico", alts:[
     { id:"spep_up", dir:"up", tag:"Picco monoclonale", name:"Componente monoclonale (picco)",
       clues:"Dolore osseo, fratture patologiche, IRC, ipercalcemia",
       dx:["mieloma","mgus"] },
@@ -534,7 +554,8 @@ const exams = [
       clues:"Edemi, calo ponderale, segni di malassorbimento",
       dx:["malassorb","malnutriz","epatopatia","nefrosica"] } ] },
 
-  { ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12"/><path d="M8 2v14a4 4 0 0 0 8 0V2"/><path d="M8 11h8"/></svg>', name:"Calcemia (corretta)", chip:"Ca²⁺", screens:"Equilibrio del calcio", alts:[
+  { ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12"/><path d="M8 2v14a4 4 0 0 0 8 0V2"/><path d="M8 11h8"/></svg>', name:"Calcemia (corretta)", chip:"Ca²⁺", screens:"Equilibrio del calcio",
+    note:"Correggere sempre la <b>calcemia per l'albumina</b>: Ca corretto (mg/dL) = Ca misurato + 0,8 × (4 − Albumina g/dL).<div class=\"cc-calc\"><label>Calcio misurato <span>(mg/dL)</span><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" class=\"cc-in\" data-k=\"ca\" placeholder=\"es. 8.5\"></label><label>Albumina <span>(g/dL)</span><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" class=\"cc-in\" data-k=\"alb\" placeholder=\"es. 3.0\"></label><div class=\"cc-out\">Calcio corretto: <b class=\"cc-res\">—</b> mg/dL</div></div>", alts:[
     { id:"ca_up", dir:"up", tag:"Calcio ▲", name:"Ipercalcemia",
       clues:"Poliuria/polidipsia, stipsi, astenia, nefrolitiasi, confusione",
       dx:["iperpara","neoplasia","mieloma","sarcoidosi","ipertiroid","intoxD","farmaciCa","fhh"] },
@@ -946,6 +967,21 @@ document.querySelectorAll(".chip-btn").forEach(btn=>{
     document.querySelectorAll(".chip-btn").forEach(b=>b.setAttribute("aria-pressed", b===btn));
     apply();
   });
+});
+
+// Calcolatore calcio corretto per albumina
+document.addEventListener("input", e=>{
+  if(!e.target.classList.contains("cc-in")) return;
+  const box = e.target.closest(".cc-calc");
+  const res = box.querySelector(".cc-res");
+  const ca = parseFloat(box.querySelector('[data-k="ca"]').value);
+  const alb = parseFloat(box.querySelector('[data-k="alb"]').value);
+  if(isFinite(ca) && isFinite(alb)){
+    const corr = ca + 0.8*(4 - alb);
+    res.textContent = corr.toFixed(2);
+  } else {
+    res.textContent = "—";
+  }
 });
 </script>
 </body>
