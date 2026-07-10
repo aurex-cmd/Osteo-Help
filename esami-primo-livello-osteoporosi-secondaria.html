@@ -699,7 +699,7 @@ const NOTES = {
   osteomalIpoP:"Perdita renale di fosfato FGF23-mediata (osteomalacia oncogenica da tumore mesenchimale, o forme genetiche tipo XLH): ipofosforemia, fosfaturia inappropriata, 1,25(OH)2-vit D bassa. Nella forma oncogenica il DOTATOC-PET localizza il tumore.",
   malassorb:"Il malassorbimento di calcio e vitamina D (celiachia, IBD, chirurgia bariatrica) causa iperparatiroidismo secondario e bassa mineralizzazione. Spesso ipocalciuria, ipoalbuminemia e carenze multiple.",
   ipopara:"PTH insufficiente (post-chirurgico, autoimmune): ipocalcemia con iperfosforemia e basso turnover osseo. La BMD può essere paradossalmente conservata, ma la qualità ossea è alterata.",
-  irc:"L'insufficienza renale cronica altera l'asse calcio-fosforo-PTH-vitamina D (CKD-MBD): iperfosforemia, deficit di calcitriolo, iperparatiroidismo secondario, osteodistrofia renale. Iperfosforemia ed eGFR ridotto sono le spie.",
+  irc:"L'insufficienza renale cronica altera l'asse calcio-fosforo-PTH-vitamina D (CKD-MBD: <i>Chronic Kidney Disease–Mineral and Bone Disorder</i>): iperfosforemia, deficit di calcitriolo, iperparatiroidismo secondario, osteodistrofia renale. Iperfosforemia ed eGFR ridotto sono le spie.",
   ipomagne:"Il deficit di magnesio compromette secrezione e azione del PTH, causando ipocalcemia refrattaria finché non si corregge il magnesio. Spesso da PPI, diuretici o perdite intestinali.",
   fanconi:"Disfunzione del tubulo prossimale con perdita di fosfato, bicarbonati, glucosio e aminoacidi: ipofosforemia, acidosi e osteomalacia. Da farmaci (tenofovir), mieloma o cause genetiche.",
   paget:"Rimodellamento osseo focale, accelerato e disorganizzato: ALP molto elevata, dolore, deformità, talvolta ipoacusia. Non è osteoporosi ma entra in differenziale per ALP elevata; scintigrafia e Rx mirata.",
@@ -892,6 +892,7 @@ function renderFab(cids, multi){
 }
 function syncFab(){
   const fab=document.getElementById("comboFab"); if(!fab||!fab._has){ if(fab)fab.classList.remove("show"); return; }
+  if(activePage===1){ fab.classList.remove("show"); return; }
   const r=comboResult.getBoundingClientRect();
   const reached = r.top < window.innerHeight*0.82;
   fab.classList.toggle("show", !reached);
@@ -924,7 +925,8 @@ document.getElementById("comboChips2").addEventListener("click", e=>{
   refresh();
 });
 const comboPages=document.getElementById("comboPages");
-function fitPages(){ const w=Math.max(1,comboPages.clientWidth); const i=Math.round(comboPages.scrollLeft/w); const pgs=comboPages.querySelectorAll(".combo-page"); if(pgs[i]) comboPages.style.height=pgs[i].offsetHeight+"px"; document.querySelectorAll(".combo-dots .dot").forEach((d,idx)=>d.classList.toggle("on",idx===i)); }
+let activePage=0;
+function fitPages(){ const w=Math.max(1,comboPages.clientWidth); const i=Math.round(comboPages.scrollLeft/w); activePage=i; const pgs=comboPages.querySelectorAll(".combo-page"); if(pgs[i]) comboPages.style.height=pgs[i].offsetHeight+"px"; document.querySelectorAll(".combo-dots .dot").forEach((d,idx)=>d.classList.toggle("on",idx===i)); syncFab(); }
 document.querySelectorAll(".combo-dots .dot").forEach(d=>d.addEventListener("click",()=>{ comboPages.scrollTo({left:(+d.dataset.pg)*comboPages.clientWidth,behavior:"smooth"}); }));
 comboPages.addEventListener("scroll",()=>requestAnimationFrame(fitPages),{passive:true});
 window.addEventListener("resize",fitPages);
