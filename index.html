@@ -183,6 +183,11 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .refsbody li::before{content:counter(list-item) ".";position:absolute;left:12px;width:22px;text-align:right;font-variant-numeric:tabular-nums}
 .refsbody li:nth-child(odd){background:var(--box)}
 .refsbody i{color:var(--ink);font-style:normal;font-weight:500}
+.refsbody.src li::before{content:none}
+.refsbody .rn{position:absolute;left:12px;width:22px;text-align:right;font-variant-numeric:tabular-nums;color:var(--focus);font-weight:600;text-decoration:none}
+.small a[data-ref]{color:var(--focus);font-weight:600;text-decoration:none}
+.refsbody li.hl{animation:hl 2.4s ease-out}
+@keyframes hl{0%,40%{background:var(--blue-box);box-shadow:inset 3px 0 0 var(--blue)}}
 .refsbody .refs-sub{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:14px 0 0}
 
 /* barra azione in basso */
@@ -1157,6 +1162,7 @@ function vForma(cid){
     <p class="lbl">Reperti tipici</p><div class="tags">${reps}</div>
     ${l2.length ? `<p class="lbl">Esami di II livello</p><ul class="list">${l2.map((x,i) => `<li><i>${i+1}</i>${x}</li>`).join("")}</ul>` : ""}
     ${NOTES[cid] ? `<p class="lbl">Perché fa male all'osso</p><p class="note">${NOTES[cid]}</p>` : ""}
+    ${fontiHTML("A", SRC_A[cid])}
 ` };
 }
 
@@ -1264,7 +1270,52 @@ function vCausa(id){
     ${confHTML(f.conferma)}
     ${f.osso ? `<p class="lbl">Esami per valutare l'osso</p>${f.osso.length === 1 ? `<p class="note">${f.osso[0]}</p>` : `<ul class="list">${f.osso.map((c,i) => `<li><i>${i+1}</i>${c}</li>`).join("")}</ul>`}` : ""}
     ${f.nota ? `<p class="lbl">Nota</p><p class="note">${f.nota}</p>` : ""}
-    ${f.calc === "vermeulen" ? vermeulenWidget() : ""}` };
+    ${f.calc === "vermeulen" ? vermeulenWidget() : ""}
+    ${fontiHTML("B", SRC_B[id])}` };
+}
+
+/* ---------- fonti nelle schede ---------- */
+const SRC_A = {
+  iperpara:["Bilezikian JP, Khan AA"], fhh:["Bilezikian JP, Khan AA"], ipopara:["Khan AA, Bilezikian"],
+  mieloma:["Rajkumar SV"], mgus:["Rajkumar SV"], talassemia:["Musallam KM"],
+  neoplasia:["Coleman R"], ipercalcemiaMaligna:["Coleman R"], sarcoidosi:["Crouser ED"],
+  ipertiroid:["Ross DS"], ipotiroid:["Jonklaas J"],
+  deficitD:["Raccomandazioni per la gestione della carenza di vitamina D","Kanis JA, Cooper C"], intoxD:["Raccomandazioni per la gestione della carenza di vitamina D","Kanis JA, Cooper C"],
+  farmaciD:["Raccomandazioni per la gestione della carenza di vitamina D","Kanis JA, Cooper C"], ridIntroito:["Raccomandazioni per la gestione della carenza di vitamina D","Kanis JA, Cooper C"],
+  osteomalIpoP:["Jan de Beur SM","Wolf M"], ipofosfatasia:["Whyte MP"], paget:["Ralston SH"],
+  irc:["KDIGO"], colestasi:["management of cholestatic"], malassorb:["Rubio-Tapia A"]
+};
+const SRC_B = {
+  ipogonadismo:["Bhasin S"], gio:["Humphrey MB","Nota 79"], ipo_adt:["Coleman R"], ipo_aromatasi:["Coleman R"], op_chemio:["Coleman R"],
+  tiroxina:["Ross DS"], op_glitazoni:["Loke YK"], op_sglt2:["Neal B"], op_tenofovir:["EACS"], op_dmpa:["Committee Opinion No. 602"], op_oppioidi:["Fountas A"],
+  mastocitosi:["Valent P","Lyons JJ"], oi:["Marini JC"], gen_marfan:["Loeys BL"], gen_eds:["Malfait F"], gen_omocistinuria:["Morris AAM"], gen_ipofosfatasia:["Whyte MP"],
+  diabete:["Vilaca T","Leslie WD"], dm1:["Vilaca T"], cushing:["Nieman LK","Fassnacht M"], acromegalia:["Katznelson L"], iperprl:["Melmed S, Casanueva"],
+  deficit_gh:["Molitch ME","Yuen KCJ"], poi:["Panay N"],
+  reuma_spa:["Rudwaleit M"], reuma_spa_occulta:["Rudwaleit M"],
+  gi_mici:["ECCO Guidelines"], gi_celiachia:["Rubio-Tapia A"], gi_celiachia_occulta:["Rubio-Tapia A"], gi_epatopatia:["nutrition in chronic liver disease"], gi_bariatrica:["Mechanick JI"],
+  renale_trapianto:["Kidney Disease: Improving Global Outcomes"], renale_rta:["Walsh SB"], neuro_midollo:["Morse LR"],
+  altre_hiv:["EACS"], altre_cf:["Sermet-Gaudelus I"], altre_emocromatosi:["Kowdley KV","on haemochromatosis"], emocromatosi_occulta:["Kowdley KV","on haemochromatosis"], plo:["Kovacs CS"],
+  vita_anoressia:["Misra M"], vita_alcol:["Alcohol intake"], vita_fumo:["Smoking and fracture"], vita_basso_peso:["De Laet C"], op_calo:["Ensrud KE"], vita_fha:["Gordon CM","Mountjoy M"]
+};
+let pendingRef = null;
+function fontiHTML(list, keys){
+  const lis = [...$(list === "A" ? "#refsA" : "#refsB").content.querySelectorAll("li")];
+  const nome = list === "A" ? "alterati" : "normali";
+  if(!keys || !keys.length) return `<p class="lbl">Fonti</p><p class="small">Nessuna fonte dedicata: valgono le linee guida generali (<a href="#bibliografia" data-ref="${list}1">rif. 1–4</a> della bibliografia, elenco "Esami di I livello ${nome}").</p>`;
+  const items = keys.map(k => {
+    const n = lis.findIndex(li => li.textContent.includes(k)); if(n < 0) return "";
+    const li = lis[n].cloneNode(true); const f = li.querySelector(".ref-for"); if(f) f.remove();
+    return `<li><a class="rn" href="#bibliografia" data-ref="${list}${n+1}">${n+1}</a>${li.innerHTML.trim()}</li>`;
+  }).join("");
+  return `<p class="lbl">Fonti</p><div class="refsbody src"><ol>${items}</ol></div><p class="small">Il numero rimanda alla bibliografia, elenco "Esami di I livello ${nome}".</p>`;
+}
+document.addEventListener("click", e => { const a = e.target.closest("[data-ref]"); if(a) pendingRef = a.dataset.ref; });
+function showPendingRef(){
+  if(!pendingRef) return;
+  const box = document.querySelectorAll(".refsbody")[pendingRef[0] === "A" ? 0 : 1];
+  const li = box && box.querySelectorAll("li")[+pendingRef.slice(1) - 1];
+  pendingRef = null;
+  if(li){ li.scrollIntoView({ block:"center" }); li.classList.add("hl"); }
 }
 
 /* ---------- consultazione ---------- */
@@ -1387,6 +1438,7 @@ function render(){
   dockCfg = v.dock ? route : null;
   updateDock();
   if(changed) window.scrollTo(0, 0);
+  if(route === "bibliografia") showPendingRef();
 }
 function goBack(){ if(stack.length > 1) history.back(); else go(PARENT(current)); }
 function updateDock(){

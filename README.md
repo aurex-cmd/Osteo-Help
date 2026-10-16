@@ -15,6 +15,8 @@ L'app procede per schermate, una cosa alla volta:
 
 In alto a destra nella home un pulsante (luna / sole) passa dal tema chiaro allo scuro; la scelta viene ricordata. Senza scelta, l'app segue il tema del dispositivo.
 
+In fondo a ogni scheda la sezione **Fonti** riporta le voci di bibliografia dedicate a quella forma, con il loro numero: toccandolo si apre la bibliografia evidenziando la voce. Le schede senza una fonte dedicata rimandano alle linee guida generali.
+
 Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il risultato), esame per esame, catalogo delle forme di osteoporosi secondaria, calcio corretto, bibliografia.
 
 **Logica (invariata rispetto all'originale)**
