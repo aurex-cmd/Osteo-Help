@@ -91,6 +91,13 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 - **Esami alterati**: carenza di vitamina D con soglie, magnesemia e PTH da ricontrollare dopo la correzione; malnutrizione con la spiegazione della fosfatasi alcalina bassa e il rimando all'ipofosfatasia; 25-OH-vitamina D per distinguere il ridotto introito di calcio dalla carenza di vitamina D; PTH soppresso nell'immobilizzazione.
 - **Nessun riferimento al FRAX**: tolto anche dalla nota del diabete tipo 2.
 
+### Revisione Altre condizioni
+
+- **Testi**: riscritte le note di HIV (recupero della BMD passando da TDF a TAF), BPCO (fratture vertebrali silenti), fibrosi cistica, emocromatosi, osteoporosi della gravidanza e allattamento (RM, cause secondarie da escludere, osteoporosi transitoria dell'anca) e post-trapianto (valutare l'osso già prima).
+- **Esami per valutare l'osso**: nuova sezione per HIV, BPCO, fibrosi cistica, emocromatosi nota e trapianto.
+- **Emocromatosi non ancora diagnosticata**: nuovo nome; soglie di saturazione della transferrina (oltre 45% nella donna, oltre 50% nell'uomo) e ruolo dei genotipi HFE come nelle linee guida EASL 2022.
+- **Esami alterati**: riviste neoplasia, ipercalcemia maligna, sarcoidosi, intossicazione da vitamina D (difetto di CYP24A1), ipomagnesiemia (frazione escreta), Paget (prima esclusa l'origine epatica della fosfatasi), MGUS e osteomalacia ipofosfatemica, con il ferro carbossimaltosio endovena tra le cause e il suo meccanismo (blocco della degradazione dell'FGF23 intatto).
+
 ### Bibliografia
 
 - Aggiunte 9 fonti nell'elenco "esami normali" a supporto delle revisioni Farmaci ed Endocrino-metaboliche: Nota 79 AIFA (2022), linee guida ESE sull'incidentaloma surrenalico (2023), AACE sul deficit di GH (2019), due studi sul diabete (Vilaca 2020, Leslie 2018), glitazoni (Loke 2009), CANVAS (Neal 2017), ACOG sul medrossiprogesterone (2014), oppioidi (Fountas 2020).
@@ -98,7 +105,8 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 - Aggiunte 3 fonti per Renali e Neurologiche: KDIGO 2017 sulla CKD-MBD, Walsh 2007 sul test con furosemide e fludrocortisone, posizione ufficiale ISCD 2019 sulla lesione midollare.
 - Aggiunte 3 fonti per Genetiche ed Ematologiche: linee guida sull'omocistinuria (Morris 2017), alfa-triptasemia ereditaria (Lyons 2016), linee guida TIF 2025 sulla talassemia (elenco "alterati").
 - Aggiunte 6 fonti per Stili di vita e nutrizione: linea guida Endocrine Society sull'amenorrea ipotalamica funzionale (Gordon 2017), estrogeni nell'anoressia (Misra 2011), alcol (Kanis 2005), fumo (Kanis 2005), indice di massa corporea (De Laet 2005), calo ponderale (Ensrud 2003).
-- Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori, diabete, cause gastro-epatiche (tranne la gastrectomia), acidosi tubulare, lesione midollare e stili di vita (tranne l'immobilizzazione) ora hanno una fonte propria.
+- Aggiunte 5 fonti per Altre condizioni: linee guida EACS sull'HIV (2023), ECFS sulla fibrosi cistica (2011), EASL sull'emocromatosi (2022), Kovacs e Ralston su gravidanza e allattamento (2015), studi PHOSPHARE sul ferro carbossimaltosio (Wolf 2020, elenco "alterati").
+- Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori, diabete, cause gastro-epatiche (tranne la gastrectomia), acidosi tubulare, lesione midollare, stili di vita (tranne l'immobilizzazione), HIV, fibrosi cistica e gravidanza ora hanno una fonte propria.
 
 ## File
 
