@@ -1198,7 +1198,7 @@ function vCausa(id){
   const row = t => { const on = selected.has(t[0]); return `<li class="${on?"on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
   return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + `
     <p class="lbl">Quando considerarla</p><ul class="list">${trig.map(row).join("")}</ul>
-    <p class="small"><b>Forte</b>: da solo è sufficiente per sospettare questa forma. <b>Lieve</b>: da solo non basta, ma aumenta il sospetto se presente insieme ad altri elementi.</p>
+    <p class="small"><b>Forte</b>: da solo è sufficiente per sospettare questa forma.<br><b>Lieve</b>: da solo non basta, ma aumenta il sospetto se presente insieme ad altri elementi.</p>
     ${confHTML(f.conferma)}
     ${f.nota ? `<p class="lbl">Nota</p><p class="note">${f.nota}</p>` : ""}
     ${f.calc === "vermeulen" ? vermeulenWidget() : ""}` };
