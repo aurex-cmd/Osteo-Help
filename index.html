@@ -1194,13 +1194,13 @@ function confHTML(list){
 function vCausa(id){
   const f = FORMA[id]; if(!f) return { redirect:"" };
   const trig = f.trigger.filter(t => t[2] !== "supp");
-  const row = t => `<li class="${selected.has(t[0])?"on":""}">${phrase(t[0])}${selected.has(t[0])?"<em>presente</em>":""}</li>`;
+  const row = t => { const on = selected.has(t[0]); return `<li class="${on?"on":""}">${phrase(t[0])}<em class="${t[1]}">${on?"presente · ":""}${t[1]}</em></li>`; };
   const forti = trig.filter(t => t[1] === "forte"), lievi = trig.filter(t => t[1] !== "forte");
   return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + `
+    ${f.nota ? `<p class="note">${f.nota}</p>` : ""}
     ${forti.length ? `<p class="lbl">${forti.length > 1 ? "Basta uno di questi per sospettarla" : "Basta questo per sospettarla"}</p><ul class="list">${forti.map(row).join("")}</ul>` : ""}
     ${lievi.length ? `<p class="lbl">${forti.length ? "Rafforzano il sospetto" : "Da sospettare se si associano"}</p><ul class="list">${lievi.map(row).join("")}</ul>` : ""}
     ${confHTML(f.conferma)}
-    ${f.nota ? `<p class="lbl">Nota</p><p class="note">${f.nota}</p>` : ""}
     ${f.calc === "vermeulen" ? vermeulenWidget() : ""}` };
 }
 
