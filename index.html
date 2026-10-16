@@ -152,13 +152,12 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .ck[aria-pressed="true"]{font-weight:600}
 .ck[aria-pressed="true"] .cb{background:var(--teal);border-color:var(--teal)}
 .ck[aria-pressed="true"] .cb svg{display:block}
-.alt h4{margin:6px 0 2px;font-size:.95rem}
-.alt h4.u{color:var(--blue)} .alt h4.d{color:var(--coral)}
-.alt > p{margin:0 0 8px;font-size:.88rem;color:var(--muted)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips button{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 9px;font-size:.84rem;font-weight:500}
-.chips button:hover{border-color:var(--teal);color:var(--teal)}
-.exnote{font-size:.85rem;color:var(--muted);margin:6px 0 0}
+.altb{position:relative;margin-top:22px;padding:13px 14px 13px 17px;border-radius:10px;background:var(--box)}
+.altb::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:2px}
+.altb.u{background:var(--blue-box)} .altb.u::before{background:var(--blue)} .altb.u b{color:var(--blue)}
+.altb.d{background:var(--coral-box)} .altb.d::before{background:var(--coral)} .altb.d b{color:var(--coral)}
+.altb b{display:block;font-size:1rem} .altb small{display:block;color:var(--muted);font-size:.86rem;margin-top:2px;line-height:1.45}
+.rowlink[hidden]{display:none}
 .l2{font-size:.66rem;font-weight:700;letter-spacing:.06em;color:var(--blue);text-transform:uppercase;margin-left:6px}
 
 /* controlli */
@@ -1218,27 +1217,27 @@ document.addEventListener("click", e => {
 
 const noCalc = s => (s||"").replace(/<div class="cc-calc">[\s\S]*$/, "").trim();
 function vEsami(){
-  const list = allExams.map(e => {
-    const isL2 = complementari.indexOf(e) > -1;
-    return `<details class="acc ex" data-ex="${esc(e.name)}"><summary><span>${e.name}${isL2?'<span class="l2">II livello</span>':""}${e.screens?`<small>${e.screens}</small>`:""}</span>${CHEV}</summary>
-    <div class="accbody">${e.alts.map(a => `
-      <div class="alt"><h4 class="${a.dir==="up"?"u":"d"}">${a.dir==="up"?"▲":"▼"} ${a.name}</h4><p>${a.clues}</p>
-      <div class="chips">${a.dx.map(id => `<button type="button" data-goto="forma-${id}">${COND[id]}</button>`).join("")}</div></div>`).join("")}
-      ${noCalc(e.note) ? `<p class="exnote">${noCalc(e.note)}</p>` : ""}
-    </div></details>`;
+  const list = allExams.map((e,i) => {
+    const q = [e.name, e.screens||""].concat(...e.alts.map(a => [a.name, a.clues].concat(a.dx.map(id => COND[id])))).join(" ").toLowerCase();
+    return `<a class="rowlink" href="#esame-${i}" data-q="${esc(q)}"><span>${e.name}${complementari.indexOf(e) > -1 ? '<span class="l2">II livello</span>' : ""}${e.screens?`<small>${e.screens}</small>`:""}</span>${CHEV}</a>`;
   }).join("");
-  return { bar:"Esame per esame", html: head("Esame per esame") + `<input class="search" id="exQ" type="search" placeholder="Cerca esame, sintomo o forma" autocomplete="off" aria-label="Cerca"><div id="exList">${list}</div><p class="hint" id="exNo" hidden>Nessuna corrispondenza.</p>` };
+  return { bar:"Esame per esame", html: head("Esame per esame") + `<input class="search" id="exQ" type="search" placeholder="Cerca esame, sintomo o forma" autocomplete="off" aria-label="Cerca"><div class="rows" id="exList">${list}</div><p class="hint" id="exNo" hidden>Nessuna corrispondenza.</p>` };
+}
+function vEsame(i){
+  const e = allExams[+i]; if(!e) return { redirect:"esami" };
+  const isL2 = complementari.indexOf(e) > -1;
+  return { bar:"Esame", html: head(e.name, e.screens||"", isL2 ? "II livello" : "") + e.alts.map(a => `
+    <div class="altb ${a.dir==="up"?"u":"d"}"><b>${a.dir==="up"?"▲":"▼"} ${a.name}</b><small>${a.clues}</small></div>
+    <p class="lbl">Forme da sospettare</p>
+    <div class="rows">${a.dx.map(id => `<a class="rowlink" href="#forma-${id}"><span>${COND[id]}</span>${CHEV}</a>`).join("")}</div>`).join("")
+    + (noCalc(e.note) ? `<p class="lbl">Nota</p><p class="note">${noCalc(e.note)}</p>` : "") };
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-goto]"); if(b) go(b.dataset.goto); });
 document.addEventListener("input", e => {
   const id = e.target.id;
   if(id === "exQ"){
     const q = e.target.value.trim().toLowerCase(); let vis = 0;
-    document.querySelectorAll("#exList details.ex").forEach(d => {
-      let any = false;
-      d.querySelectorAll(".alt").forEach(a => { const show = !q || (d.dataset.ex + " " + a.textContent).toLowerCase().includes(q); a.hidden = !show; if(show) any = true; });
-      d.hidden = !any; if(q) d.open = any; if(any) vis++;
-    });
+    document.querySelectorAll("#exList .rowlink").forEach(r => { const show = !q || r.dataset.q.includes(q); r.hidden = !show; if(show) vis++; });
     $("#exNo").hidden = vis > 0;
   }
   if(id === "catQ") $("#catList").innerHTML = catHTML(e.target.value);
@@ -1301,13 +1300,14 @@ if(darkMQ && darkMQ.addEventListener) darkMQ.addEventListener("change", paintThe
 
 /* ---------- navigazione ---------- */
 const ROUTES = { "":vHome, alterati:vAlterati, risultato:vRisultato, normali:vNormali, considerare:vConsiderare, pattern:vPattern, esami:vEsami, catalogo:vCatalogo, calcio:vCalcio, bibliografia:vBiblio };
-const PARENT = r => r === "risultato" || r.startsWith("forma-") ? "alterati" : r === "considerare" || r.startsWith("causa-") ? "normali" : "";
+const PARENT = r => r === "risultato" || r.startsWith("forma-") ? "alterati" : r === "considerare" || r.startsWith("causa-") ? "normali" : r.startsWith("esame-") ? "esami" : "";
 const stack = [];
 let current = null, dockCfg = null, actFn = null;
 const routeNow = () => location.hash.replace(/^#/, "");
 function view(route){
   if(route.startsWith("forma-")) return vForma(route.slice(6));
   if(route.startsWith("causa-")) return vCausa(route.slice(6));
+  if(route.startsWith("esame-")) return vEsame(route.slice(6));
   return (ROUTES[route] || vHome)();
 }
 function render(){
