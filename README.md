@@ -13,6 +13,8 @@ L'app procede per schermate, una cosa alla volta:
 3. **Risultato**: l'elenco delle forme compatibili, con gli esami di II livello consigliati.
 4. **Scheda**: toccando una forma si apre la sua scheda, con in alto l'etichetta colorata della categoria (es. Endocrinologia, Farmaci) (reperti tipici, esami di II livello, perché fa male all'osso; per le forme cliniche: quando considerarla, conferma, nota).
 
+In alto a destra nella home un pulsante (luna / sole) passa dal tema chiaro allo scuro; la scelta viene ricordata. Senza scelta, l'app segue il tema del dispositivo.
+
 Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il risultato), esame per esame, catalogo delle forme, calcio corretto, bibliografia.
 
 **Logica (invariata rispetto all'originale)**
