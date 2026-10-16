@@ -31,7 +31,7 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
   - soglia dei glucocorticoidi allineata alla Nota 79 AIFA (≥5 mg/die per più di 3 mesi, in atto o previsto);
   - rosiglitazone indicato come non più in commercio in Europa;
   - segnale di fratture da SGLT2-inibitori limitato al canagliflozin;
-  - magnesemia come conferma per gli inibitori di pompa protonica;
+  - magnesemia tra gli esami per valutare l'osso per gli inibitori di pompa protonica (non nella conferma);
   - TmP/GFR e segni di tubulopatia per il tenofovir.
 - **Analoghi del GnRH**: la voce del quadro clinico ora precisa "non per carcinoma prostatico", per evitare il doppione con la deprivazione androgenica (ADT).
 - **Pesi**: inibitori della calcineurina e diuretici dell'ansa passano da forte a lieve. Compaiono ancora tra le cause note, ma come "associazione possibile" invece che "causa riconosciuta".
