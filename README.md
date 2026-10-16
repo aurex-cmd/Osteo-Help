@@ -77,13 +77,28 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 - **Pesi**: lussazione del cristallino da lieve a forte per la Marfan; familiarità per fratture da forte a lieve per l'osteogenesi imperfetta.
 - **Esami alterati**: TC total body a basse dosi senza mezzo di contrasto per il mieloma; analisi genetica alfa-globinica per la talassemia; anche la talassemia minor può ridurre la BMD.
 
+### Revisione Stili di vita e nutrizione
+
+- **Testi**: riscritte le note delle 7 forme. Tra le correzioni di sostanza:
+  - anoressia anche nel maschio; la pillola estroprogestinica non protegge l'osso (estradiolo transdermico se serve una terapia ormonale);
+  - alcol: rischio di frattura da 3 unità al giorno in su;
+  - fumo: rischio di frattura di femore quasi raddoppiato, più basso negli ex fumatori;
+  - basso peso e calo ponderale non voluto vanno spiegati (celiachia, ipertiroidismo, neoplasia);
+  - amenorrea ipotalamica funzionale: criteri di diagnosi e DXA come nella linea guida Endocrine Society 2017.
+- **Esami per valutare l'osso**: nuova sezione per anoressia, alcol, immobilizzazione e amenorrea ipotalamica.
+- **Pesi**: basso peso corporeo da forte a lieve. Compare come "associazione possibile" invece che "causa riconosciuta".
+- **Soglie nelle voci del quadro clinico**: "Alcol: 3 o più unità al giorno", "Basso peso corporeo (BMI <20 kg/m²)", "Calo ponderale di oltre il 5% in 6–12 mesi".
+- **Esami alterati**: carenza di vitamina D con soglie, magnesemia e PTH da ricontrollare dopo la correzione; malnutrizione con la spiegazione della fosfatasi alcalina bassa e il rimando all'ipofosfatasia; 25-OH-vitamina D per distinguere il ridotto introito di calcio dalla carenza di vitamina D; PTH soppresso nell'immobilizzazione.
+- **Nessun riferimento al FRAX**: tolto anche dalla nota del diabete tipo 2.
+
 ### Bibliografia
 
 - Aggiunte 9 fonti nell'elenco "esami normali" a supporto delle revisioni Farmaci ed Endocrino-metaboliche: Nota 79 AIFA (2022), linee guida ESE sull'incidentaloma surrenalico (2023), AACE sul deficit di GH (2019), due studi sul diabete (Vilaca 2020, Leslie 2018), glitazoni (Loke 2009), CANVAS (Neal 2017), ACOG sul medrossiprogesterone (2014), oppioidi (Fountas 2020).
 - Aggiunte 3 fonti per le Gastro-epatiche: linee guida ECCO sulle manifestazioni extraintestinali delle IBD (2024), EASL sulla nutrizione nell'epatopatia cronica (2019), AACE/ASMBS sulla chirurgia bariatrica (2019).
 - Aggiunte 3 fonti per Renali e Neurologiche: KDIGO 2017 sulla CKD-MBD, Walsh 2007 sul test con furosemide e fludrocortisone, posizione ufficiale ISCD 2019 sulla lesione midollare.
 - Aggiunte 3 fonti per Genetiche ed Ematologiche: linee guida sull'omocistinuria (Morris 2017), alfa-triptasemia ereditaria (Lyons 2016), linee guida TIF 2025 sulla talassemia (elenco "alterati").
-- Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori e diabete ora hanno una fonte propria.
+- Aggiunte 6 fonti per Stili di vita e nutrizione: linea guida Endocrine Society sull'amenorrea ipotalamica funzionale (Gordon 2017), estrogeni nell'anoressia (Misra 2011), alcol (Kanis 2005), fumo (Kanis 2005), indice di massa corporea (De Laet 2005), calo ponderale (Ensrud 2003).
+- Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori, diabete, cause gastro-epatiche (tranne la gastrectomia), acidosi tubulare, lesione midollare e stili di vita (tranne l'immobilizzazione) ora hanno una fonte propria.
 
 ## File
 
