@@ -23,7 +23,8 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 
 | File | Contenuto |
 |---|---|
-| `index.html` | L'intera app (HTML, CSS e JavaScript, nessuna dipendenza) |
+| `index.html` | L'intera app (HTML, CSS, JavaScript e icone SVG, nessuna dipendenza) |
+| `favicon.svg` | Icona della scheda del browser (SVG, con `favicon-32.png` come riserva) |
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon-180.png`, `favicon-32.png` | Installazione come app (PWA) |
 | `.nojekyll` | Fa servire i file a GitHub Pages così come sono |
 
