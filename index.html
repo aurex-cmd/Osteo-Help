@@ -507,7 +507,7 @@ const AXES = [
     { sub:"Oncologia e deprivazione ormonale", feats:[
       ["chemio","Chemioterapici"],
       ["mtx","Metotrexato ad alte dosi"],
-      ["aromatasi","Inibitori dell'aromatasi","donna"],
+      ["aromatasi","Inibitori dell'aromatasi"],
       ["adt","Deprivazione androgenica (ADT)","uomo"],
       ["gnrh","Analoghi / antagonisti del GnRH"]
     ]},
@@ -668,7 +668,7 @@ const FORME = [
     trigger:[["tiroxina_soppr","forte"]],
     conferma:["TSH soppresso in corso di L-tiroxina"],
     nota:"L'eccesso di ormone tiroideo accelera il turnover osseo. Si parla di dose soppressiva con TSH stabilmente sotto il limite inferiore di norma (~<0,4 mU/L); il rischio osseo è rilevante soprattutto con TSH <0,1 mU/L, in particolare nella donna in postmenopausa." },
-  { id:"ipo_aromatasi", nome:"Osteoporosi da inibitori dell'aromatasi", cat:"Farmaci", sesso:"donna",
+  { id:"ipo_aromatasi", nome:"Osteoporosi da inibitori dell'aromatasi", cat:"Farmaci",
     trigger:[["aromatasi","forte"]],
     conferma:["Nessun test: legata al farmaco assunto"],
     nota:"Bloccano la sintesi di estrogeni con deprivazione estrogenica e aumento del riassorbimento. Esempi: anastrozolo, letrozolo, exemestane. Profilassi ossea raccomandata." },

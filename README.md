@@ -21,6 +21,10 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 - *Esami alterati*: compaiono le forme compatibili con **tutti** i reperti segnati. Se nessuna forma da sola li spiega, il quadro viene letto come più cause indipendenti. Un esame segnato N esclude le forme in cui quell'esame è un reperto chiave.
 - *Esami normali*: ogni forma ha trigger forti (bastano da soli) o lievi (contano se si sommano). Le forme sono divise in cause note presenti e sospetti da approfondire. Il sesso nasconde le voci non pertinenti.
 
+## Correzioni rispetto all'Osteo Help originale
+
+- **Osteoporosi da inibitori dell'aromatasi**: non più limitata alla donna. Il farmaco si usa, raramente, anche nell'uomo; la voce compare quindi con entrambi i sessi.
+
 ## File
 
 | File | Contenuto |
