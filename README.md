@@ -71,11 +71,18 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 - **Neurologiche**: note riscritte; nuova sezione "Esami per valutare l'osso" per ictus, lesione midollare (DXA anche a femore distale e tibia prossimale), Parkinson e sclerosi multipla.
 - **Esami alterati**: "IRC / CKD-MBD" diventa "Insufficienza renale cronica (CKD-MBD)", con la sigla spiegata nella nota; catene leggere libere per la sindrome di Fanconi; citraturia per l'acidosi tubulare; sodiuria e PTH chiariti per l'ipercalciuria idiopatica.
 
+### Revisione Genetiche ed Ematologiche
+
+- **Testi**: riscritte note e conferme di Marfan, Ehlers-Danlos, omocistinuria (meccanismo osseo: alterati legami crociati del collagene), ipofosfatasia (bisfosfonati controindicati perché analoghi del pirofosfato), osteogenesi imperfetta e mastocitosi (mastociti clonali nel midollo; KIT D816V su sangue prima della biopsia).
+- **Pesi**: lussazione del cristallino da lieve a forte per la Marfan; familiarità per fratture da forte a lieve per l'osteogenesi imperfetta.
+- **Esami alterati**: TC total body a basse dosi senza mezzo di contrasto per il mieloma; analisi genetica alfa-globinica per la talassemia; anche la talassemia minor può ridurre la BMD.
+
 ### Bibliografia
 
 - Aggiunte 9 fonti nell'elenco "esami normali" a supporto delle revisioni Farmaci ed Endocrino-metaboliche: Nota 79 AIFA (2022), linee guida ESE sull'incidentaloma surrenalico (2023), AACE sul deficit di GH (2019), due studi sul diabete (Vilaca 2020, Leslie 2018), glitazoni (Loke 2009), CANVAS (Neal 2017), ACOG sul medrossiprogesterone (2014), oppioidi (Fountas 2020).
 - Aggiunte 3 fonti per le Gastro-epatiche: linee guida ECCO sulle manifestazioni extraintestinali delle IBD (2024), EASL sulla nutrizione nell'epatopatia cronica (2019), AACE/ASMBS sulla chirurgia bariatrica (2019).
 - Aggiunte 3 fonti per Renali e Neurologiche: KDIGO 2017 sulla CKD-MBD, Walsh 2007 sul test con furosemide e fludrocortisone, posizione ufficiale ISCD 2019 sulla lesione midollare.
+- Aggiunte 3 fonti per Genetiche ed Ematologiche: linee guida sull'omocistinuria (Morris 2017), alfa-triptasemia ereditaria (Lyons 2016), linee guida TIF 2025 sulla talassemia (elenco "alterati").
 - Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori e diabete ora hanno una fonte propria.
 
 ## File
