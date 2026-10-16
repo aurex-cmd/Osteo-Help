@@ -1182,7 +1182,7 @@ function vermeulen(){
     +'<div>Biodisponibile: <b>'+Bionmol.toFixed(2)+'</b> nmol/L ('+Biopct.toFixed(0)+'%)</div>';
 }
 /* frase leggibile per ogni elemento del quadro clinico, in base alla sezione da cui viene */
-const AXIS_VERB = { "Farmaci":"Assume", "Comorbidità":"Ha", "Sintomi e segni":"Presenta", "Anamnesi e pattern fratturativo":"In anamnesi:" };
+const AXIS_VERB = { "Farmaci":"Assume" };
 const FEATAXIS = {}; AXES.forEach(a => axisFeats(a).forEach(f => { FEATAXIS[f[0]] = a.label; }));
 const lowerFirst = t => /^.[a-zà-ù]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t;
 const phrase = id => { const v = AXIS_VERB[FEATAXIS[id]]; return v ? v + " " + lowerFirst(FEATLABEL[id]) : FEATLABEL[id]; };
