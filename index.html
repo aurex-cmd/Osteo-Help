@@ -75,7 +75,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry.blue{background:var(--blue-box)} .entry.blue::before{background:var(--blue)}
 .entry.teal{background:var(--teal-box)} .entry.teal::before{background:var(--teal)}
 .entry.plain{padding-left:16px} .entry.plain::before{content:none}
-.cat .stack{padding:4px 0 6px}
+.cat .stack{padding:4px 0 6px 14px}
 .entry > div{flex:1;min-width:0}
 .entry b{display:block;font-size:1.05rem;letter-spacing:-.01em;line-height:1.3}
 .entry.blue b{color:var(--blue)} .entry.teal b{color:var(--teal)}
@@ -1373,7 +1373,7 @@ function vEsame(i){
   return { bar:"Esame", html: head(e.name, e.screens||"", isL2 ? "II livello" : "") + e.alts.map(a => `
     <div class="altb ${a.dir==="up"?"u":"d"}"><b>${a.dir==="up"?"▲":"▼"} ${a.name}</b><small>${a.clues}</small></div>
     <p class="lbl">Forme da sospettare</p>
-    <div class="rows">${a.dx.map(id => `<a class="rowlink" href="#forma-${id}"><span>${COND[id]}</span>${CHEV}</a>`).join("")}</div>`).join("")
+    <div class="stack">${a.dx.map(id => entry("forma-" + id, COND[id], COND_CAT[id], "plain")).join("")}</div>`).join("")
     + (noCalc(e.note) ? `<p class="lbl">Nota</p><p class="note">${noCalc(e.note)}</p>` : "") };
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-goto]"); if(b) go(b.dataset.goto); });
