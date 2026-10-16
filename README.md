@@ -23,12 +23,14 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 
 | File | Contenuto |
 |---|---|
-| `index.html` | L'intera app (HTML, CSS, JavaScript e icone SVG, nessuna dipendenza) |
+| `index.html` | L'intera app (HTML, CSS, JavaScript e icone SVG incorporate, nessuna dipendenza) |
 | `favicon.svg` | Icona della scheda del browser (SVG, con `favicon-32.png` come riserva) |
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon-180.png`, `favicon-32.png` | Installazione come app (PWA) |
 | `.nojekyll` | Fa servire i file a GitHub Pages così come sono |
 
 Unica risorsa esterna: il font Inter da Google Fonts (senza connessione si usa il font di sistema).
+
+Le icone mediche sono di [Health Icons](https://healthicons.org) (© 2021 Resolve to Save Lives, licenza MIT), incorporate in `index.html`. Sole e calcolatrice sono disegnati per questa app.
 
 ## Pubblicazione su GitHub Pages
 
