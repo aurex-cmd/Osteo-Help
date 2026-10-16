@@ -120,6 +120,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .tag.u{background:var(--blue-box);color:var(--blue)}
 .tag.d{background:var(--coral-box);color:var(--coral)}
 .tag.off{opacity:.4}
+.ptags{margin:6px 0 2px;font-weight:600}
 
 /* elenchi */
 .list{list-style:none;margin:0;padding:0}
@@ -1206,7 +1207,7 @@ function vCausa(id){
 /* ---------- consultazione ---------- */
 function vPattern(){
   return { bar:"Pattern", html: head("Pattern da riconoscere", "Tocca un pattern per vederne il risultato.") + `<div class="rows">${patterns.map((p,i) =>
-    `<button class="rowlink" type="button" data-p="${i}"><span>${p.dx}<small>${p.ids.map(id => altIndex[id].tag).join(" + ")}${p.hint?" · "+p.hint:""}</small></span>${CHEV}</button>`).join("")}</div>` };
+    `<button class="rowlink" type="button" data-p="${i}"><span>${p.dx}<span class="tags ptags">${p.ids.map(id => `<span class="tag ${altIndex[id].dir==="up"?"u":"d"}">${altIndex[id].tag}</span>`).join("")}</span>${p.hint?`<small>${p.hint}</small>`:""}</span>${CHEV}</button>`).join("")}</div>` };
 }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-p]"); if(!b) return;
@@ -1275,8 +1276,8 @@ function vCalcio(){
 }
 function vBiblio(){
   return { bar:"Bibliografia", html: head("Bibliografia") + `
-    <p class="lbl">Esami alterati</p><div class="refsbody">${$("#refsA").innerHTML}</div>
-    <p class="lbl">Esami normali</p><div class="refsbody">${$("#refsB").innerHTML}</div>` };
+    <p class="lbl">Esami di I livello alterati</p><div class="refsbody">${$("#refsA").innerHTML}</div>
+    <p class="lbl">Esami di I livello normali</p><div class="refsbody">${$("#refsB").innerHTML}</div>` };
 }
 
 /* ---------- tema chiaro / scuro ---------- */
