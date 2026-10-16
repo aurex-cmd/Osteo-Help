@@ -1180,15 +1180,26 @@ function vermeulen(){
   out.innerHTML='<div>Libero: <b>'+FTnmol.toFixed(3)+'</b> nmol/L · '+FTpgml.toFixed(1)+' pg/mL ('+FTpct.toFixed(1)+'%)</div>'
     +'<div>Biodisponibile: <b>'+Bionmol.toFixed(2)+'</b> nmol/L ('+Biopct.toFixed(0)+'%)</div>';
 }
+/* frase leggibile per ogni elemento del quadro clinico, in base alla sezione da cui viene */
+const AXIS_VERB = { "Farmaci":"Assume", "Comorbidità":"Ha", "Sintomi e segni":"Presenta", "Anamnesi e pattern fratturativo":"In anamnesi:" };
+const FEATAXIS = {}; AXES.forEach(a => axisFeats(a).forEach(f => { FEATAXIS[f[0]] = a.label; }));
+const lowerFirst = t => /^.[a-zà-ù]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t;
+const phrase = id => { const v = AXIS_VERB[FEATAXIS[id]]; return v ? v + " " + lowerFirst(FEATLABEL[id]) : FEATLABEL[id]; };
+function confHTML(list){
+  if(!list || !list.length) return "";
+  if(list.length === 1 && /^Nessun test/i.test(list[0])) return `<p class="lbl">Conferma</p><p class="note">Nessun test: dato anamnestico.</p>`;
+  if(list.length === 1) return `<p class="lbl">Conferma</p><p class="note">${list[0]}</p>`;
+  return `<p class="lbl">Conferma</p><ul class="list">${list.map((c,i) => `<li><i>${i+1}</i>${c}</li>`).join("")}</ul>`;
+}
 function vCausa(id){
   const f = FORMA[id]; if(!f) return { redirect:"" };
   const trig = f.trigger.filter(t => t[2] !== "supp");
-  const anySel = trig.some(t => selected.has(t[0]));
-  const rows = trig.map(t => { const on = selected.has(t[0]); return `<li class="${on?"on":""}"><span class="mk">${on?"✓":""}</span>${FEATLABEL[t[0]]}<em class="${t[1]}">${t[1]}</em></li>`; }).join("");
+  const row = t => `<li class="${selected.has(t[0])?"on":""}">${phrase(t[0])}${selected.has(t[0])?"<em>presente</em>":""}</li>`;
+  const forti = trig.filter(t => t[1] === "forte"), lievi = trig.filter(t => t[1] !== "forte");
   return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + `
-    <p class="lbl">Quando considerarla</p><ul class="list">${rows}</ul>
-    <p class="small">Forte: basta da solo. Lieve: conta se si somma ad altri.${anySel?" ✓ spuntato nel quadro clinico.":""}</p>
-    ${f.conferma && f.conferma.length ? `<p class="lbl">Conferma</p><ul class="list">${f.conferma.map((c,i) => `<li><i>${i+1}</i>${c}</li>`).join("")}</ul>` : ""}
+    ${forti.length ? `<p class="lbl">${forti.length > 1 ? "Basta uno di questi per sospettarla" : "Basta questo per sospettarla"}</p><ul class="list">${forti.map(row).join("")}</ul>` : ""}
+    ${lievi.length ? `<p class="lbl">${forti.length ? "Rafforzano il sospetto" : "Da sospettare se si associano"}</p><ul class="list">${lievi.map(row).join("")}</ul>` : ""}
+    ${confHTML(f.conferma)}
     ${f.nota ? `<p class="lbl">Nota</p><p class="note">${f.nota}</p>` : ""}
     ${f.calc === "vermeulen" ? vermeulenWidget() : ""}` };
 }
