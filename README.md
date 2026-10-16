@@ -30,7 +30,7 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 
 Unica risorsa esterna: il font Inter da Google Fonts (senza connessione si usa il font di sistema).
 
-Le icone mediche sono di [Health Icons](https://healthicons.org) (© 2021 Resolve to Save Lives, licenza MIT), incorporate in `index.html`. Sole e calcolatrice sono disegnati per questa app.
+Le icone mediche sono di [Health Icons](https://healthicons.org) (© 2021 Resolve to Save Lives, licenza MIT), incorporate in `index.html`. Pillola, sole e calcolatrice sono disegnati per questa app.
 
 ## Pubblicazione su GitHub Pages
 
