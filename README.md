@@ -28,7 +28,7 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 ### Revisione della categoria Farmaci
 
 - **Testi**: riscritte note e criteri di conferma delle 16 forme farmacologiche e delle due voci sui farmaci nel percorso "esami alterati". Tra le correzioni di sostanza:
-  - soglia dei glucocorticoidi allineata alla Nota 79 AIFA (≥5 mg/die per ≥3 mesi, in atto o previsto);
+  - soglia dei glucocorticoidi allineata alla Nota 79 AIFA (≥5 mg/die per più di 3 mesi, in atto o previsto);
   - rosiglitazone indicato come non più in commercio in Europa;
   - segnale di fratture da SGLT2-inibitori limitato al canagliflozin;
   - magnesemia come conferma per gli inibitori di pompa protonica;
@@ -50,6 +50,17 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 - **Nuova voce**: "Incidentaloma surrenalico" nel quadro clinico, criterio forte per il Cushing.
 - **Nomi e categorie**: "Diabete tipo 2 — rischio sottostimato dalla BMD" diventa "Diabete mellito tipo 2"; "Calo ponderale marcato" passa a Stili di vita e nutrizione; la voce "Osteoporosi/Fratture inspiegate in giovani" diventa "Osteoporosi o fratture inspiegate in età giovane".
 - **Esami alterati**: per l'ipertiroidismo si aggiunge la scintigrafia tiroidea se i TRAb sono negativi.
+
+### Revisione della categoria Reumatologiche
+
+- **Testi**: riscritte le note di LES, artrite psoriasica e sclerosi sistemica; artrite reumatoide e spondilite anchilosante restano come nell'originale.
+- **Spondiloartrite assiale (sospetto)**: rinominata "Spondiloartrite assiale non ancora diagnosticata", per distinguerla dalla forma già nota; PCR e HLA-B27 prima della RM delle sacroiliache.
+- **Esami alterati**: "Connettivite" diventa "Connettivite o artrite infiammatoria", con fattore reumatoide e anti-CCP tra gli esami di II livello; nota della flogosi riscritta.
+
+### Bibliografia
+
+- Aggiunte 9 fonti nell'elenco "esami normali" a supporto delle revisioni Farmaci ed Endocrino-metaboliche: Nota 79 AIFA (2022), linee guida ESE sull'incidentaloma surrenalico (2023), AACE sul deficit di GH (2019), due studi sul diabete (Vilaca 2020, Leslie 2018), glitazoni (Loke 2009), CANVAS (Neal 2017), ACOG sul medrossiprogesterone (2014), oppioidi (Fountas 2020).
+- Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori e diabete ora hanno una fonte propria.
 
 ## File
 
