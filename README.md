@@ -30,7 +30,7 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 
 Unica risorsa esterna: il font Inter da Google Fonts (senza connessione si usa il font di sistema).
 
-Le icone della home sono di [Health Icons](https://healthicons.org) (© 2021 Resolve to Save Lives, licenza MIT), incorporate in `index.html`; la calcolatrice è disegnata per questa app. Nelle schede la categoria di ogni forma è indicata da un'etichetta colorata sopra il titolo.
+Le icone della home sono di [Health Icons](https://healthicons.org) (© 2021 Resolve to Save Lives, licenza MIT), incorporate in `index.html`; provetta e calcolatrice sono disegnate per questa app. Nelle schede la categoria di ogni forma è indicata da un'etichetta colorata sopra il titolo.
 
 ## Pubblicazione su GitHub Pages
 
