@@ -25,6 +25,19 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 
 - **Osteoporosi da inibitori dell'aromatasi**: non più limitata alla donna. Il farmaco si usa, raramente, anche nell'uomo; la voce compare quindi con entrambi i sessi.
 
+### Revisione della categoria Farmaci
+
+- **Testi**: riscritte note e criteri di conferma delle 16 forme farmacologiche e delle due voci sui farmaci nel percorso "esami alterati". Tra le correzioni di sostanza:
+  - soglia dei glucocorticoidi allineata alla Nota 79 AIFA (≥5 mg/die per ≥3 mesi, in atto o previsto);
+  - rosiglitazone indicato come non più in commercio in Europa;
+  - segnale di fratture da SGLT2-inibitori limitato al canagliflozin;
+  - magnesemia come conferma per gli inibitori di pompa protonica;
+  - TmP/GFR e segni di tubulopatia per il tenofovir.
+- **Analoghi del GnRH**: la voce del quadro clinico ora precisa "non per carcinoma prostatico", per evitare il doppione con la deprivazione androgenica (ADT).
+- **Pesi**: inibitori della calcineurina e diuretici dell'ansa passano da forte a lieve. Compaiono ancora tra le cause note, ma come "associazione possibile" invece che "causa riconosciuta".
+- **Nuove forme**: osteoporosi da medrossiprogesterone depot (solo donna, peso lieve) e da oppioidi in uso cronico (peso lieve), con le relative voci nel quadro clinico.
+- **Esami alterati**: "Farmaci (tiazidici, litio)" diventa "Farmaci che alzano il calcio (tiazidici, litio)".
+
 ## File
 
 | File | Contenuto |
