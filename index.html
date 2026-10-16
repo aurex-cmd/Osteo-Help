@@ -273,6 +273,9 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
         <li>Neal B, Perkovic V, Mahaffey KW, et al. <i>Canagliflozin and cardiovascular and renal events in type 2 diabetes</i>. N Engl J Med 2017;377(7):644-657. DOI 10.1056/NEJMoa1611925. <span class="ref-for">— SGLT2-inibitori</span></li>
         <li>American College of Obstetricians and Gynecologists. <i>Committee Opinion No. 602: Depot medroxyprogesterone acetate and bone effects</i>. Obstet Gynecol 2014. <span class="ref-for">— medrossiprogesterone depot</span></li>
         <li>Fountas A, Van Uum S, Karavitaki N. <i>Opioid-induced endocrinopathies</i>. Lancet Diabetes Endocrinol 2020;8(1):68-80. DOI 10.1016/S2213-8587(19)30254-2. <span class="ref-for">— oppioidi</span></li>
+        <li>Gordon H, Burisch J, Ellul P, et al. <i>ECCO Guidelines on Extraintestinal Manifestations in Inflammatory Bowel Disease</i>. J Crohns Colitis 2024;18(1):1-37. DOI 10.1093/ecco-jcc/jjad108. <span class="ref-for">— malattie infiammatorie croniche intestinali</span></li>
+        <li>European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines on nutrition in chronic liver disease</i>. J Hepatol 2019;70(1):172-193. DOI 10.1016/j.jhep.2018.06.024. <span class="ref-for">— epatopatia cronica / cirrosi</span></li>
+        <li>Mechanick JI, Apovian C, Brethauer S, et al. <i>Clinical practice guidelines for the perioperative nutrition, metabolic, and nonsurgical support of patients undergoing bariatric procedures – 2019 update</i>. Endocr Pract 2019;25(12). DOI 10.4158/GL-2019-0406. <span class="ref-for">— chirurgia bariatrica</span></li>
       </ol>
       <p class="refs-foot">Le altre forme da farmaci (anticonvulsivanti, eparina, inibitori della calcineurina, chemioterapici, diuretici dell'ansa, inibitori di pompa protonica, SSRI, tenofovir, metotrexato), le cause gastro-epatiche (IBD, chirurgia bariatrica, gastrectomia, epatopatia cronica), l'acidosi tubulare renale, le cause neurologiche (ictus, lesione midollare, Parkinson, sclerosi multipla, epilessia), gli stili di vita (anoressia, alcol, fumo, immobilizzazione, basso peso), HIV, BPCO, fibrosi cistica, trapianto d'organo e l'osteoporosi di gravidanza/allattamento sono coperte dalle linee guida generali (rif. 1-4) e dalle linee guida specialistiche d'organo: per molte l'osteoporosi è un fattore di rischio riconosciuto senza una linea guida dedicata al work-up scheletrico.</p></template>
 
@@ -290,7 +293,7 @@ const COND = {
   osteomalIpoP:"Osteomalacia ipofosfatemica (FGF23)", malassorb:"Malassorbimento (celiachia, IBD, bariatrica)",
   ipopara:"Ipoparatiroidismo", irc:"IRC / CKD-MBD", ipomagne:"Ipomagnesiemia",
   fanconi:"Tubulopatia (s. di Fanconi)", paget:"Malattia di Paget", colestasi:"Epatopatia colestatica",
-  epatopatia:"Epatopatia", nefrosica:"Sindrome nefrosica", ipofosfatasia:"Ipofosfatasia",
+  epatopatia:"Epatopatia cronica / cirrosi", nefrosica:"Sindrome nefrosica", ipofosfatasia:"Ipofosfatasia",
   ipotiroid:"Ipotiroidismo", malnutriz:"Malnutrizione (deficit Mg/Zn)",
   ipercalciuriaId:"Ipercalciuria idiopatica", acidosiTub:"Acidosi tubulare renale",
   immobiliz:"Immobilizzazione", flogosi:"Flogosi / malattia cronica", connettiv:"Connettivite o artrite infiammatoria",
@@ -311,13 +314,13 @@ const LAB2 = {
   fhh:["Clearance Ca/creatinina (CCCR)","PTH","Test genetico CASR"],
   deficitD:["25-OH-vit D","PTH","Anti-transglutaminasi (tTG) + IgA totali"],
   osteomalIpoP:["FGF23","Fosfaturia (TmP/GFR)","1,25(OH)₂-vit D","DOTATOC-PET (se oncogenica)"],
-  malassorb:["Anti-transglutaminasi (tTG) + IgA totali","Calprotectina fecale","EGDS/biopsia duodenale (se indicato)"],
+  malassorb:["Anti-transglutaminasi (tTG) + IgA totali","Calprotectina fecale","Elastasi fecale (insufficienza pancreatica)","EGDS/biopsia duodenale (se indicato)"],
   ipopara:["PTH","Magnesemia","Fosforo","Calciuria 24h"],
   irc:["PTH","Fosforo","25-OH-vit D","Esame urine / proteinuria","Ecografia renale"],
   ipomagne:["Magnesemia","Magnesuria","Revisione farmaci (PPI, diuretici)"],
   fanconi:["Fosfaturia","Glicosuria normoglicemica","Aminoaciduria","EGA / bicarbonatemia"],
   paget:["Scintigrafia ossea","Rx mirata","Markers di turnover osseo"],
-  colestasi:["GGT","ALP frazionata","Bilirubina","Anticorpi AMA"],
+  colestasi:["GGT","Fosfatasi alcalina frazionata (ossea o epatica)","Bilirubina","Anticorpi antimitocondrio (AMA)","Ecografia epatica"],
   epatopatia:["Transaminasi","GGT","Bilirubina","Ecografia epatica"],
   nefrosica:["Proteinuria 24h","Albuminemia","Esame urine"],
   ipofosfatasia:["PLP (vit B6) sierico","Fosfoetanolammina urinaria","Test genetico ALPL"],
@@ -443,14 +446,14 @@ const NOTES = {
   fhh:"Mutazione inattivante del recettore del calcio (CASR): ipercalcemia lieve con calciuria bassa e PTH normale o lievemente alto, benigna e da non operare. Rapporto clearance calcio/creatinina: sotto 0,01 suggerisce questa forma, sopra 0,02 l'iperparatiroidismo primario; tra i due serve il test genetico. Utile cercare ipercalcemia nei familiari di primo grado. Non causa osteoporosi: è in elenco per non confonderla con l'iperparatiroidismo.",
   deficitD:"Il deficit di vitamina D compromette la mineralizzazione ossea (osteomalacia) e induce iperparatiroidismo secondario, con aumento del riassorbimento osseo. Può causare dolore osseo, miopatia prossimale e aumentato rischio di cadute; agli esami sono frequenti aumento della fosfatasi alcalina, ipocalcemia e/o ipofosforemia. Una ridotta esposizione solare (anziani istituzionalizzati, allettati, abbigliamento coprente) rappresenta una causa frequente e correggibile mediante adeguata esposizione e supplementazione.",
   osteomalIpoP:"Perdita renale di fosfato FGF23-mediata (osteomalacia oncogenica da tumore mesenchimale, o forme genetiche tipo XLH): ipofosforemia, fosfaturia inappropriata, 1,25(OH)2-vit D bassa. Nella forma oncogenica il DOTATOC-PET localizza il tumore.",
-  malassorb:"Il malassorbimento di calcio e vitamina D (celiachia, IBD, chirurgia bariatrica) causa iperparatiroidismo secondario e bassa mineralizzazione. Spesso ipocalciuria, ipoalbuminemia e carenze multiple.",
+  malassorb:"Il malassorbimento di calcio e vitamina D (celiachia, IBD, chirurgia bariatrica, insufficienza pancreatica) causa iperparatiroidismo secondario e una mineralizzazione insufficiente. Spesso si associano calciuria bassa, albumina bassa e carenze multiple (ferro, folati, B12).",
   ipopara:"Il PTH è insufficiente: ipocalcemia con iperfosforemia e turnover osseo molto basso. Cause: chirurgia del collo (la più frequente), autoimmune, genetica, ipomagnesiemia grave (reversibile). La BMD è spesso normale o aumentata; la qualità dell'osso è alterata, ma un aumento del rischio di frattura non è dimostrato con certezza.",
   irc:"L'insufficienza renale cronica altera il metabolismo calcio-fosforo-vitamina D (CKD-MBD: <i>Chronic Kidney Disease–Mineral and Bone Disorder</i>): la ridotta sintesi di calcitriolo, dovuto alla minore attività della 1α-idrossilasi, e la ritenzione di fosforo, favoriscono l'ipocalcemia e il conseguente iperparatiroidismo secondario, che porta ad aumento del riassorbimento osseo e all'osteodistrofia renale. Un eGFR ridotto e l'iperfosforemia rappresentano importanti indizi diagnostici.",
   ipomagne:"Il deficit di magnesio compromette secrezione e azione del PTH, causando ipocalcemia refrattaria finché non si corregge il magnesio. Spesso da PPI, diuretici o perdite intestinali.",
   fanconi:"Disfunzione generalizzata del tubulo prossimale renale, caratterizzata da perdita urinaria di fosfato, bicarbonato, glucosio e aminoacidi. La fosfaturia determina ipofosforemia e ridotta disponibilità di fosfato per la mineralizzazione ossea; inoltre, il danno tubulare può ridurre l'attività della 1α-idrossilasi, con diminuzione della sintesi di calcitriolo. Ne derivano difetto di mineralizzazione dell'osteoide, osteomalacia e, spesso, acidosi metabolica. Può essere acquisita (es. tenofovir, mieloma multiplo) o ereditaria.",
   paget:"Rimodellamento osseo focale, accelerato e disorganizzato: ALP molto elevata, dolore, deformità, talvolta ipoacusia. Non è osteoporosi ma entra in differenziale per ALP elevata; scintigrafia e Rx mirata.",
-  colestasi:"Nelle epatopatie colestatiche (es. colangite biliare primitiva) il malassorbimento di vitamina D e gli effetti diretti sull'osso danno 'osteodistrofia epatica'. ALP frazionata, GGT e AMA orientano.",
-  epatopatia:"L'epatopatia cronica riduce l'idrossilazione epatica della vitamina D e, con malnutrizione, ipogonadismo e flogosi, favorisce la perdita ossea. Transaminasi, GGT ed ecografia per l'inquadramento.",
+  colestasi:"Nelle epatopatie colestatiche (es. colangite biliare primitiva) il malassorbimento della vitamina D e l'effetto tossico di bilirubina e acidi biliari sull'osso causano l'osteodistrofia epatica. GGT e fosfatasi alcalina frazionata dicono se la fosfatasi alta viene dal fegato o dall'osso; gli AMA orientano verso la colangite biliare primitiva.",
+  epatopatia:"Nell'epatopatia cronica concorrono malnutrizione, ipogonadismo, calo di IGF-1, infiammazione e, nelle forme avanzate, una ridotta attivazione della vitamina D: la perdita ossea è frequente, soprattutto nella cirrosi. Transaminasi, GGT ed ecografia servono per l'inquadramento.",
   nefrosica:"La proteinuria nefrosica disperde la proteina legante la vitamina D e altera il metabolismo minerale: ipovitaminosi D e bilancio calcico negativo. Spie: proteinuria 24h e ipoalbuminemia.",
   ipofosfatasia:"Deficit genetico di fosfatasi alcalina (ALPL): fratture e pseudofratture, perdita precoce dei denti, condrocalcinosi. La spia è l'ALP persistentemente bassa; antiriassorbitivi controindicati. Conferma con PLP (vit B6) elevata e test genetico.",
   ipotiroid:"L'ipotiroidismo rallenta il turnover osseo e di per sé pesa poco sull'osteoporosi; il rischio viene soprattutto da una terapia sostitutiva sovradosata (TSH basso). Può abbassare la fosfatasi alcalina.",
@@ -807,28 +810,33 @@ const FORME = [
   { id:"gi_mici", nome:"Malattia infiammatoria cronica intestinale (IBD)", cat:"Gastro-epatica",
     trigger:[["mici","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"L'infiammazione cronica intestinale (citochine pro-infiammatorie → RANKL) si somma al malassorbimento di calcio e vitamina D (soprattutto nel Crohn con interessamento ileale o resezioni), all'uso di glucocorticoidi e al basso peso corporeo. Il rischio è maggiore nella malattia attiva e di lunga durata." },
-  { id:"gi_celiachia", nome:"Celiachia", cat:"Gastro-epatica",
+    osso:["25-OH-vitamina D, calcemia e PTH (malassorbimento)","DXA alla diagnosi se ci sono fattori di rischio e durante i glucocorticoidi"],
+    nota:"L'infiammazione intestinale (citochine che aumentano RANKL) si somma al malassorbimento di calcio e vitamina D, soprattutto nel Crohn ileale o dopo resezioni, ai glucocorticoidi e al basso peso. Il rischio è maggiore con malattia attiva e di lunga durata; il controllo dell'infiammazione protegge anche l'osso." },
+  { id:"gi_celiachia", nome:"Celiachia nota", cat:"Gastro-epatica",
     trigger:[["celiachia_nota","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"Anche in dieta aglutinata può persistere un deficit osseo acquisito: l'atrofia dei villi riduce l'assorbimento di calcio e vitamina D con iperparatiroidismo secondario, cui si aggiunge una componente infiammatoria/immunitaria. Se la celiachia non è ancora nota, lo screening è sierologico e di laboratorio (forme che il primo livello intercetta)." },
+    osso:["Anti-transglutaminasi IgA, per verificare l'aderenza alla dieta","25-OH-vitamina D e PTH"],
+    nota:"L'atrofia dei villi riduce l'assorbimento di calcio e vitamina D, con iperparatiroidismo secondario; si aggiunge una componente infiammatoria. Con la dieta senza glutine la BMD migliora soprattutto nel primo anno, ma un deficit può restare, specie se la diagnosi è arrivata in età adulta. La causa più comune di mancato recupero è una dieta non rigorosa." },
   { id:"gi_epatopatia", nome:"Epatopatia cronica / cirrosi", cat:"Gastro-epatica",
     trigger:[["epatopatia","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"Osteodistrofia epatica: ridotta idrossilazione epatica della vitamina D, calo di IGF-1, ipogonadismo, effetto diretto di bilirubina e acidi biliari sugli osteoblasti, basso peso corporeo. Massima nelle forme colestatiche (es. colangite biliare primitiva) e nella cirrosi avanzata." },
+    osso:["25-OH-vitamina D","Testosterone nell'uomo, se si sospetta ipogonadismo","DXA nella cirrosi e nella colestasi cronica"],
+    nota:"Osteodistrofia epatica: concorrono il calo di IGF-1, l'ipogonadismo, l'effetto tossico di bilirubina e acidi biliari sugli osteoblasti, il basso peso e, nelle colestasi, il malassorbimento della vitamina D. L'osteoporosi riguarda circa un cirrotico su tre ed è più frequente nelle forme colestatiche (es. colangite biliare primitiva) e prima del trapianto." },
   { id:"gi_bariatrica", nome:"Osteopatia post-chirurgia bariatrica", cat:"Gastro-epatica",
     trigger:[["bariatrica","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"Le procedure malassorbitive (bypass gastrico, diversione biliopancreatica) riducono l'assorbimento di calcio e vitamina D con iperparatiroidismo secondario; vi si aggiungono il calo ponderale rapido e lo scarico meccanico. Rischio minore nelle procedure puramente restrittive (sleeve, bendaggio)." },
+    osso:["25-OH-vitamina D, calcemia, PTH e fosfatasi alcalina","Calciuria 24h, per valutare l'assorbimento del calcio"],
+    nota:"Le procedure malassorbitive (bypass gastrico, diversione biliopancreatica) riducono l'assorbimento di calcio e vitamina D, con iperparatiroidismo secondario anche quando la 25-OH-vitamina D è normale. Si aggiungono il calo di peso rapido e il minor carico sullo scheletro. La sleeve gastrectomy fa perdere osso anche lei, ma meno del bypass; il bendaggio è la procedura più neutra. Il rischio di frattura aumenta negli anni successivi all'intervento." },
   { id:"gi_gastrectomia", nome:"Malattia ossea post-gastrectomia", cat:"Gastro-epatica",
     trigger:[["gastrectomia","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"La riduzione dell'acidità gastrica e l'accelerato transito compromettono l'assorbimento di calcio e vitamina D; la malattia ossea post-gastrectomia combina osteoporosi e osteomalacia. Più marcata dopo gastrectomia totale." },
+    osso:["25-OH-vitamina D, calcemia, fosforo, fosfatasi alcalina e PTH (osteomalacia)"],
+    nota:"La minore acidità gastrica, il transito accelerato e l'esclusione del duodeno riducono l'assorbimento di calcio e vitamina D. Ne deriva una malattia ossea che combina osteoporosi e osteomalacia, più marcata dopo gastrectomia totale e che può comparire anche molti anni dopo l'intervento." },
 
-  { kind:"sospetto", id:"gi_celiachia_occulta", nome:"Celiachia", cat:"Gastro-epatica",
+  { kind:"sospetto", id:"gi_celiachia_occulta", nome:"Celiachia non ancora diagnosticata", cat:"Gastro-epatica",
     trigger:[["dermatite_erpetiforme","forte"],["diarrea_steatorrea","lieve"],["meteorismo","lieve"],["calo_ponderale","lieve"],["frattura_inspiegata","lieve"]],
-    conferma:["Anti-transglutaminasi (tTG) IgA + IgA totali","Anti-endomisio (EMA) IgA a conferma","Biopsia duodenale (diagnosi nell'adulto)"],
-    nota:"La celiachia silente o atipica può manifestarsi come osteoporosi isolata con primo livello normale: il malassorbimento subclinico di calcio e vitamina D riduce la massa ossea. Gli indizi sono clinici (cutanei e gastrointestinali), la conferma è sierologica." },
+    conferma:["Anti-transglutaminasi (tTG) IgA + IgA totali, con dieta contenente glutine","Se IgA totali basse: anti-tTG o anti-gliadina deamidata (DGP) IgG","Anti-endomisio (EMA) IgA a conferma","Biopsia duodenale (diagnosi nell'adulto)"],
+    nota:"La celiachia silente o atipica può presentarsi come osteoporosi isolata, con esami di primo livello normali: il malassorbimento subclinico di calcio e vitamina D riduce la massa ossea. Gli indizi sono cutanei e gastrointestinali; la conferma è sierologica, da fare prima di togliere il glutine." },
 
   { kind:"sospetto", id:"reuma_spa_occulta", nome:"Spondiloartrite assiale non ancora diagnosticata", cat:"Reumatologica",
     trigger:[["lombalgia_infiammatoria","forte"],["vertebrali_giovane","lieve"],["frattura_inspiegata","lieve"]],
@@ -1222,6 +1230,7 @@ function vCausa(id){
     <p class="lbl">Quando considerarla</p><ul class="list">${trig.map(row).join("")}</ul>
     <p class="small"><b>Forte</b>: da solo è sufficiente per sospettare questa forma.<br><b>Lieve</b>: da solo non basta, ma aumenta il sospetto se presente insieme ad altri elementi.</p>
     ${confHTML(f.conferma)}
+    ${f.osso ? `<p class="lbl">Esami per valutare l'osso</p>${f.osso.length === 1 ? `<p class="note">${f.osso[0]}</p>` : `<ul class="list">${f.osso.map((c,i) => `<li><i>${i+1}</i>${c}</li>`).join("")}</ul>`}` : ""}
     ${f.nota ? `<p class="lbl">Nota</p><p class="note">${f.nota}</p>` : ""}
     ${f.calc === "vermeulen" ? vermeulenWidget() : ""}` };
 }

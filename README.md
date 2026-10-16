@@ -57,9 +57,18 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 - **Spondiloartrite assiale (sospetto)**: rinominata "Spondiloartrite assiale non ancora diagnosticata", per distinguerla dalla forma già nota; PCR e HLA-B27 prima della RM delle sacroiliache.
 - **Esami alterati**: "Connettivite" diventa "Connettivite o artrite infiammatoria", con fattore reumatoide e anti-CCP tra gli esami di II livello; nota della flogosi riscritta.
 
+### Revisione della categoria Gastro-epatiche
+
+- **Esami per valutare l'osso**: nuova sezione nelle schede, separata dalla conferma (che resta la conferma diagnostica). Per IBD, celiachia nota, epatopatia, chirurgia bariatrica e gastrectomia elenca gli esami che misurano l'effetto della malattia sull'osso (25-OH-vitamina D, calcemia, PTH, fosfatasi alcalina, DXA dove indicata).
+- **Nomi**: le due forme "Celiachia" diventano "Celiachia nota" e "Celiachia non ancora diagnosticata".
+- **Celiachia non ancora diagnosticata**: sierologia con dieta contenente glutine; test IgG se le IgA totali sono basse.
+- **Testi**: riscritte le note delle 6 forme; per la chirurgia bariatrica la sleeve gastrectomy non è più descritta come neutra per l'osso.
+- **Esami alterati**: elastasi fecale tra gli esami del malassorbimento; esami della colestasi riordinati con ecografia epatica; "Epatopatia" diventa "Epatopatia cronica / cirrosi".
+
 ### Bibliografia
 
 - Aggiunte 9 fonti nell'elenco "esami normali" a supporto delle revisioni Farmaci ed Endocrino-metaboliche: Nota 79 AIFA (2022), linee guida ESE sull'incidentaloma surrenalico (2023), AACE sul deficit di GH (2019), due studi sul diabete (Vilaca 2020, Leslie 2018), glitazoni (Loke 2009), CANVAS (Neal 2017), ACOG sul medrossiprogesterone (2014), oppioidi (Fountas 2020).
+- Aggiunte 3 fonti per le Gastro-epatiche: linee guida ECCO sulle manifestazioni extraintestinali delle IBD (2024), EASL sulla nutrizione nell'epatopatia cronica (2019), AACE/ASMBS sulla chirurgia bariatrica (2019).
 - Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori e diabete ora hanno una fonte propria.
 
 ## File
