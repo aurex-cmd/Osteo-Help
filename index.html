@@ -276,6 +276,9 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
         <li>Gordon H, Burisch J, Ellul P, et al. <i>ECCO Guidelines on Extraintestinal Manifestations in Inflammatory Bowel Disease</i>. J Crohns Colitis 2024;18(1):1-37. DOI 10.1093/ecco-jcc/jjad108. <span class="ref-for">— malattie infiammatorie croniche intestinali</span></li>
         <li>European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines on nutrition in chronic liver disease</i>. J Hepatol 2019;70(1):172-193. DOI 10.1016/j.jhep.2018.06.024. <span class="ref-for">— epatopatia cronica / cirrosi</span></li>
         <li>Mechanick JI, Apovian C, Brethauer S, et al. <i>Clinical practice guidelines for the perioperative nutrition, metabolic, and nonsurgical support of patients undergoing bariatric procedures – 2019 update</i>. Endocr Pract 2019;25(12). DOI 10.4158/GL-2019-0406. <span class="ref-for">— chirurgia bariatrica</span></li>
+        <li>Kidney Disease: Improving Global Outcomes (KDIGO) CKD-MBD Update Work Group. <i>KDIGO 2017 Clinical Practice Guideline Update for the Diagnosis, Evaluation, Prevention, and Treatment of Chronic Kidney Disease–Mineral and Bone Disorder (CKD-MBD)</i>. Kidney Int Suppl 2017;7(1):1-59. DOI 10.1016/j.kisu.2017.04.001. <span class="ref-for">— insufficienza renale cronica</span></li>
+        <li>Walsh SB, Shirley DG, Wrong OM, Unwin RJ. <i>Urinary acidification assessed by simultaneous furosemide and fludrocortisone treatment: an alternative to ammonium chloride</i>. Kidney Int 2007;71(12):1310-1316. <span class="ref-for">— acidosi tubulare distale</span></li>
+        <li>Morse LR, Biering-Soerensen F, Carbone LD, et al. <i>Bone Mineral Density Testing in Spinal Cord Injury: 2019 ISCD Official Position</i>. J Clin Densitom 2019. <span class="ref-for">— lesione midollare</span></li>
       </ol>
       <p class="refs-foot">Le altre forme da farmaci (anticonvulsivanti, eparina, inibitori della calcineurina, chemioterapici, diuretici dell'ansa, inibitori di pompa protonica, SSRI, tenofovir, metotrexato), le cause gastro-epatiche (IBD, chirurgia bariatrica, gastrectomia, epatopatia cronica), l'acidosi tubulare renale, le cause neurologiche (ictus, lesione midollare, Parkinson, sclerosi multipla, epilessia), gli stili di vita (anoressia, alcol, fumo, immobilizzazione, basso peso), HIV, BPCO, fibrosi cistica, trapianto d'organo e l'osteoporosi di gravidanza/allattamento sono coperte dalle linee guida generali (rif. 1-4) e dalle linee guida specialistiche d'organo: per molte l'osteoporosi è un fattore di rischio riconosciuto senza una linea guida dedicata al work-up scheletrico.</p></template>
 
@@ -291,7 +294,7 @@ const COND = {
   ipertiroid:"Ipertiroidismo", intoxD:"Intossicazione da vit D", farmaciCa:"Farmaci che alzano il calcio (tiazidici, litio)",
   fhh:"Ipercalcemia ipocalciurica familiare", deficitD:"Carenza vit D / Osteomalacia",
   osteomalIpoP:"Osteomalacia ipofosfatemica (FGF23)", malassorb:"Malassorbimento (celiachia, IBD, bariatrica)",
-  ipopara:"Ipoparatiroidismo", irc:"IRC / CKD-MBD", ipomagne:"Ipomagnesiemia",
+  ipopara:"Ipoparatiroidismo", irc:"Insufficienza renale cronica (CKD-MBD)", ipomagne:"Ipomagnesiemia",
   fanconi:"Tubulopatia (s. di Fanconi)", paget:"Malattia di Paget", colestasi:"Epatopatia colestatica",
   epatopatia:"Epatopatia cronica / cirrosi", nefrosica:"Sindrome nefrosica", ipofosfatasia:"Ipofosfatasia",
   ipotiroid:"Ipotiroidismo", malnutriz:"Malnutrizione (deficit Mg/Zn)",
@@ -318,7 +321,7 @@ const LAB2 = {
   ipopara:["PTH","Magnesemia","Fosforo","Calciuria 24h"],
   irc:["PTH","Fosforo","25-OH-vit D","Esame urine / proteinuria","Ecografia renale"],
   ipomagne:["Magnesemia","Magnesuria","Revisione farmaci (PPI, diuretici)"],
-  fanconi:["Fosfaturia","Glicosuria normoglicemica","Aminoaciduria","EGA / bicarbonatemia"],
+  fanconi:["Fosfaturia (TmP/GFR)","Glicosuria normoglicemica","Aminoaciduria","EGA / bicarbonatemia","Catene leggere libere sieriche (mieloma)"],
   paget:["Scintigrafia ossea","Rx mirata","Markers di turnover osseo"],
   colestasi:["GGT","Fosfatasi alcalina frazionata (ossea o epatica)","Bilirubina","Anticorpi antimitocondrio (AMA)","Ecografia epatica"],
   epatopatia:["Transaminasi","GGT","Bilirubina","Ecografia epatica"],
@@ -326,9 +329,9 @@ const LAB2 = {
   ipofosfatasia:["PLP (vit B6) sierico","Fosfoetanolammina urinaria","Test genetico ALPL"],
   ipotiroid:["TSH","FT4","Anti-TPO"],
   malnutriz:["Albumina / prealbumina","Magnesemia","Zinchemia"],
-  ipercalciuriaId:["Calciuria 24h","PTH","Ca/creatinina urinario"],
-  acidosiTub:["EGA venosa","pH urinario","Bicarbonatemia","Potassiemia"],
-  immobiliz:["Quadro clinico / anamnesi","Calciuria 24h","Markers di turnover osseo"],
+  ipercalciuriaId:["Calciuria 24h","PTH","Ca/creatinina urinario","Sodiuria 24h"],
+  acidosiTub:["EGA venosa","pH urinario","Bicarbonatemia","Potassiemia","Citraturia 24h"],
+  immobiliz:["Quadro clinico / anamnesi","Calciuria 24h","Marcatori di turnover osseo (CTX, P1NP)"],
   flogosi:["PCR","Ricerca focolaio","Autoimmunità (se indicato)"],
   connettiv:["ANA / ENA","Anti-dsDNA","Complemento (C3/C4)","Fattore reumatoide e anti-CCP"],
   ridIntroito:["Anamnesi alimentare","Calciuria 24h"],
@@ -448,19 +451,19 @@ const NOTES = {
   osteomalIpoP:"Perdita renale di fosfato FGF23-mediata (osteomalacia oncogenica da tumore mesenchimale, o forme genetiche tipo XLH): ipofosforemia, fosfaturia inappropriata, 1,25(OH)2-vit D bassa. Nella forma oncogenica il DOTATOC-PET localizza il tumore.",
   malassorb:"Il malassorbimento di calcio e vitamina D (celiachia, IBD, chirurgia bariatrica, insufficienza pancreatica) causa iperparatiroidismo secondario e una mineralizzazione insufficiente. Spesso si associano calciuria bassa, albumina bassa e carenze multiple (ferro, folati, B12).",
   ipopara:"Il PTH è insufficiente: ipocalcemia con iperfosforemia e turnover osseo molto basso. Cause: chirurgia del collo (la più frequente), autoimmune, genetica, ipomagnesiemia grave (reversibile). La BMD è spesso normale o aumentata; la qualità dell'osso è alterata, ma un aumento del rischio di frattura non è dimostrato con certezza.",
-  irc:"L'insufficienza renale cronica altera il metabolismo calcio-fosforo-vitamina D (CKD-MBD: <i>Chronic Kidney Disease–Mineral and Bone Disorder</i>): la ridotta sintesi di calcitriolo, dovuto alla minore attività della 1α-idrossilasi, e la ritenzione di fosforo, favoriscono l'ipocalcemia e il conseguente iperparatiroidismo secondario, che porta ad aumento del riassorbimento osseo e all'osteodistrofia renale. Un eGFR ridotto e l'iperfosforemia rappresentano importanti indizi diagnostici.",
+  irc:"Il rene malato produce meno calcitriolo e trattiene fosforo: ne derivano ipocalcemia e iperparatiroidismo secondario, con aumento del riassorbimento e osteodistrofia renale. L'insieme di queste alterazioni si chiama CKD-MBD (<i>Chronic Kidney Disease–Mineral and Bone Disorder</i>). Dallo stadio 3b la DXA misura la massa ossea ma non distingue l'osteoporosi dalle altre forme di osteodistrofia; va interpretata con PTH e fosfatasi alcalina, e la terapia va decisa con il nefrologo.",
   ipomagne:"Il deficit di magnesio compromette secrezione e azione del PTH, causando ipocalcemia refrattaria finché non si corregge il magnesio. Spesso da PPI, diuretici o perdite intestinali.",
   fanconi:"Disfunzione generalizzata del tubulo prossimale renale, caratterizzata da perdita urinaria di fosfato, bicarbonato, glucosio e aminoacidi. La fosfaturia determina ipofosforemia e ridotta disponibilità di fosfato per la mineralizzazione ossea; inoltre, il danno tubulare può ridurre l'attività della 1α-idrossilasi, con diminuzione della sintesi di calcitriolo. Ne derivano difetto di mineralizzazione dell'osteoide, osteomalacia e, spesso, acidosi metabolica. Può essere acquisita (es. tenofovir, mieloma multiplo) o ereditaria.",
   paget:"Rimodellamento osseo focale, accelerato e disorganizzato: ALP molto elevata, dolore, deformità, talvolta ipoacusia. Non è osteoporosi ma entra in differenziale per ALP elevata; scintigrafia e Rx mirata.",
   colestasi:"Nelle epatopatie colestatiche (es. colangite biliare primitiva) il malassorbimento della vitamina D e l'effetto tossico di bilirubina e acidi biliari sull'osso causano l'osteodistrofia epatica. GGT e fosfatasi alcalina frazionata dicono se la fosfatasi alta viene dal fegato o dall'osso; gli AMA orientano verso la colangite biliare primitiva.",
   epatopatia:"Nell'epatopatia cronica concorrono malnutrizione, ipogonadismo, calo di IGF-1, infiammazione e, nelle forme avanzate, una ridotta attivazione della vitamina D: la perdita ossea è frequente, soprattutto nella cirrosi. Transaminasi, GGT ed ecografia servono per l'inquadramento.",
-  nefrosica:"La proteinuria nefrosica disperde la proteina legante la vitamina D e altera il metabolismo minerale: ipovitaminosi D e bilancio calcico negativo. Spie: proteinuria 24h e ipoalbuminemia.",
+  nefrosica:"Con la proteinuria nefrosica si perde nelle urine la proteina che trasporta la vitamina D: ne derivano carenza di vitamina D e bilancio del calcio negativo, a cui spesso si aggiungono i glucocorticoidi usati per la terapia. Spie: proteinuria 24h e albumina bassa.",
   ipofosfatasia:"Deficit genetico di fosfatasi alcalina (ALPL): fratture e pseudofratture, perdita precoce dei denti, condrocalcinosi. La spia è l'ALP persistentemente bassa; antiriassorbitivi controindicati. Conferma con PLP (vit B6) elevata e test genetico.",
   ipotiroid:"L'ipotiroidismo rallenta il turnover osseo e di per sé pesa poco sull'osteoporosi; il rischio viene soprattutto da una terapia sostitutiva sovradosata (TSH basso). Può abbassare la fosfatasi alcalina.",
   malnutriz:"La malnutrizione proteico-calorica e i deficit di magnesio e zinco compromettono formazione e mineralizzazione ossea. Albumina/prealbumina basse, con carenze elettrolitiche associate.",
-  ipercalciuriaId:"Perdita renale di calcio a calcemia normale: bilancio calcico negativo, nefrolitiasi e ridotta BMD. Calciuria 24h elevata con PTH normale/alto; risponde ai tiazidici.",
+  ipercalciuriaId:"Il rene perde troppo calcio con calcemia normale: il bilancio del calcio diventa negativo, con calcoli e BMD ridotta. Calciuria 24h alta con PTH di solito normale; un PTH alto con calcemia normale fa pensare piuttosto a una carenza di vitamina D o a un iperparatiroidismo normocalcemico. La dieta ricca di sale aumenta la calciuria. Risponde ai tiazidici.",
   acidosiTub:"L'acidosi metabolica cronica viene tamponata dall'osso, con dissoluzione del minerale e ipercalciuria; la forma distale dà nefrocalcinosi e ipopotassiemia. EGA, pH urinario e bicarbonatemia.",
-  immobiliz:"L'assenza di carico meccanico accelera il riassorbimento osseo con ipercalciuria; la perdita è rapida nelle prime settimane di allettamento o paralisi.",
+  immobiliz:"Senza carico meccanico il riassorbimento osseo accelera e il calcio liberato passa nelle urine. La perdita è rapida nelle prime settimane di allettamento o paralisi; nei giovani e in chi ha un turnover alto (es. Paget) può comparire ipercalcemia.",
   flogosi:"L'infiammazione cronica (citochine, RANKL) attiva gli osteoclasti e riduce la formazione ossea: l'osteoporosi accompagna molte malattie infiammatorie croniche. Con VES alta conviene dosare la PCR e cercare la causa: malattie reumatologiche, infiammatorie intestinali, infezioni croniche, neoplasie.",
   connettiv:"Connettiviti e artriti infiammatorie sommano infiammazione cronica, glucocorticoidi, ridotta mobilità e talvolta danno renale: la perdita ossea ha più cause. ANA ed ENA, anti-dsDNA e complemento orientano verso una connettivite; fattore reumatoide e anti-CCP verso l'artrite reumatoide.",
   ridIntroito:"Un apporto cronicamente insufficiente di calcio mantiene un iperparatiroidismo secondario lieve a spese dell'osso. Ipocalciuria con anamnesi alimentare povera di latticini.",
@@ -877,8 +880,8 @@ const FORME = [
     nota:"Perdita ossea reale e precoce (massima nei primi 6–12 mesi) dopo trapianto d'organo solido o di midollo: concorrono l'immunosoppressione (glucocorticoidi e inibitori della calcineurina), l'iperparatiroidismo persistente e l'osteodistrofia renale pregressa, con frequente ipofosfatemia post-trapianto." },
   { kind:"sospetto", id:"renale_rta", nome:"Acidosi tubulare distale incompleta", cat:"Renale",
     trigger:[["nefrolitiasi_ricorrente","forte"]],
-    conferma:["pH urinario e test da carico acido (NH4Cl): incapacità di acidificare","Ipocitraturia a supporto"],
-    nota:"«Incompleta» perché il bicarbonato sierico è normale (nessuna acidosi manifesta): il difetto di acidificazione delle urine emerge solo sotto carico acido. Pur senza acidosi conclamata si hanno nefrolitiasi calcica ricorrente/nefrocalcinosi e malattia ossea (osteomalacia/osteoporosi), per la lieve acidosi cronica tamponata dall'osso e l'ipocitraturia. Diagnosi con test da carico acido." },
+    conferma:["pH urinario del mattino persistentemente >5,5","Test di acidificazione: con furosemide e fludrocortisone (meglio tollerato) o con cloruro d'ammonio; un test con furosemide anormale va confermato con il cloruro d'ammonio","Ipocitraturia a supporto"],
+    nota:"Si dice incompleta perché il bicarbonato nel sangue è normale: il rene non riesce ad acidificare le urine, ma il difetto emerge solo con un test da carico. L'acido trattenuto viene tamponato dall'osso, che perde minerale; l'ipocitraturia favorisce calcoli e nefrocalcinosi. Cause da cercare: sindrome di Sjögren e altre malattie autoimmuni, rene a spugna, farmaci." },
 
   { kind:"sospetto", id:"gen_marfan", nome:"Sindrome di Marfan", cat:"Genetica",
     trigger:[["habitus_marfanoide","forte"],["lussazione_cristallino","lieve"],["ipermobilita","lieve"]],
@@ -925,23 +928,27 @@ const FORME = [
   { id:"neuro_ictus", nome:"Ictus / emiplegia", cat:"Neurologica",
     trigger:[["ictus_emiplegia","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"Osteoporosi da disuso accentuata sul lato paretico: la riduzione del carico e l'aumentato rischio di cadute aumentano le fratture, in particolare di femore." },
+    osso:["25-OH-vitamina D","DXA del femore dal lato paretico"],
+    nota:"Osteoporosi da disuso, più marcata sul lato paretico e soprattutto nel primo anno. Con le cadute, più frequenti, aumentano le fratture, in particolare di femore sul lato paretico. Pesano anche la carenza di vitamina D e, se usati, anticoagulanti e antiepilettici." },
   { id:"neuro_midollo", nome:"Lesione midollare / para-tetraplegia", cat:"Neurologica",
     trigger:[["lesione_midollare","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"Perdita ossea sottolesionale rapida e marcata nei primi 12-18 mesi, soprattutto agli arti inferiori, con elevato rischio di fratture da traumi minori." },
+    osso:["DXA di femore totale, femore distale e tibia prossimale (la colonna è poco affidabile)","25-OH-vitamina D","Calcemia nelle prime settimane"],
+    nota:"Sotto il livello della lesione la perdita ossea è rapida e marcata nei primi 12–18 mesi e prosegue più lentamente per anni. Oltre metà delle persone con lesione motoria completa ha una frattura nel corso della vita, quasi sempre attorno al ginocchio (femore distale, tibia prossimale) e dopo traumi minimi. Nel giovane, nelle prime settimane, può comparire ipercalcemia da immobilizzazione." },
   { id:"neuro_parkinson", nome:"Malattia di Parkinson", cat:"Neurologica",
     trigger:[["parkinson","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"Immobilità, rigidità, instabilità posturale e cadute, spesso con ipovitaminosi D, determinano bassa BMD ed elevato rischio di frattura di femore." },
+    osso:["25-OH-vitamina D"],
+    nota:"Ridotta mobilità, rigidità, instabilità posturale e cadute, spesso con carenza di vitamina D e calo di peso, portano a BMD bassa e a un rischio elevato di frattura di femore. La prevenzione delle cadute conta quanto la terapia per l'osso." },
   { id:"neuro_sm", nome:"Sclerosi multipla", cat:"Neurologica",
     trigger:[["sclerosi_multipla","forte"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"Ridotta mobilità, cadute, ipovitaminosi D e i cicli di glucocorticoidi concorrono alla perdita ossea." },
+    osso:["25-OH-vitamina D"],
+    nota:"Concorrono ridotta mobilità, cadute, carenza di vitamina D e cicli ripetuti di glucocorticoidi ad alte dosi. Il rischio cresce con la disabilità." },
   { id:"neuro_epilessia", nome:"Epilessia", cat:"Neurologica",
     trigger:[["epilessia","lieve"]],
     conferma:["Nessun test: condizione già nota"],
-    nota:"Il rischio di frattura deriva soprattutto dai traumi durante le crisi e, in misura maggiore, dagli antiepilettici (vedi sezione Farmaci); la malattia di per sé è un fattore aggiuntivo." }
+    nota:"Il rischio di frattura viene dai traumi durante le crisi e, soprattutto, dagli antiepilettici (vedi la forma da anticonvulsivanti); la malattia in sé aggiunge poco." }
 ];
 
 /* ============================================================
