@@ -123,7 +123,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 
 /* elenchi */
 .list{list-style:none;margin:0;padding:0}
-.list li{display:flex;gap:12px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.list li{display:flex;gap:12px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line);font-size:.93rem}
 .list li:last-child{border-bottom:0}
 .list li i{font-style:normal;font-weight:700;color:var(--blue);font-size:.78rem;width:16px;flex:0 0 auto;font-variant-numeric:tabular-nums}
 .list li em{font-style:normal;margin-left:auto;color:var(--teal);font-size:.74rem;font-weight:600;white-space:nowrap;padding-left:8px}
@@ -1092,9 +1092,10 @@ function vForma(cid){
   }).join("");
   const l2 = (LAB2[cid]||[]).filter(x => !FIRST_LEVEL.has(x));
   return { bar:"Scheda", html: head(COND[cid], "", COND_CAT[cid]) + `
+    ${NOTES[cid] ? `<p class="note">${NOTES[cid]}</p>` : ""}
     <p class="lbl">Reperti tipici</p><div class="tags">${reps}</div>
     ${l2.length ? `<p class="lbl">Esami di II livello</p><ul class="list">${l2.map((x,i) => `<li><i>${i+1}</i>${x}</li>`).join("")}</ul>` : ""}
-    ${NOTES[cid] ? `<p class="lbl">Perché fa male all'osso</p><p class="note">${NOTES[cid]}</p>` : ""}` };
+` };
 }
 
 /* ---------- esami normali: inserimento ---------- */
