@@ -178,8 +178,10 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .out b{font-size:1.15rem;font-variant-numeric:tabular-nums}
 .small{font-size:.8rem;color:var(--muted);line-height:1.55;margin:0}
 .refsbody{font-size:.84rem;line-height:1.55;color:var(--muted)}
-.refsbody ol{padding-left:22px;margin:6px 0}
-.refsbody li{margin-bottom:6px}
+.refsbody ol{padding-left:0;margin:6px 0;list-style:none}
+.refsbody li{position:relative;padding:9px 12px 9px 40px;border-radius:8px}
+.refsbody li::before{content:counter(list-item) ".";position:absolute;left:12px;width:22px;text-align:right;font-variant-numeric:tabular-nums}
+.refsbody li:nth-child(odd){background:var(--box)}
 .refsbody i{color:var(--ink);font-style:normal;font-weight:500}
 .refsbody .refs-sub{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:14px 0 0}
 
