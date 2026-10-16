@@ -11,7 +11,7 @@ L'app procede per schermate, una cosa alla volta:
 1. **Home**: si sceglie da dove partire, *Esami alterati* o *Esami normali*.
 2. **Inserimento**: si segnano gli esami (▲ alto, ▼ basso, N normale) oppure si spuntano farmaci, malattie, segni e anamnesi. La barra in basso dice subito quanti risultati ci sono.
 3. **Risultato**: l'elenco delle forme compatibili, con gli esami di II livello consigliati.
-4. **Scheda**: toccando una forma si apre la sua scheda (reperti tipici, esami di II livello, perché fa male all'osso; per le forme cliniche: quando considerarla, conferma, nota).
+4. **Scheda**: toccando una forma si apre la sua scheda, con in alto l'etichetta colorata della categoria (es. Endocrinologia, Farmaci) (reperti tipici, esami di II livello, perché fa male all'osso; per le forme cliniche: quando considerarla, conferma, nota).
 
 Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il risultato), esame per esame, catalogo delle forme, calcio corretto, bibliografia.
 
@@ -30,7 +30,7 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 
 Unica risorsa esterna: il font Inter da Google Fonts (senza connessione si usa il font di sistema).
 
-Le icone mediche sono di [Health Icons](https://healthicons.org) (© 2021 Resolve to Save Lives, licenza MIT), incorporate in `index.html`. Pillola, sole e calcolatrice sono disegnati per questa app.
+Le icone della home sono di [Health Icons](https://healthicons.org) (© 2021 Resolve to Save Lives, licenza MIT), incorporate in `index.html`; la calcolatrice è disegnata per questa app. Nelle schede la categoria di ogni forma è indicata da un'etichetta colorata sopra il titolo.
 
 ## Pubblicazione su GitHub Pages
 
