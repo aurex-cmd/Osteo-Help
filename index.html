@@ -21,18 +21,18 @@
 /* Layout: una schermata per volta (home → inserimento → risultato → scheda), colonna stretta centrata; blocchi piatti con barra d'accento a sinistra */
 :root{
   --bg:#FFFFFF; --ink:#1B2433; --muted:#6F7988; --faint:#B5BECA; --line:#E1E5EB;
-  --box:#F2F4F7; --blue:#6A5C92; --blue-box:#F1EEFB; --teal:#0E7571; --teal-box:#E3F4F3; --focus:#2F5F96; --tile:#FFFFFF;
+  --box:#F2F4F7; --blue:#6A5C92; --blue-box:#F1EEFB; --teal:#0E7571; --teal-box:#E3F4F3; --focus:#2F5F96; --blue-ink:#483B6B; --teal-ink:#00524E; --tile:#FFFFFF;
   --coral:#B04E37; --coral-box:#F7EBE7; --amber:#9A6B1F;
   --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#12161D; --ink:#E6EBF2; --muted:#8E99A8; --faint:#4A5462; --line:#262E39;
-  --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#2B3039; --focus:#8DB4E2;
+  --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#2B3039; --focus:#8DB4E2; --blue-ink:#D6CDF8; --teal-ink:#A7E1DD;
   --coral:#E99A85; --coral-box:#3A2420; --amber:#D9AE62; color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#12161D; --ink:#E6EBF2; --muted:#8E99A8; --faint:#4A5462; --line:#262E39;
-  --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#2B3039; --focus:#8DB4E2;
+  --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#2B3039; --focus:#8DB4E2; --blue-ink:#D6CDF8; --teal-ink:#A7E1DD;
   --coral:#E99A85; --coral-box:#3A2420; --amber:#D9AE62; color-scheme:dark }
 
 *{box-sizing:border-box}
@@ -79,7 +79,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry.blue b{color:var(--blue)} .entry.teal b{color:var(--teal)}
 .entry small{display:block;color:var(--muted);font-size:.83rem;margin-top:3px;line-height:1.4}
 .entry.big{padding:20px 14px 20px 19px}
-.entry.big b{font-size:1.12rem;color:var(--ink)}
+.entry.big b{font-size:1.12rem} .entry.big.blue b{color:var(--blue-ink)} .entry.big.teal b{color:var(--teal-ink)}
 .chev{width:16px;height:16px;color:var(--faint);flex:0 0 auto}
 .ic{width:26px;height:26px;flex:0 0 auto}
 .entry > .ic{color:var(--muted)}
