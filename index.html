@@ -123,7 +123,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 
 /* elenchi */
 .list{list-style:none;margin:0;padding:0}
-.list li{display:flex;gap:12px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.list li{display:flex;gap:12px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);font-size:.93rem}
 .list li:last-child{border-bottom:0}
 .list li i{font-style:normal;font-weight:700;color:var(--blue);font-size:.78rem;width:16px;flex:0 0 auto;font-variant-numeric:tabular-nums}
 .list li em{font-style:normal;margin-left:auto;color:var(--teal);font-size:.74rem;font-weight:600;white-space:nowrap;padding-left:8px}
@@ -1092,9 +1092,9 @@ function vForma(cid){
   }).join("");
   const l2 = (LAB2[cid]||[]).filter(x => !FIRST_LEVEL.has(x));
   return { bar:"Scheda", html: head(COND[cid], "", COND_CAT[cid]) + `
-    ${NOTES[cid] ? `<p class="note">${NOTES[cid]}</p>` : ""}
     <p class="lbl">Reperti tipici</p><div class="tags">${reps}</div>
     ${l2.length ? `<p class="lbl">Esami di II livello</p><ul class="list">${l2.map((x,i) => `<li><i>${i+1}</i>${x}</li>`).join("")}</ul>` : ""}
+    ${NOTES[cid] ? `<p class="lbl">Perché fa male all'osso</p><p class="note">${NOTES[cid]}</p>` : ""}
 ` };
 }
 
@@ -1196,12 +1196,11 @@ function vCausa(id){
   const f = FORMA[id]; if(!f) return { redirect:"" };
   const trig = f.trigger.filter(t => t[2] !== "supp");
   const row = t => { const on = selected.has(t[0]); return `<li class="${on?"on":""}">${phrase(t[0])}<em class="${t[1]}">${on?"presente · ":""}${t[1]}</em></li>`; };
-  const forti = trig.filter(t => t[1] === "forte"), lievi = trig.filter(t => t[1] !== "forte");
   return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + `
-    ${f.nota ? `<p class="note">${f.nota}</p>` : ""}
-    ${forti.length ? `<p class="lbl">${forti.length > 1 ? "Basta uno di questi per sospettarla" : "Basta questo per sospettarla"}</p><ul class="list">${forti.map(row).join("")}</ul>` : ""}
-    ${lievi.length ? `<p class="lbl">${forti.length ? "Rafforzano il sospetto" : "Da sospettare se si associano"}</p><ul class="list">${lievi.map(row).join("")}</ul>` : ""}
+    <p class="lbl">Quando considerarla</p><ul class="list">${trig.map(row).join("")}</ul>
+    <p class="small"><b>Forte</b>: da solo è sufficiente per sospettare questa forma. <b>Lieve</b>: da solo non basta, ma aumenta il sospetto se presente insieme ad altri elementi.</p>
     ${confHTML(f.conferma)}
+    ${f.nota ? `<p class="lbl">Nota</p><p class="note">${f.nota}</p>` : ""}
     ${f.calc === "vermeulen" ? vermeulenWidget() : ""}` };
 }
 
