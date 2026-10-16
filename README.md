@@ -38,6 +38,19 @@ Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il ri
 - **Nuove forme**: osteoporosi da medrossiprogesterone depot (solo donna, peso lieve) e da oppioidi in uso cronico (peso lieve), con le relative voci nel quadro clinico.
 - **Esami alterati**: "Farmaci (tiazidici, litio)" diventa "Farmaci che alzano il calcio (tiazidici, litio)".
 
+### Revisione della categoria Endocrino-metaboliche
+
+- **Testi**: riscritte note e criteri di conferma delle 9 forme endocrino-metaboliche e delle 5 voci endocrinologiche del percorso "esami alterati". Tra le correzioni di sostanza:
+  - soglie del testosterone corrette (264–300 ng/dL, circa 9,2–10,4 nmol/L);
+  - POI: un solo FSH >25 UI/L basta, come nelle linee guida ESHRE 2024;
+  - deficit di GH: test con glucagone o macimorelin al posto di GHRH-arginina e regola dei tre deficit ipofisari;
+  - Cushing: esclusione dei glucocorticoidi esogeni e ipercortisolismo lieve autonomo;
+  - ipercalcemia ipocalciurica familiare: zona grigia del rapporto di clearance tra 0,01 e 0,02.
+- **Pesi**: per l'ipogonadismo maschile, ginecomastia e disfunzione erettile passano da forte a lieve. Da sole portano la forma tra i "da considerare" invece che tra i "sospetti forti".
+- **Nuova voce**: "Incidentaloma surrenalico" nel quadro clinico, criterio forte per il Cushing.
+- **Nomi e categorie**: "Diabete tipo 2 — rischio sottostimato dalla BMD" diventa "Diabete mellito tipo 2"; "Calo ponderale marcato" passa a Stili di vita e nutrizione; la voce "Osteoporosi/Fratture inspiegate in giovani" diventa "Osteoporosi o fratture inspiegate in età giovane".
+- **Esami alterati**: per l'ipertiroidismo si aggiunge la scintigrafia tiroidea se i TRAb sono negativi.
+
 ## File
 
 | File | Contenuto |
