@@ -1027,7 +1027,7 @@ function vHome(){
     <div class="rows">
       <a class="rowlink" href="#pattern">${ic("link")}<span>Pattern da riconoscere<small>Combinazioni classiche di reperti</small></span>${CHEV}</a>
       <a class="rowlink" href="#esami">${ic("rows")}<span>Esame per esame<small>Alterazioni, indizi clinici, forme da sospettare</small></span>${CHEV}</a>
-      <a class="rowlink" href="#catalogo">${ic("grid")}<span>Catalogo delle forme<small>Quando considerarle e come confermarle</small></span>${CHEV}</a>
+      <a class="rowlink" href="#catalogo">${ic("grid")}<span>Catalogo delle forme di osteoporosi secondaria<small>Quando considerarle e come confermarle</small></span>${CHEV}</a>
       <a class="rowlink" href="#calcio">${ic("calc")}<span>Calcio corretto<small>Per l'albumina</small></span>${CHEV}</a>
       <a class="rowlink" href="#bibliografia">${ic("book")}<span>Bibliografia</span>${CHEV}</a>
     </div>
@@ -1252,7 +1252,7 @@ function catHTML(q){
     `<a class="rowlink" href="#causa-${f.id}"><span>${f.nome}${f.sesso?`<small>${f.sesso}</small>`:""}</span>${CHEV}</a>`).join("")}</div></div></details>`).join("");
 }
 function vCatalogo(){
-  return { bar:"Catalogo", html: head("Catalogo delle forme") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca"><div id="catList">${catHTML("")}</div>` };
+  return { bar:"Catalogo", html: head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca"><div id="catList">${catHTML("")}</div>` };
 }
 function vCalcio(){
   return { bar:"Calcio corretto", html: head("Calcio corretto") + `
