@@ -80,7 +80,8 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry b{display:block;font-size:1.05rem;letter-spacing:-.01em;line-height:1.3}
 .entry.blue b{color:var(--blue)} .entry.teal b{color:var(--teal)}
 .entry small{display:block;color:var(--muted);font-size:.83rem;margin-top:3px;line-height:1.4}
-.entry.big{padding:20px 14px 20px 19px}
+.entry.big{padding:20px 14px;border-radius:14px} .entry.big::before{content:none}
+.stack.home{display:grid;grid-auto-rows:1fr}
 .entry.big b{font-size:1.12rem;color:var(--ink)}
 .chev{width:16px;height:16px;color:var(--faint);flex:0 0 auto}
 .ic{width:26px;height:26px;flex:0 0 auto}
@@ -1112,7 +1113,7 @@ const head = (title, sub, label) => `${label?`<div class="katrow">${kat(label)}<
 /* ---------- home ---------- */
 function vHome(){
   return { bar:"Osteo Help", html: head("Osteoporosi secondaria", "Dall'esame di primo livello al sospetto diagnostico.") + `
-    <div class="stack">
+    <div class="stack home">
       ${entry("alterati", "Esami di I livello alterati", "Segna gli esami fuori norma e vedi le forme compatibili", "blue big", "tube")}
       ${entry("normali", "Esami di I livello normali", "Parti da farmaci, malattie e segni clinici", "teal big", "clip")}
     </div>
