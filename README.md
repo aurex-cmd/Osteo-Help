@@ -102,6 +102,10 @@ Il catalogo riunisce le forme dei due percorsi. Le forme che si evidenziano agli
 - **Emocromatosi non ancora diagnosticata**: nuovo nome; soglie di saturazione della transferrina (oltre 45% nella donna, oltre 50% nell'uomo) e ruolo dei genotipi HFE come nelle linee guida EASL 2022.
 - **Esami alterati**: riviste neoplasia, ipercalcemia maligna, sarcoidosi, intossicazione da vitamina D (difetto di CYP24A1), ipomagnesiemia (frazione escreta), Paget (prima esclusa l'origine epatica della fosfatasi), MGUS e osteomalacia ipofosfatemica, con il ferro carbossimaltosio endovena tra le cause e il suo meccanismo (blocco della degradazione dell'FGF23 intatto).
 
+### Revisione linguistica delle note
+
+Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le note di mieloma, sindrome di Fanconi, acidosi tubulare renale, epatopatia colestatica, malnutrizione, artrite reumatoide, sclerosi sistemica, inibitori della calcineurina, medrossiprogesterone depot, amenorrea ipotalamica funzionale, chirurgia bariatrica, gravidanza e allattamento, ictus.
+
 ### Bibliografia
 
 - Aggiunte 9 fonti nell'elenco "esami normali" a supporto delle revisioni Farmaci ed Endocrino-metaboliche: Nota 79 AIFA (2022), linee guida ESE sull'incidentaloma surrenalico (2023), AACE sul deficit di GH (2019), due studi sul diabete (Vilaca 2020, Leslie 2018), glitazoni (Loke 2009), CANVAS (Neal 2017), ACOG sul medrossiprogesterone (2014), oppioidi (Fountas 2020).
