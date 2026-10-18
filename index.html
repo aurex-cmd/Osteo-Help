@@ -1435,7 +1435,7 @@ document.addEventListener("input", e => {
     document.querySelectorAll("#exList .rowlink").forEach(r => { const show = !q || r.dataset.q.includes(q); r.hidden = !show; if(show) vis++; });
     $("#exNo").hidden = vis > 0;
   }
-  if(id === "catQ") $("#catList").innerHTML = catHTML(e.target.value);
+  if(id === "catQ"){ catQ = e.target.value; $("#catList").innerHTML = catHTML(catQ); }
   if(id === "ccCa" || id === "ccAlb"){
     const ca = parseFloat($("#ccCa").value), alb = parseFloat($("#ccAlb").value);
     $("#ccOut").textContent = (isFinite(ca) && isFinite(alb)) ? (ca + 0.8*(4 - alb)).toFixed(2) : "—";
@@ -1468,17 +1468,24 @@ const CAT_ITEMS = [
   ...Object.keys(COND).filter(cid => !A_OUT.has(cid) && !A_IN_B[cid]).map(cid => ({ href:"forma-"+cid, nome:COND[cid], macro:A_MACRO[COND_CAT[cid]] || "ALTRE CONDIZIONI", sub:"", tags:altTags(cid),
     text:COND[cid]+" "+COND_CAT[cid]+" "+(NOTES[cid]||"") }))
 ].sort((a, b) => a.nome.localeCompare(b.nome, "it", { sensitivity:"base" }));
+/* il catalogo ricorda gruppi aperti, ricerca e posizione quando si torna da una scheda */
+const catOpen = new Set(); let catQ = "", catY = null;
+document.addEventListener("toggle", e => {
+  const d = e.target; if(!d.matches || !d.matches("details.cgrp") || catQ.trim()) return;
+  d.open ? catOpen.add(d.dataset.cat) : catOpen.delete(d.dataset.cat);
+}, true);
+document.addEventListener("click", e => { if(e.target.closest("#catList a.rowlink")) catY = window.scrollY; });
 function catHTML(q){
   q = (q||"").trim().toLowerCase();
   const list = CAT_ITEMS.filter(x => !q || (x.text+" "+x.tags.join(" ")).toLowerCase().includes(q));
   if(!list.length) return `<p class="hint">Nessuna condizione trovata.</p>`;
   const groups = {}; list.forEach(x => { (groups[x.macro] = groups[x.macro] || []).push(x); });
-  return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows ind">${groups[c].map(x => {
+  return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc cgrp" data-cat="${c}"${q||catOpen.has(c)?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows ind">${groups[c].map(x => {
     return `<a class="rowlink" href="#${x.href}"><i class="dot${x.tags.length?"":" no"}"${x.tags.length?` title="Si evidenzia agli esami di primo livello"`:""}></i><span>${x.nome}${x.sub?`<small>${x.sub}</small>`:""}</span>${CHEV}</a>`;
   }).join("")}</div></div></details>`).join("");
 }
 function vCatalogo(){
-  return { bar:"Catalogo", html: head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca"><p class="small cat-key"><span class="dot"></span>si evidenzia agli esami di primo livello</p><div id="catList" class="cat">${catHTML("")}</div>` };
+  return { bar:"Catalogo", html: head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca" value="${catQ.replace(/"/g,"&quot;")}"><p class="small cat-key"><span class="dot"></span>si evidenzia agli esami di primo livello</p><div id="catList" class="cat">${catHTML(catQ)}</div>` };
 }
 function vCalcio(){
   return { bar:"Calcio corretto", html: head("Calcio corretto") + `
@@ -1542,6 +1549,7 @@ function render(){
   dockCfg = v.dock ? route : null;
   updateDock();
   if(changed) window.scrollTo(0, 0);
+  if(changed && route === "catalogo" && catY !== null){ window.scrollTo(0, catY); catY = null; }
   if(route === "bibliografia") showPendingRef();
 }
 function goBack(){ if(stack.length > 1) history.back(); else go(PARENT(current)); }
