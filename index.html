@@ -75,7 +75,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry.blue{background:var(--blue-box)} .entry.blue::before{background:var(--blue)}
 .entry.teal{background:var(--teal-box)} .entry.teal::before{background:var(--teal)}
 .entry.plain{padding-left:16px} .entry.plain::before{content:none}
-.cat .stack{padding:4px 0 6px 14px}
+.cat .rowlink{padding-left:14px} .cat .rowlink > .pt{flex:none;width:6px;height:6px;border-radius:50%;background:var(--teal);align-self:flex-start;margin-top:8px}
 .entry > div{flex:1;min-width:0}
 .entry b{display:block;font-size:1.05rem;letter-spacing:-.01em;line-height:1.3}
 .entry.blue b{color:var(--blue)} .entry.teal b{color:var(--teal)}
@@ -1403,8 +1403,8 @@ function catHTML(q){
   const list = FORME.filter(f => !q || (f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"")).toLowerCase().includes(q));
   if(!list.length) return `<p class="hint">Nessuna condizione trovata.</p>`;
   const groups = {}; list.forEach(f => { (groups[macroOf(f)] = groups[macroOf(f)] || []).push(f); });
-  return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="stack">${groups[c].map(f =>
-    entry("causa-" + f.id, f.nome, (FORMA_CAT[f.cat]||f.cat) + (f.sesso ? " · solo " + f.sesso : ""), "plain")).join("")}</div></div></details>`).join("");
+  return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows">${groups[c].map(f =>
+    `<a class="rowlink" href="#causa-${f.id}"><i class="pt"></i><span>${f.nome}${f.sesso?`<small>solo ${f.sesso}</small>`:""}</span>${CHEV}</a>`).join("")}</div></div></details>`).join("");
 }
 function vCatalogo(){
   return { bar:"Catalogo", html: head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca"><div id="catList" class="cat">${catHTML("")}</div>` };
