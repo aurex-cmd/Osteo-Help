@@ -85,6 +85,9 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry.teal{background:var(--teal-box)} .entry.teal::before{background:var(--teal)}
 .entry.plain{padding-left:16px} .entry.plain::before{content:none}
 .rows.ind .rowlink{padding-left:14px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--coral);margin-left:7px;vertical-align:middle;position:relative;top:-1px}
+.cat-key{margin:-4px 0 0}
+.cat-key .dot{margin:0 6px 0 0}
 .entry > div{flex:1;min-width:0}
 .entry b{display:block;font-size:1.05rem;letter-spacing:-.01em;line-height:1.3}
 .entry.blue b{color:var(--blue)} .entry.teal b{color:var(--teal)}
@@ -1305,6 +1308,7 @@ function vCausa(id){
   return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + `
     <p class="lbl">Quando considerarla</p><ul class="list">${trig.map(row).join("")}</ul>
     <p class="small"><b>Forte</b>: da solo è sufficiente per sospettare questa forma.<br><b>Lieve</b>: da solo non basta, ma aumenta il sospetto se presente insieme ad altri elementi.</p>
+    ${B_TAGS[id] ? `<p class="lbl">Agli esami di I livello</p><div class="tags">${B_TAGS[id].map(t => `<span class="tag ${TAGDIR[t]==="up"?"u":"d"}">${t}</span>`).join("")}</div>` : ""}
     ${confHTML(f.conferma)}
     ${f.osso ? `<p class="lbl">Esami per valutare l'osso</p>${f.osso.length === 1 ? `<p class="note">${f.osso[0]}</p>` : `<ul class="list">${f.osso.map((c,i) => `<li><i>${i+1}</i>${c}</li>`).join("")}</ul>`}` : ""}
     ${f.nota ? `<p class="lbl">Nota</p><p class="note">${f.nota}</p>` : ""}
@@ -1409,16 +1413,33 @@ const REF_ORDER = ["DA FARMACI","ENDOCRINO-METABOLICHE","REUMATOLOGICHE / INFIAM
 const REF_MACRO = { "Farmaci":"DA FARMACI","Endocrina":"ENDOCRINO-METABOLICHE","Reumatologica":"REUMATOLOGICHE / INFIAMMATORIE","Gastro-epatica":"GASTRO-EPATICHE / NUTRIZIONALI","Ematologica / sistemica":"EMATOLOGICHE","Post-trapianto":"ALTRE CONDIZIONI","Renale":"RENALI","Genetica / del collagene":"GENETICHE","Genetica":"GENETICHE","Stile di vita / nutrizione":"STILI DI VITA E NUTRIZIONE","Neurologica":"NEUROLOGICHE" };
 const macroOf = f => REF_MACRO[f.cat] || "ALTRE CONDIZIONI";
 const cap = s => s.charAt(0) + s.slice(1).toLowerCase();
+/* forme degli esami alterati nel catalogo: quelle già presenti tra le forme cliniche prendono solo il tondino */
+const A_IN_B = { epatopatia:["gi_epatopatia"], ipofosfatasia:["gen_ipofosfatasia"], immobiliz:["vita_immobilizzazione"], acidosiTub:["renale_rta"], farmaciD:["anticonv"],
+  malassorb:["gi_celiachia","gi_celiachia_occulta","gi_mici","gi_bariatrica"], connettiv:["reuma_ar","reuma_spa","reuma_spa_occulta","reuma_les","reuma_psa","reuma_ssc"] };
+const A_OUT = new Set(["ipercalcemiaMaligna","farmaciCa"]);
+const A_MACRO = { Endocrinologia:"ENDOCRINO-METABOLICHE", "Metabolismo minerale":"ENDOCRINO-METABOLICHE", Ematologia:"EMATOLOGICHE", Nefrologia:"RENALI",
+  Epatologia:"GASTRO-EPATICHE / NUTRIZIONALI", Gastroenterologia:"GASTRO-EPATICHE / NUTRIZIONALI", Reumatologia:"REUMATOLOGICHE / INFIAMMATORIE", Nutrizione:"STILI DI VITA E NUTRIZIONE" };
+const altTags = cid => [...new Set((dxToAlts[cid]||[]).map(id => altIndex[id].tag))];
+const TAGDIR = {}; Object.values(altIndex).forEach(x => { TAGDIR[x.tag] = x.dir; });
+const B_TAGS = {}; Object.entries(A_IN_B).forEach(([cid, ids]) => ids.forEach(id => { B_TAGS[id] = [...new Set([...(B_TAGS[id]||[]), ...altTags(cid)])]; }));
+const CAT_ITEMS = [
+  ...FORME.map(f => ({ href:"causa-"+f.id, nome:f.nome, macro:macroOf(f), sub:f.sesso ? "solo "+f.sesso : "", tags:B_TAGS[f.id]||[],
+    text:f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"") })),
+  ...Object.keys(COND).filter(cid => !A_OUT.has(cid) && !A_IN_B[cid]).map(cid => ({ href:"forma-"+cid, nome:COND[cid], macro:A_MACRO[COND_CAT[cid]] || "ALTRE CONDIZIONI", sub:"", tags:altTags(cid),
+    text:COND[cid]+" "+COND_CAT[cid]+" "+(NOTES[cid]||"") }))
+];
 function catHTML(q){
   q = (q||"").trim().toLowerCase();
-  const list = FORME.filter(f => !q || (f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"")).toLowerCase().includes(q));
+  const list = CAT_ITEMS.filter(x => !q || (x.text+" "+x.tags.join(" ")).toLowerCase().includes(q));
   if(!list.length) return `<p class="hint">Nessuna condizione trovata.</p>`;
-  const groups = {}; list.forEach(f => { (groups[macroOf(f)] = groups[macroOf(f)] || []).push(f); });
-  return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows ind">${groups[c].map(f =>
-    `<a class="rowlink" href="#causa-${f.id}"><span>${f.nome}${f.sesso?`<small>solo ${f.sesso}</small>`:""}</span>${CHEV}</a>`).join("")}</div></div></details>`).join("");
+  const groups = {}; list.forEach(x => { (groups[x.macro] = groups[x.macro] || []).push(x); });
+  return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows ind">${groups[c].map(x => {
+    const sub = [x.sub, x.tags.join(" · ")].filter(Boolean).join(" — ");
+    return `<a class="rowlink" href="#${x.href}"><span>${x.nome}${x.tags.length?`<span class="dot" title="Si evidenzia agli esami di primo livello"></span>`:""}${sub?`<small>${sub}</small>`:""}</span>${CHEV}</a>`;
+  }).join("")}</div></div></details>`).join("");
 }
 function vCatalogo(){
-  return { bar:"Catalogo", html: head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca"><div id="catList" class="cat">${catHTML("")}</div>` };
+  return { bar:"Catalogo", html: head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca"><p class="small cat-key"><span class="dot"></span>si evidenzia agli esami di primo livello</p><div id="catList" class="cat">${catHTML("")}</div>` };
 }
 function vCalcio(){
   return { bar:"Calcio corretto", html: head("Calcio corretto") + `
