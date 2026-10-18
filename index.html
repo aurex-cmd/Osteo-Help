@@ -59,6 +59,12 @@ a{color:inherit;text-decoration:none}
 .bar #theme{grid-column:3;grid-row:1;justify-self:end;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--box);color:var(--ink);display:grid;place-items:center;padding:0;transition:background .2s}
 .bar #act{grid-column:3;grid-row:1}
 .bar #theme:hover{border-color:var(--faint)}
+.bar.home .bar-in{grid-template-columns:1fr 72px}
+.bar.home #back{display:none}
+/* in home: marchio OH e nome a sinistra, come in Osteoclick */
+.bar.home .bar-t{grid-column:1;display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;letter-spacing:-.01em}
+.bar.home #theme{grid-column:2}
+.oh{width:32px;height:32px;border-radius:9px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:800;letter-spacing:-.02em;flex:0 0 auto}
 .bar #theme svg{width:17px;height:17px;grid-area:1/1}
 .bar #theme .sun{display:none}
 .bar #theme.dark .sun{display:block} .bar #theme.dark .moon{display:none}
@@ -1466,7 +1472,9 @@ function render(){
   if(v.redirect !== undefined){ history.replaceState(null, "", v.redirect ? "#" + v.redirect : location.pathname + location.search); return render(); }
   const changed = route !== current; current = route;
   $("#main").innerHTML = `<div class="screen">${v.html}</div>`;
-  $("#barT").textContent = v.bar;
+  // in home la barra mostra il marchio OH accanto al nome
+  $(".bar").classList.toggle("home", !route);
+  if(route) $("#barT").textContent = v.bar; else $("#barT").innerHTML = `<span class="oh">OH</span>${v.bar}`;
   $("#back").style.visibility = route ? "visible" : "hidden";
   $("#theme").hidden = !!route; $("#act").hidden = !route;
   $("#act").textContent = v.act ? v.act[0] : ""; actFn = v.act ? v.act[1] : null;
