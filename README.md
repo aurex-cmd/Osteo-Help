@@ -104,7 +104,7 @@ Il catalogo riunisce le forme dei due percorsi. Le forme che si evidenziano agli
 
 ### Revisione linguistica delle note
 
-Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le note di mieloma, sindrome di Fanconi, acidosi tubulare renale, epatopatia colestatica, malnutrizione, artrite reumatoide, sclerosi sistemica, inibitori della calcineurina, medrossiprogesterone depot, amenorrea ipotalamica funzionale, chirurgia bariatrica, gravidanza e allattamento, ictus.
+Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le note di mieloma, sindrome di Fanconi, acidosi tubulare renale, epatopatia colestatica, malnutrizione, artrite reumatoide, sclerosi sistemica, inibitori della calcineurina, medrossiprogesterone depot, amenorrea ipotalamica funzionale, chirurgia bariatrica, gravidanza e allattamento, ictus, SGLT2-inibitori.
 
 ### Bibliografia
 
