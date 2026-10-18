@@ -75,7 +75,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry.blue{background:var(--blue-box)} .entry.blue::before{background:var(--blue)}
 .entry.teal{background:var(--teal-box)} .entry.teal::before{background:var(--teal)}
 .entry.plain{padding-left:16px} .entry.plain::before{content:none}
-.cat .rowlink{padding-left:14px} .cat .rowlink > .pt{flex:none;width:6px;height:6px;border-radius:50%;background:var(--teal);align-self:flex-start;margin-top:8px}
+.rows.ind .rowlink{padding-left:14px}
 .entry > div{flex:1;min-width:0}
 .entry b{display:block;font-size:1.05rem;letter-spacing:-.01em;line-height:1.3}
 .entry.blue b{color:var(--blue)} .entry.teal b{color:var(--teal)}
@@ -1374,7 +1374,7 @@ function vEsame(i){
   return { bar:"Esame", html: head(e.name, e.screens||"", isL2 ? "II livello" : "") + e.alts.map(a => `
     <div class="altb ${a.dir==="up"?"u":"d"}"><b>${a.dir==="up"?"▲":"▼"} ${a.name}</b><small>${a.clues}</small></div>
     <p class="lbl">Forme da sospettare</p>
-    <div class="stack">${a.dx.map(id => entry("forma-" + id, COND[id], COND_CAT[id], "plain")).join("")}</div>`).join("")
+    <div class="rows ind">${a.dx.map(id => `<a class="rowlink" href="#forma-${id}"><span>${COND[id]}</span>${CHEV}</a>`).join("")}</div>`).join("")
     + (noCalc(e.note) ? `<p class="lbl">Nota</p><p class="note">${noCalc(e.note)}</p>` : "") };
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-goto]"); if(b) go(b.dataset.goto); });
@@ -1403,8 +1403,8 @@ function catHTML(q){
   const list = FORME.filter(f => !q || (f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"")).toLowerCase().includes(q));
   if(!list.length) return `<p class="hint">Nessuna condizione trovata.</p>`;
   const groups = {}; list.forEach(f => { (groups[macroOf(f)] = groups[macroOf(f)] || []).push(f); });
-  return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows">${groups[c].map(f =>
-    `<a class="rowlink" href="#causa-${f.id}"><i class="pt"></i><span>${f.nome}${f.sesso?`<small>solo ${f.sesso}</small>`:""}</span>${CHEV}</a>`).join("")}</div></div></details>`).join("");
+  return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows ind">${groups[c].map(f =>
+    `<a class="rowlink" href="#causa-${f.id}"><span>${f.nome}${f.sesso?`<small>solo ${f.sesso}</small>`:""}</span>${CHEV}</a>`).join("")}</div></div></details>`).join("");
 }
 function vCatalogo(){
   return { bar:"Catalogo", html: head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca"><div id="catList" class="cat">${catHTML("")}</div>` };
