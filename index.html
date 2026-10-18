@@ -22,17 +22,20 @@
 :root{
   --bg:#FFFFFF; --ink:#1B2433; --muted:#6F7988; --faint:#B5BECA; --line:#E1E5EB;
   --box:#F2F4F7; --blue:#6A5C92; --blue-box:#F1EEFB; --teal:#0E7571; --teal-box:#E3F4F3; --focus:#2F5F96; --tile:#FFFFFF;
+  --home-a:var(--blue-box); --home-n:var(--teal-box); --home-sub:var(--muted);
   --coral:#B04E37; --coral-box:#F7EBE7; --amber:#9A6B1F;
   --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#12161D; --ink:#E6EBF2; --muted:#8E99A8; --faint:#4A5462; --line:#262E39;
-  --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#2B3039; --focus:#8DB4E2;
+  --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#FFFFFF; --focus:#8DB4E2;
+  --home-a:#3A3256; --home-n:#16403D; --home-sub:#BCC5D2;
   --coral:#E99A85; --coral-box:#3A2420; --amber:#D9AE62; color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#12161D; --ink:#E6EBF2; --muted:#8E99A8; --faint:#4A5462; --line:#262E39;
-  --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#2B3039; --focus:#8DB4E2;
+  --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#FFFFFF; --focus:#8DB4E2;
+  --home-a:#3A3256; --home-n:#16403D; --home-sub:#BCC5D2;
   --coral:#E99A85; --coral-box:#3A2420; --amber:#D9AE62; color-scheme:dark }
 
 *{box-sizing:border-box}
@@ -88,6 +91,8 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry > .ic{color:var(--muted)}
 .entry.blue > .ic{color:var(--blue)} .entry.teal > .ic{color:var(--teal)}
 .entry.big > .ic{width:52px;height:52px;padding:10px;border-radius:12px;background:var(--tile)}
+.entry.big.blue{background:var(--home-a)} .entry.big.teal{background:var(--home-n)} .entry.big small{color:var(--home-sub)}
+.entry.big.blue > .ic{color:#6A5C92} .entry.big.teal > .ic{color:#0E7571}
 .rowlink > .ic{width:24px;height:24px;color:var(--muted)}
 .rowlink > span{flex:1}
 .katrow{margin:10px 0 -11px}
