@@ -1329,7 +1329,7 @@ const GRUPPI = {
   celiachia:{ nome:"Celiachia", ids:["gi_celiachia","gi_celiachia_occulta"] },
   spa:{ nome:"Spondilite anchilosante / spondiloartrite assiale", ids:["reuma_spa","reuma_spa_occulta"] },
   emocromatosi:{ nome:"Emocromatosi / sovraccarico di ferro", ids:["altre_emocromatosi","emocromatosi_occulta"] },
-  epilessia:{ nome:"Epilessia e antiepilettici", ids:["anticonv","neuro_epilessia"], tabs:["Antiepilettici","Epilessia"], macro:"NEUROLOGICHE" }
+  epilessia:{ nome:"Epilessia e antiepilettici", ids:["anticonv","neuro_epilessia"], tabs:["Antiepilettici","Epilessia"], macro:["NEUROLOGICHE","DA FARMACI"] }
 };
 const GTAB_LBL = ["Già diagnosticata", "Non ancora diagnosticata"];
 const gtab = {};
@@ -1455,8 +1455,10 @@ const TAGDIR = {}; Object.values(altIndex).forEach(x => { TAGDIR[x.tag] = x.dir;
 const B_TAGS = {}; Object.entries(A_IN_B).forEach(([cid, ids]) => ids.forEach(id => { B_TAGS[id] = [...new Set([...(B_TAGS[id]||[]), ...altTags(cid)])]; }));
 const IN_GRUPPO = new Set(Object.values(GRUPPI).flatMap(g => g.ids));
 const CAT_ITEMS = [
-  ...Object.entries(GRUPPI).map(([k, g]) => { const fs = g.ids.map(id => FORMA[id]); return { href:"gruppo-"+k, nome:g.nome, macro:g.macro||macroOf(fs[0]), sub:"",
-    tags:[...new Set(g.ids.flatMap(id => B_TAGS[id]||[]))], text:g.nome+" "+fs.map(f => f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"")).join(" ") }; }),
+  ...Object.entries(GRUPPI).flatMap(([k, g]) => { const fs = g.ids.map(id => FORMA[id]);
+    const item = { href:"gruppo-"+k, nome:g.nome, sub:"", tags:[...new Set(g.ids.flatMap(id => B_TAGS[id]||[]))],
+      text:g.nome+" "+fs.map(f => f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"")).join(" ") };
+    return [].concat(g.macro || macroOf(fs[0])).map(m => ({ ...item, macro:m })); }),
   ...FORME.filter(f => !IN_GRUPPO.has(f.id)).map(f => ({ href:"causa-"+f.id, nome:f.nome, macro:macroOf(f), sub:f.sesso ? "solo "+f.sesso : "", tags:B_TAGS[f.id]||[],
     text:f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"") })),
   ...Object.keys(COND).filter(cid => !A_OUT.has(cid) && !A_IN_B[cid]).map(cid => ({ href:"forma-"+cid, nome:COND[cid], macro:A_MACRO[COND_CAT[cid]] || "ALTRE CONDIZIONI", sub:"", tags:altTags(cid),
