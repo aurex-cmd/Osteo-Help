@@ -1427,7 +1427,7 @@ const CAT_ITEMS = [
     text:f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"") })),
   ...Object.keys(COND).filter(cid => !A_OUT.has(cid) && !A_IN_B[cid]).map(cid => ({ href:"forma-"+cid, nome:COND[cid], macro:A_MACRO[COND_CAT[cid]] || "ALTRE CONDIZIONI", sub:"", tags:altTags(cid),
     text:COND[cid]+" "+COND_CAT[cid]+" "+(NOTES[cid]||"") }))
-];
+].sort((a, b) => a.nome.localeCompare(b.nome, "it", { sensitivity:"base" }));
 function catHTML(q){
   q = (q||"").trim().toLowerCase();
   const list = CAT_ITEMS.filter(x => !q || (x.text+" "+x.tags.join(" ")).toLowerCase().includes(q));
