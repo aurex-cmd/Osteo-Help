@@ -17,7 +17,7 @@ In alto a destra nella home un pulsante (luna / sole) passa dal tema chiaro allo
 
 In fondo a ogni scheda la sezione **Fonti** riporta le voci di bibliografia dedicate a quella forma, con il loro numero: toccandolo si apre la bibliografia evidenziando la voce. Le schede senza una fonte dedicata rimandano alle linee guida generali.
 
-La home, su fondo grigio chiaro, è una griglia di tessere come in Osteoclick: in alto i due percorsi (esami alterati in corallo, esami normali in verde menta), poi catalogo delle forme, pattern da riconoscere (un tocco ne mostra il risultato), esame per esame e calcio corretto. La bibliografia si apre dal link in fondo alla pagina.
+Dalla home si consultano anche: pattern da riconoscere (un tocco ne mostra il risultato), esame per esame, catalogo delle forme di osteoporosi secondaria, calcio corretto, bibliografia.
 
 **Logica (invariata rispetto all'originale)**
 - *Esami alterati*: compaiono le forme compatibili con **tutti** i reperti segnati. Se nessuna forma da sola li spiega, il quadro viene letto come più cause indipendenti. Un esame segnato N esclude le forme in cui quell'esame è un reperto chiave.
@@ -120,7 +120,7 @@ La home, su fondo grigio chiaro, è una griglia di tessere come in Osteoclick: i
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon-180.png`, `favicon-32.png` | Installazione come app (PWA) |
 | `.nojekyll` | Fa servire i file a GitHub Pages così come sono |
 
-Unica risorsa esterna: il font Manrope da Google Fonts (senza connessione si usa il font di sistema).
+Unica risorsa esterna: il font Inter da Google Fonts (senza connessione si usa il font di sistema).
 
 Le icone della home sono di [Health Icons](https://healthicons.org) (© 2021 Resolve to Save Lives, licenza MIT), incorporate in `index.html`; provetta e calcolatrice sono disegnate per questa app. Nelle schede la categoria di ogni forma è indicata da un'etichetta colorata sopra il titolo.
 

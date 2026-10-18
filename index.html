@@ -16,23 +16,26 @@
 <meta name="apple-mobile-web-app-title" content="Osteo Help">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* Layout: una schermata per volta (home → inserimento → risultato → scheda), colonna stretta centrata; blocchi piatti con barra d'accento a sinistra */
 :root{
   --bg:#FFFFFF; --ink:#1B2433; --muted:#6F7988; --faint:#B5BECA; --line:#E1E5EB;
   --box:#F2F4F7; --blue:#6A5C92; --blue-box:#F1EEFB; --teal:#0E7571; --teal-box:#E3F4F3; --focus:#2F5F96; --tile:#FFFFFF;
+  --home-a:#E3DCFD; --home-n:#C0EBE8; --home-sub:var(--muted);
   --coral:#B04E37; --coral-box:#F7EBE7; --amber:#9A6B1F;
-  --sans:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#12161D; --ink:#E6EBF2; --muted:#8E99A8; --faint:#4A5462; --line:#262E39;
   --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#FFFFFF; --focus:#8DB4E2;
+  --home-a:#3B3252; --home-n:#08413F; --home-sub:#BCC5D2;
   --coral:#E99A85; --coral-box:#3A2420; --amber:#D9AE62; color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#12161D; --ink:#E6EBF2; --muted:#8E99A8; --faint:#4A5462; --line:#262E39;
   --box:#1B212A; --blue:#C1B5EA; --blue-box:#24202F; --teal:#83CEC8; --teal-box:#112726; --tile:#FFFFFF; --focus:#8DB4E2;
+  --home-a:#3B3252; --home-n:#08413F; --home-sub:#BCC5D2;
   --coral:#E99A85; --coral-box:#3A2420; --amber:#D9AE62; color-scheme:dark }
 
 *{box-sizing:border-box}
@@ -80,10 +83,16 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry b{display:block;font-size:1.05rem;letter-spacing:-.01em;line-height:1.3}
 .entry.blue b{color:var(--blue)} .entry.teal b{color:var(--teal)}
 .entry small{display:block;color:var(--muted);font-size:.83rem;margin-top:3px;line-height:1.4}
+.entry.big{padding:20px 14px;border-radius:14px} .entry.big::before{content:none}
+.stack.home{display:grid;grid-auto-rows:1fr}
+.entry.big b{font-size:1.12rem;color:var(--ink)}
 .chev{width:16px;height:16px;color:var(--faint);flex:0 0 auto}
 .ic{width:26px;height:26px;flex:0 0 auto}
 .entry > .ic{color:var(--muted)}
 .entry.blue > .ic{color:var(--blue)} .entry.teal > .ic{color:var(--teal)}
+.entry.big > .ic{width:52px;height:52px;padding:10px;border-radius:12px;background:var(--tile)}
+.entry.big.blue{background:var(--home-a)} .entry.big.teal{background:var(--home-n)} .entry.big small{color:var(--home-sub)}
+.entry.big.blue > .ic{color:#6A5C92} .entry.big.teal > .ic{color:#0E7571}
 .rowlink > .ic{width:24px;height:24px;color:var(--muted)}
 .rowlink > span{flex:1}
 .katrow{margin:10px 0 -11px}
@@ -202,38 +211,6 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 @media (max-width:380px){ h1{font-size:1.6rem} .tri button{min-width:34px;padding:0 6px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media print{ .bar,.dock{display:none!important} }
-
-/* ---- home a tessere (stile Osteoclick) ---- */
-:root{--home-bg:#F3F4F6;--home-card:#FFFFFF;--edge:#E3E7EC}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--home-bg:#12161D;--home-card:#1B212A;--edge:#2A323E}}
-:root[data-theme="dark"]{--home-bg:#12161D;--home-card:#1B212A;--edge:#2A323E}
-body.is-home{--bg:var(--home-bg)}
-.bar.home .bar-in{grid-template-columns:1fr 72px;height:44px}
-.bar.home #back{display:none}
-.bar.home .bar-t{grid-column:1;display:flex;align-items:center;gap:10px;font-weight:800;font-size:.95rem;letter-spacing:-.01em;text-align:left}
-.bar.home #theme{grid-column:2;width:42px;height:42px;border:0;background:var(--home-card)}
-.oh{width:30px;height:30px;border-radius:9px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:.7rem;font-weight:800;letter-spacing:-.02em}
-.home-h{text-transform:none;font-size:1.75rem;line-height:1.15;margin-top:22px}
-.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:40px}
-.tile{display:flex;width:100%;border:1px solid var(--edge);border-radius:22px;background:var(--home-card);color:var(--ink);text-align:left;transition:transform .12s}
-.tile:active{transform:scale(.98)}
-.tile b{display:block;font-weight:700;font-size:1rem;letter-spacing:-.01em}
-.tile small{display:block;margin-top:2px;font-size:.78rem;color:var(--muted)}
-.tile .ic{width:26px;height:26px;flex:0 0 auto;color:var(--ink)}
-.tile-main{grid-column:span 2;flex-direction:column;justify-content:space-between;min-height:148px;gap:18px;padding:18px 20px;color:#fff}
-.tile-main.t-a{background:#EC9981;border-color:#EC9981} .tile-main.t-n{background:#99E3C6;border-color:#99E3C6}
-.tile-main.t-a,.tile-main.t-n{color:#1B2433} .tile-main.t-a .ic,.tile-main.t-n .ic{color:#1B2433} .tile-main.t-a small,.tile-main.t-n small{color:rgba(27,36,51,.8)} .tile-main.t-a .tile-go,.tile-main.t-n .tile-go{background:rgba(27,36,51,.1)}
-.tile-main b{font-size:1.3rem;font-weight:800;letter-spacing:-.02em}
-.tile-main small{color:rgba(255,255,255,.85);font-size:.84rem;margin-top:4px}
-.tile-main .ic{width:30px;height:30px;color:#fff}
-.tile-top{display:flex;justify-content:space-between;align-items:flex-start}
-.tile-go{width:40px;height:40px;border-radius:20px;background:rgba(255,255,255,.18);display:grid;place-items:center}
-.tile-go svg{width:18px;height:18px}
-.tile-row{grid-column:span 2;align-items:center;justify-content:space-between;min-height:60px;padding:0 20px;gap:12px}
-.tile-row .tile-l{display:flex;align-items:center;gap:14px}
-.tile-row em{font-style:normal;font-size:.82rem;font-weight:600;color:var(--muted);white-space:nowrap}
-.tile-sq{flex-direction:column;justify-content:space-between;min-height:108px;padding:18px;gap:14px}
-.foot a{color:var(--focus);font-weight:700}
 </style>
 </head>
 <body>
@@ -1140,18 +1117,20 @@ const head = (title, sub, label) => `${label?`<div class="katrow">${kat(label)}<
 
 /* ---------- home ---------- */
 function vHome(){
-  return { bar:"Osteo Help", html: `
-    <h1 class="home-h">Osteoporosi secondaria</h1>
-    <p class="sub">Dall'esame di primo livello al sospetto diagnostico.</p>
-    <div class="tiles">
-      <a class="tile tile-main t-a" href="#alterati"><div class="tile-top">${ic("tube")}<span class="tile-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div><div><b>Esami di I livello alterati</b><small>Segna gli esami fuori norma e vedi le forme compatibili</small></div></a>
-      <a class="tile tile-main t-n" href="#normali"><div class="tile-top">${ic("clip")}<span class="tile-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div><div><b>Esami di I livello normali</b><small>Parti da farmaci, malattie e segni clinici</small></div></a>
-      <a class="tile tile-row" href="#catalogo"><span class="tile-l">${ic("grid")}<b>Catalogo delle forme</b></span><em>${FORME.length}</em></a>
-      <a class="tile tile-sq" href="#pattern">${ic("link")}<div><b>Pattern</b><small>Combinazioni di reperti</small></div></a>
-      <a class="tile tile-sq" href="#esami">${ic("rows")}<div><b>Esame per esame</b><small>Alterazioni e indizi</small></div></a>
-      <a class="tile tile-row" href="#calcio"><span class="tile-l">${ic("calc")}<b>Calcio corretto</b></span><em>Albumina</em></a>
+  return { bar:"Osteo Help", html: head("Osteoporosi secondaria", "Dall'esame di primo livello al sospetto diagnostico.") + `
+    <div class="stack home">
+      ${entry("alterati", "Esami di I livello alterati", "Segna gli esami fuori norma e vedi le forme compatibili", "blue big", "tube")}
+      ${entry("normali", "Esami di I livello normali", "Parti da farmaci, malattie e segni clinici", "teal big", "clip")}
     </div>
-    <p class="foot">Ausilio al ragionamento clinico · <a href="#bibliografia">Bibliografia</a><br>Creato dal Dr. Aurelio Guarnaccia</p>` };
+    <p class="lbl">Consulta</p>
+    <div class="rows">
+      <a class="rowlink" href="#pattern">${ic("link")}<span>Pattern da riconoscere<small>Combinazioni classiche di reperti</small></span>${CHEV}</a>
+      <a class="rowlink" href="#esami">${ic("rows")}<span>Esame per esame<small>Alterazioni, indizi clinici, forme da sospettare</small></span>${CHEV}</a>
+      <a class="rowlink" href="#catalogo">${ic("grid")}<span>Catalogo delle forme di osteoporosi secondaria<small>Quando considerarle e come confermarle</small></span>${CHEV}</a>
+      <a class="rowlink" href="#calcio">${ic("calc")}<span>Calcio corretto<small>Per l'albumina</small></span>${CHEV}</a>
+      <a class="rowlink" href="#bibliografia">${ic("book")}<span>Bibliografia</span>${CHEV}</a>
+    </div>
+    <p class="foot">Ausilio al ragionamento clinico, non sostitutivo del giudizio specialistico.<br>Creato dal Dr. Aurelio Guarnaccia</p>` };
 }
 
 /* ---------- esami alterati: inserimento ---------- */
@@ -1487,8 +1466,7 @@ function render(){
   if(v.redirect !== undefined){ history.replaceState(null, "", v.redirect ? "#" + v.redirect : location.pathname + location.search); return render(); }
   const changed = route !== current; current = route;
   $("#main").innerHTML = `<div class="screen">${v.html}</div>`;
-  $("#barT").innerHTML = route ? v.bar : `<span class="oh">OH</span>${v.bar}`;
-  document.body.classList.toggle("is-home", !route); document.querySelector(".bar").classList.toggle("home", !route);
+  $("#barT").textContent = v.bar;
   $("#back").style.visibility = route ? "visible" : "hidden";
   $("#theme").hidden = !!route; $("#act").hidden = !route;
   $("#act").textContent = v.act ? v.act[0] : ""; actFn = v.act ? v.act[1] : null;
