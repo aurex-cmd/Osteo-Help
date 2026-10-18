@@ -1434,8 +1434,7 @@ function catHTML(q){
   if(!list.length) return `<p class="hint">Nessuna condizione trovata.</p>`;
   const groups = {}; list.forEach(x => { (groups[x.macro] = groups[x.macro] || []).push(x); });
   return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows ind">${groups[c].map(x => {
-    const sub = [x.sub, x.tags.join(" · ")].filter(Boolean).join(" — ");
-    return `<a class="rowlink" href="#${x.href}"><span>${x.nome}${x.tags.length?`<span class="dot" title="Si evidenzia agli esami di primo livello"></span>`:""}${sub?`<small>${sub}</small>`:""}</span>${CHEV}</a>`;
+    return `<a class="rowlink" href="#${x.href}"><span>${x.nome}${x.tags.length?`<span class="dot" title="Si evidenzia agli esami di primo livello"></span>`:""}${x.sub?`<small>${x.sub}</small>`:""}</span>${CHEV}</a>`;
   }).join("")}</div></div></details>`).join("");
 }
 function vCatalogo(){
