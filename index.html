@@ -134,7 +134,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .list li em.lieve{color:var(--muted);font-weight:500}
 .list.mute li{color:var(--muted)}
 .list.mute li em{color:var(--muted);font-weight:500}
-.list li.on{font-weight:600}
+.list li.forte{font-weight:600}
 .list li .mk{width:16px;flex:0 0 auto;color:var(--teal);font-weight:800;font-size:.85rem}
 .note{font-size:.93rem;line-height:1.65;margin:0;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
 .badge{font-weight:700;letter-spacing:.02em}
@@ -1290,7 +1290,7 @@ function confHTML(list){
 function vCausa(id){
   const f = FORMA[id]; if(!f) return { redirect:"" };
   const trig = f.trigger.filter(t => t[2] !== "supp");
-  const row = t => { const on = selected.has(t[0]); return `<li class="${on?"on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
+  const row = t => { const on = selected.has(t[0]); return `<li class="${t[1]==="forte"?"forte":""}${on?" on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
   return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + `
     <p class="lbl">Quando considerarla</p><ul class="list">${trig.map(row).join("")}</ul>
     <p class="small"><b>Forte</b>: da solo è sufficiente per sospettare questa forma.<br><b>Lieve</b>: da solo non basta, ma aumenta il sospetto se presente insieme ad altri elementi.</p>
