@@ -19,7 +19,7 @@ In fondo a ogni scheda la sezione **Fonti** riporta le voci di bibliografia dedi
 
 Dalla home si consultano anche: catalogo delle forme di osteoporosi secondaria, pattern da riconoscere (un tocco ne mostra il risultato), esame per esame, calcio corretto, bibliografia.
 
-Il catalogo riunisce le forme dei due percorsi. Le forme che si evidenziano agli esami di primo livello hanno un tondino corallo, e le alterazioni tipiche sono nella loro scheda; le condizioni presenti in entrambi i percorsi compaiono una sola volta. Celiachia, spondiloartrite assiale ed emocromatosi hanno una sola scheda nel catalogo, con un selettore tra «Già diagnosticata» e «Non ancora diagnosticata». Restano fuori dal catalogo l'ipercalcemia maligna e i farmaci che alzano il calcio, raggiungibili dal risultato degli esami alterati.
+Il catalogo riunisce le forme dei due percorsi. Le forme che si evidenziano agli esami di primo livello hanno un tondino corallo, e le alterazioni tipiche sono nella loro scheda; le condizioni presenti in entrambi i percorsi compaiono una sola volta. Celiachia, spondiloartrite assiale ed emocromatosi hanno una sola scheda nel catalogo, con un selettore tra «Già diagnosticata» e «Non ancora diagnosticata». Allo stesso modo epilessia e antiepilettici sono un'unica voce, con un selettore tra le due schede. Restano fuori dal catalogo l'ipercalcemia maligna e i farmaci che alzano il calcio, raggiungibili dal risultato degli esami alterati.
 
 **Logica (invariata rispetto all'originale)**
 - *Esami alterati*: compaiono le forme compatibili con **tutti** i reperti segnati. Se nessuna forma da sola li spiega, il quadro viene letto come più cause indipendenti. Un esame segnato N esclude le forme in cui quell'esame è un reperto chiave.

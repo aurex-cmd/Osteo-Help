@@ -1328,7 +1328,8 @@ function causaBody(id){
 const GRUPPI = {
   celiachia:{ nome:"Celiachia", ids:["gi_celiachia","gi_celiachia_occulta"] },
   spa:{ nome:"Spondilite anchilosante / spondiloartrite assiale", ids:["reuma_spa","reuma_spa_occulta"] },
-  emocromatosi:{ nome:"Emocromatosi / sovraccarico di ferro", ids:["altre_emocromatosi","emocromatosi_occulta"] }
+  emocromatosi:{ nome:"Emocromatosi / sovraccarico di ferro", ids:["altre_emocromatosi","emocromatosi_occulta"] },
+  epilessia:{ nome:"Epilessia e antiepilettici", ids:["anticonv","neuro_epilessia"], tabs:["Antiepilettici","Epilessia"], macro:"NEUROLOGICHE" }
 };
 const GTAB_LBL = ["Già diagnosticata", "Non ancora diagnosticata"];
 const gtab = {};
@@ -1337,7 +1338,7 @@ function vGruppo(key){
   const t = gtab[key] || 0, id = g.ids[t], f = FORMA[id];
   const src = [...new Set(g.ids.flatMap(x => SRC_B[x] || []))];
   return { bar:"Scheda", html: head(g.nome, "", FORMA_CAT[f.cat]||f.cat) + `
-    <div class="seg" role="group" aria-label="Situazione">${GTAB_LBL.map((l,i) => `<button type="button" data-gtab="${key}:${i}" aria-pressed="${i===t}">${l}</button>`).join("")}</div>
+    <div class="seg" role="group" aria-label="Situazione">${(g.tabs||GTAB_LBL).map((l,i) => `<button type="button" data-gtab="${key}:${i}" aria-pressed="${i===t}">${l}</button>`).join("")}</div>
     ${causaBody(id)}
     ${fontiHTML("B", src)}` };
 }
@@ -1454,7 +1455,7 @@ const TAGDIR = {}; Object.values(altIndex).forEach(x => { TAGDIR[x.tag] = x.dir;
 const B_TAGS = {}; Object.entries(A_IN_B).forEach(([cid, ids]) => ids.forEach(id => { B_TAGS[id] = [...new Set([...(B_TAGS[id]||[]), ...altTags(cid)])]; }));
 const IN_GRUPPO = new Set(Object.values(GRUPPI).flatMap(g => g.ids));
 const CAT_ITEMS = [
-  ...Object.entries(GRUPPI).map(([k, g]) => { const fs = g.ids.map(id => FORMA[id]); return { href:"gruppo-"+k, nome:g.nome, macro:macroOf(fs[0]), sub:"",
+  ...Object.entries(GRUPPI).map(([k, g]) => { const fs = g.ids.map(id => FORMA[id]); return { href:"gruppo-"+k, nome:g.nome, macro:g.macro||macroOf(fs[0]), sub:"",
     tags:[...new Set(g.ids.flatMap(id => B_TAGS[id]||[]))], text:g.nome+" "+fs.map(f => f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"")).join(" ") }; }),
   ...FORME.filter(f => !IN_GRUPPO.has(f.id)).map(f => ({ href:"causa-"+f.id, nome:f.nome, macro:macroOf(f), sub:f.sesso ? "solo "+f.sesso : "", tags:B_TAGS[f.id]||[],
     text:f.nome+" "+f.cat+" "+f.trigger.map(t=>FEATLABEL[t[0]]).join(" ")+" "+(f.nota||"") })),
