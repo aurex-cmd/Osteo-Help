@@ -85,7 +85,9 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry.teal{background:var(--teal-box)} .entry.teal::before{background:var(--teal)}
 .entry.plain{padding-left:16px} .entry.plain::before{content:none}
 .rows.ind .rowlink{padding-left:14px}
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--coral);margin-left:7px;vertical-align:middle;position:relative;top:-1px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--coral);flex:0 0 auto;vertical-align:middle;position:relative;top:-1px}
+.dot.no{visibility:hidden}
+.cat .rowlink{position:relative} .cat .rowlink > .dot{position:absolute;left:1px;top:21px}
 .cat-key{margin:-4px 0 0}
 .cat-key .dot{margin:0 6px 0 0}
 .entry > div{flex:1;min-width:0}
@@ -1434,7 +1436,7 @@ function catHTML(q){
   if(!list.length) return `<p class="hint">Nessuna condizione trovata.</p>`;
   const groups = {}; list.forEach(x => { (groups[x.macro] = groups[x.macro] || []).push(x); });
   return REF_ORDER.filter(c => groups[c]).map(c => `<details class="acc"${q?" open":""}><summary><span>${cap(c)}</span><span class="n">${groups[c].length}</span>${CHEV}</summary><div class="accbody"><div class="rows ind">${groups[c].map(x => {
-    return `<a class="rowlink" href="#${x.href}"><span>${x.nome}${x.tags.length?`<span class="dot" title="Si evidenzia agli esami di primo livello"></span>`:""}${x.sub?`<small>${x.sub}</small>`:""}</span>${CHEV}</a>`;
+    return `<a class="rowlink" href="#${x.href}"><i class="dot${x.tags.length?"":" no"}"${x.tags.length?` title="Si evidenzia agli esami di primo livello"`:""}></i><span>${x.nome}${x.sub?`<small>${x.sub}</small>`:""}</span>${CHEV}</a>`;
   }).join("")}</div></div></details>`).join("");
 }
 function vCatalogo(){
