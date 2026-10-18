@@ -1289,7 +1289,7 @@ function confHTML(list){
 }
 function vCausa(id){
   const f = FORMA[id]; if(!f) return { redirect:"" };
-  const trig = f.trigger.filter(t => t[2] !== "supp");
+  const trig = f.trigger.filter(t => t[2] !== "supp").sort((a, b) => (a[1] === "forte" ? 0 : 1) - (b[1] === "forte" ? 0 : 1));
   const row = t => { const on = selected.has(t[0]); return `<li class="${t[1]==="forte"?"forte":""}${on?" on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
   return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + `
     <p class="lbl">Quando considerarla</p><ul class="list">${trig.map(row).join("")}</ul>
