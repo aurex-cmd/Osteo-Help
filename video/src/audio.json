@@ -1,0 +1,57 @@
+{
+ "domanda": {
+  "dur": 8.59,
+  "start": 0.0,
+  "cuts": [
+   5.22
+  ]
+ },
+ "primaria": {
+  "dur": 9.69,
+  "start": 0.0,
+  "cuts": [
+   3.03,
+   7.06
+  ]
+ },
+ "esclusione": {
+  "dur": 9.01,
+  "start": 0.0,
+  "cuts": [
+   4.09
+  ]
+ },
+ "esami": {
+  "dur": 18.65,
+  "start": 0.0,
+  "cuts": [
+   5.29,
+   9.47
+  ]
+ },
+ "normali": {
+  "dur": 5.51,
+  "start": 0.0,
+  "cuts": []
+ },
+ "resto": {
+  "dur": 7.89,
+  "start": 0.0,
+  "cuts": []
+ },
+ "app": {
+  "dur": 20.9,
+  "start": 0.0,
+  "cuts": [
+   6.69,
+   12.05
+  ]
+ },
+ "sintesi": {
+  "dur": 7.55,
+  "start": 0.0,
+  "cuts": [
+   3.53
+  ]
+ }
+}
