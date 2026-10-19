@@ -10,7 +10,7 @@ export type SceneDef = { id: string; lines: Line[]; src?: string };
 export const SCENES: SceneDef[] = [
   { id: "domanda", lines: [
     { say: "Hai appena diagnosticato un'osteoporosi, con una frattura da fragilità o con la densitometria.", cap: "Hai appena diagnosticato un'osteoporosi, con una frattura da fragilità o con la DXA." },
-    { say: "La domanda è: da dove viene?", cap: "La domanda è: da dove viene?" },
+    { say: "La domanda è: qual è la causa?", cap: "La domanda è: qual è la causa?" },
   ]},
   { id: "primaria", src: "Fitzpatrick, Mayo Clin Proc 2002 · Ebeling, N Engl J Med 2008", lines: [
     { say: "Nella maggior parte dei casi, la risposta è semplice: l'osteoporosi è primaria.", cap: "Nella maggior parte dei casi la risposta è semplice: l'osteoporosi è primaria." },
@@ -40,8 +40,8 @@ export const SCENES: SceneDef[] = [
   ]},
 ];
 
-// Senza audio la durata è stimata da un parlato lento (~12 caratteri al secondo).
-const CPS = 12, TAIL = 1.1;
+// Senza audio la durata è stimata da un parlato a ritmo normale (~15 caratteri al secondo).
+const CPS = 15, TAIL = 1.1;
 export const LEAD = 0.5;
 const DUR = audio as Record<string, number>;
 
