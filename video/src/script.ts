@@ -9,7 +9,7 @@ export type SceneDef = { id: string; lines: Line[]; src?: string };
 
 export const SCENES: SceneDef[] = [
   { id: "domanda", lines: [
-    { say: "Hai posto diagnosi di osteoporosi, per una frattura da fragilità o con la densitometria.", cap: "Hai posto diagnosi di osteoporosi, per una frattura da fragilità o con la DXA." },
+    { say: "Hai posto diagnosi di osteoporosi, per una frattura da fragilità o con la densitometria.", cap: "Hai posto diagnosi di osteoporosi, per una frattura da fragilità o con la densitometria." },
     { say: "A questo punto la domanda è: qual è la causa?", cap: "A questo punto la domanda è: qual è la causa?" },
   ]},
   { id: "primaria", src: "Fitzpatrick, Mayo Clin Proc 2002 · Ebeling, N Engl J Med 2008", lines: [
@@ -23,7 +23,7 @@ export const SCENES: SceneDef[] = [
   ]},
   { id: "esami", src: "Tannenbaum, J Clin Endocrinol Metab 2002", lines: [
     { say: "Per escluderle, di solito bastano pochi esami del sangue e delle urine: gli esami di primo livello.", cap: "Per escluderle, di solito bastano pochi esami del sangue e delle urine: gli esami di I livello." },
-    { say: "TSH e PTH, in senso stretto, sono esami di secondo livello.", cap: "TSH e PTH, in senso stretto, sono esami di II livello." },
+    { say: "Tiesseàcca e pitiàcca, in senso stretto, sono esami di secondo livello.", cap: "TSH e PTH, in senso stretto, sono esami di II livello." },
     { say: "Però permettono di escludere cause frequenti, come l'ipertiroidismo e l'iperparatiroidismo: per questo, in Osteo Help, rientrano tra quelli di primo livello.", cap: "Però permettono di escludere cause frequenti, come ipertiroidismo e iperparatiroidismo: per questo in Osteo Help rientrano tra quelli di I livello." },
   ]},
   { id: "normali", src: "Tannenbaum, J Clin Endocrinol Metab 2002: 86% delle forme secondarie non note", lines: [

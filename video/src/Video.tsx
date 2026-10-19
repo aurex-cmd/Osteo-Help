@@ -109,7 +109,7 @@ const S1: React.FC = () => {
     </div>
     <Title delay={18} size={104}>Osteoporosi.<br /><span style={{ color: C.pri }}>Qual è la causa?</span></Title>
     <Rise delay={34}><div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-      {["frattura da fragilità", "DXA"].map(t => <span key={t} style={{ fontSize: 34, fontWeight: 600, padding: "12px 24px", borderRadius: 40, background: C.box, color: C.muted }}>{t}</span>)}
+      {["frattura da fragilità", "densitometria"].map(t => <span key={t} style={{ fontSize: 34, fontWeight: 600, padding: "12px 24px", borderRadius: 40, background: C.box, color: C.muted }}>{t}</span>)}
     </div></Rise>
   </Body>;
 };
