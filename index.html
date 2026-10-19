@@ -201,14 +201,16 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .refsbody ol{padding-left:0;margin:6px 0;list-style:none}
 .refsbody li{position:relative;padding:10px 0 10px 30px;border-bottom:1px solid var(--line)}
 .refsbody li:last-child{border-bottom:0}
-.refsbody li::before{content:counter(list-item) ".";position:absolute;left:0;width:22px;text-align:right;font-variant-numeric:tabular-nums}
+.refsbody li::before{content:attr(data-n) ".";position:absolute;left:0;width:22px;text-align:right;font-variant-numeric:tabular-nums}
 .refsbody i{color:var(--ink);font-style:normal;font-weight:500}
 .refsbody.src li::before{content:none}
 .refsbody .rn{position:absolute;left:0;width:22px;text-align:right;font-variant-numeric:tabular-nums;color:var(--focus);font-weight:600;text-decoration:none}
 .small a[data-ref]{color:var(--focus);font-weight:600;text-decoration:none}
 .refsbody li.hl{animation:hl 2.4s ease-out}
 @keyframes hl{0%,40%{background:var(--blue-box);box-shadow:inset 3px 0 0 var(--blue)}}
-.refsbody .refs-sub{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:14px 0 0}
+.refsbody .refs-sub{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:18px 0 0}
+.refsbody .refs-sub:first-child{margin-top:4px}
+.refsbody .refs-foot{margin:14px 0 0}
 
 /* barra azione in basso */
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:10px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,transparent)}
@@ -240,114 +242,114 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 
 <div class="dock" id="dock" hidden><button type="button" id="dockBtn"><div><b id="dockT"></b><span id="dockS"></span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
 
-<template id="refsA"><ol>
-        <li>Commissione Intersocietaria per l'Osteoporosi (SIE, SIGG, SIMFER, SIMG, SIMI, SIOMMMS, SIR, SIOT). <i>Linee guida per la gestione dell'osteoporosi e delle fratture da fragilità</i>, 2023 (processo di validazione ISS – Sistema Nazionale Linee Guida, SNLG).</li>
-        <li>SIOMMMS. <i>Linee guida per la diagnosi, prevenzione e terapia dell'osteoporosi</i>, Reumatismo 2016 (aggiornamento di Adami S. et al., Reumatismo 2009;61(4):1-25).</li>
-        <li>SIOMMMS. <i>Raccomandazioni per la gestione della carenza di vitamina D</i>, 2022.</li>
-        <li>Kanis JA, Cooper C, Rizzoli R, Reginster JY — IOF/ESCEO. <i>European guidance for the diagnosis and management of osteoporosis in postmenopausal women</i>. Osteoporos Int 2019; DOI 10.1007/s00198-018-4704-5.</li>
-      </ol>
-      <p class="refs-sub">Per le forme specifiche</p>
-      <ol start="5">
-        <li>Rajkumar SV, Dimopoulos MA, Palumbo A, et al. <i>International Myeloma Working Group updated criteria for the diagnosis of multiple myeloma</i>. Lancet Oncol 2014;15(12):e538-e548. DOI 10.1016/S1470-2045(14)70442-5. <span class="ref-for">— mieloma multiplo / MGUS (immunofissazione, catene leggere)</span></li>
-        <li>Coleman R, Hadji P, Body J-J, et al. <i>Bone health in cancer: ESMO Clinical Practice Guidelines</i>. Ann Oncol 2020;31(12):1650-1663. DOI 10.1016/j.annonc.2020.07.019. <span class="ref-for">— neoplasia / metastasi ossee</span></li>
-        <li>Crouser ED, Maier LA, Wilson KC, et al. <i>Diagnosis and Detection of Sarcoidosis. An Official ATS Clinical Practice Guideline</i>. Am J Respir Crit Care Med 2020;201(8):e26-e51. DOI 10.1164/rccm.202002-0251ST. <span class="ref-for">— sarcoidosi / granulomatosi (ACE, 1,25(OH)₂D)</span></li>
-        <li>Bilezikian JP, Khan AA, Silverberg SJ, et al. <i>Evaluation and management of primary hyperparathyroidism: summary statement and guidelines from the Fifth International Workshop</i>. J Bone Miner Res 2022;37(11):2293-2314. DOI 10.1002/jbmr.4677. <span class="ref-for">— iperparatiroidismo primario / FHH (clearance Ca/creatinina)</span></li>
-        <li>Khan AA, Bilezikian JP, Brandi ML, et al. <i>Evaluation and management of hypoparathyroidism: summary statement and guidelines from the Second International Workshop</i>. J Bone Miner Res 2022;37(12):2568-2585. DOI 10.1002/jbmr.4691. <span class="ref-for">— ipoparatiroidismo</span></li>
-        <li>Whyte MP. <i>Hypophosphatasia — aetiology, nosology, pathogenesis, diagnosis and treatment</i>. Nat Rev Endocrinol 2016;12(4):233-246. DOI 10.1038/nrendo.2016.14. <span class="ref-for">— ipofosfatasia (PLP, fosfoetanolaminuria, ALPL)</span></li>
-        <li>Jan de Beur SM, et al. <i>Global guidance for the recognition, diagnosis, and management of tumor-induced osteomalacia</i>. J Intern Med 2023; DOI 10.1111/joim.13593. <span class="ref-for">— osteomalacia ipofosfatemica/oncogenica (FGF23, TmP/GFR)</span></li>
-        <li>Ralston SH, Corral-Gudino L, Cooper C, et al. <i>Diagnosis and Management of Paget's Disease of Bone in Adults: A Clinical Guideline</i>. J Bone Miner Res 2019;34(4):579-604. DOI 10.1002/jbmr.3657. <span class="ref-for">— malattia di Paget</span></li>
-        <li>KDIGO CKD-MBD Update Work Group. <i>KDIGO 2017 Clinical Practice Guideline Update for the Diagnosis, Evaluation, Prevention, and Treatment of CKD-MBD</i>. Kidney Int Suppl 2017;7(1):1-59. <span class="ref-for">— IRC / CKD-MBD</span></li>
-        <li>European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines: management of cholestatic liver diseases</i>. J Hepatol 2009;51(2):237-267. DOI 10.1016/j.jhep.2009.04.009. <span class="ref-for">— epatopatia colestatica</span></li>
-        <li>Rubio-Tapia A, Hill ID, Semrad C, et al. <i>ACG Guidelines Update: Diagnosis and Management of Celiac Disease</i>. Am J Gastroenterol 2023;118(1):59-76. DOI 10.14309/ajg.0000000000002075. <span class="ref-for">— malassorbimento / celiachia (anti-tTG + IgA totali)</span></li>
-        <li>Ross DS, Burch HB, Cooper DS, et al. <i>2016 American Thyroid Association Guidelines for Diagnosis and Management of Hyperthyroidism and Other Causes of Thyrotoxicosis</i>. Thyroid 2016;26(10):1343-1421. DOI 10.1089/thy.2016.0229. <span class="ref-for">— ipertiroidismo</span></li>
-        <li>Jonklaas J, Bianco AC, Bauer AJ, et al. <i>Guidelines for the Treatment of Hypothyroidism (ATA)</i>. Thyroid 2014;24(12):1670-1751. DOI 10.1089/thy.2014.0028. <span class="ref-for">— ipotiroidismo</span></li>
-        <li>Musallam KM, Cappellini MD, Porter JB, et al. <i>TIF Guidelines for the Management of Transfusion-Dependent β-Thalassemia</i>. HemaSphere 2025. DOI 10.1002/hem3.70095. <span class="ref-for">— talassemia</span></li>
-        <li>Wolf M, et al. <i>Effects of iron isomaltoside vs ferric carboxymaltose on hypophosphatemia in iron-deficiency anemia: two randomized clinical trials</i>. JAMA 2020;323(5):432-443. DOI 10.1001/jama.2019.22450. <span class="ref-for">— ipofosforemia da ferro carbossimaltosio</span></li>
-        <li>Griebeler ML, et al. <i>Thiazide-associated hypercalcemia: incidence and association with primary hyperparathyroidism over two decades</i>. J Clin Endocrinol Metab 2016;101(3):1166-1173. <span class="ref-for">— ipercalcemia da tiazidici</span></li>
-        <li>Meehan AD, et al. <i>Lithium-associated hypercalcemia: pathophysiology, prevalence, management</i>. World J Surg 2018;42(2):415-424. <span class="ref-for">— ipercalcemia da litio</span></li>
-        <li>de Baaij JHF, Hoenderop JGJ, Bindels RJM. <i>Magnesium in man: implications for health and disease</i>. Physiol Rev 2015;95(1):1-46. DOI 10.1152/physrev.00012.2014. <span class="ref-for">— ipomagnesiemia</span></li>
-        <li>Hall AM, Bass P, Unwin RJ. <i>Drug-induced renal Fanconi syndrome</i>. QJM 2014;107(4):261-269. DOI 10.1093/qjmed/hct258. <span class="ref-for">— sindrome di Fanconi</span></li>
-        <li>Ryan LE, Ing SW. <i>Idiopathic hypercalciuria: can we prevent stones and protect bones?</i> Cleve Clin J Med 2018;85(1):47-54. DOI 10.3949/ccjm.85a.16090. <span class="ref-for">— ipercalciuria idiopatica</span></li>
-        <li>Walsh SB, Shirley DG, Wrong OM, Unwin RJ. <i>Urinary acidification assessed by simultaneous furosemide and fludrocortisone treatment: an alternative to ammonium chloride</i>. Kidney Int 2007;71(12):1310-1316. <span class="ref-for">— acidosi tubulare renale</span></li>
-        <li>European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines on nutrition in chronic liver disease</i>. J Hepatol 2019;70(1):172-193. DOI 10.1016/j.jhep.2018.06.024. <span class="ref-for">— epatopatia cronica / cirrosi</span></li>
-        <li>Burt LA, Billington EO, Rose MS, et al. <i>Effect of high-dose vitamin D supplementation on volumetric bone density and bone strength: a randomized clinical trial</i>. JAMA 2019;322(8):736-745. DOI 10.1001/jama.2019.11889. <span class="ref-for">— eccesso di vitamina D e densità ossea</span></li>
-        <li>Sanders KM, Stuart AL, Williamson EJ, et al. <i>Annual high-dose oral vitamin D and falls and fractures in older women: a randomized controlled trial</i>. JAMA 2010;303(18):1815-1822. DOI 10.1001/jama.2010.594. <span class="ref-for">— boli di vitamina D, cadute e fratture</span></li>
-      </ol>
-      <p class="refs-foot">Carenza/intossicazione di vitamina D, ridotta esposizione solare, farmaci (anticonvulsivanti) e ridotto introito di calcio sono coperti dalle fonti generali su vitamina D e calcio (rif. 3 e 4). Sindrome nefrosica, malnutrizione, immobilizzazione e flogosi/connettiviti non dispongono di una linea guida dedicata in questo contesto: il relativo work-up segue la pratica internistica e le linee guida specialistiche d'organo (nefrologiche, reumatologiche, nutrizionali).</p></template>
-<template id="refsB"><ol>
-        <li>Commissione Intersocietaria per l'Osteoporosi (SIE, SIGG, SIMFER, SIMG, SIMI, SIOMMMS, SIR, SIOT). <i>Linee guida per la gestione dell'osteoporosi e delle fratture da fragilità</i>, 2023 (validazione ISS – Sistema Nazionale Linee Guida, SNLG).</li>
-        <li>SIOMMMS. <i>Linee guida per la diagnosi, prevenzione e terapia dell'osteoporosi</i>, Reumatismo 2016 (aggiornamento di Adami S. et al., Reumatismo 2009;61(4):1-25).</li>
-        <li>SIOMMMS. <i>Raccomandazioni per la gestione della carenza di vitamina D</i>, 2022.</li>
-        <li>Kanis JA, Cooper C, Rizzoli R, Reginster JY — IOF/ESCEO. <i>European guidance for the diagnosis and management of osteoporosis in postmenopausal women</i>. Osteoporos Int 2019; DOI 10.1007/s00198-018-4704-5.</li>
-      </ol>
-      <p class="refs-sub">Per le forme specifiche</p>
-      <ol start="5">
-        <li>Humphrey MB, Russell L, Danila MI, et al. <i>2022 American College of Rheumatology Guideline for the Prevention and Treatment of Glucocorticoid-Induced Osteoporosis</i>. Arthritis Rheumatol 2023;75(12):2088-2102. DOI 10.1002/art.42646. <span class="ref-for">— osteoporosi da glucocorticoidi</span></li>
-        <li>Coleman R, Hadji P, Body J-J, et al. <i>Bone health in cancer: ESMO Clinical Practice Guidelines</i>. Ann Oncol 2020;31(12):1650-1663. DOI 10.1016/j.annonc.2020.07.019. <span class="ref-for">— inibitori dell'aromatasi / deprivazione androgenica</span></li>
-        <li>Bhasin S, Brito JP, Cunningham GR, et al. <i>Testosterone Therapy in Men With Hypogonadism: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2018;103(5):1715-1744. DOI 10.1210/jc.2018-00229. <span class="ref-for">— ipogonadismo maschile</span></li>
-        <li>Panay N, Anderson RA, Bennie A, et al. <i>Evidence-based guideline: premature ovarian insufficiency</i>. Hum Reprod Open 2024;2024(4):hoae065. DOI 10.1093/hropen/hoae065. <span class="ref-for">— insufficienza ovarica primaria / menopausa precoce</span></li>
-        <li>Nieman LK, Biller BMK, Findling JW, et al. <i>The Diagnosis of Cushing's Syndrome: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2008;93(5):1526-1540. DOI 10.1210/jc.2008-0125. <span class="ref-for">— sindrome di Cushing</span></li>
-        <li>Katznelson L, Laws ER, Melmed S, et al. <i>Acromegaly: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2014;99(11):3933-3951. DOI 10.1210/jc.2014-2700. <span class="ref-for">— acromegalia</span></li>
-        <li>Melmed S, Casanueva FF, Hoffman AR, et al. <i>Diagnosis and Treatment of Hyperprolactinemia: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2011;96(2):273-288. DOI 10.1210/jc.2010-1692. <span class="ref-for">— iperprolattinemia</span></li>
-        <li>Molitch ME, Clemmons DR, Malozowski S, et al. <i>Evaluation and Treatment of Adult Growth Hormone Deficiency: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2011;96(6):1587-1609. <span class="ref-for">— deficit di GH dell'adulto</span></li>
-        <li>Ross DS, Burch HB, Cooper DS, et al. <i>2016 American Thyroid Association Guidelines for Diagnosis and Management of Hyperthyroidism and Other Causes of Thyrotoxicosis</i>. Thyroid 2016;26(10):1343-1421. DOI 10.1089/thy.2016.0229. <span class="ref-for">— ipertiroidismo / soppressione da L-tiroxina</span></li>
-        <li>Rudwaleit M, van der Heijde D, Landewé R, et al. <i>The development of ASAS classification criteria for axial spondyloarthritis (part II): validation and final selection</i>. Ann Rheum Dis 2009;68(6):777-783. DOI 10.1136/ard.2009.108233. <span class="ref-for">— spondiloartrite assiale</span></li>
-        <li>Valent P, Akin C, Hartmann K, et al. <i>Updated Diagnostic Criteria and Classification of Mast Cell Disorders: A Consensus Proposal</i>. HemaSphere 2021;5(11):e646. DOI 10.1097/HS9.0000000000000646. <span class="ref-for">— mastocitosi sistemica</span></li>
-        <li>Marini JC, Forlino A, Bächinger HP, et al. <i>Osteogenesis imperfecta</i>. Nat Rev Dis Primers 2017;3:17052. DOI 10.1038/nrdp.2017.52. <span class="ref-for">— osteogenesi imperfetta</span></li>
-        <li>Loeys BL, Dietz HC, Braverman AC, et al. <i>The revised Ghent nosology for the Marfan syndrome</i>. J Med Genet 2010;47(7):476-485. DOI 10.1136/jmg.2009.072785. <span class="ref-for">— sindrome di Marfan (criteri di Ghent)</span></li>
-        <li>Malfait F, Francomano C, Byers P, et al. <i>The 2017 international classification of the Ehlers-Danlos syndromes</i>. Am J Med Genet C Semin Med Genet 2017;175(1):8-26. DOI 10.1002/ajmg.c.31552. <span class="ref-for">— sindromi di Ehlers-Danlos</span></li>
-        <li>Whyte MP. <i>Hypophosphatasia — aetiology, nosology, pathogenesis, diagnosis and treatment</i>. Nat Rev Endocrinol 2016;12(4):233-246. DOI 10.1038/nrendo.2016.14. <span class="ref-for">— ipofosfatasia</span></li>
-        <li>Kowdley KV, Brown KE, Ahn J, Sundaram V. <i>ACG Clinical Guideline: Hereditary Hemochromatosis</i>. Am J Gastroenterol 2019;114(8):1202-1218. DOI 10.14309/ajg.0000000000000315. <span class="ref-for">— emocromatosi ereditaria</span></li>
-        <li>Rubio-Tapia A, Hill ID, Semrad C, et al. <i>ACG Guidelines Update: Diagnosis and Management of Celiac Disease</i>. Am J Gastroenterol 2023;118(1):59-76. DOI 10.14309/ajg.0000000000002075. <span class="ref-for">— celiachia</span></li>
-        <li>Mountjoy M, Ackerman KE, Bailey DM, et al. <i>2023 IOC consensus statement on Relative Energy Deficiency in Sport (REDs)</i>. Br J Sports Med 2023;57(17):1073-1097. DOI 10.1136/bjsports-2023-106994. <span class="ref-for">— amenorrea ipotalamica funzionale / RED-S</span></li>
-        <li>AIFA. <i>Aggiornamento della Nota 79</i>. Determina del 5 agosto 2022. <span class="ref-for">— osteoporosi da glucocorticoidi (dose e durata)</span></li>
-        <li>Fassnacht M, Tsagarakis S, Terzolo M, et al. <i>European Society of Endocrinology clinical practice guidelines on the management of adrenal incidentalomas</i>. Eur J Endocrinol 2023;189(1):G1-G42. DOI 10.1093/ejendo/lvad066. <span class="ref-for">— ipercortisolismo lieve autonomo, incidentaloma surrenalico</span></li>
-        <li>Yuen KCJ, Biller BMK, Radovick S, et al. <i>AACE/ACE guidelines for management of growth hormone deficiency in adults and patients transitioning from pediatric to adult care</i>. Endocr Pract 2019;25(11):1191-1232. DOI 10.4158/GL-2019-0405. <span class="ref-for">— deficit di GH dell'adulto</span></li>
-        <li>Vilaca T, Schini M, Harnan S, et al. <i>The risk of hip and non-vertebral fractures in type 1 and type 2 diabetes: a systematic review and meta-analysis update</i>. Bone 2020;137:115457. <span class="ref-for">— diabete tipo 1 e tipo 2</span></li>
-        <li>Leslie WD, Johansson H, McCloskey EV, et al. <i>Comparison of methods for improving fracture risk assessment in diabetes: the Manitoba BMD Registry</i>. J Bone Miner Res 2018;33(11):1923-1930. DOI 10.1002/jbmr.3538. <span class="ref-for">— rischio di frattura sottostimato nel diabete tipo 2</span></li>
-        <li>Loke YK, Singh S, Furberg CD. <i>Long-term use of thiazolidinediones and fractures in type 2 diabetes: a meta-analysis</i>. CMAJ 2009;180(1):32-39. DOI 10.1503/cmaj.080486. <span class="ref-for">— glitazoni</span></li>
-        <li>Neal B, Perkovic V, Mahaffey KW, et al. <i>Canagliflozin and cardiovascular and renal events in type 2 diabetes</i>. N Engl J Med 2017;377(7):644-657. DOI 10.1056/NEJMoa1611925. <span class="ref-for">— SGLT2-inibitori</span></li>
-        <li>American College of Obstetricians and Gynecologists. <i>Committee Opinion No. 602: Depot medroxyprogesterone acetate and bone effects</i>. Obstet Gynecol 2014. <span class="ref-for">— medrossiprogesterone depot</span></li>
-        <li>Fountas A, Van Uum S, Karavitaki N. <i>Opioid-induced endocrinopathies</i>. Lancet Diabetes Endocrinol 2020;8(1):68-80. DOI 10.1016/S2213-8587(19)30254-2. <span class="ref-for">— oppioidi</span></li>
-        <li>Gordon H, Burisch J, Ellul P, et al. <i>ECCO Guidelines on Extraintestinal Manifestations in Inflammatory Bowel Disease</i>. J Crohns Colitis 2024;18(1):1-37. DOI 10.1093/ecco-jcc/jjad108. <span class="ref-for">— malattie infiammatorie croniche intestinali</span></li>
-        <li>European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines on nutrition in chronic liver disease</i>. J Hepatol 2019;70(1):172-193. DOI 10.1016/j.jhep.2018.06.024. <span class="ref-for">— epatopatia cronica / cirrosi</span></li>
-        <li>Mechanick JI, Apovian C, Brethauer S, et al. <i>Clinical practice guidelines for the perioperative nutrition, metabolic, and nonsurgical support of patients undergoing bariatric procedures – 2019 update</i>. Endocr Pract 2019;25(12). DOI 10.4158/GL-2019-0406. <span class="ref-for">— chirurgia bariatrica</span></li>
-        <li>Kidney Disease: Improving Global Outcomes (KDIGO) CKD-MBD Update Work Group. <i>KDIGO 2017 Clinical Practice Guideline Update for the Diagnosis, Evaluation, Prevention, and Treatment of Chronic Kidney Disease–Mineral and Bone Disorder (CKD-MBD)</i>. Kidney Int Suppl 2017;7(1):1-59. DOI 10.1016/j.kisu.2017.04.001. <span class="ref-for">— insufficienza renale cronica</span></li>
-        <li>Walsh SB, Shirley DG, Wrong OM, Unwin RJ. <i>Urinary acidification assessed by simultaneous furosemide and fludrocortisone treatment: an alternative to ammonium chloride</i>. Kidney Int 2007;71(12):1310-1316. <span class="ref-for">— acidosi tubulare distale</span></li>
-        <li>Morse LR, Biering-Soerensen F, Carbone LD, et al. <i>Bone Mineral Density Testing in Spinal Cord Injury: 2019 ISCD Official Position</i>. J Clin Densitom 2019. <span class="ref-for">— lesione midollare</span></li>
-        <li>Morris AAM, et al. <i>Guidelines for the diagnosis and management of cystathionine beta-synthase deficiency</i>. J Inherit Metab Dis 2017;40(1):49-74. DOI 10.1007/s10545-016-9979-0. <span class="ref-for">— omocistinuria</span></li>
-        <li>Lyons JJ, et al. <i>Elevated basal serum tryptase identifies a multisystem disorder associated with increased TPSAB1 copy number</i>. Nat Genet 2016;48(12):1564-1569. <span class="ref-for">— alfa-triptasemia ereditaria</span></li>
-        <li>Gordon CM, et al. <i>Functional Hypothalamic Amenorrhea: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2017;102(5):1413-1439. <span class="ref-for">— amenorrea ipotalamica funzionale</span></li>
-        <li>Misra M, Katzman DK, Miller KK, et al. <i>Physiologic estrogen replacement increases bone density in adolescent girls with anorexia nervosa</i>. J Bone Miner Res 2011;26(10):2430-2438. <span class="ref-for">— anoressia nervosa</span></li>
-        <li>Kanis JA, et al. <i>Alcohol intake as a risk factor for fracture</i>. Osteoporos Int 2005;16(7):737-742. <span class="ref-for">— alcol</span></li>
-        <li>Kanis JA, et al. <i>Smoking and fracture risk: a meta-analysis</i>. Osteoporos Int 2005;16(2):155-162. DOI 10.1007/s00198-004-1640-3. <span class="ref-for">— fumo</span></li>
-        <li>De Laet C, et al. <i>Body mass index as a predictor of fracture risk: a meta-analysis</i>. Osteoporos Int 2005;16(11):1330-1338. DOI 10.1007/s00198-005-1863-y. <span class="ref-for">— basso peso corporeo</span></li>
-        <li>Ensrud KE, et al. <i>Intentional and unintentional weight loss increase bone loss and hip fracture risk in older women</i>. J Am Geriatr Soc 2003;51(12):1740-1747. <span class="ref-for">— calo ponderale</span></li>
-        <li>European AIDS Clinical Society. <i>EACS Guidelines, versione 12</i>, 2023: sezione sulla malattia ossea. <span class="ref-for">— HIV</span></li>
-        <li>Sermet-Gaudelus I, et al. <i>European cystic fibrosis bone mineralisation guidelines</i>. J Cyst Fibros 2011;10 Suppl 2:S16-S23. <span class="ref-for">— fibrosi cistica</span></li>
-        <li>European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines on haemochromatosis</i>. J Hepatol 2022;77(2):479-502. DOI 10.1016/j.jhep.2022.03.033. <span class="ref-for">— emocromatosi</span></li>
-        <li>Kovacs CS, Ralston SH. <i>Presentation and management of osteoporosis presenting in association with pregnancy or lactation</i>. Osteoporos Int 2015;26(9):2223-2241. DOI 10.1007/s00198-015-3149-3. <span class="ref-for">— gravidanza e allattamento</span></li>
-        <li>Vestergaard P. <i>Epilepsy, osteoporosis and fracture risk – a meta-analysis</i>. Acta Neurol Scand 2005;112(5):277-286. DOI 10.1111/j.1600-0404.2005.00474.x. <span class="ref-for">— anticonvulsivanti, epilessia</span></li>
-        <li>Gajic-Veljanoski O, et al. <i>Effects of long-term low-molecular-weight heparin on fractures and bone density in non-pregnant adults: a systematic review with meta-analysis</i>. J Gen Intern Med 2016;31(8):947-957. DOI 10.1007/s11606-016-3603-8. <span class="ref-for">— eparine</span></li>
-        <li>Tamler R, Epstein S. <i>Nonsteroid immune modulators and bone disease</i>. Ann N Y Acad Sci 2006;1068:284-296. <span class="ref-for">— inibitori della calcineurina</span></li>
-        <li>Carbone LD, et al. <i>Loop diuretic use and fracture in postmenopausal women: findings from the Women's Health Initiative</i>. Arch Intern Med 2009;169(2):132-140. <span class="ref-for">— diuretici dell'ansa</span></li>
-        <li>Yang YX, Lewis JD, Epstein S, Metz DC. <i>Long-term proton pump inhibitor therapy and risk of hip fracture</i>. JAMA 2006;296(24):2947-2953. <span class="ref-for">— inibitori di pompa protonica</span></li>
-        <li>Richards JB, et al. <i>Effect of selective serotonin reuptake inhibitors on the risk of fracture</i>. Arch Intern Med 2007;167(2):188-194. DOI 10.1001/archinte.167.2.188. <span class="ref-for">— SSRI</span></li>
-        <li>Ruffer N, Krusche M, Beil FT, et al. <i>Clinical features of methotrexate osteopathy in rheumatic musculoskeletal disease: a systematic review</i>. Semin Arthritis Rheum 2022;52:151952. DOI 10.1016/j.semarthrit.2022.151952. <span class="ref-for">— metotrexato</span></li>
-        <li>Sagsveen M, et al. <i>Gonadotrophin-releasing hormone analogues for endometriosis: bone mineral density</i>. Cochrane Database Syst Rev 2003;(4):CD001297. <span class="ref-for">— analoghi del GnRH</span></li>
-        <li>van Staa TP, Geusens P, Bijlsma JW, et al. <i>Clinical assessment of the long-term risk of fracture in patients with rheumatoid arthritis</i>. Arthritis Rheum 2006;54(10):3104-3112. <span class="ref-for">— artrite reumatoide</span></li>
-        <li>Mendoza-Pinto C, et al. <i>Bone mineral density and vertebral fractures in patients with systemic lupus erythematosus: a systematic review and meta-regression</i>. PLoS One 2018;13(6):e0196113. DOI 10.1371/journal.pone.0196113. <span class="ref-for">— LES</span></li>
-        <li>Chen TL, Lu JW, Huang YW, et al. <i>Bone mineral density, osteoporosis, and fracture risk in adult patients with psoriasis or psoriatic arthritis: a systematic review and meta-analysis of observational studies</i>. J Clin Med 2020;9(11):3712. DOI 10.3390/jcm9113712. <span class="ref-for">— artrite psoriasica</span></li>
-        <li>Omair MA, Pagnoux C, McDonald-Blumer H, Johnson SR. <i>Low bone density in systemic sclerosis: a systematic review</i>. J Rheumatol 2013;40(11):1881-1890. DOI 10.3899/jrheum.130032. <span class="ref-for">— sclerosi sistemica</span></li>
-        <li>Seo GH, Kang HY, Choe EK. <i>Osteoporosis and fracture after gastrectomy for stomach cancer: a nationwide claims study</i>. Medicine (Baltimore) 2018;97(17):e10532. DOI 10.1097/MD.0000000000010532. <span class="ref-for">— gastrectomia</span></li>
-        <li>Global Initiative for Chronic Obstructive Lung Disease. <i>Global Strategy for the Prevention, Diagnosis and Management of COPD: 2025 Report</i>. <span class="ref-for">— BPCO (comorbidità)</span></li>
-        <li>Yuan ZC, Mo H, Guan J, He JL, Wu ZJ. <i>Risk of hip fracture following stroke, a meta-analysis of 13 cohort studies</i>. Osteoporos Int 2016;27(9):2673-2679. DOI 10.1007/s00198-016-3603-x. <span class="ref-for">— ictus</span></li>
-        <li>Torsney KM, et al. <i>Bone health in Parkinson's disease: a systematic review and meta-analysis</i>. J Neurol Neurosurg Psychiatry 2014;85(10):1159-1166. DOI 10.1136/jnnp-2013-307307. <span class="ref-for">— malattia di Parkinson</span></li>
-        <li>Dong G, Zhang N, Wu Z, Liu Y, Wang L. <i>Multiple sclerosis increases fracture risk: a meta-analysis</i>. Biomed Res Int 2015;2015:650138. DOI 10.1155/2015/650138. <span class="ref-for">— sclerosi multipla</span></li>
-        <li>Anastasilakis AD, Tsourdi E, Makras P, et al. <i>Bone disease following solid organ transplantation: a narrative review and recommendations for management from the European Calcified Tissue Society</i>. Bone 2019;127:401-418. DOI 10.1016/j.bone.2019.07.006. <span class="ref-for">— trapianto di organo solido (rene, fegato, cuore, polmone)</span></li>
-        <li>Kendler DL, Body JJ, Brandi ML, et al. <i>Osteoporosis management in hematologic stem cell transplant recipients: executive summary</i>. J Bone Oncol 2021;28:100361. DOI 10.1016/j.jbo.2021.100361. <span class="ref-for">— trapianto di cellule staminali ematopoietiche</span></li>
-      </ol>
-      <p class="refs-foot">L'immobilizzazione è coperta dalle linee guida generali (rif. 1-4). Per diverse forme non esiste una linea guida dedicata al work-up scheletrico: la fonte citata è allora uno studio o una metanalisi sul rischio di frattura.</p></template>
+<template id="refs"><p class="refs-sub">Linee guida generali</p><ol>
+<li data-id="lg2023" data-n="1">Commissione Intersocietaria per l'Osteoporosi (SIE, SIGG, SIMFER, SIMG, SIMI, SIOMMMS, SIR, SIOT). <i>Linee guida per la gestione dell'osteoporosi e delle fratture da fragilità</i>. 2023 (processo di validazione ISS – Sistema Nazionale Linee Guida, SNLG).</li>
+<li data-id="siommms2016" data-n="2">Rossini M, Adami S, Bertoldo F, et al. <i>Guidelines for the diagnosis, prevention and management of osteoporosis</i>. Reumatismo 2016;68(1):1-39. DOI 10.4081/reumatismo.2016.870. <span class="ref-for">— linee guida SIOMMMS</span></li>
+<li data-id="vitd2022" data-n="3">Bertoldo F, Cianferotti L, et al. <i>Definition, assessment, and management of vitamin D inadequacy: suggestions, recommendations, and warnings from the Italian Society for Osteoporosis, Mineral Metabolism and Bone Diseases (SIOMMMS)</i>. Nutrients 2022;14(19):4148. DOI 10.3390/nu14194148. <span class="ref-for">— vitamina D, calcio</span></li>
+<li data-id="kanis2019" data-n="4">Kanis JA, Cooper C, Rizzoli R, Reginster JY. <i>European guidance for the diagnosis and management of osteoporosis in postmenopausal women</i>. Osteoporos Int 2019;30(1):3-44. DOI 10.1007/s00198-018-4704-5. <span class="ref-for">— IOF/ESCEO</span></li>
+</ol>
+<p class="refs-sub">Da farmaci</p><ol>
+<li data-id="nota79" data-n="5">AIFA. <i>Aggiornamento della Nota 79</i>. Determina del 5 agosto 2022. <span class="ref-for">— glucocorticoidi (dose e durata)</span></li>
+<li data-id="acog602" data-n="6">American College of Obstetricians and Gynecologists. <i>Committee Opinion No. 602: Depot medroxyprogesterone acetate and bone effects</i>. Obstet Gynecol 2014;123(6):1398-1402. DOI 10.1097/01.AOG.0000450758.95422.c8. <span class="ref-for">— medrossiprogesterone depot</span></li>
+<li data-id="carbone" data-n="7">Carbone LD, Johnson KC, Bush AJ, et al. <i>Loop diuretic use and fracture in postmenopausal women: findings from the Women's Health Initiative</i>. Arch Intern Med 2009;169(2):132-140. <span class="ref-for">— diuretici dell'ansa</span></li>
+<li data-id="coleman" data-n="8">Coleman R, Hadji P, Body JJ, et al. <i>Bone health in cancer: ESMO Clinical Practice Guidelines</i>. Ann Oncol 2020;31(12):1650-1663. DOI 10.1016/j.annonc.2020.07.019. <span class="ref-for">— inibitori dell'aromatasi, deprivazione androgenica, chemioterapia; neoplasie e metastasi ossee</span></li>
+<li data-id="fountas" data-n="9">Fountas A, Van Uum S, Karavitaki N. <i>Opioid-induced endocrinopathies</i>. Lancet Diabetes Endocrinol 2020;8(1):68-80. DOI 10.1016/S2213-8587(19)30254-2. <span class="ref-for">— oppioidi</span></li>
+<li data-id="gajic" data-n="10">Gajic-Veljanoski O, Phua CW, Shah PS, et al. <i>Effects of long-term low-molecular-weight heparin on fractures and bone density in non-pregnant adults: a systematic review with meta-analysis</i>. J Gen Intern Med 2016;31(8):947-957. DOI 10.1007/s11606-016-3603-8. <span class="ref-for">— eparine</span></li>
+<li data-id="griebeler" data-n="11">Griebeler ML, Kearns AE, Ryu E, et al. <i>Thiazide-associated hypercalcemia: incidence and association with primary hyperparathyroidism over two decades</i>. J Clin Endocrinol Metab 2016;101(3):1166-1173. DOI 10.1210/jc.2015-3964. <span class="ref-for">— tiazidici</span></li>
+<li data-id="humphrey" data-n="12">Humphrey MB, Russell L, Danila MI, et al. <i>2022 American College of Rheumatology Guideline for the Prevention and Treatment of Glucocorticoid-Induced Osteoporosis</i>. Arthritis Rheumatol 2023;75(12):2088-2102. DOI 10.1002/art.42646. <span class="ref-for">— glucocorticoidi</span></li>
+<li data-id="loke" data-n="13">Loke YK, Singh S, Furberg CD. <i>Long-term use of thiazolidinediones and fractures in type 2 diabetes: a meta-analysis</i>. CMAJ 2009;180(1):32-39. DOI 10.1503/cmaj.080486. <span class="ref-for">— glitazoni</span></li>
+<li data-id="meehan" data-n="14">Meehan AD, Udumyan R, Kardell M, et al. <i>Lithium-associated hypercalcemia: pathophysiology, prevalence, management</i>. World J Surg 2018;42(2):415-424. DOI 10.1007/s00268-017-4328-5. <span class="ref-for">— litio</span></li>
+<li data-id="neal" data-n="15">Neal B, Perkovic V, Mahaffey KW, et al. <i>Canagliflozin and cardiovascular and renal events in type 2 diabetes</i>. N Engl J Med 2017;377(7):644-657. DOI 10.1056/NEJMoa1611925. <span class="ref-for">— SGLT2-inibitori</span></li>
+<li data-id="richards" data-n="16">Richards JB, Papaioannou A, Adachi JD, et al. <i>Effect of selective serotonin reuptake inhibitors on the risk of fracture</i>. Arch Intern Med 2007;167(2):188-194. DOI 10.1001/archinte.167.2.188. <span class="ref-for">— SSRI</span></li>
+<li data-id="ruffer" data-n="17">Ruffer N, Krusche M, Beil FT, et al. <i>Clinical features of methotrexate osteopathy in rheumatic musculoskeletal disease: a systematic review</i>. Semin Arthritis Rheum 2022;52:151952. DOI 10.1016/j.semarthrit.2022.151952. <span class="ref-for">— metotrexato</span></li>
+<li data-id="sagsveen" data-n="18">Sagsveen M, Farmer JE, Prentice A, Breeze A. <i>Gonadotrophin-releasing hormone analogues for endometriosis: bone mineral density</i>. Cochrane Database Syst Rev 2003;(4):CD001297. DOI 10.1002/14651858.CD001297. <span class="ref-for">— analoghi del GnRH</span></li>
+<li data-id="tamler" data-n="19">Tamler R, Epstein S. <i>Nonsteroid immune modulators and bone disease</i>. Ann N Y Acad Sci 2006;1068:284-296. DOI 10.1196/annals.1346.032. <span class="ref-for">— inibitori della calcineurina</span></li>
+<li data-id="vestergaard" data-n="20">Vestergaard P. <i>Epilepsy, osteoporosis and fracture risk – a meta-analysis</i>. Acta Neurol Scand 2005;112(5):277-286. DOI 10.1111/j.1600-0404.2005.00474.x. <span class="ref-for">— antiepilettici, epilessia</span></li>
+<li data-id="wolf" data-n="21">Wolf M, Rubin J, Achebe M, et al. <i>Effects of iron isomaltoside vs ferric carboxymaltose on hypophosphatemia in iron-deficiency anemia: two randomized clinical trials</i>. JAMA 2020;323(5):432-443. DOI 10.1001/jama.2019.22450. <span class="ref-for">— ferro carbossimaltosio e ipofosforemia</span></li>
+<li data-id="yang" data-n="22">Yang YX, Lewis JD, Epstein S, Metz DC. <i>Long-term proton pump inhibitor therapy and risk of hip fracture</i>. JAMA 2006;296(24):2947-2953. DOI 10.1001/jama.296.24.2947. <span class="ref-for">— inibitori di pompa protonica</span></li>
+</ol>
+<p class="refs-sub">Endocrino-metaboliche</p><ol>
+<li data-id="bhasin" data-n="23">Bhasin S, Brito JP, Cunningham GR, et al. <i>Testosterone Therapy in Men With Hypogonadism: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2018;103(5):1715-1744. DOI 10.1210/jc.2018-00229. <span class="ref-for">— ipogonadismo maschile</span></li>
+<li data-id="bilezikian" data-n="24">Bilezikian JP, Khan AA, Silverberg SJ, et al. <i>Evaluation and management of primary hyperparathyroidism: summary statement and guidelines from the Fifth International Workshop</i>. J Bone Miner Res 2022;37(11):2293-2314. DOI 10.1002/jbmr.4677. <span class="ref-for">— iperparatiroidismo primario, ipercalcemia ipocalciurica familiare</span></li>
+<li data-id="burt" data-n="25">Burt LA, Billington EO, Rose MS, et al. <i>Effect of high-dose vitamin D supplementation on volumetric bone density and bone strength: a randomized clinical trial</i>. JAMA 2019;322(8):736-745. DOI 10.1001/jama.2019.11889. <span class="ref-for">— eccesso di vitamina D</span></li>
+<li data-id="debaaij" data-n="26">de Baaij JHF, Hoenderop JGJ, Bindels RJM. <i>Magnesium in man: implications for health and disease</i>. Physiol Rev 2015;95(1):1-46. DOI 10.1152/physrev.00012.2014. <span class="ref-for">— ipomagnesiemia</span></li>
+<li data-id="fassnacht" data-n="27">Fassnacht M, Tsagarakis S, Terzolo M, et al. <i>European Society of Endocrinology clinical practice guidelines on the management of adrenal incidentalomas</i>. Eur J Endocrinol 2023;189(1):G1-G42. DOI 10.1093/ejendo/lvad066. <span class="ref-for">— ipercortisolismo lieve autonomo</span></li>
+<li data-id="jonklaas" data-n="28">Jonklaas J, Bianco AC, Bauer AJ, et al. <i>Guidelines for the treatment of hypothyroidism: prepared by the American Thyroid Association Task Force on Thyroid Hormone Replacement</i>. Thyroid 2014;24(12):1670-1751. DOI 10.1089/thy.2014.0028. <span class="ref-for">— ipotiroidismo</span></li>
+<li data-id="katznelson" data-n="29">Katznelson L, Laws ER, Melmed S, et al. <i>Acromegaly: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2014;99(11):3933-3951. DOI 10.1210/jc.2014-2700. <span class="ref-for">— acromegalia</span></li>
+<li data-id="khan" data-n="30">Khan AA, Bilezikian JP, Brandi ML, et al. <i>Evaluation and management of hypoparathyroidism: summary statement and guidelines from the Second International Workshop</i>. J Bone Miner Res 2022;37(12):2568-2585. DOI 10.1002/jbmr.4691. <span class="ref-for">— ipoparatiroidismo</span></li>
+<li data-id="leslie" data-n="31">Leslie WD, Johansson H, McCloskey EV, et al. <i>Comparison of methods for improving fracture risk assessment in diabetes: the Manitoba BMD Registry</i>. J Bone Miner Res 2018;33(11):1923-1930. DOI 10.1002/jbmr.3538. <span class="ref-for">— rischio di frattura nel diabete tipo 2</span></li>
+<li data-id="melmed" data-n="32">Melmed S, Casanueva FF, Hoffman AR, et al. <i>Diagnosis and Treatment of Hyperprolactinemia: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2011;96(2):273-288. DOI 10.1210/jc.2010-1692. <span class="ref-for">— iperprolattinemia</span></li>
+<li data-id="molitch" data-n="33">Molitch ME, Clemmons DR, Malozowski S, et al. <i>Evaluation and Treatment of Adult Growth Hormone Deficiency: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2011;96(6):1587-1609. DOI 10.1210/jc.2011-0179. <span class="ref-for">— deficit di GH dell'adulto</span></li>
+<li data-id="nieman" data-n="34">Nieman LK, Biller BMK, Findling JW, et al. <i>The Diagnosis of Cushing's Syndrome: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2008;93(5):1526-1540. DOI 10.1210/jc.2008-0125. <span class="ref-for">— sindrome di Cushing</span></li>
+<li data-id="panay" data-n="35">Panay N, Anderson RA, Bennie A, et al. <i>Evidence-based guideline: premature ovarian insufficiency</i>. Hum Reprod Open 2024;2024(4):hoae065. DOI 10.1093/hropen/hoae065. <span class="ref-for">— insufficienza ovarica primaria</span></li>
+<li data-id="ross" data-n="36">Ross DS, Burch HB, Cooper DS, et al. <i>2016 American Thyroid Association Guidelines for Diagnosis and Management of Hyperthyroidism and Other Causes of Thyrotoxicosis</i>. Thyroid 2016;26(10):1343-1421. DOI 10.1089/thy.2016.0229. <span class="ref-for">— ipertiroidismo, L-tiroxina soppressiva</span></li>
+<li data-id="sanders" data-n="37">Sanders KM, Stuart AL, Williamson EJ, et al. <i>Annual high-dose oral vitamin D and falls and fractures in older women: a randomized controlled trial</i>. JAMA 2010;303(18):1815-1822. DOI 10.1001/jama.2010.594. <span class="ref-for">— boli di vitamina D</span></li>
+<li data-id="vilaca" data-n="38">Vilaca T, Schini M, Harnan S, et al. <i>The risk of hip and non-vertebral fractures in type 1 and type 2 diabetes: a systematic review and meta-analysis update</i>. Bone 2020;137:115457. DOI 10.1016/j.bone.2020.115457. <span class="ref-for">— diabete tipo 1 e tipo 2</span></li>
+<li data-id="yuen" data-n="39">Yuen KCJ, Biller BMK, Radovick S, et al. <i>American Association of Clinical Endocrinologists and American College of Endocrinology guidelines for management of growth hormone deficiency in adults and patients transitioning from pediatric to adult care</i>. Endocr Pract 2019;25(11):1191-1232. DOI 10.4158/GL-2019-0405. <span class="ref-for">— deficit di GH dell'adulto</span></li>
+</ol>
+<p class="refs-sub">Reumatologiche / infiammatorie</p><ol>
+<li data-id="chen" data-n="40">Chen TL, Lu JW, Huang YW, et al. <i>Bone mineral density, osteoporosis, and fracture risk in adult patients with psoriasis or psoriatic arthritis: a systematic review and meta-analysis of observational studies</i>. J Clin Med 2020;9(11):3712. DOI 10.3390/jcm9113712. <span class="ref-for">— artrite psoriasica</span></li>
+<li data-id="mendoza" data-n="41">Mendoza-Pinto C, Rojas-Villarraga A, Molano-González N, et al. <i>Bone mineral density and vertebral fractures in patients with systemic lupus erythematosus: a systematic review and meta-regression</i>. PLoS One 2018;13(6):e0196113. DOI 10.1371/journal.pone.0196113. <span class="ref-for">— lupus eritematoso sistemico</span></li>
+<li data-id="omair" data-n="42">Omair MA, Pagnoux C, McDonald-Blumer H, Johnson SR. <i>Low bone density in systemic sclerosis: a systematic review</i>. J Rheumatol 2013;40(11):1881-1890. DOI 10.3899/jrheum.130032. <span class="ref-for">— sclerosi sistemica</span></li>
+<li data-id="rudwaleit" data-n="43">Rudwaleit M, van der Heijde D, Landewé R, et al. <i>The development of Assessment of SpondyloArthritis international Society classification criteria for axial spondyloarthritis (part II): validation and final selection</i>. Ann Rheum Dis 2009;68(6):777-783. DOI 10.1136/ard.2009.108233. <span class="ref-for">— spondiloartrite assiale</span></li>
+<li data-id="vanstaa" data-n="44">van Staa TP, Geusens P, Bijlsma JW, et al. <i>Clinical assessment of the long-term risk of fracture in patients with rheumatoid arthritis</i>. Arthritis Rheum 2006;54(10):3104-3112. DOI 10.1002/art.22117. <span class="ref-for">— artrite reumatoide</span></li>
+</ol>
+<p class="refs-sub">Gastro-epatiche / nutrizionali</p><ol>
+<li data-id="easlnutr" data-n="45">European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines on nutrition in chronic liver disease</i>. J Hepatol 2019;70(1):172-193. DOI 10.1016/j.jhep.2018.06.024. <span class="ref-for">— epatopatia cronica, cirrosi</span></li>
+<li data-id="easlchol" data-n="46">European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines: management of cholestatic liver diseases</i>. J Hepatol 2009;51(2):237-267. DOI 10.1016/j.jhep.2009.04.009. <span class="ref-for">— epatopatia colestatica</span></li>
+<li data-id="ecco" data-n="47">Gordon H, Burisch J, Ellul P, et al. <i>ECCO Guidelines on Extraintestinal Manifestations in Inflammatory Bowel Disease</i>. J Crohns Colitis 2024;18(1):1-37. DOI 10.1093/ecco-jcc/jjad108. <span class="ref-for">— malattie infiammatorie croniche intestinali</span></li>
+<li data-id="mechanick" data-n="48">Mechanick JI, Apovian C, Brethauer S, et al. <i>Clinical practice guidelines for the perioperative nutrition, metabolic, and nonsurgical support of patients undergoing bariatric procedures – 2019 update</i>. Endocr Pract 2019;25(12):1346-1359. DOI 10.4158/GL-2019-0406. <span class="ref-for">— chirurgia bariatrica</span></li>
+<li data-id="rubiotapia" data-n="49">Rubio-Tapia A, Hill ID, Semrad C, et al. <i>American College of Gastroenterology Guidelines Update: Diagnosis and Management of Celiac Disease</i>. Am J Gastroenterol 2023;118(1):59-76. DOI 10.14309/ajg.0000000000002075. <span class="ref-for">— celiachia, malassorbimento</span></li>
+<li data-id="seo" data-n="50">Seo GH, Kang HY, Choe EK. <i>Osteoporosis and fracture after gastrectomy for stomach cancer: a nationwide claims study</i>. Medicine (Baltimore) 2018;97(17):e10532. DOI 10.1097/MD.0000000000010532. <span class="ref-for">— gastrectomia</span></li>
+</ol>
+<p class="refs-sub">Renali</p><ol>
+<li data-id="hall" data-n="51">Hall AM, Bass P, Unwin RJ. <i>Drug-induced renal Fanconi syndrome</i>. QJM 2014;107(4):261-269. DOI 10.1093/qjmed/hct258. <span class="ref-for">— sindrome di Fanconi</span></li>
+<li data-id="kdigo" data-n="52">Kidney Disease: Improving Global Outcomes (KDIGO) CKD-MBD Update Work Group. <i>KDIGO 2017 Clinical Practice Guideline Update for the Diagnosis, Evaluation, Prevention, and Treatment of Chronic Kidney Disease–Mineral and Bone Disorder (CKD-MBD)</i>. Kidney Int Suppl 2017;7(1):1-59. DOI 10.1016/j.kisu.2017.04.001. <span class="ref-for">— insufficienza renale cronica, trapianto di rene</span></li>
+<li data-id="ryan" data-n="53">Ryan LE, Ing SW. <i>Idiopathic hypercalciuria: can we prevent stones and protect bones?</i> Cleve Clin J Med 2018;85(1):47-54. DOI 10.3949/ccjm.85a.16090. <span class="ref-for">— ipercalciuria idiopatica</span></li>
+<li data-id="walsh" data-n="54">Walsh SB, Shirley DG, Wrong OM, Unwin RJ. <i>Urinary acidification assessed by simultaneous furosemide and fludrocortisone treatment: an alternative to ammonium chloride</i>. Kidney Int 2007;71(12):1310-1316. DOI 10.1038/sj.ki.5002220. <span class="ref-for">— acidosi tubulare renale</span></li>
+</ol>
+<p class="refs-sub">Neurologiche</p><ol>
+<li data-id="dong" data-n="55">Dong G, Zhang N, Wu Z, et al. <i>Multiple sclerosis increases fracture risk: a meta-analysis</i>. Biomed Res Int 2015;2015:650138. DOI 10.1155/2015/650138. <span class="ref-for">— sclerosi multipla</span></li>
+<li data-id="morse" data-n="56">Morse LR, Biering-Soerensen F, Carbone LD, et al. <i>Bone Mineral Density Testing in Spinal Cord Injury: 2019 ISCD Official Position</i>. J Clin Densitom 2019;22(4):554-566. DOI 10.1016/j.jocd.2019.07.012. <span class="ref-for">— lesione midollare</span></li>
+<li data-id="torsney" data-n="57">Torsney KM, Noyce AJ, Doherty KM, et al. <i>Bone health in Parkinson's disease: a systematic review and meta-analysis</i>. J Neurol Neurosurg Psychiatry 2014;85(10):1159-1166. DOI 10.1136/jnnp-2013-307307. <span class="ref-for">— malattia di Parkinson</span></li>
+<li data-id="yuan" data-n="58">Yuan ZC, Mo H, Guan J, et al. <i>Risk of hip fracture following stroke, a meta-analysis of 13 cohort studies</i>. Osteoporos Int 2016;27(9):2673-2679. DOI 10.1007/s00198-016-3603-x. <span class="ref-for">— ictus</span></li>
+</ol>
+<p class="refs-sub">Ematologiche</p><ol>
+<li data-id="lyons" data-n="59">Lyons JJ, Yu X, Hughes JD, et al. <i>Elevated basal serum tryptase identifies a multisystem disorder associated with increased TPSAB1 copy number</i>. Nat Genet 2016;48(12):1564-1569. DOI 10.1038/ng.3696. <span class="ref-for">— alfa-triptasemia ereditaria</span></li>
+<li data-id="musallam" data-n="60">Musallam KM, Cappellini MD, Porter JB, et al. <i>TIF Guidelines for the Management of Transfusion-Dependent β-Thalassemia</i>. HemaSphere 2025;9(3):e70095. DOI 10.1002/hem3.70095. <span class="ref-for">— talassemia</span></li>
+<li data-id="rajkumar" data-n="61">Rajkumar SV, Dimopoulos MA, Palumbo A, et al. <i>International Myeloma Working Group updated criteria for the diagnosis of multiple myeloma</i>. Lancet Oncol 2014;15(12):e538-e548. DOI 10.1016/S1470-2045(14)70442-5. <span class="ref-for">— mieloma multiplo, MGUS</span></li>
+<li data-id="valent" data-n="62">Valent P, Akin C, Hartmann K, et al. <i>Updated Diagnostic Criteria and Classification of Mast Cell Disorders: A Consensus Proposal</i>. HemaSphere 2021;5(11):e646. DOI 10.1097/HS9.0000000000000646. <span class="ref-for">— mastocitosi sistemica</span></li>
+</ol>
+<p class="refs-sub">Genetiche</p><ol>
+<li data-id="loeys" data-n="63">Loeys BL, Dietz HC, Braverman AC, et al. <i>The revised Ghent nosology for the Marfan syndrome</i>. J Med Genet 2010;47(7):476-485. DOI 10.1136/jmg.2009.072785. <span class="ref-for">— sindrome di Marfan</span></li>
+<li data-id="malfait" data-n="64">Malfait F, Francomano C, Byers P, et al. <i>The 2017 international classification of the Ehlers-Danlos syndromes</i>. Am J Med Genet C Semin Med Genet 2017;175(1):8-26. DOI 10.1002/ajmg.c.31552. <span class="ref-for">— sindromi di Ehlers-Danlos</span></li>
+<li data-id="marini" data-n="65">Marini JC, Forlino A, Bächinger HP, et al. <i>Osteogenesis imperfecta</i>. Nat Rev Dis Primers 2017;3:17052. DOI 10.1038/nrdp.2017.52. <span class="ref-for">— osteogenesi imperfetta</span></li>
+<li data-id="morris" data-n="66">Morris AA, Kožich V, Santra S, et al. <i>Guidelines for the diagnosis and management of cystathionine beta-synthase deficiency</i>. J Inherit Metab Dis 2017;40(1):49-74. DOI 10.1007/s10545-016-9979-0. <span class="ref-for">— omocistinuria</span></li>
+<li data-id="whyte" data-n="67">Whyte MP. <i>Hypophosphatasia — aetiology, nosology, pathogenesis, diagnosis and treatment</i>. Nat Rev Endocrinol 2016;12(4):233-246. DOI 10.1038/nrendo.2016.14. <span class="ref-for">— ipofosfatasia</span></li>
+</ol>
+<p class="refs-sub">Stili di vita e nutrizione</p><ol>
+<li data-id="delaet" data-n="68">De Laet C, Kanis JA, Odén A, et al. <i>Body mass index as a predictor of fracture risk: a meta-analysis</i>. Osteoporos Int 2005;16(11):1330-1338. DOI 10.1007/s00198-005-1863-y. <span class="ref-for">— basso peso corporeo</span></li>
+<li data-id="ensrud" data-n="69">Ensrud KE, Ewing SK, Stone KL, et al. <i>Intentional and unintentional weight loss increase bone loss and hip fracture risk in older women</i>. J Am Geriatr Soc 2003;51(12):1740-1747. DOI 10.1046/j.1532-5415.2003.51558.x. <span class="ref-for">— calo ponderale</span></li>
+<li data-id="gordoncm" data-n="70">Gordon CM, Ackerman KE, Berga SL, et al. <i>Functional Hypothalamic Amenorrhea: An Endocrine Society Clinical Practice Guideline</i>. J Clin Endocrinol Metab 2017;102(5):1413-1439. DOI 10.1210/jc.2017-00131. <span class="ref-for">— amenorrea ipotalamica funzionale</span></li>
+<li data-id="kanisalc" data-n="71">Kanis JA, Johansson H, Johnell O, et al. <i>Alcohol intake as a risk factor for fracture</i>. Osteoporos Int 2005;16(7):737-742. DOI 10.1007/s00198-004-1734-y. <span class="ref-for">— alcol</span></li>
+<li data-id="kanisfumo" data-n="72">Kanis JA, Johnell O, Odén A, et al. <i>Smoking and fracture risk: a meta-analysis</i>. Osteoporos Int 2005;16(2):155-162. DOI 10.1007/s00198-004-1640-3. <span class="ref-for">— fumo</span></li>
+<li data-id="misra" data-n="73">Misra M, Katzman DK, Miller KK, et al. <i>Physiologic estrogen replacement increases bone density in adolescent girls with anorexia nervosa</i>. J Bone Miner Res 2011;26(10):2430-2438. DOI 10.1002/jbmr.447. <span class="ref-for">— anoressia nervosa</span></li>
+<li data-id="mountjoy" data-n="74">Mountjoy M, Ackerman KE, Bailey DM, et al. <i>2023 International Olympic Committee's (IOC) consensus statement on Relative Energy Deficiency in Sport (REDs)</i>. Br J Sports Med 2023;57(17):1073-1097. DOI 10.1136/bjsports-2023-106994. <span class="ref-for">— bassa disponibilità energetica (REDs)</span></li>
+</ol>
+<p class="refs-sub">Altre condizioni</p><ol>
+<li data-id="anastasilakis" data-n="75">Anastasilakis AD, Tsourdi E, Makras P, et al. <i>Bone disease following solid organ transplantation: a narrative review and recommendations for management from the European Calcified Tissue Society</i>. Bone 2019;127:401-418. DOI 10.1016/j.bone.2019.07.006. <span class="ref-for">— trapianto di organo solido</span></li>
+<li data-id="crouser" data-n="76">Crouser ED, Maier LA, Wilson KC, et al. <i>Diagnosis and Detection of Sarcoidosis. An Official American Thoracic Society Clinical Practice Guideline</i>. Am J Respir Crit Care Med 2020;201(8):e26-e51. DOI 10.1164/rccm.202002-0251ST. <span class="ref-for">— sarcoidosi</span></li>
+<li data-id="eacs" data-n="77">European AIDS Clinical Society. <i>EACS Guidelines, version 12.0</i>. Ottobre 2023: sezione sulla malattia ossea. <span class="ref-for">— HIV</span></li>
+<li data-id="easlhaem" data-n="78">European Association for the Study of the Liver. <i>EASL Clinical Practice Guidelines on haemochromatosis</i>. J Hepatol 2022;77(2):479-502. DOI 10.1016/j.jhep.2022.03.033. <span class="ref-for">— emocromatosi</span></li>
+<li data-id="gold" data-n="79">Global Initiative for Chronic Obstructive Lung Disease. <i>Global Strategy for the Prevention, Diagnosis and Management of COPD: 2025 Report</i>. GOLD 2025. <span class="ref-for">— BPCO</span></li>
+<li data-id="jandebeur" data-n="80">Jan de Beur SM, Minisola S, Xia WB, et al. <i>Global guidance for the recognition, diagnosis, and management of tumor-induced osteomalacia</i>. J Intern Med 2023;293(3):309-328. DOI 10.1111/joim.13593. <span class="ref-for">— osteomalacia ipofosfatemica e oncogenica</span></li>
+<li data-id="kendler" data-n="81">Kendler DL, Body JJ, Brandi ML, et al. <i>Osteoporosis management in hematologic stem cell transplant recipients: executive summary</i>. J Bone Oncol 2021;28:100361. DOI 10.1016/j.jbo.2021.100361. <span class="ref-for">— trapianto di cellule staminali ematopoietiche</span></li>
+<li data-id="kovacs" data-n="82">Kovacs CS, Ralston SH. <i>Presentation and management of osteoporosis presenting in association with pregnancy or lactation</i>. Osteoporos Int 2015;26(9):2223-2241. DOI 10.1007/s00198-015-3149-3. <span class="ref-for">— gravidanza e allattamento</span></li>
+<li data-id="kowdley" data-n="83">Kowdley KV, Brown KE, Ahn J, Sundaram V. <i>ACG Clinical Guideline: Hereditary Hemochromatosis</i>. Am J Gastroenterol 2019;114(8):1202-1218. DOI 10.14309/ajg.0000000000000315. <span class="ref-for">— emocromatosi</span></li>
+<li data-id="ralston" data-n="84">Ralston SH, Corral-Gudino L, Cooper C, et al. <i>Diagnosis and Management of Paget's Disease of Bone in Adults: A Clinical Guideline</i>. J Bone Miner Res 2019;34(4):579-604. DOI 10.1002/jbmr.3657. <span class="ref-for">— malattia di Paget</span></li>
+<li data-id="sermet" data-n="85">Sermet-Gaudelus I, Bianchi ML, Garabédian M, et al. <i>European cystic fibrosis bone mineralisation guidelines</i>. J Cyst Fibros 2011;10 Suppl 2:S16-S23. DOI 10.1016/S1569-1993(11)60004-0. <span class="ref-for">— fibrosi cistica</span></li>
+</ol>
+<p class="refs-foot">Per diverse forme non esiste una linea guida dedicata al work-up scheletrico: la fonte citata è allora uno studio o una metanalisi sul rischio di frattura. Carenza di vitamina D, ridotto introito di calcio, immobilizzazione, sindrome nefrosica, malnutrizione, flogosi e connettiviti sono coperte dalle linee guida generali (rif. 1–4).</p></template>
 
 <script>
 /* ============================================================
@@ -1212,7 +1214,7 @@ function vForma(cid){
     <p class="lbl">Reperti tipici</p><div class="tags">${reps}</div>
     ${l2.length ? `<p class="lbl">Esami di II livello</p><ul class="list">${l2.map((x,i) => `<li><i>${i+1}</i>${x}</li>`).join("")}</ul>` : ""}
     ${NOTES[cid] ? `<p class="lbl">Perché fa male all'osso</p><p class="note">${NOTES[cid]}</p>` : ""}
-    ${fontiHTML("A", SRC_A[cid])}
+    ${fontiHTML(SRC[cid])}
 ` };
 }
 
@@ -1314,7 +1316,7 @@ function vCausa(id){
   const f = FORMA[id]; if(!f) return { redirect:"" };
   const trig = f.trigger.filter(t => t[2] !== "supp").sort((a, b) => (a[1] === "forte" ? 0 : 1) - (b[1] === "forte" ? 0 : 1));
   const row = t => { const on = selected.has(t[0]); return `<li class="${t[1]==="forte"?"forte":""}${on?" on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
-  return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + causaBody(id) + fontiHTML("B", SRC_B[id]) };
+  return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + causaBody(id) + fontiHTML(SRC[id]) };
 }
 function causaBody(id){
   const f = FORMA[id];
@@ -1342,11 +1344,11 @@ const gtab = {};
 function vGruppo(key){
   const g = GRUPPI[key]; if(!g) return { redirect:"catalogo" };
   const t = gtab[key] || 0, id = g.ids[t], f = FORMA[id];
-  const src = [...new Set(g.ids.flatMap(x => SRC_B[x] || []))];
+  const src = [...new Set(g.ids.flatMap(x => SRC[x] || []))];
   return { bar:"Scheda", html: head(g.nome, "", FORMA_CAT[f.cat]||f.cat) + `
     <div class="seg" role="group" aria-label="Situazione">${(g.tabs||GTAB_LBL).map((l,i) => `<button type="button" data-gtab="${key}:${i}" aria-pressed="${i===t}">${l}</button>`).join("")}</div>
     ${causaBody(id)}
-    ${fontiHTML("B", src)}` };
+    ${fontiHTML(src)}` };
 }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-gtab]"); if(!b) return;
@@ -1354,48 +1356,40 @@ document.addEventListener("click", e => {
 });
 
 /* ---------- fonti nelle schede ---------- */
-const SRC_A = {
-  iperpara:["Bilezikian JP, Khan AA"], fhh:["Bilezikian JP, Khan AA"], ipopara:["Khan AA, Bilezikian"],
-  mieloma:["Rajkumar SV"], mgus:["Rajkumar SV"], talassemia:["Musallam KM"],
-  neoplasia:["Coleman R"], ipercalcemiaMaligna:["Coleman R"], sarcoidosi:["Crouser ED"],
-  ipertiroid:["Ross DS"], ipotiroid:["Jonklaas J"],
-  deficitD:["Raccomandazioni per la gestione della carenza di vitamina D","Kanis JA, Cooper C"], intoxD:["Raccomandazioni per la gestione della carenza di vitamina D","Kanis JA, Cooper C","Burt LA","Sanders KM"],
-  farmaciD:["Raccomandazioni per la gestione della carenza di vitamina D","Kanis JA, Cooper C"], ridIntroito:["Raccomandazioni per la gestione della carenza di vitamina D","Kanis JA, Cooper C"],
-  osteomalIpoP:["Jan de Beur SM","Wolf M"], ipofosfatasia:["Whyte MP"], paget:["Ralston SH"],
-  irc:["KDIGO"], colestasi:["management of cholestatic"], malassorb:["Rubio-Tapia A"],
-  farmaciCa:["Griebeler ML","Meehan AD"], ipomagne:["de Baaij JHF"], fanconi:["Hall AM"], ipercalciuriaId:["Ryan LE"], acidosiTub:["Walsh SB"], epatopatia:["nutrition in chronic liver disease"]
-};
-const SRC_B = {
-  ipogonadismo:["Bhasin S"], gio:["Humphrey MB","Nota 79"], ipo_adt:["Coleman R"], ipo_aromatasi:["Coleman R"], op_chemio:["Coleman R"],
-  tiroxina:["Ross DS"], op_glitazoni:["Loke YK"], op_sglt2:["Neal B"], op_tenofovir:["EACS"], op_dmpa:["Committee Opinion No. 602"], op_oppioidi:["Fountas A"],
-  mastocitosi:["Valent P","Lyons JJ"], oi:["Marini JC"], gen_marfan:["Loeys BL"], gen_eds:["Malfait F"], gen_omocistinuria:["Morris AAM"], gen_ipofosfatasia:["Whyte MP"],
-  diabete:["Vilaca T","Leslie WD"], dm1:["Vilaca T"], cushing:["Nieman LK","Fassnacht M"], acromegalia:["Katznelson L"], iperprl:["Melmed S, Casanueva"],
-  deficit_gh:["Molitch ME","Yuen KCJ"], poi:["Panay N"],
-  reuma_spa:["Rudwaleit M"], reuma_spa_occulta:["Rudwaleit M"],
-  gi_mici:["ECCO Guidelines"], gi_celiachia:["Rubio-Tapia A"], gi_celiachia_occulta:["Rubio-Tapia A"], gi_epatopatia:["nutrition in chronic liver disease"], gi_bariatrica:["Mechanick JI"],
-  renale_trapianto:["Kidney Disease: Improving Global Outcomes","Anastasilakis AD","Kendler DL"], renale_rta:["Walsh SB"], neuro_midollo:["Morse LR"],
-  altre_hiv:["EACS"], altre_cf:["Sermet-Gaudelus I"], altre_emocromatosi:["Kowdley KV","on haemochromatosis"], emocromatosi_occulta:["Kowdley KV","on haemochromatosis"], plo:["Kovacs CS"],
-  anticonv:["Vestergaard P"], neuro_epilessia:["Vestergaard P"], op_eparina:["Gajic-Veljanoski O"], op_cni:["Tamler R"], op_diuretici:["Loop diuretic use"], op_ipp:["Yang YX"], op_ssri:["Richards JB"], op_mtx:["Ruffer N"], ipo_gnrh:["Sagsveen M"],
-  reuma_ar:["van Staa TP"], reuma_les:["Mendoza-Pinto C"], reuma_psa:["Chen TL"], reuma_ssc:["Omair MA"], gi_gastrectomia:["Seo GH"], altre_bpco:["Global Initiative for Chronic"], neuro_ictus:["Risk of hip fracture following stroke"], neuro_parkinson:["Torsney KM"], neuro_sm:["Dong G"],
-  vita_anoressia:["Misra M"], vita_alcol:["Alcohol intake"], vita_fumo:["Smoking and fracture"], vita_basso_peso:["De Laet C"], op_calo:["Ensrud KE"], vita_fha:["Gordon CM","Mountjoy M"]
+const SRC = {
+  iperpara:["bilezikian"], fhh:["bilezikian"], ipopara:["khan"], mieloma:["rajkumar"], mgus:["rajkumar"], talassemia:["musallam"], neoplasia:["coleman"],
+  ipercalcemiaMaligna:["coleman"], sarcoidosi:["crouser"], ipertiroid:["ross"], ipotiroid:["jonklaas"], deficitD:["vitd2022","kanis2019"],
+  intoxD:["vitd2022","kanis2019","burt","sanders"], farmaciD:["vitd2022","kanis2019"], ridIntroito:["vitd2022","kanis2019"],
+  osteomalIpoP:["jandebeur","wolf"], ipofosfatasia:["whyte"], paget:["ralston"], irc:["kdigo"], colestasi:["easlchol"], malassorb:["rubiotapia"],
+  farmaciCa:["griebeler","meehan"], ipomagne:["debaaij"], fanconi:["hall"], ipercalciuriaId:["ryan"], acidosiTub:["walsh"], epatopatia:["easlnutr"],
+  ipogonadismo:["bhasin"], gio:["humphrey","nota79"], ipo_adt:["coleman"], ipo_aromatasi:["coleman"], op_chemio:["coleman"], tiroxina:["ross"],
+  op_glitazoni:["loke"], op_sglt2:["neal"], op_tenofovir:["eacs"], op_dmpa:["acog602"], op_oppioidi:["fountas"], mastocitosi:["valent","lyons"],
+  oi:["marini"], gen_marfan:["loeys"], gen_eds:["malfait"], gen_omocistinuria:["morris"], gen_ipofosfatasia:["whyte"], diabete:["vilaca","leslie"],
+  dm1:["vilaca"], cushing:["nieman","fassnacht"], acromegalia:["katznelson"], iperprl:["melmed"], deficit_gh:["molitch","yuen"], poi:["panay"],
+  reuma_spa:["rudwaleit"], reuma_spa_occulta:["rudwaleit"], gi_mici:["ecco"], gi_celiachia:["rubiotapia"], gi_celiachia_occulta:["rubiotapia"],
+  gi_epatopatia:["easlnutr"], gi_bariatrica:["mechanick"], renale_trapianto:["kdigo","anastasilakis","kendler"], renale_rta:["walsh"],
+  neuro_midollo:["morse"], altre_hiv:["eacs"], altre_cf:["sermet"], altre_emocromatosi:["kowdley","easlhaem"],
+  emocromatosi_occulta:["kowdley","easlhaem"], plo:["kovacs"], anticonv:["vestergaard"], neuro_epilessia:["vestergaard"], op_eparina:["gajic"],
+  op_cni:["tamler"], op_diuretici:["carbone"], op_ipp:["yang"], op_ssri:["richards"], op_mtx:["ruffer"], ipo_gnrh:["sagsveen"], reuma_ar:["vanstaa"],
+  reuma_les:["mendoza"], reuma_psa:["chen"], reuma_ssc:["omair"], gi_gastrectomia:["seo"], altre_bpco:["gold"], neuro_ictus:["yuan"],
+  neuro_parkinson:["torsney"], neuro_sm:["dong"], vita_anoressia:["misra"], vita_alcol:["kanisalc"], vita_fumo:["kanisfumo"], vita_basso_peso:["delaet"],
+  op_calo:["ensrud"], vita_fha:["gordoncm","mountjoy"]
 };
 let pendingRef = null;
-function fontiHTML(list, keys){
-  const lis = [...$(list === "A" ? "#refsA" : "#refsB").content.querySelectorAll("li")];
-  const nome = list === "A" ? "alterati" : "normali";
-  if(!keys || !keys.length) return `<p class="lbl">Fonti</p><p class="small">Nessuna fonte dedicata: valgono le linee guida generali (<a href="#bibliografia" data-ref="${list}1">rif. 1–4</a> della bibliografia, elenco "Esami di I livello ${nome}").</p>`;
-  const items = keys.map(k => {
-    const n = lis.findIndex(li => li.textContent.includes(k)); if(n < 0) return "";
-    const li = lis[n].cloneNode(true); const f = li.querySelector(".ref-for"); if(f) f.remove();
-    return `<li><a class="rn" href="#bibliografia" data-ref="${list}${n+1}">${n+1}</a>${li.innerHTML.trim()}</li>`;
+function fontiHTML(ids){
+  const lis = $("#refs").content;
+  if(!ids || !ids.length) return `<p class="lbl">Fonti</p><p class="small">Nessuna fonte dedicata: valgono le linee guida generali (<a href="#bibliografia" data-ref="1">rif. 1–4</a> della bibliografia).</p>`;
+  const items = ids.map(id => {
+    const src = lis.querySelector(`li[data-id="${id}"]`); if(!src) return "";
+    const li = src.cloneNode(true); const f = li.querySelector(".ref-for"); if(f) f.remove();
+    return `<li><a class="rn" href="#bibliografia" data-ref="${src.dataset.n}">${src.dataset.n}</a>${li.innerHTML.trim()}</li>`;
   }).join("");
-  return `<p class="lbl">Fonti</p><div class="refsbody src"><ol>${items}</ol></div><p class="small">Il numero rimanda alla bibliografia, elenco "Esami di I livello ${nome}".</p>`;
+  return `<p class="lbl">Fonti</p><div class="refsbody src"><ol>${items}</ol></div><p class="small">Il numero rimanda alla bibliografia.</p>`;
 }
 document.addEventListener("click", e => { const a = e.target.closest("[data-ref]"); if(a) pendingRef = a.dataset.ref; });
 function showPendingRef(){
   if(!pendingRef) return;
-  const box = document.querySelectorAll(".refsbody")[pendingRef[0] === "A" ? 0 : 1];
-  const li = box && box.querySelectorAll("li")[+pendingRef.slice(1) - 1];
+  const li = document.querySelector(`.refsbody li[data-n="${pendingRef}"]`);
   pendingRef = null;
   if(li){ li.scrollIntoView({ block:"center" }); li.classList.add("hl"); }
 }
@@ -1500,8 +1494,7 @@ function vCalcio(){
 }
 function vBiblio(){
   return { bar:"Bibliografia", html: head("Bibliografia") + `
-    <p class="lbl">Esami di I livello alterati</p><div class="refsbody">${$("#refsA").innerHTML}</div>
-    <p class="lbl">Esami di I livello normali</p><div class="refsbody">${$("#refsB").innerHTML}</div>` };
+    <div class="refsbody">${$("#refs").innerHTML}</div>` };
 }
 
 /* ---------- tema chiaro / scuro ---------- */

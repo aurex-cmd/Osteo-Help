@@ -108,6 +108,7 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 
 ### Bibliografia
 
+- Bibliografia unificata (85 voci): un solo elenco numerato al posto dei due elenchi "esami alterati" ed "esami normali", senza doppioni. Prima le 4 linee guida generali, poi le fonti specifiche raggruppate come nel catalogo e in ordine alfabetico per autore. Citazioni completate con lo stesso formato (primi tre autori, volume, pagine, DOI), verificate sul web; le linee guida SIOMMMS sono citate con la pubblicazione su Reumatismo 2016 (Rossini et al.) e le raccomandazioni sulla vitamina D con quella su Nutrients 2022 (Bertoldo et al.). Le schede rimandano al numero unico.
 - Aggiunte 9 fonti nell'elenco "esami normali" a supporto delle revisioni Farmaci ed Endocrino-metaboliche: Nota 79 AIFA (2022), linee guida ESE sull'incidentaloma surrenalico (2023), AACE sul deficit di GH (2019), due studi sul diabete (Vilaca 2020, Leslie 2018), glitazoni (Loke 2009), CANVAS (Neal 2017), ACOG sul medrossiprogesterone (2014), oppioidi (Fountas 2020).
 - Aggiunte 3 fonti per le Gastro-epatiche: linee guida ECCO sulle manifestazioni extraintestinali delle IBD (2024), EASL sulla nutrizione nell'epatopatia cronica (2019), AACE/ASMBS sulla chirurgia bariatrica (2019).
 - Aggiunte 3 fonti per Renali e Neurologiche: KDIGO 2017 sulla CKD-MBD, Walsh 2007 sul test con furosemide e fludrocortisone, posizione ufficiale ISCD 2019 sulla lesione midollare.
@@ -149,6 +150,6 @@ Per aprire direttamente una schermata: `…/#alterati` oppure `…/#normali`.
 
 ## Avvertenze
 
-Ausilio al ragionamento clinico, non sostitutivo del giudizio dello specialista e non un algoritmo diagnostico. Le alterazioni sono direzionali (▲ ▼), senza soglie numeriche: vanno lette sui range del proprio laboratorio. Nella sezione "Esami normali" i trigger forte/lieve sono una proposta ragionata, da validare nella pratica. La bibliografia completa è in fondo a ciascuna sezione.
+Ausilio al ragionamento clinico, non sostitutivo del giudizio dello specialista e non un algoritmo diagnostico. Le alterazioni sono direzionali (▲ ▼), senza soglie numeriche: vanno lette sui range del proprio laboratorio. Nella sezione "Esami normali" i trigger forte/lieve sono una proposta ragionata, da validare nella pratica. La bibliografia completa è nella pagina Bibliografia, raggiungibile dalla home.
 
 Creato dal Dr. Aurelio Guarnaccia.
