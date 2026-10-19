@@ -318,9 +318,29 @@ const Scene: React.FC<{ frames: number; children: React.ReactNode }> = ({ frames
   return <AbsoluteFill style={{ opacity: o, transform: `translateY(${y}px)` }}>{children}</AbsoluteFill>;
 };
 
+// musica di sottofondo (tools/musica.py): si abbassa mentre parla la voce
+const MUSIC = 0.42, DUCK = 0.2, RAMP = 10;
+function speechSpans() {
+  const spans: [number, number][] = [];
+  let from = 0;
+  for (const s of SCENES) {
+    const t = timing(s);
+    if (t.hasAudio) t.lines.forEach(l => spans.push([from + l.from, from + l.to]));
+    from += t.frames - TRANSITION;
+  }
+  return spans;
+}
+const SPANS = speechSpans();
+const musicVolume = (f: number) => {
+  // distanza dal parlato più vicino, per scendere e risalire con una rampa morbida
+  const d = Math.min(...SPANS.map(([a, b]) => f < a ? a - f : f > b ? f - b : 0));
+  return DUCK + (MUSIC - DUCK) * Math.min(1, d / RAMP);
+};
+
 export const Video: React.FC = () => {
   let from = 0;
   return <AbsoluteFill style={{ fontFamily, color: C.ink }}>
+    <Audio src={staticFile("musica/sottofondo.mp3")} volume={musicVolume} />
     <Background />
     <Brand />
     {SCENES.map((s, i) => {
