@@ -222,6 +222,55 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .dock svg{width:18px;height:18px;flex:0 0 auto}
 .dock button:disabled svg{display:none}
 
+/* video introduttivo: scene animate a tempo, saltabile */
+.introbtn{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--box);border-radius:20px;padding:6px 13px 6px 7px;font-size:.82rem;font-weight:600;color:var(--ink);margin:-4px 0 2px}
+.introbtn:hover{border-color:var(--faint)}
+.introbtn i{width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-style:normal}
+.introbtn i svg{width:9px;height:9px;margin-left:1px}
+.introbtn small{color:var(--muted);font-weight:500;font-size:.78rem}
+.intro{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom))}
+.intro-in{width:100%;max-width:560px;margin:0 auto;flex:1;display:flex;flex-direction:column;min-height:0}
+.intro-top{display:flex;align-items:center;gap:12px}
+.intro-prog{flex:1;display:flex;gap:4px}
+.intro-prog span{flex:1;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+.intro-prog b{display:block;height:100%;width:0;background:var(--ink)}
+.intro-skip{border:0;background:var(--box);border-radius:16px;padding:6px 12px;font-size:.82rem;font-weight:600;color:var(--ink);white-space:nowrap}
+.intro-stage{flex:1;position:relative;min-height:0;overflow-y:auto}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:18px 0;visibility:hidden}
+.scene.on{visibility:visible;position:relative;min-height:100%}
+.scene .k{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.scene h2{font-size:1.6rem;line-height:1.08;font-weight:800;letter-spacing:-.025em;margin:0;text-wrap:balance}
+.scene p{margin:0;font-size:.95rem;line-height:1.5;color:var(--muted)}
+.scene p b{color:var(--ink)}
+.rv{opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease;transition-delay:var(--d,0s)}
+.scene.on .rv{opacity:1;transform:none}
+.pbar{display:flex;flex-direction:column;gap:6px}
+.pbar-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700}
+.pbar-h small{font-weight:500;color:var(--muted);font-size:.78rem}
+.pbar-t{display:flex;height:30px;border-radius:8px;overflow:hidden;background:var(--box)}
+.pbar-t span{width:0;display:flex;align-items:center;padding:0 9px;font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;transition:width 1.1s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+.pbar-t .pri{background:var(--blue);color:var(--bg)}
+.pbar-t .sec{background:var(--coral-box);color:var(--coral);justify-content:flex-end}
+.scene.on .pbar-t span{width:var(--w)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{font-size:.85rem;font-weight:600;padding:6px 10px;border-radius:8px;background:var(--teal-box);color:var(--teal)}
+.chips sup{font-size:.68rem;margin-left:2px}
+.inotes{display:flex;flex-direction:column;gap:6px;font-size:.84rem;line-height:1.45;color:var(--muted);margin:0;padding:0;list-style:none}
+.inotes b{color:var(--ink)}
+.big-n{font-size:4.6rem;line-height:1;font-weight:800;letter-spacing:-.04em;color:var(--teal);font-variant-numeric:tabular-nums}
+.meter{height:10px;border-radius:5px;background:var(--coral-box);overflow:hidden}
+.meter span{display:block;height:100%;width:0;background:var(--teal);transition:width 2s cubic-bezier(.2,.7,.2,1) .3s}
+.scene.on .meter span{width:86%}
+.icta{display:flex;flex-wrap:wrap;gap:8px}
+.icta button{border:0;border-radius:12px;padding:12px 16px;font-weight:600;font-size:.92rem;background:var(--box);color:var(--ink)}
+.icta button.pri{background:var(--ink);color:var(--bg)}
+.intro-src{font-size:.7rem;line-height:1.45;color:var(--muted);margin:8px 0 0;min-height:2.9em}
+.intro-src a{color:var(--focus);font-weight:600}
+.intro-ctl{display:flex;justify-content:center;gap:10px;margin-top:8px}
+.intro-ctl button{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);display:grid;place-items:center;padding:0}
+.intro-ctl button:disabled{opacity:.35;cursor:default}
+.intro-ctl svg{width:18px;height:18px}
+
 @media (max-width:380px){ h1{font-size:1.6rem} .tri button{min-width:34px;padding:0 6px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media print{ .bar,.dock{display:none!important} }
@@ -241,6 +290,19 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 <main id="main"></main>
 
 <div class="dock" id="dock" hidden><button type="button" id="dockBtn"><div><b id="dockT"></b><span id="dockS"></span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
+
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="introT" hidden>
+  <div class="intro-in">
+    <div class="intro-top"><div class="intro-prog" id="introProg"></div><button type="button" class="intro-skip" id="introSkip">Salta ✕</button></div>
+    <div class="intro-stage" id="introStage" aria-live="polite"></div>
+    <p class="intro-src" id="introSrc"></p>
+    <div class="intro-ctl">
+      <button type="button" id="introPrev" aria-label="Scena precedente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 5-7 7 7 7"/></svg></button>
+      <button type="button" id="introPause" aria-label="Pausa"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+      <button type="button" id="introNext" aria-label="Scena successiva"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg></button>
+    </div>
+  </div>
+</div>
 
 <template id="refs"><p class="refs-sub">Linee guida generali</p><ol>
 <li data-id="lg2023" data-n="1">Commissione Intersocietaria per l'Osteoporosi (SIE, SIGG, SIMFER, SIMG, SIMI, SIOMMMS, SIR, SIOT). <i>Linee guida per la gestione dell'osteoporosi e delle fratture da fragilità</i>. 2023 (processo di validazione ISS – Sistema Nazionale Linee Guida, SNLG).</li>
@@ -348,6 +410,11 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 <li data-id="kowdley" data-n="83">Kowdley KV, Brown KE, Ahn J, Sundaram V. <i>ACG Clinical Guideline: Hereditary Hemochromatosis</i>. Am J Gastroenterol 2019;114(8):1202-1218. DOI 10.14309/ajg.0000000000000315. <span class="ref-for">— emocromatosi</span></li>
 <li data-id="ralston" data-n="84">Ralston SH, Corral-Gudino L, Cooper C, et al. <i>Diagnosis and Management of Paget's Disease of Bone in Adults: A Clinical Guideline</i>. J Bone Miner Res 2019;34(4):579-604. DOI 10.1002/jbmr.3657. <span class="ref-for">— malattia di Paget</span></li>
 <li data-id="sermet" data-n="85">Sermet-Gaudelus I, Bianchi ML, Garabédian M, et al. <i>European cystic fibrosis bone mineralisation guidelines</i>. J Cyst Fibros 2011;10 Suppl 2:S16-S23. DOI 10.1016/S1569-1993(11)60004-0. <span class="ref-for">— fibrosi cistica</span></li>
+</ol>
+<p class="refs-sub">Epidemiologia e work-up iniziale</p><ol>
+<li data-id="tannenbaum" data-n="86">Tannenbaum C, Clark J, Schwartzman K, et al. <i>Yield of laboratory testing to identify secondary contributors to osteoporosis in otherwise healthy women</i>. J Clin Endocrinol Metab 2002;87(10):4431-4437. DOI 10.1210/jc.2002-020275. <span class="ref-for">— resa degli esami di primo livello</span></li>
+<li data-id="fitzpatrick" data-n="87">Fitzpatrick LA. <i>Secondary causes of osteoporosis</i>. Mayo Clin Proc 2002;77(5):453-468. DOI 10.4065/77.5.453. <span class="ref-for">— frequenza delle forme secondarie</span></li>
+<li data-id="ebeling" data-n="88">Ebeling PR. <i>Osteoporosis in men</i>. N Engl J Med 2008;358(14):1474-1482. DOI 10.1056/NEJMcp0707217. <span class="ref-for">— osteoporosi maschile primaria e secondaria</span></li>
 </ol>
 <p class="refs-foot">Per diverse forme non esiste una linea guida dedicata al work-up scheletrico: la fonte citata è allora uno studio o una metanalisi sul rischio di frattura. Carenza di vitamina D, ridotto introito di calcio, immobilizzazione, sindrome nefrosica, malnutrizione, flogosi e connettiviti sono coperte dalle linee guida generali (rif. 1–4).</p></template>
 
@@ -1138,6 +1205,7 @@ const head = (title, sub, label) => `${label?`<div class="katrow">${kat(label)}<
 /* ---------- home ---------- */
 function vHome(){
   return { bar:"Osteo Help", html: head("Osteoporosi secondaria", "Dall'esame di primo livello al sospetto diagnostico.") + `
+    <button type="button" class="introbtn" id="introOpen"><i><svg viewBox="0 0 10 12" fill="currentColor"><path d="M0 0v12l10-6z"/></svg></i>Primaria o secondaria? <small>· video, 50 s</small></button>
     <div class="stack home">
       ${entry("alterati", "Esami di I livello alterati", "Segna gli esami fuori norma e vedi le forme compatibili", "blue big", "heroTube")}
       ${entry("normali", "Esami di I livello normali", "Parti da farmaci, malattie e segni clinici", "teal big", "heroClip")}
@@ -1516,6 +1584,100 @@ if(storedTheme() === "dark" || storedTheme() === "light") document.documentEleme
 $("#theme").addEventListener("click", () => setTheme(isDark() ? "light" : "dark"));
 if(darkMQ && darkMQ.addEventListener) darkMQ.addEventListener("change", paintThemeBtn);
 
+/* ---------- video introduttivo ---------- */
+// scene a tempo; si salta in ogni momento. Fonti: rif. 86-88 della bibliografia
+const IREF = n => `<a href="#bibliografia" data-ref="${n}">${n}</a>`;
+const SCENES = [
+  { ms:13000, src:`Fitzpatrick, Mayo Clin Proc 2002 (rif. ${IREF(87)}); Ebeling, N Engl J Med 2008 (rif. ${IREF(88)}). Le stime nell'uomo variano molto fra gli studi.`,
+    html:() => `<div class="k rv">1 · Chi è il paziente</div>
+      <h2 class="rv" style="--d:.1s" id="introT">Osteoporosi diagnosticata: quanto spesso è primaria?</h2>
+      <p class="rv" style="--d:.25s">Diagnosi clinica (frattura da fragilità) o densitometrica (DXA).</p>
+      <div class="pbar rv" style="--d:.5s"><div class="pbar-h">Donna<small>primaria = post-menopausale</small></div>
+        <div class="pbar-t"><span class="pri" style="--w:75%;--d:.8s">primaria 70–80%</span><span class="sec" style="--w:25%;--d:1.6s">20–30%</span></div></div>
+      <div class="pbar rv" style="--d:1.2s"><div class="pbar-h">Uomo<small>primaria = senile o idiopatica</small></div>
+        <div class="pbar-t"><span class="pri" style="--w:45%;--d:2.4s">primaria ~40–50%</span><span class="sec" style="--w:55%;--d:3.2s">secondaria &gt;50%</span></div></div>` },
+  { ms:15000, src:`Esami secondo Tannenbaum, J Clin Endocrinol Metab 2002 (rif. ${IREF(86)}).`,
+    html:() => `<div class="k rv">2 · Diagnosi di esclusione</div>
+      <h2 class="rv" style="--d:.1s">La forma primaria si diagnostica escludendo le secondarie</h2>
+      <p class="rv" style="--d:.25s">Bastano gli <b>esami di I livello</b>:</p>
+      <div class="chips">${COMBO_GROUPS.flatMap(g => g.exams).map((e,i) => `<span class="rv" style="--d:${(.5 + i*.18).toFixed(2)}s">${e.name}${e.id === "TSH" ? "<sup>1</sup>" : e.id === "PTH" ? "<sup>2</sup>" : ""}</span>`).join("")}</div>
+      <ul class="inotes rv" style="--d:3s">
+        <li><b>¹ TSH</b> — indispensabile in chi assume L-tiroxina: il sovradosaggio (ipertiroidismo iatrogeno) è una causa frequente e silente.</li>
+        <li><b>² PTH</b> — si legge insieme a calcemia e 25-OH-vit D: PTH alto con calcio normale e vitamina D bassa è un iperparatiroidismo secondario, non primario.</li>
+      </ul>` },
+  { ms:11000, src:`Calcemia, calciuria 24h e PTH in tutte, TSH se in terapia tiroidea: 86% delle cause secondarie non note individuate. Tannenbaum 2002 (rif. ${IREF(86)}).`,
+    html:() => `<div class="k rv">3 · Esami normali</div>
+      <h2 class="rv" style="--d:.1s">Nessuna alterazione?</h2>
+      <div class="big-n rv" style="--d:.3s"><span id="introCount">0</span>%</div>
+      <div class="meter rv" style="--d:.3s"><span></span></div>
+      <p class="rv" style="--d:.6s">delle cause secondarie non note è già <b>esclusa</b>: le più frequenti (iperparatiroidismo, carenza di vitamina D, ipercalciuria, malassorbimento, ipertiroidismo).</p>` },
+  { ms:11000, src:`Quota residua: circa 14% (Tannenbaum 2002, rif. ${IREF(86)}).`,
+    html:() => `<div class="k rv">4 · Il restante ~14%</div>
+      <h2 class="rv" style="--d:.1s">Per il resto si parte da farmaci, malattie e segni clinici</h2>
+      <p class="rv" style="--d:.3s">Glucocorticoidi, ipogonadismo, celiachia, ipercortisolismo, mieloma… non sempre alterano gli esami di I livello. Compila la parte <b>Esami di I livello normali</b>.</p>
+      <div class="icta rv" style="--d:.6s"><button type="button" class="pri" data-intro="normali">Esami di I livello normali →</button><button type="button" data-intro="again">Rivedi</button></div>` }
+];
+const intro = { i:0, t0:0, el:0, paused:false, raf:0, from:null };
+const reduceMotion = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+function introShow(i){
+  intro.i = i; intro.el = 0; intro.t0 = performance.now();
+  $("#introStage").innerHTML = `<div class="scene">${SCENES[i].html()}</div>`;
+  $("#introSrc").innerHTML = "Fonti: " + SCENES[i].src;
+  $("#introPrev").disabled = i === 0;
+  $("#introProg").querySelectorAll("b").forEach((b,k) => b.style.width = k < i ? "100%" : "0");
+  const sc = $("#introStage .scene");
+  sc.getBoundingClientRect(); // forza il layout, così le transizioni partono
+  sc.classList.add("on");
+  const c = $("#introCount");
+  if(c){ if(reduceMotion()) c.textContent = 86; else { const s0 = performance.now(); const step = t => { const k = Math.min(1, (t - s0 - 300) / 2000); c.textContent = Math.round(86 * (1 - Math.pow(1 - Math.max(0,k), 3))); if(k < 1 && $("#introCount") === c) requestAnimationFrame(step); }; requestAnimationFrame(step); } }
+}
+function introTick(t){
+  if(!intro.paused){
+    const el = intro.el + (t - intro.t0), ms = SCENES[intro.i].ms;
+    const bar = $("#introProg").querySelectorAll("b")[intro.i];
+    bar.style.width = Math.min(100, el / ms * 100) + "%";
+    if(el >= ms){ if(intro.i < SCENES.length - 1) introShow(intro.i + 1); else { intro.el = ms; intro.t0 = t; introPause(true); } }
+  }
+  intro.raf = requestAnimationFrame(introTick);
+}
+function introPause(p){
+  if(p && !intro.paused) intro.el += performance.now() - intro.t0;
+  if(!p) intro.t0 = performance.now();
+  intro.paused = p;
+  $("#introPause").setAttribute("aria-label", p ? "Riprendi" : "Pausa");
+  $("#introPause").innerHTML = p ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+}
+function introOpen(){
+  intro.from = document.activeElement;
+  $("#introProg").innerHTML = SCENES.map(() => "<span><b></b></span>").join("");
+  $("#intro").hidden = false; document.body.style.overflow = "hidden";
+  introPause(false); introShow(0);
+  cancelAnimationFrame(intro.raf); intro.raf = requestAnimationFrame(introTick);
+  $("#introSkip").focus();
+}
+function introClose(){
+  if($("#intro").hidden) return;
+  cancelAnimationFrame(intro.raf);
+  $("#intro").hidden = true; document.body.style.overflow = ""; $("#introStage").innerHTML = "";
+  if(intro.from && document.contains(intro.from)) intro.from.focus();
+}
+document.addEventListener("click", e => {
+  if(e.target.closest("#introOpen")) return introOpen();
+  const b = e.target.closest("[data-intro]"); if(!b) return;
+  if(b.dataset.intro === "again"){ introPause(false); introShow(0); } else { introClose(); go(b.dataset.intro); }
+});
+$("#introSkip").addEventListener("click", introClose);
+$("#introPrev").addEventListener("click", () => { if(intro.i > 0){ introPause(false); introShow(intro.i - 1); } });
+$("#introNext").addEventListener("click", () => { if(intro.i < SCENES.length - 1){ introPause(false); introShow(intro.i + 1); } else introClose(); });
+$("#introPause").addEventListener("click", () => introPause(!intro.paused));
+document.addEventListener("keydown", e => {
+  if($("#intro").hidden) return;
+  if(e.key === "Escape") introClose();
+  else if(e.key === "ArrowRight") $("#introNext").click();
+  else if(e.key === "ArrowLeft") $("#introPrev").click();
+  else if(e.key === " " && !e.target.closest("button")){ e.preventDefault(); $("#introPause").click(); }
+});
+
 /* ---------- navigazione ---------- */
 const ROUTES = { "":vHome, alterati:vAlterati, risultato:vRisultato, normali:vNormali, considerare:vConsiderare, pattern:vPattern, esami:vEsami, catalogo:vCatalogo, calcio:vCalcio, bibliografia:vBiblio };
 const PARENT = r => r === "risultato" || r.startsWith("forma-") ? "alterati" : r === "considerare" || r.startsWith("causa-") ? "normali" : r.startsWith("esame-") ? "esami" : r.startsWith("gruppo-") ? "catalogo" : "";
@@ -1559,6 +1721,7 @@ $("#dockBtn").addEventListener("click", () => { const to = $("#dockBtn").dataset
 $("#act").addEventListener("click", () => { if(actFn) actFn(); });
 $("#back").addEventListener("click", goBack);
 window.addEventListener("hashchange", () => {
+  introClose();
   const r = routeNow();
   if(stack.length > 1 && stack[stack.length - 2] === r) stack.pop(); else stack.push(r);
   render();
