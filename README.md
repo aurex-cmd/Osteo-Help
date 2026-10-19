@@ -119,6 +119,14 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 - Aggiunte 2 fonti per l'intossicazione da vitamina D (elenco "alterati"): studio randomizzato sulle alte dosi e la densità ossea (Burt 2019), boli annuali, cadute e fratture (Sanders 2010).
 - Aggiunte 2 fonti per il trapianto d'organo (elenco "esami normali"), che prima citava solo la KDIGO sul rene: revisione ECTS sul trapianto di organo solido (Anastasilakis 2019) e sintesi IOF sul trapianto di cellule staminali ematopoietiche (Kendler 2021).
 - Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori, diabete, cause gastro-epatiche (tranne la gastrectomia), acidosi tubulare, lesione midollare, stili di vita (tranne l'immobilizzazione), HIV, fibrosi cistica e gravidanza ora hanno una fonte propria.
+- Nuovo gruppo «Epidemiologia e work-up iniziale» (rif. 86–88): Tannenbaum 2002 (resa degli esami di primo livello), Fitzpatrick 2002 (frequenza delle forme secondarie), Ebeling 2008 (osteoporosi maschile).
+
+### Video «Primaria o secondaria?»
+
+- **Tondo «?»** nella barra della home, accanto al pulsante del tema: apre un video verticale di circa 1 minuto e 40 secondi, saltabile, con voce narrante (ElevenLabs) e musica di sottofondo («Calm Care», ElevenLabs Music).
+- **Contenuto**: nella maggior parte dei casi l'osteoporosi è primaria (donna in post-menopausa 7–8 casi su 10, uomo circa la metà); è una diagnosi di esclusione; gli esami di primo livello (con TSH e PTH, a rigore di secondo livello) escludono quasi il 90% delle forme secondarie; per il resto conta la storia clinica, con una dimostrazione dell'app (glucocorticoidi e inibitori di pompa protonica, forme da considerare, scheda).
+- **Riserva**: se il video non si carica parte un'animazione HTML con le stesse informazioni e la sintesi vocale del dispositivo.
+- Il progetto del video (Remotion) è nella cartella `video/`: copione in `video/COPIONE.md`, istruzioni di esportazione nello stesso file.
 
 ## File
 
@@ -128,6 +136,8 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 | `favicon.svg` | Icona della scheda del browser (SVG, con `favicon-32.png` come riserva) |
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon-180.png`, `favicon-32.png` | Installazione come app (PWA) |
 | `.nojekyll` | Fa servire i file a GitHub Pages così come sono |
+| `media/primaria-secondaria.mp4`, `.jpg` | Video aperto dal tondo «?» (H.264/AAC, circa 8 MB) e locandina |
+| `video/` | Progetto Remotion del video: scene, copione, voce, musica, schermate dell'app |
 
 Unica risorsa esterna: il font Inter da Google Fonts (senza connessione si usa il font di sistema).
 
