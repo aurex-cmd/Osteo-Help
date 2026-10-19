@@ -270,6 +270,10 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .intro-ctl #introVoice{margin-left:14px}
 .intro-ctl #introVoice[aria-pressed="false"]{color:var(--muted)}
 
+/* video MP4 aperto dal tondo «?»; se non si carica resta l'animazione */
+.vid{position:fixed;inset:0;z-index:60;background:#000;display:flex;align-items:center;justify-content:center}
+.vid video{width:100%;height:100%;object-fit:contain;background:#000}
+.vid-skip{position:absolute;top:calc(12px + env(safe-area-inset-top));right:16px;border:0;border-radius:16px;padding:7px 13px;font-size:.84rem;font-weight:600;background:rgba(255,255,255,.88);color:#1B2433}
 @media (max-width:380px){ h1{font-size:1.6rem} .tri button{min-width:34px;padding:0 6px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media print{ .bar,.dock{display:none!important} }
@@ -291,6 +295,10 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 
 <div class="dock" id="dock" hidden><button type="button" id="dockBtn"><div><b id="dockT"></b><span id="dockS"></span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
 
+<div class="vid" id="vid" role="dialog" aria-modal="true" aria-label="Video: primaria o secondaria?" hidden>
+  <video id="vidEl" playsinline controls preload="none" poster="media/primaria-secondaria.jpg"><source src="media/primaria-secondaria.mp4" type="video/mp4"></video>
+  <button type="button" class="vid-skip" id="vidSkip">Salta ✕</button>
+</div>
 <div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="introT" hidden>
   <div class="intro-in">
     <div class="intro-top"><div class="intro-prog" id="introProg"></div><button type="button" class="intro-skip" id="introSkip">Salta ✕</button></div>
@@ -1693,7 +1701,7 @@ function introClose(){
   if(intro.from && document.contains(intro.from)) intro.from.focus();
 }
 document.addEventListener("click", e => {
-  if(e.target.closest("#help")) return introOpen();
+  if(e.target.closest("#help")) return vidOpen();
   const b = e.target.closest("[data-intro]"); if(!b) return;
   if(b.dataset.intro === "again"){ introShow(0); introPause(false); } else { introClose(); go(b.dataset.intro); }
 });
@@ -1714,6 +1722,28 @@ document.addEventListener("keydown", e => {
   else if(e.key === "ArrowLeft") $("#introPrev").click();
   else if(e.key === " " && !e.target.closest("button")){ e.preventDefault(); $("#introPause").click(); }
 });
+
+/* ---------- video MP4 ---------- */
+// il tocco sul «?» avvia il video con l'audio; se il file non si carica parte l'animazione
+let vidFrom = null;
+function vidOpen(){
+  const v = $("#vidEl");
+  vidFrom = document.activeElement;
+  $("#vid").hidden = false; document.body.style.overflow = "hidden";
+  try{ v.currentTime = 0; }catch(e){}
+  const p = v.play(); if(p && p.catch) p.catch(() => {});
+  $("#vidSkip").focus();
+}
+function vidClose(){
+  if($("#vid").hidden) return;
+  const v = $("#vidEl"); v.pause();
+  $("#vid").hidden = true; document.body.style.overflow = "";
+  if(vidFrom && document.contains(vidFrom)) vidFrom.focus();
+}
+$("#vidSkip").addEventListener("click", vidClose);
+$("#vidEl").addEventListener("ended", vidClose);
+$("#vidEl").addEventListener("error", () => { if(!$("#vid").hidden){ vidClose(); introOpen(); } }, true);
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !$("#vid").hidden) vidClose(); });
 
 /* ---------- navigazione ---------- */
 const ROUTES = { "":vHome, alterati:vAlterati, risultato:vRisultato, normali:vNormali, considerare:vConsiderare, pattern:vPattern, esami:vEsami, catalogo:vCatalogo, calcio:vCalcio, bibliografia:vBiblio };
@@ -1758,7 +1788,7 @@ $("#dockBtn").addEventListener("click", () => { const to = $("#dockBtn").dataset
 $("#act").addEventListener("click", () => { if(actFn) actFn(); });
 $("#back").addEventListener("click", goBack);
 window.addEventListener("hashchange", () => {
-  introClose();
+  introClose(); vidClose();
   const r = routeNow();
   if(stack.length > 1 && stack[stack.length - 2] === r) stack.pop(); else stack.push(r);
   render();
