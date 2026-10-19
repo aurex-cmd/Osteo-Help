@@ -162,11 +162,11 @@ const S3: React.FC<{ at: number[] }> = ({ at }) => {
       {items.map((t, i) => {
         const k = interpolate(f, [t0 + i * 14, t0 + i * 14 + 10], [0, 1], { ...clamp, easing: ease });
         return <div key={t} style={{ display: "flex", alignItems: "center", gap: 26, padding: "20px 0", borderTop: i ? `2px solid ${C.line}` : "none" }}>
-          <div style={{ width: 58, height: 58, borderRadius: "50%", border: `4px solid ${k > 0 ? C.teal : C.line}`, background: k > 0 ? C.teal : "transparent", display: "grid", placeItems: "center", flex: "0 0 auto" }}>
-            <svg viewBox="0 0 24 24" width={34} height={34} fill="none" stroke="#fff" strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: k, transform: `scale(${0.5 + k / 2})` }}><path d="m5 12 5 5 9-10" /></svg>
+          <div style={{ width: 58, height: 58, borderRadius: "50%", border: `4px solid ${k > 0 ? C.sec : C.line}`, background: k > 0 ? C.sec : "transparent", display: "grid", placeItems: "center", flex: "0 0 auto" }}>
+            <svg viewBox="0 0 24 24" width={34} height={34} fill="none" stroke="#fff" strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: k, transform: `scale(${0.5 + k / 2})` }}><path d="m7 7 10 10M17 7 7 17" /></svg>
           </div>
           <div style={{ flex: 1, fontSize: 40, fontWeight: 600, color: C.ink }}>{t}</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: C.teal, opacity: k }}>escluse</div>
+          <div style={{ fontSize: 32, fontWeight: 700, color: C.sec, opacity: k }}>escluse</div>
         </div>;
       })}
     </div></Rise>
@@ -245,11 +245,34 @@ const S6: React.FC<{ at: number[] }> = ({ at }) => (
 
 // l'app vera: schermate catturate da index.html, con i tocchi nei punti registrati
 const PHONE_H = 1130, PHONE_W = Math.round(PHONE_H * 390 / 844);
+// il tasto verde della home, come nell'app
+const AppTile: React.FC<{ tap: number }> = ({ tap }) => {
+  const f = useCurrentFrame();
+  const press = interpolate(f, [tap, tap + 5, tap + 12], [1, 0.95, 1], clamp);
+  const ring = interpolate(f, [tap, tap + 22], [0, 1], clamp);
+  return <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 30, background: C.mint, borderRadius: 44, padding: "38px 36px", transform: `scale(${press})` }}>
+    <div style={{ width: 130, height: 130, borderRadius: 32, background: "#fff", display: "grid", placeItems: "center", flex: "0 0 auto" }}>
+      <svg viewBox="0 0 24 24" width={70} height={70} fill="none" stroke="#172231" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4" /></svg>
+    </div>
+    <div><div style={{ fontSize: 46, fontWeight: 800, color: C.ink, lineHeight: 1.15 }}>Esami di I livello normali</div><div style={{ fontSize: 32, color: "#333C49", marginTop: 8 }}>Parti da farmaci, malattie e segni clinici</div></div>
+    <div style={{ position: "absolute", right: 130, top: "50%", width: 170, height: 170, marginTop: -85, borderRadius: "50%", border: `6px solid ${C.ink}`, opacity: f >= tap ? 1 - ring : 0, transform: `scale(${0.3 + ring})` }} />
+  </div>;
+};
+
 const SApp: React.FC<{ at: number[] }> = ({ at }) => {
   const f = useCurrentFrame();
+  const tileTap = at[0] + 70, phoneIn = tileTap + 20;
+  if (f < phoneIn + 6) {
+    const out = interpolate(f, [phoneIn - 4, phoneIn + 6], [1, 0], clamp);
+    return <Body><div style={{ opacity: out, transform: `scale(${1 + (1 - out) * 0.08})` }}>
+      <Kicker n={6} text="Nell'app" />
+      <div style={{ height: 40 }} />
+      <Rise delay={6}><AppTile tap={tileTap} /></Rise>
+    </div></Body>;
+  }
   // inizio di ciascuna schermata, in fotogrammi dall'inizio della scena
-  const T = [0, at[0] + 50, at[1] - 10, at[1] + 30, at[1] + 70, at[2], at[2] + 55, at[2] + 140];
-  const pop = useSpring(0, 18);
+  const T = [phoneIn, phoneIn + 40, Math.max(at[1] - 10, phoneIn + 80), at[1] + 30, at[1] + 70, at[2], at[2] + 55, at[2] + 140];
+  const pop = spring({ frame: f - phoneIn, fps: 30, config: { damping: 18, mass: 0.8 } });
   let cur = 0; T.forEach((t, i) => { if (f >= t) cur = i; });
   const X = 8; // dissolvenza tra schermate
   return <div style={{ position: "absolute", left: 0, right: 0, top: 270, display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
