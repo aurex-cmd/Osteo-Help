@@ -95,8 +95,8 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry b{display:block;font-size:1.05rem;letter-spacing:-.01em;line-height:1.3}
 .entry.blue b{color:var(--blue)} .entry.teal b{color:var(--teal)}
 .entry small{display:block;color:var(--muted);font-size:.83rem;margin-top:3px;line-height:1.4}
-.entry.big{padding:20px 14px;border-radius:14px} .entry.big::before{content:none}
-.stack.home{display:grid;grid-auto-rows:1fr}
+.entry.big{min-height:92px;padding:14px 16px 14px 14px;border-radius:22px;transition:transform .12s} .entry.big:active{transform:scale(.98)} .entry.big::before{content:none}
+.stack.home{display:grid;grid-auto-rows:1fr;gap:12px}
 .entry.big b{font-size:1.12rem;color:var(--ink)}
 .chev{width:16px;height:16px;color:var(--faint);flex:0 0 auto}
 .ic{width:26px;height:26px;flex:0 0 auto}
