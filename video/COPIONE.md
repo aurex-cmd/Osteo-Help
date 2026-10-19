@@ -7,13 +7,13 @@ fissano i tempi delle scene (vedi `src/audio.json`).
 
 | File | Testo |
 |---|---|
-| `domanda.mp3` | Hai appena diagnosticato un'osteoporosi, con una frattura da fragilità o con la densitometria. La domanda è: qual è la causa? |
-| `primaria.mp3` | Nella maggior parte dei casi, la risposta è semplice: l'osteoporosi è primaria. Nella donna dopo la menopausa succede sette, otto volte su dieci. Nell'uomo, più o meno una volta su due. |
-| `esclusione.mp3` | Ma attenzione: primaria non si dimostra direttamente. Ci si arriva escludendo le cause secondarie. |
-| `esami.mp3` | Per escluderle, il più delle volte bastano pochi esami del sangue e delle urine: gli esami di primo livello. TSH e PTH, a rigore, sarebbero esami di secondo livello. Ma escludono cause frequenti, come l'ipertiroidismo e l'iperparatiroidismo: per questo, in Osteo Help, li trovi tra quelli di primo livello. |
-| `normali.mp3` | Se questi esami sono tutti normali, abbiamo già escluso quasi nove cause secondarie su dieci. |
-| `resto.mp3` | Per quel piccolo resto, si guarda alla storia del paziente: farmaci, malattie, segni clinici. |
-| `app.mp3` | In Osteo Help apri la sezione: esami di primo livello normali, e spunti ciò che il paziente presenta. Per esempio: glucocorticoidi e inibitori di pompa protonica. L'app ti mostra le forme da considerare, e per ognuna una scheda: quando sospettarla, come confermarla, e le fonti. |
-| `sintesi.mp3` | In sintesi: quasi sempre è primaria. Ma lo diciamo solo dopo aver escluso le secondarie. |
+| `domanda.mp3` | Hai posto diagnosi di osteoporosi, per una frattura da fragilità o con la densitometria. A questo punto la domanda è: qual è la causa? |
+| `primaria.mp3` | Nella maggior parte dei casi, l'osteoporosi è primaria. Nella donna in post-menopausa, lo è in sette, otto casi su dieci. Nell'uomo, in circa la metà dei casi. |
+| `esclusione.mp3` | Attenzione, però: non esiste un esame che confermi la forma primaria. È una diagnosi di esclusione: si pone dopo aver escluso le cause secondarie. |
+| `esami.mp3` | Per escluderle, di solito bastano pochi esami del sangue e delle urine: gli esami di primo livello. TSH e PTH, in senso stretto, sono esami di secondo livello. Però permettono di escludere cause frequenti, come l'ipertiroidismo e l'iperparatiroidismo: per questo, in Osteo Help, rientrano tra quelli di primo livello. |
+| `normali.mp3` | Se sono tutti nella norma, si esclude già quasi il novanta per cento delle osteoporosi secondarie. |
+| `resto.mp3` | Per la quota restante conta la storia clinica del paziente: i farmaci che assume, le malattie di cui soffre, i segni che presenta. |
+| `app.mp3` | In Osteo Help apri la sezione: esami di primo livello normali, e seleziona ciò che riguarda il paziente. Per esempio, una terapia con glucocorticoidi e con inibitori di pompa protonica. L'app propone le forme secondarie da considerare. Per ciascuna c'è una scheda: quando sospettarla, come confermarla, su quali fonti. |
+| `sintesi.mp3` | In sintesi: il più delle volte l'osteoporosi è primaria. Ma si può affermarlo solo dopo aver escluso le forme secondarie. |
 
 Render: `npm run render -- --browser-executable=<chrome-headless-shell>`

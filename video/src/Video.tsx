@@ -156,7 +156,7 @@ const S3: React.FC<{ at: number[] }> = ({ at }) => {
   const stamp = spring({ frame: f - (t0 + items.length * 14 + 10), fps: 30, config: { damping: 11 } });
   return <Body>
     <Kicker n={2} text="Come si arriva alla diagnosi" />
-    <Title>Primaria è una diagnosi di <Mark color={C.teal} bg={C.tealBox} delay={24}>esclusione</Mark></Title>
+    <Title>La forma primaria è una diagnosi di <Mark color={C.teal} bg={C.tealBox} delay={24}>esclusione</Mark></Title>
     <Rise delay={20}><div style={{ background: C.box, borderRadius: 40, padding: "40px 44px", display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 20px 60px rgba(27,36,51,.06)" }}>
       <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: C.muted, marginBottom: 12 }}>Cause secondarie</div>
       {items.map((t, i) => {
@@ -198,7 +198,7 @@ const S4: React.FC<{ at: number[] }> = ({ at }) => {
     </div>
     <Rise delay={at[2]}><div style={{ background: C.box, borderRadius: 28, padding: "28px 32px", borderLeft: `8px solid ${C.pri}`, display: "flex", flexDirection: "column", gap: 12 }}>
       <div style={{ fontSize: 36, fontWeight: 800, color: C.ink, lineHeight: 1.25 }}>Escludono cause frequenti: <span style={{ color: C.pri }}>ipertiroidismo</span> e <span style={{ color: C.pri }}>iperparatiroidismo</span></div>
-      <div style={{ fontSize: 30, color: C.muted, lineHeight: 1.4 }}>Per questo in Osteo Help sono tra gli esami di I livello. TSH: soprattutto in chi assume L-tiroxina. PTH: si legge con calcio e vitamina D.</div>
+      <div style={{ fontSize: 30, color: C.muted, lineHeight: 1.4 }}>Per questo in Osteo Help rientrano tra gli esami di I livello. TSH: utile soprattutto in chi assume L-tiroxina. PTH: va interpretato insieme a calcemia e vitamina D.</div>
     </div></Rise>
   </Body>;
 };
@@ -208,8 +208,8 @@ const S5: React.FC = () => {
   const p = interpolate(f, [16, 76], [0, 0.86], { ...clamp, easing: Easing.out(Easing.cubic) });
   const R = 250, L = 2 * Math.PI * R;
   return <Body>
-    <Kicker n={4} text="Se sono normali" />
-    <Title>Quasi <Mark color={C.teal} bg={C.tealBox} delay={20}>9 su 10</Mark> sono già escluse</Title>
+    <Kicker n={4} text="Se sono nella norma" />
+    <Title>Escluse già quasi <Mark color={C.teal} bg={C.tealBox} delay={20}>9 su 10</Mark> delle forme secondarie</Title>
     <div style={{ display: "flex", justifyContent: "center" }}>
       <div style={{ position: "relative", width: 600, height: 600 }}>
         <svg viewBox="0 0 600 600" width={600} height={600} style={{ transform: "rotate(-90deg)" }}>
@@ -218,7 +218,7 @@ const S5: React.FC = () => {
         </svg>
         <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <div style={{ fontSize: 170, fontWeight: 800, color: C.teal, letterSpacing: -6, lineHeight: 1 }}>{Math.round(p * 100)}%</div>
-          <div style={{ fontSize: 34, color: C.muted, fontWeight: 600, marginTop: 10, textAlign: "center" }}>cause secondarie<br />escluse</div>
+          <div style={{ fontSize: 34, color: C.muted, fontWeight: 600, marginTop: 10, textAlign: "center" }}>osteoporosi secondarie<br />escluse</div>
         </div>
       </div>
     </div>
@@ -231,8 +231,8 @@ const ICON_EYE = <svg viewBox="0 0 24 24" width={70} height={70} fill="none" str
 
 const S6: React.FC<{ at: number[] }> = ({ at }) => (
   <Body>
-    <Kicker n={5} text="Il piccolo resto" />
-    <Title>Per il resto, la <Mark color={C.sec} bg={C.secBox} delay={22}>storia</Mark> del paziente</Title>
+    <Kicker n={5} text="La quota restante" />
+    <Title>Per il resto conta la <Mark color={C.sec} bg={C.secBox} delay={22}>storia clinica</Mark></Title>
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {([["Farmaci", ICON_PILL, "glucocorticoidi, inibitori dell'aromatasi…"], ["Malattie", ICON_CLIP, "celiachia, artrite reumatoide, diabete…"], ["Segni clinici", ICON_EYE, "strie rubre, galattorrea, sclere blu…"]] as const).map(([t, ic, ex], i) =>
         <Rise key={t} delay={at[0] + 30 + i * 14}>
@@ -244,7 +244,7 @@ const S6: React.FC<{ at: number[] }> = ({ at }) => (
 );
 
 // l'app vera: schermate catturate da index.html, con i tocchi nei punti registrati
-const PHONE_H = 1130, PHONE_W = Math.round(PHONE_H * 390 / 844);
+const PHONE_H = 1040, PHONE_W = Math.round(PHONE_H * 390 / 844);
 // il tasto verde della home, come nell'app
 const AppTile: React.FC<{ tap: number }> = ({ tap }) => {
   const f = useCurrentFrame();
@@ -302,8 +302,8 @@ const SApp: React.FC<{ at: number[] }> = ({ at }) => {
 
 const S7: React.FC<{ at: number[] }> = ({ at }) => (
   <Body>
-    <Title size={120}>Quasi sempre <span style={{ color: C.pri }}>primaria.</span></Title>
-    <Rise delay={at[1]}><div style={{ fontSize: 60, lineHeight: 1.15, fontWeight: 700, color: C.ink }}>Ma solo dopo aver <Mark color={C.teal} bg={C.tealBox} delay={at[1] + 10}>escluso le secondarie</Mark>.</div></Rise>
+    <Title size={110}>Il più delle volte è <span style={{ color: C.pri }}>primaria.</span></Title>
+    <Rise delay={at[1]}><div style={{ fontSize: 60, lineHeight: 1.15, fontWeight: 700, color: C.ink }}>Ma lo si afferma solo dopo aver <Mark color={C.teal} bg={C.tealBox} delay={at[1] + 10}>escluso le forme secondarie</Mark>.</div></Rise>
     <Rise delay={at[1] + 40}><div style={{ fontSize: 26, color: C.muted, lineHeight: 1.6, marginTop: 40 }}>
       Fonti: Fitzpatrick LA, Mayo Clin Proc 2002;77:453 · Ebeling PR, N Engl J Med 2008;358:1474 · Tannenbaum C et al., J Clin Endocrinol Metab 2002;87:4431
     </div></Rise>

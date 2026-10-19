@@ -9,37 +9,37 @@ export type SceneDef = { id: string; lines: Line[]; src?: string };
 
 export const SCENES: SceneDef[] = [
   { id: "domanda", lines: [
-    { say: "Hai appena diagnosticato un'osteoporosi, con una frattura da fragilità o con la densitometria.", cap: "Hai appena diagnosticato un'osteoporosi, con una frattura da fragilità o con la DXA." },
-    { say: "La domanda è: qual è la causa?", cap: "La domanda è: qual è la causa?" },
+    { say: "Hai posto diagnosi di osteoporosi, per una frattura da fragilità o con la densitometria.", cap: "Hai posto diagnosi di osteoporosi, per una frattura da fragilità o con la DXA." },
+    { say: "A questo punto la domanda è: qual è la causa?", cap: "A questo punto la domanda è: qual è la causa?" },
   ]},
   { id: "primaria", src: "Fitzpatrick, Mayo Clin Proc 2002 · Ebeling, N Engl J Med 2008", lines: [
-    { say: "Nella maggior parte dei casi, la risposta è semplice: l'osteoporosi è primaria.", cap: "Nella maggior parte dei casi la risposta è semplice: l'osteoporosi è primaria." },
-    { say: "Nella donna dopo la menopausa succede sette, otto volte su dieci.", cap: "Nella donna dopo la menopausa succede 7–8 volte su 10." },
-    { say: "Nell'uomo, più o meno una volta su due.", cap: "Nell'uomo, più o meno una volta su due." },
+    { say: "Nella maggior parte dei casi, l'osteoporosi è primaria.", cap: "Nella maggior parte dei casi l'osteoporosi è primaria." },
+    { say: "Nella donna in post-menopausa, lo è in sette, otto casi su dieci.", cap: "Nella donna in post-menopausa lo è in 7–8 casi su 10." },
+    { say: "Nell'uomo, in circa la metà dei casi.", cap: "Nell'uomo, in circa la metà dei casi." },
   ]},
   { id: "esclusione", lines: [
-    { say: "Ma attenzione: primaria non si dimostra direttamente.", cap: "Ma attenzione: primaria non si dimostra direttamente." },
-    { say: "Ci si arriva escludendo le cause secondarie.", cap: "Ci si arriva escludendo le cause secondarie." },
+    { say: "Attenzione, però: non esiste un esame che confermi la forma primaria.", cap: "Attenzione, però: non esiste un esame che confermi la forma primaria." },
+    { say: "È una diagnosi di esclusione: si pone dopo aver escluso le cause secondarie.", cap: "È una diagnosi di esclusione: si pone dopo aver escluso le cause secondarie." },
   ]},
   { id: "esami", src: "Tannenbaum, J Clin Endocrinol Metab 2002", lines: [
-    { say: "Per escluderle, il più delle volte bastano pochi esami del sangue e delle urine: gli esami di primo livello.", cap: "Per escluderle, il più delle volte bastano pochi esami del sangue e delle urine: gli esami di I livello." },
-    { say: "TSH e PTH, a rigore, sarebbero esami di secondo livello.", cap: "TSH e PTH, a rigore, sarebbero esami di II livello." },
-    { say: "Ma escludono cause frequenti, come l'ipertiroidismo e l'iperparatiroidismo: per questo, in Osteo Help, li trovi tra quelli di primo livello.", cap: "Ma escludono cause frequenti, come ipertiroidismo e iperparatiroidismo: per questo in Osteo Help sono tra quelli di I livello." },
+    { say: "Per escluderle, di solito bastano pochi esami del sangue e delle urine: gli esami di primo livello.", cap: "Per escluderle, di solito bastano pochi esami del sangue e delle urine: gli esami di I livello." },
+    { say: "TSH e PTH, in senso stretto, sono esami di secondo livello.", cap: "TSH e PTH, in senso stretto, sono esami di II livello." },
+    { say: "Però permettono di escludere cause frequenti, come l'ipertiroidismo e l'iperparatiroidismo: per questo, in Osteo Help, rientrano tra quelli di primo livello.", cap: "Però permettono di escludere cause frequenti, come ipertiroidismo e iperparatiroidismo: per questo in Osteo Help rientrano tra quelli di I livello." },
   ]},
-  { id: "normali", src: "Tannenbaum, J Clin Endocrinol Metab 2002: 86% delle cause secondarie non note", lines: [
-    { say: "Se questi esami sono tutti normali, abbiamo già escluso quasi nove cause secondarie su dieci.", cap: "Se questi esami sono tutti normali, abbiamo già escluso quasi 9 cause secondarie su 10." },
+  { id: "normali", src: "Tannenbaum, J Clin Endocrinol Metab 2002: 86% delle forme secondarie non note", lines: [
+    { say: "Se sono tutti nella norma, si esclude già quasi il novanta per cento delle osteoporosi secondarie.", cap: "Se sono tutti nella norma, si esclude già quasi il 90% delle osteoporosi secondarie." },
   ]},
   { id: "resto", lines: [
-    { say: "Per quel piccolo resto, si guarda alla storia del paziente: farmaci, malattie, segni clinici.", cap: "Per quel piccolo resto si guarda alla storia del paziente: farmaci, malattie, segni clinici." },
+    { say: "Per la quota restante conta la storia clinica del paziente: i farmaci che assume, le malattie di cui soffre, i segni che presenta.", cap: "Per la quota restante conta la storia clinica: i farmaci che il paziente assume, le malattie di cui soffre, i segni che presenta." },
   ]},
   { id: "app", lines: [
-    { say: "In Osteo Help apri la sezione: esami di primo livello normali, e spunti ciò che il paziente presenta.", cap: "In Osteo Help apri «Esami di I livello normali» e spunti ciò che il paziente presenta." },
-    { say: "Per esempio: glucocorticoidi e inibitori di pompa protonica.", cap: "Per esempio: glucocorticoidi e inibitori di pompa protonica." },
-    { say: "L'app ti mostra le forme da considerare, e per ognuna una scheda: quando sospettarla, come confermarla, e le fonti.", cap: "L'app ti mostra le forme da considerare e, per ognuna, una scheda: quando sospettarla, come confermarla, le fonti." },
+    { say: "In Osteo Help apri la sezione: esami di primo livello normali, e seleziona ciò che riguarda il paziente.", cap: "In Osteo Help apri «Esami di I livello normali» e seleziona ciò che riguarda il paziente." },
+    { say: "Per esempio, una terapia con glucocorticoidi e con inibitori di pompa protonica.", cap: "Per esempio, una terapia con glucocorticoidi e con inibitori di pompa protonica." },
+    { say: "L'app propone le forme secondarie da considerare. Per ciascuna c'è una scheda: quando sospettarla, come confermarla, su quali fonti.", cap: "L'app propone le forme secondarie da considerare. Per ciascuna c'è una scheda: quando sospettarla, come confermarla, su quali fonti." },
   ]},
   { id: "sintesi", lines: [
-    { say: "In sintesi: quasi sempre è primaria.", cap: "In sintesi: quasi sempre è primaria." },
-    { say: "Ma lo diciamo solo dopo aver escluso le secondarie.", cap: "Ma lo diciamo solo dopo aver escluso le secondarie." },
+    { say: "In sintesi: il più delle volte l'osteoporosi è primaria.", cap: "In sintesi: il più delle volte l'osteoporosi è primaria." },
+    { say: "Ma si può affermarlo solo dopo aver escluso le forme secondarie.", cap: "Ma si può affermarlo solo dopo aver escluso le forme secondarie." },
   ]},
 ];
 
