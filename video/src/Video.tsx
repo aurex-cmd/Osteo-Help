@@ -303,7 +303,7 @@ const SApp: React.FC<{ at: number[] }> = ({ at }) => {
 const S7: React.FC<{ at: number[] }> = ({ at }) => (
   <Body>
     <Title size={110}>Il più delle volte è <span style={{ color: C.pri }}>primaria.</span></Title>
-    <Rise delay={at[1]}><div style={{ fontSize: 60, lineHeight: 1.15, fontWeight: 700, color: C.ink }}>Ma lo si afferma solo dopo aver <Mark color={C.teal} bg={C.tealBox} delay={at[1] + 10}>escluso le forme secondarie</Mark>.</div></Rise>
+    <Rise delay={at[1]}><div style={{ fontSize: 60, lineHeight: 1.15, fontWeight: 700, color: C.ink }}>Ma lo si afferma solo dopo aver escluso <Mark color={C.teal} bg={C.tealBox} delay={at[1] + 10}>le forme secondarie</Mark>.</div></Rise>
     <Rise delay={at[1] + 40}><div style={{ fontSize: 26, color: C.muted, lineHeight: 1.6, marginTop: 40 }}>
       Fonti: Fitzpatrick LA, Mayo Clin Proc 2002;77:453 · Ebeling PR, N Engl J Med 2008;358:1474 · Tannenbaum C et al., J Clin Endocrinol Metab 2002;87:4431
     </div></Rise>

@@ -43,24 +43,28 @@ export const SCENES: SceneDef[] = [
   ]},
 ];
 
-// Senza audio la durata è stimata da un parlato a ritmo normale (~15 caratteri al secondo).
+// Con l'audio: durata del file e pause tra le frasi (src/audio.json, misurate con silencedetect).
+// Senza audio: durata stimata da un parlato a ritmo normale (~15 caratteri al secondo).
 const CPS = 15, TAIL = 1.1;
 export const LEAD = 0.5;
-const DUR = audio as Record<string, number>;
+type Voice = { dur: number; cuts: number[] };
+const VOICE = audio as Record<string, Voice>;
 
 export function timing(s: SceneDef) {
+  const v = VOICE[s.id];
   const chars = s.lines.map(l => l.say.length);
   const total = chars.reduce((a, b) => a + b, 0);
-  const speech = DUR[s.id] ?? total / CPS + (s.lines.length - 1) * 0.45;
+  let bounds: number[];
+  if (v) bounds = [0, ...v.cuts, v.dur];
+  else {
+    const speech = total / CPS + (s.lines.length - 1) * 0.45;
+    let acc = 0;
+    bounds = [0, ...chars.map(c => (acc += c) / total * speech)];
+  }
+  const speech = bounds[bounds.length - 1];
   const frames = Math.round((LEAD + speech + TAIL) * FPS);
-  let t = LEAD;
-  const lines = s.lines.map((l, i) => {
-    const d = speech * chars[i] / total;
-    const r = { ...l, from: Math.round(t * FPS), to: Math.round((t + d) * FPS) };
-    t += d;
-    return r;
-  });
-  return { frames, lines, hasAudio: s.id in DUR };
+  const lines = s.lines.map((l, i) => ({ ...l, from: Math.round((LEAD + bounds[i]) * FPS), to: Math.round((LEAD + bounds[i + 1]) * FPS) }));
+  return { frames, lines, hasAudio: !!v };
 }
 
 export const TRANSITION = 14;
