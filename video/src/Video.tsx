@@ -318,7 +318,7 @@ const Scene: React.FC<{ frames: number; children: React.ReactNode }> = ({ frames
   return <AbsoluteFill style={{ opacity: o, transform: `translateY(${y}px)` }}>{children}</AbsoluteFill>;
 };
 
-// musica di sottofondo (tools/musica.py): si abbassa mentre parla la voce
+// musica di sottofondo («Calm Care», ElevenLabs Music): si abbassa mentre parla la voce
 const MUSIC = 0.42, DUCK = 0.2, RAMP = 10;
 function speechSpans() {
   const spans: [number, number][] = [];
