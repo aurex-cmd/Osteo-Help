@@ -1597,15 +1597,15 @@ const SCENES = [
         <div class="pbar-t"><span class="pri" style="--w:75%;--d:.8s">primaria 70–80%</span><span class="sec" style="--w:25%;--d:1.6s">20–30%</span></div></div>
       <div class="pbar rv" style="--d:1.2s"><div class="pbar-h">Uomo<small>primaria = senile o idiopatica</small></div>
         <div class="pbar-t"><span class="pri" style="--w:45%;--d:2.4s">primaria ~40–50%</span><span class="sec" style="--w:55%;--d:3.2s">secondaria &gt;50%</span></div></div>` },
-  { ms:22000, say:["La diagnosi di osteoporosi primaria, però, è una diagnosi di esclusione.", "Per escludere le cause secondarie bastano gli esami di primo livello.", "Due attenzioni. Il TSH è indispensabile in chi assume levotiroxina.", "Il PTH va letto insieme a calcemia e vitamina D: un PTH alto con vitamina D bassa indica un iperparatiroidismo secondario, non primario."],
+  { ms:22000, say:["La diagnosi di osteoporosi primaria, però, è una diagnosi di esclusione.", "Per escludere le cause secondarie bastano gli esami di primo livello.", "TSH e PTH, a rigore, sarebbero esami di secondo livello: ma escludono cause frequenti, come ipertiroidismo e iperparatiroidismo, e per questo qui sono tra quelli di primo livello.", "Il PTH va letto insieme a calcemia e vitamina D."],
     src:`Esami secondo Tannenbaum, J Clin Endocrinol Metab 2002 (rif. ${IREF(86)}).`,
     html:() => `<div class="k rv">2 · Diagnosi di esclusione</div>
       <h2 class="rv" style="--d:.1s">La forma primaria si diagnostica escludendo le secondarie</h2>
       <p class="rv" style="--d:.25s">Bastano gli <b>esami di I livello</b>:</p>
       <div class="chips">${COMBO_GROUPS.flatMap(g => g.exams).map((e,i) => `<span class="rv" style="--d:${(.5 + i*.18).toFixed(2)}s">${e.name}${e.id === "TSH" ? "<sup>1</sup>" : e.id === "PTH" ? "<sup>2</sup>" : ""}</span>`).join("")}</div>
       <ul class="inotes rv" style="--d:3s">
-        <li><b>¹ TSH</b> — indispensabile in chi assume L-tiroxina: il sovradosaggio (ipertiroidismo iatrogeno) è una causa frequente e silente.</li>
-        <li><b>² PTH</b> — si legge insieme a calcemia e 25-OH-vit D: PTH alto con calcio normale e vitamina D bassa è un iperparatiroidismo secondario, non primario.</li>
+        <li><b>¹ ² TSH e PTH</b> — a rigore esami di II livello, ma escludono cause frequenti (ipertiroidismo, iperparatiroidismo): per questo in Osteo Help sono tra quelli di I livello.</li>
+        <li><b>¹ TSH</b> — soprattutto in chi assume L-tiroxina (ipertiroidismo iatrogeno). <b>² PTH</b> — si legge con calcemia e 25-OH-vit D: PTH alto con vitamina D bassa è un iperparatiroidismo secondario.</li>
       </ul>` },
   { ms:11000, say:["Se questi esami sono normali, è già escluso circa l'ottantasei per cento delle cause secondarie non note: le più frequenti."],
     src:`Calcemia, calciuria 24h e PTH in tutte, TSH se in terapia tiroidea: 86% delle cause secondarie non note individuate. Tannenbaum 2002 (rif. ${IREF(86)}).`,

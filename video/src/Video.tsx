@@ -1,7 +1,8 @@
 import React from "react";
-import { AbsoluteFill, Audio, Easing, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, Easing, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { loadFont } from "@remotion/fonts";
 import { FPS, LEAD, SCENES, TRANSITION, timing } from "./script";
+import STEPS from "./app-steps.json";
 
 // Inter variabile, incluso nel progetto (rsms/inter, SIL Open Font License)
 const fontFamily = "Inter";
@@ -147,63 +148,60 @@ const S2: React.FC<{ at: number[] }> = ({ at }) => (
   </Body>
 );
 
-// imbuto: tanti possibili, le cause secondarie (corallo) vengono scartate, resta la primaria (viola)
+// primaria = nessuna causa secondaria trovata: si spuntano le categorie una per una
 const S3: React.FC<{ at: number[] }> = ({ at }) => {
   const f = useCurrentFrame();
-  const dots = Array.from({ length: 9 }, (_, i) => i);
+  const items = ["Cause endocrine", "Cause da farmaci", "Malattie croniche", "Carenze di vitamina D e calcio"];
   const t0 = at[1];
+  const stamp = spring({ frame: f - (t0 + items.length * 14 + 10), fps: 30, config: { damping: 11 } });
   return <Body>
     <Kicker n={2} text="Come si arriva alla diagnosi" />
     <Title>Primaria è una diagnosi di <Mark color={C.teal} bg={C.tealBox} delay={24}>esclusione</Mark></Title>
-    <div style={{ position: "relative", height: 560 }}>
-      <svg viewBox="0 0 900 560" width="100%" height="100%">
-        <path d="M150 120h600L520 340v150h-140V340z" fill={C.box} stroke={C.line} strokeWidth={6} strokeLinejoin="round" opacity={fade(f, 20)} />
-        {dots.map(i => {
-          const isPri = i === 4;
-          const start = t0 + i * 5;
-          const p = interpolate(f, [start, start + 34], [0, 1], { ...clamp, easing: ease });
-          const x0 = 190 + i * 65, y0 = 50;
-          // le secondarie vengono spinte fuori dall'imbuto, la primaria scende fino in fondo
-          const out = i < 4 ? -1 : 1;
-          const x = isPri ? interpolate(p, [0, 1], [x0, 450]) : x0 + out * interpolate(p, [0.45, 1], [0, 260], clamp);
-          const y = isPri ? interpolate(p, [0, 1], [y0, 520]) : interpolate(p, [0, 0.45, 1], [y0, 200, 470]);
-          const o = isPri ? 1 : interpolate(p, [0.6, 1], [1, 0.25], clamp);
-          return <g key={i} opacity={fade(f, 10 + i * 2, 10) * o}>
-            <circle cx={x} cy={y} r={isPri ? 34 : 24} fill={isPri ? C.pri : C.sec} />
-            {!isPri && p > 0.6 && <path d={`M${x - 11} ${y - 11}l22 22m0-22-22 22`} stroke="#fff" strokeWidth={6} strokeLinecap="round" />}
-          </g>;
-        })}
-      </svg>
-      <div style={{ position: "absolute", bottom: -10, left: 0, right: 0, textAlign: "center", fontSize: 36, fontWeight: 700, color: C.pri, opacity: fade(f, t0 + 50) }}>osteoporosi primaria</div>
+    <Rise delay={20}><div style={{ background: C.box, borderRadius: 40, padding: "40px 44px", display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 20px 60px rgba(27,36,51,.06)" }}>
+      <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: C.muted, marginBottom: 12 }}>Cause secondarie</div>
+      {items.map((t, i) => {
+        const k = interpolate(f, [t0 + i * 14, t0 + i * 14 + 10], [0, 1], { ...clamp, easing: ease });
+        return <div key={t} style={{ display: "flex", alignItems: "center", gap: 26, padding: "20px 0", borderTop: i ? `2px solid ${C.line}` : "none" }}>
+          <div style={{ width: 58, height: 58, borderRadius: "50%", border: `4px solid ${k > 0 ? C.teal : C.line}`, background: k > 0 ? C.teal : "transparent", display: "grid", placeItems: "center", flex: "0 0 auto" }}>
+            <svg viewBox="0 0 24 24" width={34} height={34} fill="none" stroke="#fff" strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: k, transform: `scale(${0.5 + k / 2})` }}><path d="m5 12 5 5 9-10" /></svg>
+          </div>
+          <div style={{ flex: 1, fontSize: 40, fontWeight: 600, color: C.ink }}>{t}</div>
+          <div style={{ fontSize: 32, fontWeight: 700, color: C.teal, opacity: k }}>escluse</div>
+        </div>;
+      })}
+    </div></Rise>
+    <div style={{ display: "flex", justifyContent: "center", opacity: stamp, transform: `scale(${0.7 + stamp * 0.3})` }}>
+      <div style={{ background: C.pri, color: "#fff", fontSize: 50, fontWeight: 800, padding: "22px 48px", borderRadius: 60, letterSpacing: -0.5 }}>= osteoporosi primaria</div>
     </div>
   </Body>;
 };
 
-const EXAMS: [string, string?][] = [["Hb"], ["MCV"], ["VES"], ["Elettroforesi"], ["Albumina"], ["Calcio"], ["Fosforo"], ["Fosfatasi alcalina"], ["Calciuria 24h"], ["25-OH-vit D"], ["PTH", "2"], ["TSH", "1"], ["Creatinina"]];
+const EXAMS: [string, boolean?][] = [["Hb"], ["MCV"], ["VES"], ["Elettroforesi"], ["Albumina"], ["Calcio"], ["Fosforo"], ["Fosfatasi alcalina"], ["Calciuria 24h"], ["25-OH-vit D"], ["Creatinina"], ["TSH", true], ["PTH", true]];
 
-const Note: React.FC<{ n: string; title: string; text: string; delay: number }> = ({ n, title, text, delay }) => (
-  <Rise delay={delay}><div style={{ display: "flex", gap: 24, alignItems: "flex-start", background: C.box, borderRadius: 28, padding: "26px 30px", borderLeft: `8px solid ${C.teal}` }}>
-    <div style={{ fontSize: 34, fontWeight: 800, color: C.teal, minWidth: 30 }}>{n}</div>
-    <div><div style={{ fontSize: 38, fontWeight: 800, color: C.ink }}>{title}</div><div style={{ fontSize: 32, color: C.muted, lineHeight: 1.35, marginTop: 6 }}>{text}</div></div>
-  </div></Rise>
-);
-
-const S4: React.FC<{ at: number[] }> = ({ at }) => (
-  <Body>
+const S4: React.FC<{ at: number[] }> = ({ at }) => {
+  const f = useCurrentFrame();
+  const hi = interpolate(f, [at[1], at[1] + 12], [0, 1], clamp);
+  return <Body>
     <Kicker n={3} text="Gli esami" />
     <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
       <Rise delay={2}><Tube /></Rise>
       <Title size={84}>Bastano gli esami di I livello</Title>
     </div>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
-      {EXAMS.map(([e, sup], i) => <Rise key={e} delay={at[0] + 30 + i * 5}>
-        <span style={{ display: "inline-block", fontSize: 36, fontWeight: 700, padding: "14px 24px", borderRadius: 18, background: C.tealBox, color: C.teal }}>{e}{sup && <sup style={{ fontSize: 22, marginLeft: 4 }}>{sup}</sup>}</span>
+      {EXAMS.map(([e, ii], i) => <Rise key={e} delay={at[0] + 30 + i * 5}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 12, fontSize: 36, fontWeight: 700, padding: "14px 24px", borderRadius: 18,
+          background: ii ? `color-mix(in srgb, ${C.priBox} ${hi * 100}%, ${C.tealBox})` : C.tealBox, color: ii && hi > 0.5 ? C.pri : C.teal,
+          boxShadow: ii ? `0 0 0 ${hi * 4}px ${C.pri}` : "none" }}>{e}
+          {ii && <span style={{ fontSize: 22, fontWeight: 800, background: C.pri, color: "#fff", borderRadius: 8, padding: "3px 9px", opacity: hi }}>II liv.</span>}
+        </span>
       </Rise>)}
     </div>
-    <Note n="1" title="TSH" text="soprattutto in chi prende la tiroxina" delay={at[2]} />
-    <Note n="2" title="PTH" text="sempre insieme a calcio e vitamina D" delay={at[3]} />
-  </Body>
-);
+    <Rise delay={at[2]}><div style={{ background: C.box, borderRadius: 28, padding: "28px 32px", borderLeft: `8px solid ${C.pri}`, display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ fontSize: 36, fontWeight: 800, color: C.ink, lineHeight: 1.25 }}>Escludono cause frequenti: <span style={{ color: C.pri }}>ipertiroidismo</span> e <span style={{ color: C.pri }}>iperparatiroidismo</span></div>
+      <div style={{ fontSize: 30, color: C.muted, lineHeight: 1.4 }}>Per questo in Osteo Help sono tra gli esami di I livello. TSH: soprattutto in chi assume L-tiroxina. PTH: si legge con calcio e vitamina D.</div>
+    </div></Rise>
+  </Body>;
+};
 
 const S5: React.FC = () => {
   const f = useCurrentFrame();
@@ -231,30 +229,52 @@ const ICON_PILL = <svg viewBox="0 0 24 24" width={70} height={70} fill="none" st
 const ICON_CLIP = <svg viewBox="0 0 24 24" width={70} height={70} fill="none" stroke={C.sec} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4" /></svg>;
 const ICON_EYE = <svg viewBox="0 0 24 24" width={70} height={70} fill="none" stroke={C.sec} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></svg>;
 
-const S6: React.FC<{ at: number[] }> = ({ at }) => {
-  const f = useCurrentFrame();
-  const tap = at[1] + 40;
-  const press = interpolate(f, [tap, tap + 5, tap + 12], [1, 0.96, 1], clamp);
-  const ring = interpolate(f, [tap, tap + 22], [0, 1], clamp);
-  return <Body>
+const S6: React.FC<{ at: number[] }> = ({ at }) => (
+  <Body>
     <Kicker n={5} text="Il piccolo resto" />
     <Title>Per il resto, la <Mark color={C.sec} bg={C.secBox} delay={22}>storia</Mark> del paziente</Title>
-    <div style={{ display: "flex", gap: 20 }}>
-      {([["Farmaci", ICON_PILL], ["Malattie", ICON_CLIP], ["Segni clinici", ICON_EYE]] as const).map(([t, ic], i) =>
-        <Rise key={t} delay={at[0] + 40 + i * 12} style={{ flex: 1 }}>
-          <div style={{ background: C.box, borderRadius: 30, padding: "34px 10px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>{ic}<div style={{ fontSize: 32, fontWeight: 700, color: C.ink }}>{t}</div></div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {([["Farmaci", ICON_PILL, "glucocorticoidi, inibitori dell'aromatasi…"], ["Malattie", ICON_CLIP, "celiachia, artrite reumatoide, diabete…"], ["Segni clinici", ICON_EYE, "strie rubre, galattorrea, sclere blu…"]] as const).map(([t, ic, ex], i) =>
+        <Rise key={t} delay={at[0] + 30 + i * 14}>
+          <div style={{ background: C.box, borderRadius: 30, padding: "28px 34px", display: "flex", alignItems: "center", gap: 30 }}>{ic}
+            <div><div style={{ fontSize: 42, fontWeight: 800, color: C.ink }}>{t}</div><div style={{ fontSize: 30, color: C.muted, marginTop: 4 }}>{ex}</div></div></div>
         </Rise>)}
     </div>
-    <Rise delay={at[1]}>
-      <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 30, background: C.mint, borderRadius: 44, padding: "34px 34px", transform: `scale(${press})` }}>
-        <div style={{ width: 120, height: 120, borderRadius: 30, background: "#fff", display: "grid", placeItems: "center", flex: "0 0 auto" }}>
-          <svg viewBox="0 0 24 24" width={64} height={64} fill="none" stroke="#172231" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4" /></svg>
-        </div>
-        <div><div style={{ fontSize: 42, fontWeight: 800, color: C.ink, lineHeight: 1.15 }}>Esami di I livello normali</div><div style={{ fontSize: 30, color: "#333C49", marginTop: 8 }}>Parti da farmaci, malattie e segni clinici</div></div>
-        <div style={{ position: "absolute", right: 120, top: "50%", width: 160, height: 160, marginTop: -80, borderRadius: "50%", border: `6px solid ${C.ink}`, opacity: f >= tap ? 1 - ring : 0, transform: `scale(${0.3 + ring})` }} />
+  </Body>
+);
+
+// l'app vera: schermate catturate da index.html, con i tocchi nei punti registrati
+const PHONE_H = 1130, PHONE_W = Math.round(PHONE_H * 390 / 844);
+const SApp: React.FC<{ at: number[] }> = ({ at }) => {
+  const f = useCurrentFrame();
+  // inizio di ciascuna schermata, in fotogrammi dall'inizio della scena
+  const T = [0, at[0] + 50, at[1] - 10, at[1] + 30, at[1] + 70, at[2], at[2] + 55, at[2] + 140];
+  const pop = useSpring(0, 18);
+  let cur = 0; T.forEach((t, i) => { if (f >= t) cur = i; });
+  const X = 8; // dissolvenza tra schermate
+  return <div style={{ position: "absolute", left: 0, right: 0, top: 270, display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+    <div style={{ width: PHONE_W + 28, height: PHONE_H + 28, borderRadius: 78, background: C.ink, padding: 14, boxShadow: "0 40px 100px rgba(27,36,51,.25)", transform: `translateY(${(1 - pop) * 80}px) scale(${0.94 + pop * 0.06})`, opacity: pop }}>
+      <div style={{ position: "relative", width: PHONE_W, height: PHONE_H, borderRadius: 64, overflow: "hidden", background: "#fff" }}>
+        {STEPS.map((s, i) => {
+          if (i < cur - 1 || i > cur) return null;
+          const o = i === cur ? interpolate(f, [T[i], T[i] + X], [0, 1], clamp) : 1;
+          const slide = i === 7 ? interpolate(f, [T[i], T[i] + 14], [120, 0], { ...clamp, easing: ease }) : 0;
+          return <Img key={s.file} src={staticFile(`app/${s.file}`)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: o, transform: `translateY(${slide}px)` }} />;
+        })}
+        {STEPS.map((s, i) => {
+          if (!s.tap || i + 1 >= T.length) return null;
+          const t = T[i + 1] - 10; // il dito tocca poco prima del cambio schermata
+          const k = interpolate(f, [t - 8, t, t + 16], [0, 1, 2], clamp);
+          if (k <= 0 || k >= 2) return null;
+          const x = s.tap.x * PHONE_W, y = s.tap.y * PHONE_H;
+          return <React.Fragment key={i}>
+            <div style={{ position: "absolute", left: x - 38, top: y - 38, width: 76, height: 76, borderRadius: "50%", background: "rgba(27,36,51,.28)", opacity: k < 1 ? k : 2 - k, transform: `scale(${k < 1 ? 1.3 - k * 0.3 : 1})` }} />
+            <div style={{ position: "absolute", left: x - 60, top: y - 60, width: 120, height: 120, borderRadius: "50%", border: "5px solid rgba(27,36,51,.5)", opacity: k > 1 ? 2 - k : 0, transform: `scale(${k > 1 ? 0.5 + (k - 1) : 0.5})` }} />
+          </React.Fragment>;
+        })}
       </div>
-    </Rise>
-  </Body>;
+    </div>
+  </div>;
 };
 
 const S7: React.FC<{ at: number[] }> = ({ at }) => (
@@ -285,7 +305,7 @@ export const Video: React.FC = () => {
       const at = t.lines.map(l => l.from);
       const start = from;
       from += t.frames - TRANSITION;
-      const body = [<S1 />, <S2 at={at} />, <S3 at={at} />, <S4 at={at} />, <S5 />, <S6 at={at} />, <S7 at={at} />][i];
+      const body = { domanda: <S1 />, primaria: <S2 at={at} />, esclusione: <S3 at={at} />, esami: <S4 at={at} />, normali: <S5 />, resto: <S6 at={at} />, app: <SApp at={at} />, sintesi: <S7 at={at} /> }[s.id];
       return <Sequence key={s.id} from={start} durationInFrames={t.frames}>
         {t.hasAudio && <Sequence from={Math.round(LEAD * FPS)}><Audio src={staticFile(`voce/${s.id}.mp3`)} /></Sequence>}
         <Scene frames={t.frames}>{body}<Caption lines={t.lines} /><Source text={s.src} /></Scene>
