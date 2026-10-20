@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Audio, Easing, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { C, Background, Body, Caption, Mark, PeopleRow, Rise, Source, Title, Tube, clamp, ease, fade, fontFamily, useSpring } from "./Video";
+import { C, Background, Body, Mark, PeopleRow, Rise, Source, Title, Tube, clamp, ease, fade, fontFamily, useSpring } from "./Video";
 import { FPS, LEAD, TRANSITION } from "./script";
 import { BREVE, timingBreve, totalBreve } from "./breve";
 
@@ -363,6 +363,47 @@ const B4: React.FC<{ at: number[] }> = ({ at }) => {
   </Body>;
 };
 
+/* ---------- sottotitoli in stile reel ---------- */
+// Poche parole alla volta, la parola detta in evidenza. I tempi delle parole sono stimati
+// dentro ciascuna battuta (già sincronizzata sulle pause della voce) in proporzione alla lunghezza.
+type Word = { w: string; from: number; to: number };
+type Group = { words: Word[]; from: number; to: number };
+function reelGroups(lines: { cap: string; from: number; to: number }[]): Group[] {
+  const groups: Group[] = [];
+  for (const l of lines) {
+    const ws = l.cap.split(/\s+/).filter(Boolean);
+    const weight = ws.map(w => w.length + 1), tot = weight.reduce((a, b) => a + b, 0);
+    let acc = 0;
+    const words = ws.map((w, i) => { const from = l.from + (acc / tot) * (l.to - l.from); acc += weight[i]; return { w, from, to: l.from + (acc / tot) * (l.to - l.from) }; });
+    let g: Word[] = [];
+    words.forEach((w, i) => {
+      g.push(w);
+      const chars = g.reduce((a, x) => a + x.w.length + 1, 0);
+      const next = words[i + 1];
+      if (!next || /[,.:?!]$/.test(w.w) || g.length >= 3 || chars + next.w.length > 18) { groups.push({ words: g, from: g[0].from, to: w.to }); g = []; }
+    });
+  }
+  return groups;
+}
+
+const ReelCaption: React.FC<{ lines: { cap: string; from: number; to: number }[] }> = ({ lines }) => {
+  const f = useCurrentFrame();
+  const groups = reelGroups(lines);
+  const i = groups.findIndex((g, k) => f >= g.from - 2 && f < (groups[k + 1]?.from ?? g.to + 14) - 2);
+  if (i < 0) return null;
+  const g = groups[i];
+  const pop = spring({ frame: f - (g.from - 2), fps: FPS, config: { damping: 14, mass: 0.6 } });
+  return <div style={{ position: "absolute", left: 60, right: 60, bottom: 230, display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "4px 2px", transform: `scale(${0.85 + pop * 0.15})`, opacity: Math.min(1, pop * 1.5) }}>
+    {g.words.map((w, k) => {
+      // la parola in evidenza è l'ultima già iniziata
+      const on = k === g.words.reduce((a, x, j) => f >= x.from - 1 ? j : a, -1);
+      return <span key={k} style={{ fontSize: 68, fontWeight: 800, letterSpacing: -1, lineHeight: 1.15, padding: "2px 14px", borderRadius: 16,
+        color: on ? "#fff" : C.ink, background: on ? C.pri : "transparent",
+        textShadow: on ? "none" : "0 0 18px #fff, 0 0 6px #fff, 0 2px 0 rgba(255,255,255,.9)", boxShadow: on ? "0 10px 28px rgba(106,92,146,.35)" : "none" }}>{w.w}</span>;
+    })}
+  </div>;
+};
+
 /* ---------- montaggio ---------- */
 const Scene: React.FC<{ frames: number; children: React.ReactNode }> = ({ frames, children }) => {
   const f = useCurrentFrame();
@@ -404,7 +445,7 @@ export const Breve: React.FC = () => (
       const body = { b1: <B1 at={at} />, b2: <B2 at={at} />, b3: <B3 at={at} />, b4: <B4 at={at} />, b5: <AppAlterati at={at} frames={t.frames} />, b6: <AppNormali at={at} />, b7: <B7 at={at} /> }[s.id];
       return <Sequence key={s.id} from={STARTS[i]} durationInFrames={t.frames}>
         {t.hasAudio && <Sequence from={Math.round(LEAD * FPS)}><Audio src={staticFile(`voce-breve/${s.id}.mp3`)} /></Sequence>}
-        <Scene frames={t.frames}>{body}{s.id !== "b7" && <Caption lines={t.lines} />}<Source text={s.src} /></Scene>
+        <Scene frames={t.frames}>{body}{s.id !== "b7" ? <ReelCaption lines={t.lines} /> : <ReelCaption lines={t.lines.slice(0, 1)} />}<Source text={s.src} /></Scene>
       </Sequence>;
     })}
   </AbsoluteFill>
