@@ -6,40 +6,40 @@ import STEPS from "./app-steps.json";
 import STEPS_ALT from "./app-alterati-steps.json";
 
 // Inter variabile, incluso nel progetto (rsms/inter, SIL Open Font License)
-const fontFamily = "Inter";
+export const fontFamily = "Inter";
 loadFont({ family: fontFamily, url: staticFile("fonts/inter-latin-wght-normal.woff2"), weight: "100 900" });
 
 // palette dell'app Osteo Help
-const C = {
+export const C = {
   bg: "#F7F5F1", ink: "#1B2433", muted: "#6F7988", line: "#E1E5EB", box: "#FFFFFF",
   pri: "#6A5C92", priBox: "#ECE8F7", sec: "#B04E37", secBox: "#F7E4DE",
   teal: "#0E7571", tealBox: "#DDF1EF", peach: "#F7C6B7", mint: "#B0DFCC",
 };
 
-const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
-const ease = Easing.bezier(0.2, 0.7, 0.2, 1);
-const fade = (f: number, from: number, len = 18) => interpolate(f, [from, from + len], [0, 1], { ...clamp, easing: ease });
-const useSpring = (delay: number, damping = 16) => {
+export const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+export const ease = Easing.bezier(0.2, 0.7, 0.2, 1);
+export const fade = (f: number, from: number, len = 18) => interpolate(f, [from, from + len], [0, 1], { ...clamp, easing: ease });
+export const useSpring = (delay: number, damping = 16) => {
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   return spring({ frame: f - delay, fps, config: { damping, mass: 0.8 } });
 };
 
 /* ---------- elementi comuni ---------- */
-const Rise: React.FC<{ delay: number; children: React.ReactNode; style?: React.CSSProperties }> = ({ delay, children, style }) => {
+export const Rise: React.FC<{ delay: number; children: React.ReactNode; style?: React.CSSProperties }> = ({ delay, children, style }) => {
   const s = useSpring(delay);
   return <div style={{ opacity: s, transform: `translateY(${(1 - s) * 50}px)`, ...style }}>{children}</div>;
 };
 
-const Kicker: React.FC<{ n: number; text: string; delay?: number }> = ({ n, text, delay = 0 }) => (
+export const Kicker: React.FC<{ n: number; text: string; delay?: number }> = ({ n, text, delay = 0 }) => (
   <Rise delay={delay}><div style={{ fontSize: 30, fontWeight: 700, letterSpacing: 4, textTransform: "uppercase", color: C.muted }}>{n} · {text}</div></Rise>
 );
 
-const Title: React.FC<{ children: React.ReactNode; delay?: number; size?: number }> = ({ children, delay = 4, size = 92 }) => (
+export const Title: React.FC<{ children: React.ReactNode; delay?: number; size?: number }> = ({ children, delay = 4, size = 92 }) => (
   <Rise delay={delay}><div style={{ fontSize: size, lineHeight: 1.04, fontWeight: 800, letterSpacing: -2.5, color: C.ink }}>{children}</div></Rise>
 );
 
 // evidenziatore che scorre sotto una parola
-const Mark: React.FC<{ children: React.ReactNode; color: string; bg: string; delay: number }> = ({ children, color, bg, delay }) => {
+export const Mark: React.FC<{ children: React.ReactNode; color: string; bg: string; delay: number }> = ({ children, color, bg, delay }) => {
   const f = useCurrentFrame();
   const w = interpolate(f, [delay, delay + 16], [0, 100], { ...clamp, easing: ease });
   return <span style={{ position: "relative", color, whiteSpace: "nowrap" }}>
@@ -48,7 +48,7 @@ const Mark: React.FC<{ children: React.ReactNode; color: string; bg: string; del
   </span>;
 };
 
-const Background: React.FC = () => {
+export const Background: React.FC = () => {
   const f = useCurrentFrame();
   const a = Math.sin(f / 90), b = Math.cos(f / 110);
   const blob = (c: string, x: number, y: number, r: number) => (
@@ -67,7 +67,7 @@ const Brand: React.FC = () => (
   </div>
 );
 
-const Caption: React.FC<{ lines: ReturnType<typeof timing>["lines"] }> = ({ lines }) => {
+export const Caption: React.FC<{ lines: ReturnType<typeof timing>["lines"] }> = ({ lines }) => {
   const f = useCurrentFrame();
   const cur = lines.find(l => f >= l.from - 4 && f < l.to + 8) ?? null;
   if (!cur) return null;
@@ -77,23 +77,23 @@ const Caption: React.FC<{ lines: ReturnType<typeof timing>["lines"] }> = ({ line
   </div>;
 };
 
-const Source: React.FC<{ text?: string }> = ({ text }) => text
+export const Source: React.FC<{ text?: string }> = ({ text }) => text
   ? <div style={{ position: "absolute", left: 90, right: 90, bottom: 150, fontSize: 24, color: C.muted, textAlign: "center" }}>Fonte: {text}</div>
   : null;
 
-const Body: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const Body: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div style={{ position: "absolute", left: 90, right: 90, top: 330, bottom: 460, display: "flex", flexDirection: "column", justifyContent: "center", gap: 40 }}>{children}</div>
 );
 
 /* ---------- icone ---------- */
-const Person: React.FC<{ color: string; light?: boolean }> = ({ color, light }) => (
+export const Person: React.FC<{ color: string; light?: boolean }> = ({ color, light }) => (
   <svg viewBox="0 0 40 72" width={58} height={104}>
     <circle cx="20" cy="12" r="10" fill={color} opacity={light ? 0.45 : 1} />
     <path d="M4 34a16 16 0 0 1 32 0v34H4z" fill={color} opacity={light ? 0.45 : 1} />
   </svg>
 );
 
-const Tube: React.FC<{ size?: number }> = ({ size = 120 }) => (
+export const Tube: React.FC<{ size?: number }> = ({ size = 120 }) => (
   <svg viewBox="0 0 48 48" width={size} height={size} fill="none" stroke={C.teal} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 5h20M17.5 5v31a6.5 6.5 0 0 0 13 0V5" /><path d="M17.5 22h13" />
   </svg>
@@ -115,7 +115,7 @@ const S1: React.FC = () => {
   </Body>;
 };
 
-const PeopleRow: React.FC<{ label: string; sub: string; solid: number; light: number; delay: number; tag: string }> = ({ label, sub, solid, light, delay, tag }) => {
+export const PeopleRow: React.FC<{ label: string; sub: string; solid: number; light: number; delay: number; tag: string }> = ({ label, sub, solid, light, delay, tag }) => {
   const f = useCurrentFrame();
   return <Rise delay={delay}>
     <div style={{ background: C.box, borderRadius: 36, padding: "34px 36px", display: "flex", flexDirection: "column", gap: 22, boxShadow: "0 20px 60px rgba(27,36,51,.06)" }}>
