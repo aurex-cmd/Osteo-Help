@@ -209,7 +209,7 @@ const S5: React.FC = () => {
   const p = interpolate(f, [16, 76], [0, 0.86], { ...clamp, easing: Easing.out(Easing.cubic) });
   const R = 250, L = 2 * Math.PI * R;
   return <Body>
-    <Kicker n={5} text="Se sono nella norma" />
+    <Kicker n={5} text="Se invece sono nella norma" />
     <Title>Escluse già quasi <Mark color={C.teal} bg={C.tealBox} delay={20}>9 su 10</Mark> delle forme secondarie</Title>
     <div style={{ display: "flex", justifyContent: "center" }}>
       <div style={{ position: "relative", width: 600, height: 600 }}>

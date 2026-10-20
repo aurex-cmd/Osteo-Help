@@ -33,7 +33,7 @@ export const SCENES: SceneDef[] = [
     { say: "L'app indica anche gli esami di secondo livello per confermarla, e apre la sua scheda.", cap: "L'app indica anche gli esami di II livello per confermarla e apre la sua scheda." },
   ]},
   { id: "normali", src: "Tannenbaum, J Clin Endocrinol Metab 2002: 86% delle forme secondarie non note", lines: [
-    { say: "Se sono tutti nella norma, si esclude già quasi il novanta per cento delle osteoporosi secondarie.", cap: "Se sono tutti nella norma, si esclude già quasi il 90% delle osteoporosi secondarie." },
+    { say: "Se invece gli esami di primo livello sono tutti nella norma, si esclude già quasi il novanta per cento delle osteoporosi secondarie.", cap: "Se invece gli esami di I livello sono tutti nella norma, si esclude già quasi il 90% delle osteoporosi secondarie." },
   ]},
   { id: "resto", lines: [
     { say: "Per la quota restante conta la storia clinica del paziente: i farmaci che assume, le malattie di cui soffre, i segni che presenta.", cap: "Per la quota restante conta la storia clinica: i farmaci che il paziente assume, le malattie di cui soffre, i segni che presenta." },
