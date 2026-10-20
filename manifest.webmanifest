@@ -1,7 +1,7 @@
 {
   "name": "Osteo Help",
   "short_name": "Osteo Help",
-  "description": "Osteoporosi secondaria: dagli esami di primo livello e dal quadro clinico al sospetto diagnostico.",
+  "description": "Osteoporosi secondaria: dagli esami di primo livello e dalla clinica alle possibili cause secondarie.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
