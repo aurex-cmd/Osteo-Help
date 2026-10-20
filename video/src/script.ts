@@ -5,7 +5,7 @@ import audio from "./audio.json";
 export const FPS = 30;
 
 export type Line = { say: string; cap: string };
-export type SceneDef = { id: string; lines: Line[]; src?: string };
+export type SceneDef = { id: string; lines: Line[]; src?: string; extra?: number };
 
 export const SCENES: SceneDef[] = [
   { id: "domanda", lines: [
@@ -53,11 +53,11 @@ export const SCENES: SceneDef[] = [
 // Senza audio: durata stimata da un parlato a ritmo normale (~15 caratteri al secondo).
 const CPS = 15, TAIL = 1.1;
 export const LEAD = 0.5;
-type Voice = { dur: number; cuts: number[] };
+export type Voice = { dur: number; cuts: number[] };
 const VOICE = audio as Record<string, Voice>;
 
-export function timing(s: SceneDef) {
-  const v = VOICE[s.id];
+export function timing(s: SceneDef, voice: Record<string, Voice> = VOICE) {
+  const v = voice[s.id];
   const chars = s.lines.map(l => l.say.length);
   const total = chars.reduce((a, b) => a + b, 0);
   let bounds: number[];
@@ -68,7 +68,7 @@ export function timing(s: SceneDef) {
     bounds = [0, ...chars.map(c => (acc += c) / total * speech)];
   }
   const speech = bounds[bounds.length - 1];
-  const frames = Math.round((LEAD + speech + TAIL) * FPS);
+  const frames = Math.round((LEAD + speech + TAIL + (s.extra ?? 0)) * FPS);
   const lines = s.lines.map((l, i) => ({ ...l, from: Math.round((LEAD + bounds[i]) * FPS), to: Math.round((LEAD + bounds[i + 1]) * FPS) }));
   return { frames, lines, hasAudio: !!v };
 }

@@ -123,10 +123,11 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 
 ### Video «Primaria o secondaria?»
 
-- **Tondo «?»** nella barra della home, accanto al pulsante del tema: apre un video verticale di circa 2 minuti, saltabile, con voce narrante (ElevenLabs) e musica di sottofondo («Calm Care», ElevenLabs Music).
-- **Contenuto**: nella maggior parte dei casi l'osteoporosi è primaria (donna in post-menopausa 7–8 casi su 10, uomo circa la metà); è una diagnosi di esclusione; gli esami di primo livello (con TSH e PTH, a rigore di secondo livello); se un esame è alterato, dimostrazione della sezione «Esami di I livello alterati» (calcio e PTH alti → iperparatiroidismo primario, con esami di II livello e scheda); se sono tutti nella norma si esclude quasi il 90% delle forme secondarie; per il resto conta la storia clinica, con una dimostrazione dell'app (glucocorticoidi e inibitori di pompa protonica, forme da considerare, scheda).
+- **Tondo «?»** nella barra della home, accanto al pulsante del tema: apre un video verticale di circa 55 secondi, saltabile, con voce narrante (ElevenLabs, voce «Marco Romeo») e musica di sottofondo («Calm Care», ElevenLabs Music).
+- **Contenuto**: nella maggior parte dei casi l'osteoporosi è primaria (donna in post-menopausa 7–8 casi su 10, uomo circa la metà); è una diagnosi di esclusione; bastano gli esami di primo livello (con TSH e PTH, a rigore di secondo livello) e, se sono nella norma, si esclude quasi il 90% delle forme secondarie; dimostrazione animata dell'app (esami alterati: calcio e PTH alti → iperparatiroidismo primario; esami normali: glucocorticoidi e inibitori di pompa protonica → forme da considerare; la scheda con le fonti).
+- **Senza audio**: niente sottotitoli; titoli ed etichette accanto al telefono spiegano ogni passo anche con l'iPhone in modalità silenziosa.
 - **Riserva**: se il video non si carica parte un'animazione HTML con le stesse informazioni e la sintesi vocale del dispositivo.
-- Il progetto del video (Remotion) è nella cartella `video/`: copione in `video/COPIONE.md`, istruzioni di esportazione nello stesso file.
+- Il progetto del video (Remotion) è nella cartella `video/`: composizione «Breve» (quella pubblicata, copione in `video/COPIONE-breve.md`) e la precedente versione lunga di 2 minuti «PrimariaSecondaria» (copione in `video/COPIONE.md`).
 
 ## File
 
@@ -136,7 +137,7 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 | `favicon.svg` | Icona della scheda del browser (SVG, con `favicon-32.png` come riserva) |
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon-180.png`, `favicon-32.png` | Installazione come app (PWA) |
 | `.nojekyll` | Fa servire i file a GitHub Pages così come sono |
-| `media/primaria-secondaria.mp4`, `.jpg` | Video aperto dal tondo «?» (H.264/AAC, circa 8 MB) e locandina |
+| `media/primaria-secondaria-breve.mp4`, `.jpg` | Video aperto dal tondo «?» (H.264/AAC, circa 7 MB) e locandina |
 | `video/` | Progetto Remotion del video: scene, copione, voce, musica, schermate dell'app |
 
 Unica risorsa esterna: il font Inter da Google Fonts (senza connessione si usa il font di sistema).
