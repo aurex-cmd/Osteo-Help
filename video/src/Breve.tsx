@@ -299,9 +299,8 @@ const EndCard: React.FC<{ t: number }> = ({ t }) => {
       </div>
       <div style={{ fontSize: 96, fontWeight: 800, letterSpacing: -3, color: C.ink }}>Osteo Help</div>
       <div style={{ fontSize: 38, lineHeight: 1.35, color: C.muted, textAlign: "center", opacity: fade(f, t + 16) }}>Dagli esami di primo livello e dalla clinica<br />alle possibili cause secondarie</div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, marginTop: 10, opacity: fade(f, t + 30) }}>
-        <div style={{ width: 80, height: 3, borderRadius: 2, background: C.line }} />
-        <div style={{ fontSize: 44, fontWeight: 700, letterSpacing: -0.5, color: C.ink }}>Dr. Aurelio Guarnaccia</div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 6, opacity: fade(f, t + 30) }}>
+                <div style={{ fontSize: 30, fontWeight: 400, color: C.muted }}>Dr. Aurelio Guarnaccia</div>
       </div>
     </div>
   </Body>;
