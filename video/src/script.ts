@@ -26,8 +26,14 @@ export const SCENES: SceneDef[] = [
     { say: "Tiesseàcca e pitiàcca, in senso stretto, sono esami di secondo livello.", cap: "TSH e PTH, in senso stretto, sono esami di II livello." },
     { say: "Però permettono di escludere cause frequenti, come l'ipertiroidismo e l'iperparatiroidismo: per questo, in Osteo Help, rientrano tra quelli di primo livello.", cap: "Però permettono di escludere cause frequenti, come ipertiroidismo e iperparatiroidismo: per questo in Osteo Help rientrano tra quelli di I livello." },
   ]},
+  { id: "alterati", lines: [
+    { say: "E se qualche esame è alterato?", cap: "E se qualche esame è alterato?" },
+    { say: "In Osteo Help apri la sezione: esami di primo livello alterati, e segna gli esami fuori norma.", cap: "In Osteo Help apri «Esami di I livello alterati» e segna gli esami fuori norma." },
+    { say: "Per esempio, calcio alto: le forme compatibili sono nove. Aggiungi il pitiàcca alto, e ne resta una sola: l'iperparatiroidismo primario.", cap: "Per esempio, calcio alto: le forme compatibili sono 9. Aggiungi il PTH alto e ne resta una sola: l'iperparatiroidismo primario." },
+    { say: "L'app indica anche gli esami di secondo livello per confermarla, e apre la sua scheda.", cap: "L'app indica anche gli esami di II livello per confermarla e apre la sua scheda." },
+  ]},
   { id: "normali", src: "Tannenbaum, J Clin Endocrinol Metab 2002: 86% delle forme secondarie non note", lines: [
-    { say: "Se sono tutti nella norma, si esclude già quasi il novanta per cento delle osteoporosi secondarie.", cap: "Se sono tutti nella norma, si esclude già quasi il 90% delle osteoporosi secondarie." },
+    { say: "Se invece gli esami di primo livello sono tutti nella norma, si esclude già quasi il novanta per cento delle osteoporosi secondarie.", cap: "Se invece gli esami di I livello sono tutti nella norma, si esclude già quasi il 90% delle osteoporosi secondarie." },
   ]},
   { id: "resto", lines: [
     { say: "Per la quota restante conta la storia clinica del paziente: i farmaci che assume, le malattie di cui soffre, i segni che presenta.", cap: "Per la quota restante conta la storia clinica: i farmaci che il paziente assume, le malattie di cui soffre, i segni che presenta." },
