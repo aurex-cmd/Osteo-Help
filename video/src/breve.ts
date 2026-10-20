@@ -29,7 +29,7 @@ export const BREVE: SceneDef[] = [
     { say: "Se sono tutti normali, parti dalla storia del paziente:", cap: "Se sono tutti normali, parti dalla storia del paziente:" },
     { say: "farmaci, malattie, segni clinici.", cap: "farmaci, malattie, segni clinici." },
   ]},
-  { id: "b7", extra: 2.4, lines: [
+  { id: "b7", extra: 3.8, lines: [
     { say: "Per ogni forma, una scheda con le fonti.", cap: "Per ogni forma, una scheda con le fonti." },
     { say: "Osteo Help.", cap: "Osteo Help." },
   ]},

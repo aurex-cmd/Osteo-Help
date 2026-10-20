@@ -10,7 +10,10 @@ const A = {
   blue: "#6A5C92", blueBox: "#F1EEFB", teal: "#0E7571", tealBox: "#E3F4F3", amber: "#9A6B1F", amberBox: "#F6EDDA",
 };
 const LW = 330, LH = 714;                 // schermo logico del telefono
-const PHONE_H = 1200, K = PHONE_H / LH, PHONE_W = Math.round(LW * K);
+const PHONE_H = 1050, K = PHONE_H / LH, PHONE_W = Math.round(LW * K);
+const PHONE_TOP = 470, PHONE_L = (1080 - PHONE_W - 28) / 2, PHONE_R = PHONE_L + PHONE_W + 28;
+// da coordinate logiche dello schermo a coordinate del video
+const vy = (y: number) => PHONE_TOP + 14 + y * K;
 const TOP = 88;                           // barra di stato + barra dell'app
 
 const StatusBar: React.FC = () => (
@@ -93,7 +96,7 @@ const Phone: React.FC<{ children: React.ReactNode; out?: number }> = ({ children
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   const pop = spring({ frame: f, fps, config: { damping: 18, mass: 0.8 } });
   const leave = interpolate(f, [out, out + 14], [0, 1], { ...clamp, easing: ease });
-  return <div style={{ position: "absolute", left: 0, right: 0, top: 250, display: "flex", justifyContent: "center", opacity: pop * (1 - leave) }}>
+  return <div style={{ position: "absolute", left: 0, right: 0, top: PHONE_TOP, display: "flex", justifyContent: "center", opacity: pop * (1 - leave) }}>
     <div style={{ width: PHONE_W + 28, height: PHONE_H + 28, borderRadius: 78, background: C.ink, padding: 14, boxShadow: "0 40px 100px rgba(27,36,51,.25)", transform: `translateY(${(1 - pop) * 80 - leave * 60}px) scale(${0.94 + pop * 0.06 - leave * 0.06})` }}>
       <div style={{ position: "relative", width: PHONE_W, height: PHONE_H, borderRadius: 64, overflow: "hidden", background: "#fff" }}>
         <div style={{ position: "absolute", left: 0, top: 0, width: LW, height: LH, transform: `scale(${K})`, transformOrigin: "0 0", fontFamily }}>{children}</div>
@@ -102,24 +105,23 @@ const Phone: React.FC<{ children: React.ReactNode; out?: number }> = ({ children
   </div>;
 };
 
-// sotto il telefono: un titolo fisso e una riga che cambia a ogni passo, per capire anche senza audio
-const Steps: React.FC<{ head: string; steps: { t: number; text: React.ReactNode }[]; out?: number }> = ({ head, steps, out = 1e9 }) => {
+// titolo in alto, come nelle prime scene
+const AppTitle: React.FC<{ children: React.ReactNode; out?: number; size?: number }> = ({ children, out = 1e9, size = 84 }) => {
   const f = useCurrentFrame();
-  let cur = 0; steps.forEach((s, i) => { if (f >= s.t) cur = i; });
-  const leave = interpolate(f, [out, out + 12], [1, 0], clamp);
-  return <div style={{ position: "absolute", left: 70, right: 70, top: 1525, display: "flex", flexDirection: "column", alignItems: "center", gap: 22, opacity: Math.min(fade(f, 6, 14), leave) }}>
-    <div style={{ fontSize: 66, fontWeight: 800, letterSpacing: -1.5, color: C.ink, textAlign: "center", lineHeight: 1.1 }}>{head}</div>
-    <div style={{ position: "relative", height: 76, alignSelf: "stretch" }}>
-      {steps.map((s, i) => {
-        if (i < cur - 1 || i > cur) return null;
-        const k = interpolate(f, [steps[cur].t, steps[cur].t + 10], [0, 1], { ...clamp, easing: ease });
-        const o = i === cur ? (cur === 0 ? 1 : k) : 1 - k;
-        const y = i === cur ? (cur === 0 ? 0 : (1 - k) * 30) : -k * 30;
-        return <div key={i} style={{ position: "absolute", inset: 0, display: "flex", justifyContent: "center", alignItems: "center", opacity: o, transform: `translateY(${y}px)` }}>
-          <span style={{ fontSize: 42, fontWeight: 700, color: C.pri, background: C.priBox, padding: "12px 28px", borderRadius: 40, whiteSpace: "nowrap" }}>{s.text}</span>
-        </div>;
-      })}
-    </div>
+  return <div style={{ position: "absolute", left: 90, right: 90, top: 290, opacity: interpolate(f, [out, out + 12], [1, 0], clamp) }}><Title size={size}>{children}</Title></div>;
+};
+
+// etichetta accanto al telefono, all'altezza dell'elemento toccato, con un trattino che la collega
+const Callout: React.FC<{ t: number; until?: number; side: "l" | "r"; y: number; tone?: "pri" | "teal" | "ink"; children: React.ReactNode }> = ({ t, until = 1e9, side, y, tone = "pri", children }) => {
+  const f = useCurrentFrame();
+  const s = spring({ frame: f - t, fps: FPS, config: { damping: 15, mass: 0.6 } });
+  const o = Math.min(s, interpolate(f, [until, until + 10], [1, 0], clamp));
+  if (o <= 0) return null;
+  const col = tone === "teal" ? C.teal : tone === "ink" ? C.ink : C.pri;
+  const pos: React.CSSProperties = side === "l" ? { right: 1080 - PHONE_L + 26 } : { left: PHONE_R + 26 };
+  return <div style={{ position: "absolute", top: vy(y), ...pos, transform: `translateY(-50%) translateX(${(1 - s) * (side === "l" ? -30 : 30)}px)`, opacity: o, display: "flex", alignItems: "center", flexDirection: side === "l" ? "row" : "row-reverse" }}>
+    <div style={{ maxWidth: 240, background: "#fff", borderRadius: 24, padding: "14px 20px", fontSize: 35, fontWeight: 800, lineHeight: 1.15, color: col, letterSpacing: -0.5, boxShadow: "0 14px 40px rgba(27,36,51,.14)", textAlign: side === "l" ? "right" : "left" }}>{children}</div>
+    <div style={{ width: 22, height: 4, borderRadius: 2, background: col }} />
   </div>;
 };
 
@@ -191,7 +193,13 @@ const AppAlterati: React.FC<{ at: number[]; frames: number }> = ({ at }) => {
     <Numbered items={["PTH", "Localizzazione (se indicazione chirurgica): eco → scintigrafia sestamibi → PET-colina"]} />
   </Screen>;
   return <>
-    <Steps head="Un esame è alterato?" steps={[{ t: 0, text: "Segnalalo nell'app" }, { t: tCa + 4, text: "Calcio ▲ → 9 forme compatibili" }, { t: tPth + 4, text: "+ PTH ▲ → ne resta una" }, { t: tDock + 10, text: "con gli esami per confermarla" }]} />
+    <AppTitle>Un esame è <Mark color={C.sec} bg={C.secBox} delay={16}>alterato</Mark>?</AppTitle>
+    <Callout t={tCa + 2} until={tDock + 6} side="l" y={altRowY["Calcio (corretto)"]}>Calcio alto</Callout>
+    <Callout t={tCa + 14} until={tPth + 6} side="r" y={LH - 52} tone="ink">9 forme possibili</Callout>
+    <Callout t={tPth + 2} until={tDock + 6} side="l" y={altRowY["PTH"]}>+ PTH alto</Callout>
+    <Callout t={tPth + 18} until={tDock + 6} side="r" y={LH - 52} tone="ink">ne resta una</Callout>
+    <Callout t={tDock + 22} side="r" y={TOP + 128} tone="teal">la forma compatibile</Callout>
+    <Callout t={tDock + 34} side="l" y={TOP + 220}>gli esami per confermarla</Callout>
     <Phone>
     <Nav screens={[{ t: 0, el: list }, { t: tDock + 8, el: result }]} />
     <Tap x={LW - 16 - 30 - 4 - 34 - 4 - 17} y={altRowY["Calcio (corretto)"]} t={tCa} />
@@ -245,7 +253,13 @@ const AppNormali: React.FC<{ at: number[] }> = ({ at }) => {
     <Entry tone="plain" title="Osteoporosi da inibitori di pompa protonica" sub={<>Farmaci · <b style={{ color: A.amber }}>associazione possibile</b></>} />
   </Screen>;
   return <>
-    <Steps head="Esami tutti normali?" steps={[{ t: 0, text: "Parti dalla storia del paziente" }, { t: tG + 4, text: "Spunta farmaci, malattie, segni" }, { t: tDock + 10, text: "→ le forme da considerare" }]} />
+    <AppTitle>Esami tutti <Mark color={C.teal} bg={C.tealBox} delay={16}>normali</Mark>?</AppTitle>
+    <Callout t={14} until={tDock + 6} side="r" y={TOP + 90} tone="ink">la storia del paziente</Callout>
+    <Callout t={tG + 2} until={tDock + 6} side="l" y={ckY["Glucocorticoidi sistemici"]} tone="teal">glucocorticoidi</Callout>
+    <Callout t={tI + 2} until={tDock + 6} side="l" y={ckY["Inibitori di pompa protonica"]} tone="teal">IPP</Callout>
+    <Callout t={tI + 16} until={tDock + 6} side="r" y={LH - 52} tone="ink">2 forme da considerare</Callout>
+    <Callout t={tDock + 22} side="r" y={TOP + 112} tone="teal">causa riconosciuta</Callout>
+    <Callout t={tDock + 34} side="l" y={TOP + 182}>associazione possibile</Callout>
     <Phone>
     <Nav screens={[{ t: 0, el: list }, { t: tDock + 8, el: result }]} />
     <Tap x={26} y={ckY["Glucocorticoidi sistemici"]} t={tG} />
@@ -292,10 +306,16 @@ const EndCard: React.FC<{ t: number }> = ({ t }) => {
 const B7: React.FC<{ at: number[] }> = ({ at }) => {
   const f = useCurrentFrame();
   const out = at[1] - 16;
-  const scroll = interpolate(f, [24, out], [0, 170], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  const tS = Math.round(out * 0.55);  // la scheda scorre fino alle fonti
+  const scroll = interpolate(f, [tS, tS + 18], [0, 170], { ...clamp, easing: Easing.inOut(Easing.cubic) });
   return <>
     {f < out + 16 && <Phone out={out}><Scheda scroll={scroll} /></Phone>}
-    {f < out + 16 && <Steps head="Per ogni forma, una scheda" out={out} steps={[{ t: 0, text: "Quando sospettarla · come confermarla · fonti" }]} />}
+    {f < out + 16 && <>
+      <AppTitle out={out} size={72}>Per ogni forma, una <Mark color={C.pri} bg={C.priBox} delay={16}>scheda</Mark></AppTitle>
+      <Callout t={16} until={tS} side="r" y={TOP + 240} tone="ink">quando sospettarla</Callout>
+      <Callout t={30} until={tS} side="l" y={TOP + 310} tone="ink">come confermarla</Callout>
+      <Callout t={tS + 22} until={out} side="r" y={TOP + 440 - 170} tone="ink">con le fonti</Callout>
+    </>}
     <EndCard t={out + 6} />
   </>;
 };
@@ -399,14 +419,19 @@ const Scene: React.FC<{ frames: number; children: React.ReactNode }> = ({ frames
   return <AbsoluteFill style={{ opacity: o, transform: `translateY(${y}px)` }}>{children}</AbsoluteFill>;
 };
 
+// nel finale la voce si ferma un attimo prima di «Osteo Help.», per lasciare tempo alla scheda
+const GAP = 40;
 const STARTS: number[] = [];
 { let from = 0; for (const s of BREVE) { STARTS.push(from); from += timingBreve(s).frames - TRANSITION; } }
 const TOTAL = totalBreve();
 // fotogramma in cui compare il marchio finale (Brand in alto si spegne)
-const END_AT = STARTS[STARTS.length - 1] + timingBreve(BREVE[BREVE.length - 1]).lines[1].from - 10;
+const END_AT = STARTS[STARTS.length - 1] + timingBreve(BREVE[BREVE.length - 1]).lines[1].from + GAP - 10;
 
 const MUSIC = 0.42, DUCK = 0.2, RAMP = 10;
-const SPANS: [number, number][] = BREVE.flatMap((s, i) => timingBreve(s).lines.map(l => [STARTS[i] + l.from, STARTS[i] + l.to] as [number, number]));
+const SPANS: [number, number][] = BREVE.flatMap((s, i) => timingBreve(s).lines.map((l, k) => {
+  const g = s.id === "b7" && k > 0 ? GAP : 0;
+  return [STARTS[i] + l.from + g, STARTS[i] + l.to + g] as [number, number];
+}));
 const musicVolume = (f: number) => {
   const d = Math.min(...SPANS.map(([a, b]) => f < a ? a - f : f > b ? f - b : 0));
   const out = interpolate(f, [TOTAL - 50, TOTAL - 4], [1, 0], clamp);
@@ -428,10 +453,15 @@ export const Breve: React.FC = () => (
     <BrandSmall />
     {BREVE.map((s, i) => {
       const t = timingBreve(s);
-      const at = t.lines.map(l => l.from);
+      const at = t.lines.map((l, k) => l.from + (s.id === "b7" && k > 0 ? GAP : 0));
       const body = { b1: <B1 at={at} />, b2: <B2 at={at} />, b3: <B3 at={at} />, b4: <B4 at={at} />, b5: <AppAlterati at={at} frames={t.frames} />, b6: <AppNormali at={at} />, b7: <B7 at={at} /> }[s.id];
       return <Sequence key={s.id} from={STARTS[i]} durationInFrames={t.frames}>
-        {t.hasAudio && <Sequence from={Math.round(LEAD * FPS)}><Audio src={staticFile(`voce-breve/${s.id}.mp3`)} /></Sequence>}
+        {t.hasAudio && (s.id !== "b7"
+          ? <Sequence from={Math.round(LEAD * FPS)}><Audio src={staticFile(`voce-breve/${s.id}.mp3`)} /></Sequence>
+          : <>
+            <Sequence from={Math.round(LEAD * FPS)}><Audio src={staticFile("voce-breve/b7.mp3")} endAt={t.lines[1].from - Math.round(LEAD * FPS)} /></Sequence>
+            <Sequence from={t.lines[1].from + GAP}><Audio src={staticFile("voce-breve/b7.mp3")} startFrom={t.lines[1].from - Math.round(LEAD * FPS)} /></Sequence>
+          </>)}
         <Scene frames={t.frames}>{body}<Source text={s.src} /></Scene>
       </Sequence>;
     })}
