@@ -340,8 +340,8 @@ const B1: React.FC<{ at: number[] }> = ({ at }) => {
 const B2: React.FC<{ at: number[] }> = ({ at }) => (
   <Body>
     <Title>Il più delle volte è <Mark color={C.pri} bg={C.priBox} delay={22}>primaria</Mark></Title>
-    <PeopleRow label="Donna" sub="in post-menopausa" solid={7} light={1} delay={at[1] - 6} tag="7–8 su 10" />
-    <PeopleRow label="Uomo" sub="" solid={4} light={1} delay={at[2] - 6} tag="~1 su 2" />
+    <PeopleRow label="Donna" sub="primaria = post-menopausale" solid={7} light={1} delay={at[1] - 6} tag="7–8 su 10" />
+    <PeopleRow label="Uomo" sub="primaria = senile o idiopatica" solid={4} light={1} delay={at[2] - 6} tag="~1 su 2" />
     <Rise delay={at[2] + 24}><div style={{ display: "flex", gap: 40, fontSize: 30, color: C.muted, fontWeight: 600 }}>
       <span><span style={{ display: "inline-block", width: 22, height: 22, borderRadius: 6, background: C.pri, marginRight: 12, verticalAlign: -2 }} />primaria</span>
       <span><span style={{ display: "inline-block", width: 22, height: 22, borderRadius: 6, background: C.sec, marginRight: 12, verticalAlign: -2 }} />secondaria</span>
