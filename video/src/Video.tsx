@@ -3,6 +3,7 @@ import { AbsoluteFill, Audio, Easing, Img, Sequence, interpolate, spring, static
 import { loadFont } from "@remotion/fonts";
 import { FPS, LEAD, SCENES, TRANSITION, timing } from "./script";
 import STEPS from "./app-steps.json";
+import STEPS_ALT from "./app-alterati-steps.json";
 
 // Inter variabile, incluso nel progetto (rsms/inter, SIL Open Font License)
 const fontFamily = "Inter";
@@ -208,7 +209,7 @@ const S5: React.FC = () => {
   const p = interpolate(f, [16, 76], [0, 0.86], { ...clamp, easing: Easing.out(Easing.cubic) });
   const R = 250, L = 2 * Math.PI * R;
   return <Body>
-    <Kicker n={4} text="Se sono nella norma" />
+    <Kicker n={5} text="Se sono nella norma" />
     <Title>Escluse già quasi <Mark color={C.teal} bg={C.tealBox} delay={20}>9 su 10</Mark> delle forme secondarie</Title>
     <div style={{ display: "flex", justifyContent: "center" }}>
       <div style={{ position: "relative", width: 600, height: 600 }}>
@@ -231,7 +232,7 @@ const ICON_EYE = <svg viewBox="0 0 24 24" width={70} height={70} fill="none" str
 
 const S6: React.FC<{ at: number[] }> = ({ at }) => (
   <Body>
-    <Kicker n={5} text="La quota restante" />
+    <Kicker n={6} text="La quota restante" />
     <Title>Per il resto conta la <Mark color={C.sec} bg={C.secBox} delay={22}>storia clinica</Mark></Title>
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {([["Farmaci", ICON_PILL, "glucocorticoidi, inibitori dell'aromatasi…"], ["Malattie", ICON_CLIP, "celiachia, artrite reumatoide, diabete…"], ["Segni clinici", ICON_EYE, "strie rubre, galattorrea, sclere blu…"]] as const).map(([t, ic, ex], i) =>
@@ -245,46 +246,38 @@ const S6: React.FC<{ at: number[] }> = ({ at }) => (
 
 // l'app vera: schermate catturate da index.html, con i tocchi nei punti registrati
 const PHONE_H = 1040, PHONE_W = Math.round(PHONE_H * 390 / 844);
-// il tasto verde della home, come nell'app
-const AppTile: React.FC<{ tap: number }> = ({ tap }) => {
+// i due tasti della home, come nell'app
+const TILE_CLIP = <svg viewBox="0 0 24 24" width={70} height={70} fill="none" stroke="#172231" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4" /></svg>;
+const TILE_TUBE = <svg viewBox="0 0 24 24" width={70} height={70} fill="none" stroke="#172231" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M9 3h6M10 3v14a2 2 0 0 0 4 0V3M10 11h4" /></svg>;
+const AppTile: React.FC<{ tap: number; title: string; sub: string; bg: string; icon: React.ReactNode }> = ({ tap, title, sub, bg, icon }) => {
   const f = useCurrentFrame();
   const press = interpolate(f, [tap, tap + 5, tap + 12], [1, 0.95, 1], clamp);
   const ring = interpolate(f, [tap, tap + 22], [0, 1], clamp);
-  return <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 30, background: C.mint, borderRadius: 44, padding: "38px 36px", transform: `scale(${press})` }}>
-    <div style={{ width: 130, height: 130, borderRadius: 32, background: "#fff", display: "grid", placeItems: "center", flex: "0 0 auto" }}>
-      <svg viewBox="0 0 24 24" width={70} height={70} fill="none" stroke="#172231" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4" /></svg>
-    </div>
-    <div><div style={{ fontSize: 46, fontWeight: 800, color: C.ink, lineHeight: 1.15 }}>Esami di I livello normali</div><div style={{ fontSize: 32, color: "#333C49", marginTop: 8 }}>Parti da farmaci, malattie e segni clinici</div></div>
+  return <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 30, background: bg, borderRadius: 44, padding: "38px 36px", transform: `scale(${press})` }}>
+    <div style={{ width: 130, height: 130, borderRadius: 32, background: "#fff", display: "grid", placeItems: "center", flex: "0 0 auto" }}>{icon}</div>
+    <div><div style={{ fontSize: 46, fontWeight: 800, color: C.ink, lineHeight: 1.15 }}>{title}</div><div style={{ fontSize: 32, color: "#333C49", marginTop: 8 }}>{sub}</div></div>
     <div style={{ position: "absolute", right: 130, top: "50%", width: 170, height: 170, marginTop: -85, borderRadius: "50%", border: `6px solid ${C.ink}`, opacity: f >= tap ? 1 - ring : 0, transform: `scale(${0.3 + ring})` }} />
   </div>;
 };
 
-const SApp: React.FC<{ at: number[] }> = ({ at }) => {
+type Step = { file: string; tap: { x: number; y: number } | null };
+// T: inizio di ciascuna schermata, in fotogrammi dall'inizio della scena; l'ultima schermata scorre dal basso
+const Phone: React.FC<{ steps: Step[]; dir: string; T: number[] }> = ({ steps, dir, T }) => {
   const f = useCurrentFrame();
-  const tileTap = at[0] + 70, phoneIn = tileTap + 20;
-  if (f < phoneIn + 6) {
-    const out = interpolate(f, [phoneIn - 4, phoneIn + 6], [1, 0], clamp);
-    return <Body><div style={{ opacity: out, transform: `scale(${1 + (1 - out) * 0.08})` }}>
-      <Kicker n={6} text="Nell'app" />
-      <div style={{ height: 40 }} />
-      <Rise delay={6}><AppTile tap={tileTap} /></Rise>
-    </div></Body>;
-  }
-  // inizio di ciascuna schermata, in fotogrammi dall'inizio della scena
-  const T = [phoneIn, phoneIn + 40, Math.max(at[1] - 10, phoneIn + 80), at[1] + 30, at[1] + 70, at[2], at[2] + 55, at[2] + 140];
-  const pop = spring({ frame: f - phoneIn, fps: 30, config: { damping: 18, mass: 0.8 } });
+  const pop = spring({ frame: f - T[0], fps: 30, config: { damping: 18, mass: 0.8 } });
   let cur = 0; T.forEach((t, i) => { if (f >= t) cur = i; });
   const X = 8; // dissolvenza tra schermate
+  const last = steps.length - 1;
   return <div style={{ position: "absolute", left: 0, right: 0, top: 270, display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
     <div style={{ width: PHONE_W + 28, height: PHONE_H + 28, borderRadius: 78, background: C.ink, padding: 14, boxShadow: "0 40px 100px rgba(27,36,51,.25)", transform: `translateY(${(1 - pop) * 80}px) scale(${0.94 + pop * 0.06})`, opacity: pop }}>
       <div style={{ position: "relative", width: PHONE_W, height: PHONE_H, borderRadius: 64, overflow: "hidden", background: "#fff" }}>
-        {STEPS.map((s, i) => {
+        {steps.map((s, i) => {
           if (i < cur - 1 || i > cur) return null;
           const o = i === cur ? interpolate(f, [T[i], T[i] + X], [0, 1], clamp) : 1;
-          const slide = i === 7 ? interpolate(f, [T[i], T[i] + 14], [120, 0], { ...clamp, easing: ease }) : 0;
-          return <Img key={s.file} src={staticFile(`app/${s.file}`)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: o, transform: `translateY(${slide}px)` }} />;
+          const slide = i === last ? interpolate(f, [T[i], T[i] + 14], [120, 0], { ...clamp, easing: ease }) : 0;
+          return <Img key={s.file} src={staticFile(`${dir}/${s.file}`)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: o, transform: `translateY(${slide}px)` }} />;
         })}
-        {STEPS.map((s, i) => {
+        {steps.map((s, i) => {
           if (!s.tap || i + 1 >= T.length) return null;
           const t = T[i + 1] - 10; // il dito tocca poco prima del cambio schermata
           const k = interpolate(f, [t - 8, t, t + 16], [0, 1, 2], clamp);
@@ -299,6 +292,33 @@ const SApp: React.FC<{ at: number[] }> = ({ at }) => {
     </div>
   </div>;
 };
+
+// prima il tasto della home, poi il telefono con le schermate
+const AppDemo: React.FC<{ n: number; kicker: string; tile: React.ComponentProps<typeof AppTile>; steps: Step[]; dir: string; T: (phoneIn: number) => number[] }> = ({ n, kicker, tile, steps, dir, T }) => {
+  const f = useCurrentFrame();
+  const phoneIn = tile.tap + 20;
+  if (f < phoneIn + 6) {
+    const out = interpolate(f, [phoneIn - 4, phoneIn + 6], [1, 0], clamp);
+    return <Body><div style={{ opacity: out, transform: `scale(${1 + (1 - out) * 0.08})` }}>
+      <Kicker n={n} text={kicker} />
+      <div style={{ height: 40 }} />
+      <Rise delay={6}><AppTile {...tile} /></Rise>
+    </div></Body>;
+  }
+  return <Phone steps={steps} dir={dir} T={T(phoneIn)} />;
+};
+
+const SAlterati: React.FC<{ at: number[] }> = ({ at }) => (
+  <AppDemo n={4} kicker="Se un esame è alterato" dir="app-alterati" steps={STEPS_ALT}
+    tile={{ tap: at[1] + 60, title: "Esami di I livello alterati", sub: "Segna gli esami fuori norma e vedi le forme compatibili", bg: C.peach, icon: TILE_TUBE }}
+    T={p => { const mid = at[2] + Math.round((at[3] - at[2]) * 0.5); return [p, Math.max(at[2] + 20, p + 30), mid, at[3], at[3] + 65, at[3] + 130]; }} />
+);
+
+const SApp: React.FC<{ at: number[] }> = ({ at }) => (
+  <AppDemo n={7} kicker="Nell'app" dir="app" steps={STEPS}
+    tile={{ tap: at[0] + 70, title: "Esami di I livello normali", sub: "Parti da farmaci, malattie e segni clinici", bg: C.mint, icon: TILE_CLIP }}
+    T={p => [p, p + 40, Math.max(at[1] - 10, p + 80), at[1] + 30, at[1] + 70, at[2], at[2] + 55, at[2] + 140]} />
+);
 
 const S7: React.FC<{ at: number[] }> = ({ at }) => (
   <Body>
@@ -348,7 +368,7 @@ export const Video: React.FC = () => {
       const at = t.lines.map(l => l.from);
       const start = from;
       from += t.frames - TRANSITION;
-      const body = { domanda: <S1 />, primaria: <S2 at={at} />, esclusione: <S3 at={at} />, esami: <S4 at={at} />, normali: <S5 />, resto: <S6 at={at} />, app: <SApp at={at} />, sintesi: <S7 at={at} /> }[s.id];
+      const body = { domanda: <S1 />, primaria: <S2 at={at} />, esclusione: <S3 at={at} />, esami: <S4 at={at} />, alterati: <SAlterati at={at} />, normali: <S5 />, resto: <S6 at={at} />, app: <SApp at={at} />, sintesi: <S7 at={at} /> }[s.id];
       return <Sequence key={s.id} from={start} durationInFrames={t.frames}>
         {t.hasAudio && <Sequence from={Math.round(LEAD * FPS)}><Audio src={staticFile(`voce/${s.id}.mp3`)} /></Sequence>}
         <Scene frames={t.frames}>{body}<Caption lines={t.lines} /><Source text={s.src} /></Scene>
