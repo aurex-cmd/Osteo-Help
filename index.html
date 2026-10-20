@@ -49,23 +49,21 @@ a{color:inherit;text-decoration:none}
 
 /* barra superiore */
 .bar{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(8px + env(safe-area-inset-top)) 16px 8px}
-.bar-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:72px 1fr 72px;align-items:center;height:32px}
+.bar-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:72px 1fr 72px;align-items:center;height:44px}
 .bar-t{text-align:center;font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar button{border:0;background:none;padding:4px 0;color:var(--muted);font-size:.85rem;font-weight:500}
 .bar #back{display:flex;align-items:center;justify-self:start}
 .bar #back svg{width:22px;height:22px}
 .bar #act{justify-self:end}
 .bar #act:hover,.bar #back:hover{color:var(--ink)}
-.bar #theme{grid-column:3;grid-row:1;justify-self:end;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--box);color:var(--ink);display:grid;place-items:center;padding:0;transition:background .2s}
+.bar #theme{grid-column:3;grid-row:1;justify-self:end;width:42px;height:42px;border-radius:50%;border:0;background:var(--box);color:var(--ink);display:grid;place-items:center;padding:0;transition:background .2s}
 .bar #act{grid-column:3;grid-row:1}
-.bar #theme:hover{border-color:var(--faint)}
 .bar.home .bar-in{grid-template-columns:1fr auto auto;column-gap:8px}
 .bar.home #back{display:none}
 /* in home: marchio OH e nome a sinistra, come in Osteoclick */
 .bar.home .bar-t{grid-column:1;display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;letter-spacing:-.01em}
 .bar.home #theme{grid-column:3}
-.bar #help{grid-column:2;grid-row:1;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--box);color:var(--ink);display:grid;place-items:center;padding:0;font-size:16px;font-weight:700;line-height:1}
-.bar #help:hover{border-color:var(--faint)}
+.bar #help{grid-column:2;grid-row:1;width:42px;height:42px;border-radius:50%;border:0;background:var(--box);color:var(--ink);display:grid;place-items:center;padding:0;font-size:16px;font-weight:700;line-height:1}
 .oh{width:32px;height:32px;border-radius:9px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:800;letter-spacing:-.02em;flex:0 0 auto}
 .bar #theme svg{width:17px;height:17px;grid-area:1/1}
 .bar #theme .sun{display:none}
@@ -99,6 +97,12 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;tex
 .entry small{display:block;color:var(--muted);font-size:.83rem;margin-top:3px;line-height:1.4}
 .entry.big{min-height:92px;padding:14px 16px 14px 14px;border-radius:22px;transition:transform .12s} .entry.big:active{transform:scale(.98)} .entry.big::before{content:none}
 .stack.home{display:grid;grid-auto-rows:1fr;gap:12px}
+/* home: stesse misure della home di Osteoclick (titolo più in basso, più aria sopra i riquadri, righe di Consulta più compatte) */
+body.is-home main h1{margin-top:18px}
+body.is-home main .sub{margin-top:-2px}
+body.is-home .stack.home{margin-top:6px}
+body.is-home .rows .rowlink{padding:10px 0}
+body.is-home .rows .rowlink > .ic{width:26px;height:26px;margin-right:6px}
 .entry.big b{font-size:1.12rem;color:var(--ink)}
 .chev{width:16px;height:16px;color:var(--faint);flex:0 0 auto}
 .ic{width:26px;height:26px;flex:0 0 auto}
@@ -1766,6 +1770,7 @@ function render(){
   $("#main").innerHTML = `<div class="screen">${v.html}</div>`;
   // in home la barra mostra il marchio OH accanto al nome
   $(".bar").classList.toggle("home", !route);
+  document.body.classList.toggle("is-home", !route);
   if(route) $("#barT").textContent = v.bar; else $("#barT").innerHTML = `<span class="oh">OH</span>${v.bar}`;
   $("#back").style.visibility = route ? "visible" : "hidden";
   $("#theme").hidden = !!route; $("#help").hidden = !!route; $("#act").hidden = !route;
