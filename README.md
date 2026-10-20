@@ -123,8 +123,8 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 
 ### Video «Primaria o secondaria?»
 
-- **Tondo «?»** nella barra della home, accanto al pulsante del tema: apre un video verticale di circa 1 minuto e 40 secondi, saltabile, con voce narrante (ElevenLabs) e musica di sottofondo («Calm Care», ElevenLabs Music).
-- **Contenuto**: nella maggior parte dei casi l'osteoporosi è primaria (donna in post-menopausa 7–8 casi su 10, uomo circa la metà); è una diagnosi di esclusione; gli esami di primo livello (con TSH e PTH, a rigore di secondo livello) escludono quasi il 90% delle forme secondarie; per il resto conta la storia clinica, con una dimostrazione dell'app (glucocorticoidi e inibitori di pompa protonica, forme da considerare, scheda).
+- **Tondo «?»** nella barra della home, accanto al pulsante del tema: apre un video verticale di circa 2 minuti, saltabile, con voce narrante (ElevenLabs) e musica di sottofondo («Calm Care», ElevenLabs Music).
+- **Contenuto**: nella maggior parte dei casi l'osteoporosi è primaria (donna in post-menopausa 7–8 casi su 10, uomo circa la metà); è una diagnosi di esclusione; gli esami di primo livello (con TSH e PTH, a rigore di secondo livello); se un esame è alterato, dimostrazione della sezione «Esami di I livello alterati» (calcio e PTH alti → iperparatiroidismo primario, con esami di II livello e scheda); se sono tutti nella norma si esclude quasi il 90% delle forme secondarie; per il resto conta la storia clinica, con una dimostrazione dell'app (glucocorticoidi e inibitori di pompa protonica, forme da considerare, scheda).
 - **Riserva**: se il video non si carica parte un'animazione HTML con le stesse informazioni e la sintesi vocale del dispositivo.
 - Il progetto del video (Remotion) è nella cartella `video/`: copione in `video/COPIONE.md`, istruzioni di esportazione nello stesso file.
 
