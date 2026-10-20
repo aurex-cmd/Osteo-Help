@@ -1,0 +1,9 @@
+# file del repository da non pubblicare
+.git
+.github
+README.md
+wrangler.jsonc
+.assetsignore
+.nojekyll
+# progetto sorgente del video (il video pubblicato è in media/)
+video
