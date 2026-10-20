@@ -102,6 +102,27 @@ const Phone: React.FC<{ children: React.ReactNode; out?: number }> = ({ children
   </div>;
 };
 
+// sotto il telefono: un titolo fisso e una riga che cambia a ogni passo, per capire anche senza audio
+const Steps: React.FC<{ head: string; steps: { t: number; text: React.ReactNode }[]; out?: number }> = ({ head, steps, out = 1e9 }) => {
+  const f = useCurrentFrame();
+  let cur = 0; steps.forEach((s, i) => { if (f >= s.t) cur = i; });
+  const leave = interpolate(f, [out, out + 12], [1, 0], clamp);
+  return <div style={{ position: "absolute", left: 70, right: 70, top: 1525, display: "flex", flexDirection: "column", alignItems: "center", gap: 22, opacity: Math.min(fade(f, 6, 14), leave) }}>
+    <div style={{ fontSize: 66, fontWeight: 800, letterSpacing: -1.5, color: C.ink, textAlign: "center", lineHeight: 1.1 }}>{head}</div>
+    <div style={{ position: "relative", height: 76, alignSelf: "stretch" }}>
+      {steps.map((s, i) => {
+        if (i < cur - 1 || i > cur) return null;
+        const k = interpolate(f, [steps[cur].t, steps[cur].t + 10], [0, 1], { ...clamp, easing: ease });
+        const o = i === cur ? (cur === 0 ? 1 : k) : 1 - k;
+        const y = i === cur ? (cur === 0 ? 0 : (1 - k) * 30) : -k * 30;
+        return <div key={i} style={{ position: "absolute", inset: 0, display: "flex", justifyContent: "center", alignItems: "center", opacity: o, transform: `translateY(${y}px)` }}>
+          <span style={{ fontSize: 42, fontWeight: 700, color: C.pri, background: C.priBox, padding: "12px 28px", borderRadius: 40, whiteSpace: "nowrap" }}>{s.text}</span>
+        </div>;
+      })}
+    </div>
+  </div>;
+};
+
 /* --- esami alterati --- */
 type Ex = { n: string; tri?: boolean };
 const ALT_GROUPS: [string, Ex[]][] = [
@@ -169,12 +190,15 @@ const AppAlterati: React.FC<{ at: number[]; frames: number }> = ({ at }) => {
     <Lbl mt={20}>Esami di II livello</Lbl>
     <Numbered items={["PTH", "Localizzazione (se indicazione chirurgica): eco → scintigrafia sestamibi → PET-colina"]} />
   </Screen>;
-  return <Phone>
+  return <>
+    <Steps head="Un esame è alterato?" steps={[{ t: 0, text: "Segnalalo nell'app" }, { t: tCa + 4, text: "Calcio ▲ → 9 forme compatibili" }, { t: tPth + 4, text: "+ PTH ▲ → ne resta una" }, { t: tDock + 10, text: "con gli esami per confermarla" }]} />
+    <Phone>
     <Nav screens={[{ t: 0, el: list }, { t: tDock + 8, el: result }]} />
     <Tap x={LW - 16 - 30 - 4 - 34 - 4 - 17} y={altRowY["Calcio (corretto)"]} t={tCa} />
     <Tap x={LW - 16 - 30 - 4 - 34 - 4 - 17} y={altRowY["PTH"]} t={tPth} />
     <Tap x={LW / 2} y={LH - 52} t={tDock} />
-  </Phone>;
+  </Phone>
+  </>;
 };
 
 /* --- esami normali: farmaci --- */
@@ -220,12 +244,15 @@ const AppNormali: React.FC<{ at: number[] }> = ({ at }) => {
     <Entry tone="teal" title="Osteoporosi indotta da glucocorticoidi" sub={<>Farmaci · <b style={{ color: A.teal }}>causa riconosciuta</b></>} />
     <Entry tone="plain" title="Osteoporosi da inibitori di pompa protonica" sub={<>Farmaci · <b style={{ color: A.amber }}>associazione possibile</b></>} />
   </Screen>;
-  return <Phone>
+  return <>
+    <Steps head="Esami tutti normali?" steps={[{ t: 0, text: "Parti dalla storia del paziente" }, { t: tG + 4, text: "Spunta farmaci, malattie, segni" }, { t: tDock + 10, text: "→ le forme da considerare" }]} />
+    <Phone>
     <Nav screens={[{ t: 0, el: list }, { t: tDock + 8, el: result }]} />
     <Tap x={26} y={ckY["Glucocorticoidi sistemici"]} t={tG} />
     <Tap x={26} y={ckY["Inibitori di pompa protonica"]} t={tI} />
     <Tap x={LW / 2} y={LH - 52} t={tDock} />
-  </Phone>;
+  </Phone>
+  </>;
 };
 
 /* --- la scheda, poi il marchio --- */
@@ -268,6 +295,7 @@ const B7: React.FC<{ at: number[] }> = ({ at }) => {
   const scroll = interpolate(f, [24, out], [0, 170], { ...clamp, easing: Easing.inOut(Easing.cubic) });
   return <>
     {f < out + 16 && <Phone out={out}><Scheda scroll={scroll} /></Phone>}
+    {f < out + 16 && <Steps head="Per ogni forma, una scheda" out={out} steps={[{ t: 0, text: "Quando sospettarla · come confermarla · fonti" }]} />}
     <EndCard t={out + 6} />
   </>;
 };
@@ -363,47 +391,6 @@ const B4: React.FC<{ at: number[] }> = ({ at }) => {
   </Body>;
 };
 
-/* ---------- sottotitoli in stile reel ---------- */
-// Poche parole alla volta, la parola detta in evidenza. I tempi delle parole sono stimati
-// dentro ciascuna battuta (già sincronizzata sulle pause della voce) in proporzione alla lunghezza.
-type Word = { w: string; from: number; to: number };
-type Group = { words: Word[]; from: number; to: number };
-function reelGroups(lines: { cap: string; from: number; to: number }[]): Group[] {
-  const groups: Group[] = [];
-  for (const l of lines) {
-    const ws = l.cap.split(/\s+/).filter(Boolean);
-    const weight = ws.map(w => w.length + 1), tot = weight.reduce((a, b) => a + b, 0);
-    let acc = 0;
-    const words = ws.map((w, i) => { const from = l.from + (acc / tot) * (l.to - l.from); acc += weight[i]; return { w, from, to: l.from + (acc / tot) * (l.to - l.from) }; });
-    let g: Word[] = [];
-    words.forEach((w, i) => {
-      g.push(w);
-      const chars = g.reduce((a, x) => a + x.w.length + 1, 0);
-      const next = words[i + 1];
-      if (!next || /[,.:?!]$/.test(w.w) || g.length >= 3 || chars + next.w.length > 18) { groups.push({ words: g, from: g[0].from, to: w.to }); g = []; }
-    });
-  }
-  return groups;
-}
-
-const ReelCaption: React.FC<{ lines: { cap: string; from: number; to: number }[] }> = ({ lines }) => {
-  const f = useCurrentFrame();
-  const groups = reelGroups(lines);
-  const i = groups.findIndex((g, k) => f >= g.from - 2 && f < (groups[k + 1]?.from ?? g.to + 14) - 2);
-  if (i < 0) return null;
-  const g = groups[i];
-  const pop = spring({ frame: f - (g.from - 2), fps: FPS, config: { damping: 14, mass: 0.6 } });
-  return <div style={{ position: "absolute", left: 60, right: 60, bottom: 230, display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "4px 2px", transform: `scale(${0.85 + pop * 0.15})`, opacity: Math.min(1, pop * 1.5) }}>
-    {g.words.map((w, k) => {
-      // la parola in evidenza è l'ultima già iniziata
-      const on = k === g.words.reduce((a, x, j) => f >= x.from - 1 ? j : a, -1);
-      return <span key={k} style={{ fontSize: 68, fontWeight: 800, letterSpacing: -1, lineHeight: 1.15, padding: "2px 14px", borderRadius: 16,
-        color: on ? "#fff" : C.ink, background: on ? C.pri : "transparent",
-        textShadow: on ? "none" : "0 0 18px #fff, 0 0 6px #fff, 0 2px 0 rgba(255,255,255,.9)", boxShadow: on ? "0 10px 28px rgba(106,92,146,.35)" : "none" }}>{w.w}</span>;
-    })}
-  </div>;
-};
-
 /* ---------- montaggio ---------- */
 const Scene: React.FC<{ frames: number; children: React.ReactNode }> = ({ frames, children }) => {
   const f = useCurrentFrame();
@@ -445,7 +432,7 @@ export const Breve: React.FC = () => (
       const body = { b1: <B1 at={at} />, b2: <B2 at={at} />, b3: <B3 at={at} />, b4: <B4 at={at} />, b5: <AppAlterati at={at} frames={t.frames} />, b6: <AppNormali at={at} />, b7: <B7 at={at} /> }[s.id];
       return <Sequence key={s.id} from={STARTS[i]} durationInFrames={t.frames}>
         {t.hasAudio && <Sequence from={Math.round(LEAD * FPS)}><Audio src={staticFile(`voce-breve/${s.id}.mp3`)} /></Sequence>}
-        <Scene frames={t.frames}>{body}{s.id !== "b7" ? <ReelCaption lines={t.lines} /> : <ReelCaption lines={t.lines.slice(0, 1)} />}<Source text={s.src} /></Scene>
+        <Scene frames={t.frames}>{body}<Source text={s.src} /></Scene>
       </Sequence>;
     })}
   </AbsoluteFill>
