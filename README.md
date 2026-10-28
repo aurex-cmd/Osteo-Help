@@ -13,8 +13,6 @@ L'app procede per schermate, una cosa alla volta:
 3. **Risultato**: l'elenco delle forme compatibili, con gli esami di II livello consigliati.
 4. **Scheda**: toccando una forma si apre la sua scheda, con in alto l'etichetta colorata della categoria (es. Endocrinologia, Farmaci) (reperti tipici, esami di II livello, perché fa male all'osso; per le forme cliniche: quando considerarla, conferma, nota).
 
-In alto a destra nella home un pulsante (luna / sole) passa dal tema chiaro allo scuro; la scelta viene ricordata. Senza scelta, l'app segue il tema del dispositivo.
-
 In fondo a ogni scheda la sezione **Fonti** riporta le voci di bibliografia dedicate a quella forma, con il loro numero: toccandolo si apre la bibliografia evidenziando la voce. Le schede senza una fonte dedicata rimandano alle linee guida generali.
 
 Dalla home si consultano anche: catalogo delle forme di osteoporosi secondaria, pattern da riconoscere (un tocco ne mostra il risultato), esame per esame, calcio corretto, bibliografia.
@@ -123,7 +121,7 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 
 ### Video «Primaria o secondaria?»
 
-- **Tondo «?»** nella barra della home, accanto al pulsante del tema: apre un video verticale di circa 55 secondi, saltabile, con voce narrante (ElevenLabs, voce «Marco Romeo») e musica di sottofondo («Calm Care», ElevenLabs Music).
+- **Tondo «?»** nella barra della home, in alto a destra: apre un video verticale di circa 55 secondi, saltabile, con voce narrante (ElevenLabs, voce «Marco Romeo») e musica di sottofondo («Calm Care», ElevenLabs Music).
 - **Contenuto**: nella maggior parte dei casi l'osteoporosi è primaria (donna in post-menopausa 7–8 casi su 10, uomo circa la metà); è una diagnosi di esclusione; bastano gli esami di primo livello (con TSH e PTH, a rigore di secondo livello) e, se sono nella norma, si esclude quasi il 90% delle forme secondarie; dimostrazione animata dell'app (esami alterati: calcio e PTH alti → iperparatiroidismo primario; esami normali: glucocorticoidi e inibitori di pompa protonica → forme da considerare; la scheda con le fonti).
 - **Senza audio**: niente sottotitoli; titoli ed etichette accanto al telefono spiegano ogni passo anche con l'iPhone in modalità silenziosa.
 - **Riserva**: se il video non si carica parte un'animazione HTML con le stesse informazioni e la sintesi vocale del dispositivo.
