@@ -82,11 +82,14 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;mar
 .entry.big{min-height:92px;padding:14px 16px 14px 14px;border-radius:22px;transition:transform .12s} .entry.big:active{transform:scale(.98)} .entry.big::before{content:none}
 .stack.home{display:grid;grid-auto-rows:1fr;gap:12px}
 /* home: stesse misure della home di Osteoclick (titolo più in basso, più aria sopra i riquadri, righe di Consulta più compatte) */
-body.is-home main h1{margin-top:18px;text-transform:uppercase}
+body.is-home main h1{margin-top:18px}
+/* come la home di Osteoclick: lineetta blu sotto il titolo, freccia dei riquadri nel cerchietto bianco, icone di Consulta nel riquadrino grigio */
+body.is-home main .rule{width:36px;height:3px;border-radius:2px;background:#2B587D}
+body.is-home .entry.big .chev{width:28px;height:28px;padding:7px;margin:0 -7px 0 -6px;box-sizing:border-box;border-radius:50%;background:rgba(255,255,255,.65);color:var(--ink);stroke-width:2.2}
 body.is-home main .sub{margin-top:-2px}
 body.is-home .stack.home{margin-top:6px}
-body.is-home .rows .rowlink{padding:10px 0}
-body.is-home .rows .rowlink > .ic{width:26px;height:26px;margin-right:6px}
+body.is-home .rows .rowlink{padding:9px 0}
+body.is-home .rows .rowlink > .ic{width:40px;height:40px;padding:9px;border-radius:12px;background:var(--box);color:var(--home-sub);margin-right:2px}
 .entry.big b{font-size:1.12rem;color:var(--ink)}
 .chev{width:16px;height:16px;color:var(--faint);flex:0 0 auto}
 .ic{width:26px;height:26px;flex:0 0 auto}
@@ -1198,7 +1201,7 @@ const head = (title, sub, label) => `${label?`<div class="katrow">${kat(label)}<
 
 /* ---------- home ---------- */
 function vHome(){
-  return { bar:"Osteo Help", html: head("Osteoporosi secondaria", "Dagli esami di primo livello e dalla clinica alle possibili cause secondarie.") + `
+  return { bar:"Osteo Help", html: head("Osteoporosi<br>secondaria", "Dagli esami di primo livello e dalla clinica alle possibili cause secondarie.") + `
     <div class="stack home">
       ${entry("alterati", "Esami di I livello alterati", "Segna gli esami fuori norma e vedi le forme compatibili", "blue big", "heroTube")}
       ${entry("normali", "Esami di I livello normali", "Parti da farmaci, malattie e segni clinici", "teal big", "heroClip")}
