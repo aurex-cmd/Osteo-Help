@@ -11,7 +11,7 @@ L'app procede per schermate, una cosa alla volta:
 1. **Home**: si sceglie da dove partire, *Esami alterati* o *Esami normali*.
 2. **Inserimento**: si segnano gli esami (▲ alto, ▼ basso, N normale) oppure si spuntano farmaci, malattie, segni e anamnesi. La barra in basso dice subito quanti risultati ci sono.
 3. **Risultato**: l'elenco delle forme compatibili, con gli esami di II livello consigliati.
-4. **Scheda**: toccando una forma si apre la sua scheda, con in alto l'etichetta colorata della categoria (es. Endocrinologia, Farmaci) (reperti tipici, esami di II livello, perché fa male all'osso; per le forme cliniche: quando considerarla, conferma, nota).
+4. **Scheda**: toccando una forma si apre la sua scheda, con in alto l'etichetta colorata della categoria (es. Endocrinologia, Farmaci) (reperti tipici, esami di II livello, effetti sull'osso; per le forme cliniche: quando considerarla, conferma, nota).
 
 In fondo a ogni scheda la sezione **Fonti** riporta le voci di bibliografia dedicate a quella forma, con il loro numero: toccandolo si apre la bibliografia evidenziando la voce. Le schede senza una fonte dedicata rimandano alle linee guida generali.
 
