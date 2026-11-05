@@ -1277,7 +1277,7 @@ function vForma(cid){
   return { bar:"Scheda", html: head(COND[cid], "", COND_CAT[cid]) + `
     <p class="lbl">Reperti tipici</p><div class="tags">${reps}</div>
     ${l2.length ? `<p class="lbl">Esami di II livello</p><ul class="list">${l2.map((x,i) => `<li><i>${i+1}</i>${x}</li>`).join("")}</ul>` : ""}
-    ${NOTES[cid] ? `<p class="lbl">Perché fa male all'osso</p><p class="note">${NOTES[cid]}</p>` : ""}
+    ${NOTES[cid] ? `<p class="lbl">Effetti sull'osso</p><p class="note">${NOTES[cid]}</p>` : ""}
     ${fontiHTML(SRC[cid])}
 ` };
 }
