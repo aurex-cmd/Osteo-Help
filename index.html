@@ -730,8 +730,7 @@ const AXES = [
       ["orticaria_pigmentosa","Orticaria pigmentosa"],
       ["prurito","Prurito"],
       ["strie_rubre","Strie rubre"],
-      ["fragilita_cutanea","Fragilità cutanea"],
-      ["ecchimosi","Ecchimosi facili"],
+      ["g_cute_fragile","Fragilità cutanea o ecchimosi facili"],
       ["anafilassi","Anafilassi ricorrente / idiopatica"],
       ["anafilassi_imenotteri","Anafilassi da puntura di imenotteri"],
       ["dermatite_erpetiforme","Dermatite erpetiforme"],
@@ -751,8 +750,7 @@ const AXES = [
       ["lussazione_cristallino","Lussazione del cristallino (ectopia lentis)"]
     ]},
     { sub:"Muscolo-scheletrico e connettivo", feats:[
-      ["miopatia","Miopatia prossimale"],
-      ["sarcopenia","Sarcopenia / perdita di massa muscolare"],
+      ["g_muscolo","Debolezza muscolare prossimale o perdita di massa muscolare"],
       ["sclere_blu","Sclere blu"],
       ["dentinogenesi","Dentinogenesi imperfetta"],
       ["perdita_denti_precoce","Perdita precoce dei denti (radice integra)"],
@@ -763,9 +761,7 @@ const AXES = [
       ["ipermobilita","Ipermobilità articolare marcata"]
     ]},
     { sub:"Gastrointestinale", feats:[
-      ["sintomi_gi","Sintomi GI ricorrenti (dolore addominale, diarrea)"],
-      ["diarrea_steatorrea","Diarrea cronica / steatorrea"],
-      ["meteorismo","Meteorismo / dolore addominale ricorrente"]
+      ["g_gi","Disturbi intestinali cronici (diarrea, steatorrea, meteorismo, dolore addominale)"]
     ]},
     { sub:"Generali e habitus", feats:[
       ["astenia","Astenia"],
@@ -778,8 +774,7 @@ const AXES = [
   ]},
   { label:"Anamnesi e pattern fratturativo", groups:[
     { sub:"Pattern fratturativo", feats:[
-      ["frattura_inspiegata","Osteoporosi o fratture inspiegate in età giovane"],
-      ["vertebrali_giovane","Fratture vertebrali in soggetto giovane"],
+      ["g_fratture_giovane","Osteoporosi o fratture inspiegate in età giovane, anche vertebrali"],
       ["fratture_infanzia","Fratture multiple fin dall'infanzia"],
       ["familiarita_fratture","Familiarità per fratture"]
     ]},
@@ -807,6 +802,27 @@ const AXES = [
     ]}
   ]}
 ];
+
+/* Voci generiche della pagina di scelta: ognuna accende le voci più specifiche usate nelle schede.
+   Le voci specifiche restano nelle schede ("Quando considerarla") con le loro etichette. */
+const GENERICHE = {
+  g_cute_fragile:["fragilita_cutanea","ecchimosi"],
+  g_muscolo:["miopatia","sarcopenia"],
+  g_gi:["sintomi_gi","diarrea_steatorrea","meteorismo"],
+  g_fratture_giovane:["frattura_inspiegata","vertebrali_giovane"]
+};
+const SPECIFICHE = { "Sintomi e segni":[
+    ["fragilita_cutanea","Fragilità cutanea"],
+    ["ecchimosi","Ecchimosi facili"],
+    ["miopatia","Miopatia prossimale"],
+    ["sarcopenia","Sarcopenia / perdita di massa muscolare"],
+    ["sintomi_gi","Sintomi GI ricorrenti (dolore addominale, diarrea)"],
+    ["diarrea_steatorrea","Diarrea cronica / steatorrea"],
+    ["meteorismo","Meteorismo / dolore addominale ricorrente"]
+  ], "Anamnesi e pattern fratturativo":[
+    ["frattura_inspiegata","Osteoporosi o fratture inspiegate in età giovane"],
+    ["vertebrali_giovane","Fratture vertebrali in soggetto giovane"]
+  ] };
 
 const FORME = [
   { kind:"sospetto", id:"ipogonadismo", nome:"Ipogonadismo maschile", cat:"Endocrina", sesso:"uomo", calc:"vermeulen",
@@ -1154,20 +1170,27 @@ function computeA(){
 function axisFeats(a){ return a.groups ? a.groups.flatMap(g=>g.feats) : a.feats; }
 const FEATLABEL = {}, FEATSEX = {};
 AXES.forEach(a => axisFeats(a).forEach(f => { FEATLABEL[f[0]] = f[1]; if(f[2]) FEATSEX[f[0]] = f[2]; }));
+Object.values(SPECIFICHE).forEach(l => l.forEach(f => { FEATLABEL[f[0]] = f[1]; }));
+const GENOF = {}; Object.entries(GENERICHE).forEach(([g, l]) => l.forEach(id => { GENOF[id] = g; }));
 const FORMA = {}; FORME.forEach(f => { FORMA[f.id] = f; });
 const W = { forte:2, lieve:1 };
 let sex = null;
 const selected = new Set();
+/* voci spuntate più le voci specifiche accese da quelle generiche */
+function active(){ const a = new Set(selected); selected.forEach(id => (GENERICHE[id]||[]).forEach(x => a.add(x))); return a; }
 function visibleForms(){ return FORME.filter(f => !f.sesso || !sex || f.sesso === sex); }
 function featVisible(id){ return !FEATSEX[id] || !sex || FEATSEX[id] === sex; }
 function computeN(){
+  const act = active();
   const matched = visibleForms().map(f => {
-    const fired = f.trigger.filter(t => selected.has(t[0]));
+    const fired = f.trigger.filter(t => act.has(t[0]));
     const primary = fired.filter(t => t[2] !== "supp");
-    const score = fired.reduce((s,t) => s + W[t[1]], 0);
+    /* più voci specifiche accese dalla stessa voce generica contano una volta sola (la più forte) */
+    const best = {}; fired.forEach(t => { const k = GENOF[t[0]] || t[0]; best[k] = Math.max(best[k]||0, W[t[1]]); });
+    const score = Object.values(best).reduce((s,w) => s + w, 0);
     const hasForte = primary.some(t => t[1] === "forte");
     return { f, fired, primary, score, hasForte };
-  }).filter(x => x.primary.length > 0 && !(x.f.suppressedBy && x.f.suppressedBy.some(id => selected.has(id))));
+  }).filter(x => x.primary.length > 0 && !(x.f.suppressedBy && x.f.suppressedBy.some(id => act.has(id))));
   const byScore = (a,b) => b.score - a.score || b.hasForte - a.hasForte;
   return { note: matched.filter(x => x.f.kind !== "sospetto").sort(byScore), sosp: matched.filter(x => x.f.kind === "sospetto").sort(byScore) };
 }
@@ -1383,6 +1406,7 @@ function vermeulen(){
 /* frase leggibile per ogni elemento del quadro clinico, in base alla sezione da cui viene */
 const AXIS_VERB = { "Farmaci":"Assume" };
 const FEATAXIS = {}; AXES.forEach(a => axisFeats(a).forEach(f => { FEATAXIS[f[0]] = a.label; }));
+Object.entries(SPECIFICHE).forEach(([ax, l]) => l.forEach(f => { FEATAXIS[f[0]] = ax; }));
 const lowerFirst = t => /^.[a-zà-ù]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t;
 const phrase = id => { const v = AXIS_VERB[FEATAXIS[id]]; return v ? v + " " + lowerFirst(FEATLABEL[id]) : FEATLABEL[id]; };
 function confHTML(list){
@@ -1394,13 +1418,13 @@ function confHTML(list){
 function vCausa(id){
   const f = FORMA[id]; if(!f) return { redirect:"" };
   const trig = f.trigger.filter(t => t[2] !== "supp").sort((a, b) => (a[1] === "forte" ? 0 : 1) - (b[1] === "forte" ? 0 : 1));
-  const row = t => { const on = selected.has(t[0]); return `<li class="${t[1]==="forte"?"forte":""}${on?" on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
+  const row = t => { const on = active().has(t[0]); return `<li class="${t[1]==="forte"?"forte":""}${on?" on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
   return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + causaBody(id) + fontiHTML(SRC[id]) };
 }
 function causaBody(id){
   const f = FORMA[id];
   const trig = f.trigger.filter(t => t[2] !== "supp").sort((a, b) => (a[1] === "forte" ? 0 : 1) - (b[1] === "forte" ? 0 : 1));
-  const row = t => { const on = selected.has(t[0]); return `<li class="${t[1]==="forte"?"forte":""}${on?" on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
+  const row = t => { const on = active().has(t[0]); return `<li class="${t[1]==="forte"?"forte":""}${on?" on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
   return `
     <p class="lbl">Quando considerarla</p><ul class="list">${trig.map(row).join("")}</ul>
     <p class="small"><b>Forte</b>: da solo è sufficiente per sospettare questa forma.<br><b>Lieve</b>: da solo non basta, ma aumenta il sospetto se presente insieme ad altri elementi.</p>
