@@ -983,17 +983,17 @@ const FORME = [
   { kind:"sospetto", id:"gi_celiachia_occulta", nome:"Celiachia non ancora diagnosticata", cat:"Gastro-epatica",
     trigger:[["dermatite_erpetiforme","forte"],["diarrea_steatorrea","lieve"],["meteorismo","lieve"],["calo_ponderale","lieve"],["frattura_inspiegata","lieve"]],
     conferma:["Anti-transglutaminasi (tTG) IgA + IgA totali, con dieta contenente glutine","Se IgA totali basse: anti-tTG o anti-gliadina deamidata (DGP) IgG","Anti-endomisio (EMA) IgA a conferma","Biopsia duodenale (diagnosi nell'adulto)"],
-    nota:"La celiachia silente o atipica può presentarsi come osteoporosi isolata, con esami di primo livello normali: il malassorbimento subclinico di calcio e vitamina D riduce la massa ossea. Gli indizi sono cutanei e gastrointestinali; la conferma è sierologica, da fare prima di togliere il glutine." },
+    nota:"L'atrofia dei villi riduce l'assorbimento di calcio e vitamina D, con iperparatiroidismo secondario, e si aggiunge una componente infiammatoria. Per questo la celiachia silente o atipica può presentarsi come osteoporosi isolata, con esami di primo livello normali. Gli indizi sono cutanei e gastrointestinali; la conferma è sierologica, da fare prima di togliere il glutine." },
 
   { kind:"sospetto", id:"gi_whipple_occulta", nome:"Malattia di Whipple non ancora diagnosticata", cat:"Gastro-epatica",
     trigger:[["artralgie_migranti","lieve"],["diarrea_steatorrea","lieve"],["calo_ponderale","lieve"],["meteorismo","lieve"]],
     conferma:["EGDS con biopsie duodenali multiple: macrofagi PAS-positivi nella lamina propria","PCR per Tropheryma whipplei sulla biopsia, a conferma","Se l'istologia è negativa ma il sospetto resta: PCR su altri tessuti o liquidi (liquido sinoviale, liquor)","Invio gastroenterologico o infettivologico"],
-    nota:"Malattia rara, più frequente nell'uomo di mezza età. Le artralgie migranti precedono spesso di anni i sintomi intestinali (diarrea, calo di peso, dolore addominale) e vengono scambiate per un'artrite sieronegativa; possono associarsi febbre, linfoadenopatie e disturbi neurologici. Un peggioramento dopo l'inizio di immunosoppressori o farmaci biologici deve far pensare a questa diagnosi. La PCR su saliva o feci da sola non basta: esistono portatori sani." },
+    nota:"L'infezione cronica da Tropheryma whipplei infiltra la mucosa del tenue: malassorbimento di calcio e vitamina D, calo di peso e infiammazione sistemica riducono la massa ossea, e nell'uomo può aggiungersi l'ipogonadismo. È una malattia rara, più frequente nell'uomo di mezza età. Le artralgie migranti precedono spesso di anni i sintomi intestinali (diarrea, calo di peso, dolore addominale) e vengono scambiate per un'artrite sieronegativa, curata con glucocorticoidi o immunosoppressori che pesano anch'essi sull'osso; possono associarsi febbre, linfoadenopatie e disturbi neurologici. Un peggioramento dopo l'inizio di immunosoppressori o farmaci biologici deve far pensare a questa diagnosi. La PCR su saliva o feci da sola non basta: esistono portatori sani." },
 
   { kind:"sospetto", id:"reuma_spa_occulta", nome:"Spondiloartrite assiale non ancora diagnosticata", cat:"Reumatologica",
     trigger:[["lombalgia_infiammatoria","forte"],["vertebrali_giovane","lieve"],["frattura_inspiegata","lieve"]],
     conferma:["PCR (spesso normale: non esclude)","HLA-B27","RM delle sacroiliache (± Rx bacino)","Invio reumatologico"],
-    nota:"La perdita ossea può precedere di anni la diagnosi e presentarsi con fratture vertebrali nel giovane, mentre la lombalgia infiammatoria viene a lungo scambiata per meccanica. Per la DXA vale quanto detto per la spondilite: la colonna in proiezione antero-posteriore è falsamente alta." },
+    nota:"L'infiammazione cronica causa perdita di osso trabecolare vertebrale, anche mentre si forma osso nuovo (sindesmofiti). La perdita ossea può precedere di anni la diagnosi e presentarsi con fratture vertebrali nel giovane, mentre la lombalgia infiammatoria viene a lungo scambiata per meccanica. La BMD lombare in proiezione antero-posteriore può risultare falsamente alta per le calcificazioni: preferire il femore o la proiezione laterale." },
 
   { id:"altre_hiv", nome:"Infezione da HIV", cat:"Infettiva / sistemica",
     trigger:[["hiv","forte"]],
@@ -1023,7 +1023,7 @@ const FORME = [
   { kind:"sospetto", id:"emocromatosi_occulta", nome:"Emocromatosi non ancora diagnosticata", cat:"Metabolica / genetica",
     trigger:[["artropatia_mcf","forte"],["iperpigmentazione","lieve"],["astenia","lieve"]],
     conferma:["Saturazione della transferrina e ferritina: sospette con saturazione oltre il 45% nella donna e oltre il 50% nell'uomo","Se aumentate, test genetico HFE: conta l'omozigosi C282Y; H63D da sola non spiega un sovraccarico","Con altro genotipo, RM epatica per quantificare il ferro"],
-    nota:"Può presentarsi con osteoporosi prima della diagnosi: il ferro in eccesso danneggia gli osteoblasti e, depositandosi nell'ipofisi, causa ipogonadismo ipogonadotropo. Indizi fuori dall'osso: artropatia della 2ª e 3ª metacarpo-falangea, pelle bronzina, astenia, diabete, transaminasi alte. L'assetto marziale non è nel primo livello e va richiesto. Una ferritina alta con saturazione normale fa pensare piuttosto a infiammazione, alcol o steatosi." },
+    nota:"Può presentarsi con osteoporosi prima della diagnosi: il ferro in eccesso danneggia direttamente gli osteoblasti, stimola gli osteoclasti e, depositandosi nell'ipofisi, causa ipogonadismo ipogonadotropo. Indizi fuori dall'osso: artropatia della 2ª e 3ª metacarpo-falangea, pelle bronzina, astenia, diabete, transaminasi alte. L'assetto marziale non è nel primo livello e va richiesto. Una ferritina alta con saturazione normale fa pensare piuttosto a infiammazione, alcol o steatosi." },
 
   { id:"renale_trapianto", nome:"Osteoporosi post-trapianto d'organo", cat:"Post-trapianto",
     trigger:[["trapianto","forte"]],
