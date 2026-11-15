@@ -98,16 +98,35 @@ function figStage(p, fig, spots){
       return `<button type="button" class="fhs ${s.st}${left ? " l" : ""}" data-fsheet="${k}" style="left:${x}%;top:${y}%" aria-label="${hx(t)}: ${hx(s.s)}"><span class="fdot">${s.st === "ok" ? "✓" : s.st === "al" ? "!" : s.n}</span><span class="ftag"><b>${hx(t)}</b><small>${hx(s.s)}</small></span></button>`;
     }).join("") + `</div></div>`;
 }
-function figDesk(p, F, S){
-  const it = (k, ic, t, s, st) => `<button type="button" class="fitem ${st}" data-fsheet="${k}"><span class="fic">${ic}</span><span><b>${t}</b><small>${s}</small></span>${st === "ok" ? `<i class="fck">✓</i>` : st === "al" ? `<i class="fck al">!</i>` : ""}</button>`;
-  const ls = labStatus(p), e = stepStatus(p, "esami", F, S), dx = stepStatus(p, "dxa", F, S), df = stepStatus(p, "defra", F, S);
-  return `<div class="fdesk"><span class="flbl">Sulla scrivania · referti</span>
-    ${it("esami", "🧪", "Esami del sangue", e.st === "miss" ? `${ls.done} di ${ls.tot} esami` : e.s, e.st === "miss" ? "miss" : e.st === "warn" ? "al" : "ok")}
-    ${it("dxa", "🩻", F.minT !== null ? "DXA: " + fmtN(F.minT) : "Densitometria", F.lastDxa ? fmtD(F.lastDxa.data) + (F.dxaAge > 24 ? " · da ripetere" : "") : "T-score di colonna e femore", dx.st === "miss" ? "miss" : dx.st === "warn" ? "al" : "ok")}
-    ${it("defra", "🎯", F.zona ? "DeFRA: zona " + ZONE[F.zona].t.toLowerCase() : "DeFRA", F.zona ? ZONE[F.zona].r : "calcola e riporta la zona", df.st === "miss" ? "miss" : "ok")}
-    ${p.decisione ? it("storico", "📈", "Controlli", dxaPlan(F).t, "ok") : ""}
+/* la prossima mossa: una sola cosa da fare, la più utile adesso */
+function figNext(p, F, S, spots){
+  const urg = pzTodo(p, F).find(x => x.u === 0 && !/^Frattura recente/.test(x.t));
+  if(urg) return `<a class="fnext urg" href="${urg.href}"><small>Urgente</small><b>${urg.t}</b><span>${urg.s}</span></a>`;
+  const ls = labStatus(p), clues = [
+    ["chi", spots.chi.st === "miss", "Chi è", "età, peso e altezza, familiarità"],
+    ["fx", spots.fx.st === "miss", "Le fratture", "sede e data delle fratture da fragilità"],
+    ["anam", spots.anam.st === "miss", "Malattie e farmaci", "incolla il riassunto dal gestionale"],
+    ["esami", ls.done < ls.tot, "Esami del sangue", `${ls.done} di ${ls.tot} esami di I livello`],
+    ["dxa", !F.lastDxa, "Densitometria", "T-score di colonna e femore"],
+    ["defra", !F.zona, "DeFRA", "calcola il rischio e riporta la zona"]
+  ], miss = clues.filter(c => c[1]), dec = p.decisione && DECISIONI[p.decisione.tipo];
+  if(dec) return `<div class="fnext done"><small>Caso completato · ${fmtD(p.decisione.data)}</small><b>${dec.t}</b><span>${dxaPlan(F).t}</span><a class="fnext-l" href="#paz-${p.id}-decidi">Rivedi la decisione</a></div>`;
+  if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
+    return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo indizio · ne ${miss.length === 1 ? "manca 1" : "mancano " + miss.length}</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
+  return `<a class="fnext go" href="#paz-${p.id}-decidi"><small>${miss.length ? "Manca ancora: " + miss[0][2].toLowerCase() : "Tutti gli indizi raccolti"}</small><b>Decidi la terapia</b><span>La proposta tiene conto di zona, Nota 79 e controindicazioni</span><em>▶</em></a>`;
+}
+/* referti come una fila di caselle: icona, nome, valore */
+function figInv(p, F, S){
+  const ls = labStatus(p), e = stepStatus(p, "esami", F, S);
+  const it = (k, ic, t, v, st) => `<button type="button" class="finv-i ${st}" data-fsheet="${k}"><span class="fic">${ic}</span><b>${t}</b><small>${v}</small></button>`;
+  return `<div class="finv">
+    ${it("esami", "🧪", "Esami", e.st === "miss" ? ls.done + "/" + ls.tot : e.st === "warn" ? "da vedere" : "nella norma", e.st === "miss" ? "miss" : e.st === "warn" ? "al" : "ok")}
+    ${it("dxa", "🩻", "DXA", F.minT !== null ? fmtN(F.minT) + (F.dxaAge > 24 ? " · vecchia" : "") : "manca", !F.lastDxa ? "miss" : F.dxaAge > 24 ? "al" : "ok")}
+    ${it("defra", "🎯", "DeFRA", F.zona ? "zona " + ZONE[F.zona].t.toLowerCase() : "manca", F.zona ? "ok" : "miss")}
+    ${p.decisione ? it("storico", "📈", "Controlli", "DXA " + (dxaPlan(F).st === "ok" ? "in programma" : "da fare"), dxaPlan(F).st === "ok" ? "ok" : "al") : ""}
   </div>`;
 }
+const figDocs = p => `<p class="fdocs"><button type="button" class="lnk" data-copy="riepilogo">Copia per la cartella</button><a href="#paz-${p.id}-lettera">Lettera allo specialista</a><a href="#paz-${p.id}-foglio">Foglio per il paziente</a><a href="#paz-${p.id}-report">Report</a></p>`;
 function figSheet(p){
   const sh = FIG_SHEETS[FIG.open]; if(!sh) return "";
   return `<div class="fdim" data-fclose></div><div class="fsheet" role="dialog" aria-label="${sh.t}"><div class="fsheet-h"><span class="fic">${sh.ic}</span><b>${sh.t}</b><button type="button" class="btn" data-fclose>Fatto</button></div>
@@ -122,26 +141,16 @@ function vFigura(p){
       <button type="button" data-pset="sesso" data-val="uomo"><img src="img/uomo-anziano.jpg" alt=""><b>Un uomo</b></button></div>
       <p class="small">Poi tocca i punti sulla figura per raccogliere gli indizi.</p></div>` };
   const F = pzFacts(p), S = pzSecondary(p), all = allSteps(p), done = all.filter(x => x.st !== "miss").length, spots = figSpots(p, F, S);
-  const dec = p.decisione && DECISIONI[p.decisione.tipo], ready = !!F.zona;
   const title = [hx(pzName(p)), F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
-  const banner = dec ? `<a class="fwin" href="#paz-${p.id}-decidi"><span class="fwin-f" style="background-image:url(img/${fig}-viso.jpg)"></span><span><small>Caso completato · ${fmtD(p.decisione.data)}</small><b>${dec.t}</b><span class="fstars">★★★</span></span></a>` : "";
-  const td = pzTodo(p, F);
   return { bar: pzName(p), html: viewSwitch(p, "figura") + `
-    <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} indizi raccolti${done < STEPS.length ? " · tocca i punti sulla figura" : ""}</small></div></div>
+    <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} indizi raccolti</small></div></div>
     <div class="fprog">${all.map(x => `<i class="${x.st}" title="${x.t}"></i>`).join("")}</div>
     <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots)}</div>
     <div class="fcol-r">
-      ${banner}
-      ${figChips(p, F, S) || `<p class="small">Qui restano in evidenza i dati che contano per la decisione.</p>`}
-      ${(t => t.length ? `<div class="todo">${t.slice(0, 2).map(x => todoItem(x, false)).join("")}</div>` : "")(td.filter(x => x.u === 0 && !/^Frattura recente/.test(x.t)))}
-      ${figDesk(p, F, S)}
-      <a class="fcta${ready ? " on" : ""}" href="${ready ? `#paz-${p.id}-decidi` : `#paz-${p.id}-figura`}"${ready ? "" : ` data-fsheet="defra"`}>${ready ? (dec ? "Rivedi la decisione" : "▶ Decidi la terapia") : "🔒 Decidi la terapia"}<small>${ready ? (all.find(x => x.st === "miss" && x.k !== "terapia" && x.k !== "storico") ? "alcuni indizi mancano: la proposta sarà meno sicura" : "tutti gli indizi raccolti") : "serve la zona del DeFRA"}</small></a>
-      <div class="docs">
-        <button type="button" class="doc" data-copy="riepilogo"><b>Copia per la cartella</b><small>Riepilogo da incollare nel gestionale</small></button>
-        <a class="doc" href="#paz-${p.id}-lettera"><b>Lettera allo specialista</b><small>Già compilata</small></a>
-        <a class="doc" href="#paz-${p.id}-foglio"><b>Foglio per il paziente</b><small>Terapia e consigli</small></a>
-        <a class="doc" href="#paz-${p.id}-report"><b>Report</b><small>Da stampare</small></a>
-      </div>
+      ${figNext(p, F, S, spots)}
+      <div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>
+      <div class="fsec"><p class="flbl">Referti</p>${figInv(p, F, S)}</div>
+      <div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>
     </div></div>` + figSheet(p) };
 }
 function viewSwitch(p, cur){
