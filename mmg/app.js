@@ -10,6 +10,12 @@ const DEFRA_URL = "https://defra-osteoporosi.it/";
 const hx = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 const num = v => { if(v === "" || v == null) return null; const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) ? n : null; };
 const fmtN = (n, d) => n == null ? "—" : n.toFixed(d == null ? 1 : d).replace(".", ",").replace("-", "−");
+/* vitamina D: si conserva in ng/mL; si mostra e si inserisce nell'unità scelta (1 ng/mL = 2,496 nmol/L) */
+const VD_F = 2.496;
+let VD_U = "ng"; try{ if(localStorage.getItem("oh-mmg-vitd-unit") === "nmol") VD_U = "nmol"; }catch(e){}
+const vdUnit = () => VD_U === "nmol" ? "nmol/L" : "ng/mL";
+const vdShow = ng => ng === null ? "" : VD_U === "nmol" ? String(Math.round(ng * VD_F)) : String(Math.round(ng * 10) / 10);
+const vdTxt = ng => VD_U === "nmol" ? fmtN(ng * VD_F, 0) + " nmol/L" : fmtN(ng, 0) + " ng/mL";
 const todayISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 const pDate = s => { if(!s) return null; const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(s); return m ? new Date(+m[1], +m[2] - 1, +(m[3] || 1)) : null; };
 const fmtD = s => { const d = pDate(s); return d ? (/^\d{4}-\d{2}$/.test(s) ? "" : String(d.getDate()).padStart(2, "0") + "/") + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear() : "—"; };
@@ -222,7 +228,7 @@ function drugFlags(p, F, S){
   if(lab.Ca === "alto") add(ANABOL, "ci", "ipercalcemia");
   if(lab.PTH === "alto" && lab.Ca === "alto") add(ANABOL, "ci", "sospetto iperparatiroidismo");
   if(lab.ALP === "alto") add(ANABOL, "warn", "fosfatasi alcalina elevata da spiegare (Paget?)");
-  if((vd !== null && vd < 20) || lab.D === "basso") add([...ANTIRIASS, ...ANABOL], "warn", "correggere prima la carenza di vitamina D" + (vd !== null ? ` (${fmtN(vd, 0)} ng/mL)` : ""));
+  if((vd !== null && vd < 20) || lab.D === "basso") add([...ANTIRIASS, ...ANABOL], "warn", "correggere prima la carenza di vitamina D" + (vd !== null ? ` (${vdTxt(vd)})` : ""));
   if(ci.esofago) add(ORALI, "ci", "disturbi esofagei o impossibilità a restare in piedi/seduti");
   if(ci.tev) add([RX_, BZ_], "ci", "tromboembolismo venoso pregresso");
   if(ci.cv || F.feats.has("ictus_emiplegia")){ add([RO_], "ci", "pregresso infarto o ictus / rischio cardiovascolare"); add([RX_, BZ_], "warn", "rischio di ictus"); }
@@ -499,7 +505,7 @@ function labReport(p, S){
   if(S.hpp) out.push(`<div class="alert"><b>Fosfatasi alcalina bassa: pensa all'ipofosfatasia</b>Prima di un antiriassorbitivo dosa la vitamina B6 (piridossal-5-fosfato) e, se serve, la fosfoetanolammina urinaria. I bisfosfonati sono controindicati. <a target="_blank" rel="noopener" href="${OH}#causa-gen_ipofosfatasia">Scheda</a></div>`);
   if(lab.Ca === "basso") out.push(`<div class="alert"><b>Ipocalcemia</b>Va corretta (e spiegata) prima di qualsiasi antiriassorbitivo, in particolare denosumab e zoledronato.</div>`);
   const vd = num(p.vitd);
-  if((vd !== null && vd < 20) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa</b>Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
+  if((vd !== null && vd < 20) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa${vd !== null ? " · " + vdTxt(vd) : ""}</b>Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
   if(A.kind === "none") out.push(`<p class="hint">${labStatus(p).done ? "Tutti gli esami registrati sono nella norma." : "Segna ▲ o ▼ gli esami fuori norma e N quelli nella norma."}</p>`);
   else {
     const tags = `<div class="tags">${A.sel.map(s => `<span class="tag ${s[1]}">${ftag(s)}</span>`).join("")}</div>`;
@@ -519,7 +525,7 @@ function vPazEsami(p){
     <div class="grid2">
       <label class="fld">Data dei prelievi<input type="date" data-pf="labData" value="${hx(p.labData)}"></label>
       <label class="fld">eGFR (mL/min)<input type="number" inputmode="decimal" data-pf="egfr" value="${hx(p.egfr)}"></label>
-      <label class="fld">25-OH-vitamina D (ng/mL)<input type="number" inputmode="decimal" data-pf="vitd" value="${hx(p.vitd)}"></label>
+      <div class="fld" style="grid-column:1/-1">25-OH-vitamina D<div class="vdrow"><input type="number" inputmode="decimal" id="vdIn" value="${vdShow(num(p.vitd))}" aria-label="25-OH-vitamina D in ${vdUnit()}"><div class="seg" role="group" aria-label="Unità">${["ng", "nmol"].map(u => `<button type="button" data-vdu="${u}" aria-pressed="${VD_U === u}">${u === "ng" ? "ng/mL" : "nmol/L"}</button>`).join("")}</div></div></div>
     </div>
     <div id="pzGrid">${grid}</div>
     <p class="small">Nell'uomo aggiungi il testosterone totale; in base alla clinica anti-transglutaminasi con IgA totali, PTH e TSH se non già eseguiti.</p>
@@ -703,7 +709,7 @@ function vPazReport(p){
     <p class="lbl">Fratture da fragilità</p>${li(F.fx.map(f => FX_SEDI[f.sede] + (f.grado ? " (" + f.grado + ")" : "") + " — " + fmtD(f.data)).concat(!F.fx.length && p.nessunaFx ? ["Nessuna"] : []))}
     <p class="lbl">Anamnesi e terapie</p>${li(anam.concat(p.fam === true ? ["Familiarità per fratture di femore o vertebre"] : []))}
     <p class="lbl">Forme secondarie dall'anamnesi</p>${li([...S.N.note.map(x => x.f.nome + " — " + badgeOf(x, false)), ...S.N.sosp.map(x => x.f.nome + " — " + badgeOf(x, true))])}
-    <p class="lbl">Esami di I livello${p.labData ? " (" + fmtD(p.labData) + ")" : ""}</p>${li(labTxt.concat(num(p.egfr) !== null ? ["eGFR " + fmtN(num(p.egfr), 0) + " mL/min"] : [], num(p.vitd) !== null ? ["25-OH-vitamina D " + fmtN(num(p.vitd), 0) + " ng/mL"] : []))}
+    <p class="lbl">Esami di I livello${p.labData ? " (" + fmtD(p.labData) + ")" : ""}</p>${li(labTxt.concat(num(p.egfr) !== null ? ["eGFR " + fmtN(num(p.egfr), 0) + " mL/min"] : [], num(p.vitd) !== null ? ["25-OH-vitamina D " + vdTxt(num(p.vitd))] : []))}
     ${S.A.forms.length ? `<p class="note"><b>Forme compatibili con gli esami:</b> ${S.A.forms.map(x => COND[x.cid]).join(", ")}.${S.A.panel.length ? " Esami di II livello: " + S.A.panel.slice(0, 6).map(x => x[0]).join("; ") + "." : ""}</p>` : ""}
     ${S.hpp ? `<p class="note"><b>Fosfatasi alcalina bassa:</b> escludere l'ipofosfatasia; bisfosfonati controindicati.</p>` : ""}
     <p class="lbl">Densitometria</p>${li(F.dxa.map(d => fmtD(d.data) + " — colonna " + fmtN(num(d.tL)) + ", femore totale " + fmtN(num(d.tFt)) + ", collo " + fmtN(num(d.tFn))))}
@@ -763,7 +769,7 @@ const GUIDA = [
     <div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>` },
   { k:"base", t:"Calcio, vitamina D e stile di vita", s:"Per tutti, prima e durante la terapia", html:`
     <ul class="list"><li><i>1</i><span><b>Calcio</b>: 1000–1200 mg al giorno, possibilmente con la dieta (latte, yogurt, formaggi, acque ricche di calcio); integratore solo per la quota mancante.</span></li>
-    <li><i>2</i><span><b>Vitamina D</b>: correggere la carenza prima di iniziare un farmaco (la carenza ne riduce l'efficacia e favorisce l'ipocalcemia). In chi è in terapia per l'osteoporosi si punta ad almeno 30 ng/mL; colecalciferolo rimborsabile senza dosaggio in corso di terapia remineralizzante (Nota 96).</span></li>
+    <li><i>2</i><span><b>Vitamina D</b>: correggere la carenza prima di iniziare un farmaco (la carenza ne riduce l'efficacia e favorisce l'ipocalcemia). In chi è in terapia per l'osteoporosi si punta ad almeno 30 ng/mL (75 nmol/L); colecalciferolo rimborsabile senza dosaggio in corso di terapia remineralizzante (Nota 96).</span></li>
     <li><i>3</i><span><b>Attività fisica</b> regolare, con esercizi di carico e di equilibrio.</span></li>
     <li><i>4</i><span><b>Cadute</b>: vista, farmaci sedativi e ipotensivi, casa sicura, calzature.</span></li>
     <li><i>5</i><span><b>Fumo</b> da sospendere, <b>alcol</b> sotto le 3 unità al giorno, peso adeguato.</span></li>
@@ -821,11 +827,12 @@ const PZ_LIVE = {
 function pzLive(p){ document.querySelectorAll("[data-live]").forEach(el => { const f = PZ_LIVE[el.dataset.live]; if(f) el.innerHTML = f(p); }); }
 
 document.addEventListener("input", e => {
+  if(e.target.id === "vdIn"){ const { p } = pzRoute(); if(!p) return; const v = num(e.target.value); p.vitd = v === null ? "" : String(Math.round((VD_U === "nmol" ? v / VD_F : v) * 10) / 10); savePz(p); return; }
   const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
   if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); document.querySelectorAll("#pzList .pcard").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); }); }
 });
 document.addEventListener("change", e => {
-  if(e.target.closest("[data-pf]")){ const { p } = pzRoute(); if(p) pzLive(p); return; }
+  if(e.target.closest("[data-pf]") || e.target.id === "vdIn"){ const { p } = pzRoute(); if(p) pzLive(p); return; }
   if(e.target.id === "pzImport"){
     const f = e.target.files && e.target.files[0]; if(!f) return;
     const rd = new FileReader();
@@ -845,6 +852,8 @@ document.addEventListener("click", e => {
   }
   if(t.closest("#pzPrint")){ window.print(); return; }
   const zb = t.closest(".zbtn"); if(zb){ document.querySelectorAll(".zbtn").forEach(x => x.setAttribute("aria-pressed", x === zb)); return; }
+  const vu = t.closest("[data-vdu]");
+  if(vu){ VD_U = vu.dataset.vdu; try{ localStorage.setItem("oh-mmg-vitd-unit", VD_U); }catch(e){} render(); return; }
   const tmp = t.closest(".ck[data-tmp]"); if(tmp){ tmp.setAttribute("aria-pressed", tmp.getAttribute("aria-pressed") !== "true"); return; }
   const { p } = pzRoute(); if(!p) return;
   if(t.closest("#pzDel")){ if(confirm("Eliminare " + pzName(p) + " e tutti i suoi dati?")){ PZ.splice(PZ.indexOf(p), 1); savePz(); history.replaceState(null, "", location.pathname + location.search); stack.length = 0; stack.push(""); render(); } return; }
