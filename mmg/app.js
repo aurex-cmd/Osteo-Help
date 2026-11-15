@@ -15,9 +15,10 @@ const VD_F = 2.496;
 let VD_U = "nmol"; try{ if(localStorage.getItem("oh-mmg-vitd-unit") === "ng") VD_U = "ng"; }catch(e){}   /* nmol/L come unità predefinita */
 const vdUnit = () => VD_U === "nmol" ? "nmol/L" : "ng/mL";
 const vdShow = ng => ng === null ? "" : VD_U === "nmol" ? String(Math.round(ng * VD_F)) : String(Math.round(ng * 10) / 10);
-/* soglie in nmol/L: bassa sotto 75 (obiettivo nel paziente con osteoporosi o a rischio, Nota 96), alta sopra 250 */
-const VD_BASSA = 75, VD_ALTA = 250, vdNmol = ng => Math.round(ng * VD_F);
-const vdLow = ng => ng !== null && vdNmol(ng) < VD_BASSA, vdHigh = ng => ng !== null && vdNmol(ng) > VD_ALTA;
+/* soglie in nmol/L: bassa sotto 75 (obiettivo nel paziente con osteoporosi o a rischio, Nota 96), alta sopra 250;
+   solo sopra 375 (150 ng/mL) la vitamina D entra nel motore come «alta» e fa sospettare un'intossicazione */
+const VD_BASSA = 75, VD_ALTA = 250, VD_TOSS = 375, vdNmol = ng => Math.round(ng * VD_F);
+const vdLow = ng => ng !== null && vdNmol(ng) < VD_BASSA, vdHigh = ng => ng !== null && vdNmol(ng) > VD_ALTA, vdToss = ng => ng !== null && vdNmol(ng) > VD_TOSS;
 const vdTxt = ng => VD_U === "nmol" ? fmtN(ng * VD_F, 0) + " nmol/L" : fmtN(ng, 0) + " ng/mL";
 const todayISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 const pDate = s => { if(!s) return null; const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(s); return m ? new Date(+m[1], +m[2] - 1, +(m[3] || 1)) : null; };
@@ -325,7 +326,7 @@ const todoItem = (x, who) => `<a class="todo-i u${x.u}" href="${x.href}"><i></i>
 const albGdl = p => { const v = num(p.albVal); return v === null ? null : v > 15 ? v / 10 : v; };   /* accetta anche g/L */
 const caCorr = p => { const c = num(p.caTot), a = albGdl(p); return c === null || a === null ? null : c + 0.8 * (4 - a); };
 const AUTO = {
-  D:    p => { const v = num(p.vitd); return v === null ? null : { st: vdLow(v) ? "basso" : vdHigh(v) ? "alto" : "norm", val: vdTxt(v) }; },
+  D:    p => { const v = num(p.vitd); return v === null ? null : { st: vdLow(v) ? "basso" : vdToss(v) ? "alto" : "norm", disp: vdHigh(v) ? "alto" : undefined, val: vdTxt(v) }; },
   eGFR: p => { const v = num(p.egfr); return v === null ? null : { st: v < 60 ? "basso" : "norm", val: fmtN(v, 0) + " mL/min" }; },
   Ca:   p => { const c = caCorr(p); return c === null ? null : { st: c < 8.5 ? "basso" : c > 10.5 ? "alto" : "norm", val: fmtN(c) + " mg/dL" }; },
   Alb:  p => { const a = albGdl(p); return a === null ? null : { st: a < 3.5 ? "basso" : a > 5.2 ? "alto" : "norm", val: fmtN(a) + " g/dL" }; }
@@ -337,7 +338,8 @@ function applyAuto(p){
 const ST_ARR = { alto:"▲ alto", basso:"▼ basso", norm:"nella norma", pres:"presente" };
 /* esami in una riga di testo: alterati con il valore, poi quanti nella norma */
 function labLine(p){
-  const lab = p.lab || {}, lv = p.labVal || {}, val = e => { const a = AUTO[e.id] && AUTO[e.id](p); return a ? a.val : lv[e.id] ? hx(lv[e.id]) : ""; };
+  const lv = p.labVal || {}, val = e => { const a = AUTO[e.id] && AUTO[e.id](p); return a ? a.val : lv[e.id] ? hx(lv[e.id]) : ""; };
+  const lab = Object.assign({}, p.lab || {}); for(const k in AUTO){ const a = AUTO[k](p); if(a && a.disp) lab[k] = a.disp; }
   const alt = PZ_EXAMS.filter(e => lab[e.id] && lab[e.id] !== "norm").map(e => e.name + " " + (e.binary ? "presente" : lab[e.id] === "alto" ? "▲" : "▼") + (val(e) ? " " + val(e) : ""));
   const norm = PZ_EXAMS.filter(e => lab[e.id] === "norm").map(e => e.name + (val(e) ? " " + val(e) : "") + (e.binary ? " assente" : ""));
   return [alt.join("; "), norm.length ? "nella norma: " + norm.join(", ") : ""].filter(Boolean).join(". ");
@@ -657,6 +659,8 @@ function labReport(p, S){
   if(S.hpp) out.push(`<div class="alert"><b>Fosfatasi alcalina bassa: pensa all'ipofosfatasia</b>Prima di un antiriassorbitivo dosa la vitamina B6 (piridossal-5-fosfato) e, se serve, la fosfoetanolammina urinaria. I bisfosfonati sono controindicati. <a target="_blank" rel="noopener" href="${OH}#causa-gen_ipofosfatasia">Scheda</a></div>`);
   if(lab.Ca === "basso") out.push(`<div class="alert"><b>Ipocalcemia</b>Va corretta (e spiegata) prima di qualsiasi antiriassorbitivo, in particolare denosumab e zoledronato.</div>`);
   const vd = num(p.vitd);
+  if(vdHigh(vd)) out.push(vdToss(vd) ? `<div class="alert"><b>Vitamina D molto alta · ${vdTxt(vd)}</b>Sopra 375 nmol/L (150 ng/mL): sospendi l'integrazione e controlla calcemia e calciuria per escludere un'intossicazione.</div>`
+    : `<div class="alert warn"><b>Vitamina D alta · ${vdTxt(vd)}</b>Sopra 250 nmol/L (100 ng/mL): riduci o sospendi l'integrazione e ricontrolla. Si sospetta un'intossicazione solo sopra 375 nmol/L (150 ng/mL).</div>`);
   if(vdLow(vd) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa${vd !== null ? " · " + vdTxt(vd) : ""}</b>Sotto 75 nmol/L (30 ng/mL), il valore da raggiungere nel paziente con osteoporosi o a rischio di ipovitaminosi D (Nota 96). Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
   if(A.kind === "none") out.push(`<p class="hint">${labStatus(p).done ? "Tutti gli esami registrati sono nella norma." : "Segna ▲ o ▼ gli esami fuori norma e N quelli nella norma."}</p>`);
   else {
@@ -670,7 +674,7 @@ function labReport(p, S){
 function triRow(p, e){
   const lab = p.lab || {}, a = AUTO[e.id] && AUTO[e.id](p), lv = (p.labVal || {})[e.id] || "";
   const btn = (kind, txt, cls, lbl) => `<button type="button" class="${cls}" data-pex="${e.id}" data-kind="${kind}" aria-pressed="${lab[e.id] === kind}" aria-label="${lbl}">${txt}</button>`;
-  if(a) return `<span class="auto ${a.st}" title="Ricavato dal valore inserito sopra">${ST_ARR[a.st]} · ${a.val}</span>`;
+  if(a){ const d = a.disp || a.st; return `<span class="auto ${d}" title="Ricavato dal valore inserito sopra">${ST_ARR[d]} · ${a.val}</span>`; }
   return (e.binary ? "" : `<input class="lv" data-lv="${e.id}" value="${hx(lv)}" inputmode="decimal" autocomplete="off" placeholder="valore" aria-label="Valore di ${e.name} (facoltativo)">`) + `<div class="tri">${
     e.binary ? btn("pres", "Presente", "u", e.name + " presente") + btn("norm", "Assente", "n", e.name + " assente")
       : btn("alto", "▲", "u", e.name + " alto") + btn("norm", "N", "n", e.name + " normale") + btn("basso", "▼", "d", e.name + " basso")}</div>`;
