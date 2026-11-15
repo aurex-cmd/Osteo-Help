@@ -11,6 +11,7 @@ const FIGURE = {
   "donna-giovane": { alt:"Donna giovane", testa:[57, 7],  busto:[58, 58], fx:[30, 72] },
   "donna-anziana": { alt:"Donna anziana", testa:[50, 5],  busto:[62, 52], fx:[44, 78] },
   "donna-polso":   { alt:"Donna anziana con il polso ingessato", testa:[50, 5], busto:[66, 44], fx:[52, 63], fxLbl:"Il polso" },
+  "donna-vertebre":{ alt:"Donna anziana con il busto ortopedico per una frattura vertebrale", testa:[50, 4], busto:[27, 58], fx:[62, 74], fxLbl:"Le vertebre" },
   "uomo-giovane":  { alt:"Uomo giovane", testa:[50, 6],  busto:[58, 56], fx:[26, 70] },
   "uomo-anziano":  { alt:"Uomo anziano", testa:[50, 6],  busto:[58, 58], fx:[27, 72] },
   "uomo-femore":   { alt:"Uomo anziano in carrozzina, con frattura di femore", testa:[36, 4], busto:[44, 44], fx:[78, 23], fxLbl:"Il femore" }
@@ -20,7 +21,8 @@ function figOf(p){
   const age = ageOf(p.nascita), old = age === null || age >= 60, fx = (p.fratture || []).slice().sort(byDateDesc);
   const recent = sede => fx.some(f => f.sede === sede && (monthsSince(f.data) ?? 999) <= 24);
   if(p.sesso === "uomo") return recent("femore") ? "uomo-femore" : old ? "uomo-anziano" : "uomo-giovane";
-  return recent("polso") && old ? "donna-polso" : old ? "donna-anziana" : "donna-giovane";
+  /* la frattura vertebrale recente ha la precedenza: è la più importante per il rischio */
+  return recent("vertebra") && old ? "donna-vertebre" : recent("polso") && old ? "donna-polso" : old ? "donna-anziana" : "donna-giovane";
 }
 const figViso = p => { const f = figOf(p); return f ? `img/${f}-viso.jpg` : null; };
 
@@ -66,7 +68,7 @@ function figSpots(p, F, S){
     chi: { n:1, st: anagMiss ? "miss" : "ok", t: anagMiss ? "Chi è" : (F.age + " anni"),
       s: anagMiss ? "età, peso, familiarità" : ["BMI " + fmtN(F.bmi), p.fam ? "familiarità sì" : "", p.sesso === "donna" && p.postmeno ? "in menopausa" : ""].filter(Boolean).join(" · ") },
     fx: { n:2, st: F.fx.length ? (F.recent.length ? "al" : "ok") : p.nessunaFx ? "ok" : "miss",
-      t: F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura") + (F.fx.length > 1 ? " +" + (F.fx.length - 1) : "") : p.nessunaFx ? "Nessuna frattura" : "Le fratture",
+      t: F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura") + (F.fx[0].grado ? " " + F.fx[0].grado : "") + (F.fx.length > 1 ? " +" + (F.fx.length - 1) : "") : p.nessunaFx ? "Nessuna frattura" : "Le fratture",
       s: F.fx.length ? (F.recent.length ? "recente · " + fmtD(F.fx[0].data) : fmtD(F.fx[0].data)) : p.nessunaFx ? "da fragilità" : "quando, dove, come" },
     anam: { n:3, st: an.st === "miss" ? "miss" : (sec.length || ciOn ? "al" : "ok"), t: an.st === "miss" ? "Malattie e farmaci" : sec.length ? sec[0] : "Anamnesi verificata",
       s: an.st === "miss" ? "incolla dal gestionale" : sec.length > 1 ? "+ " + plural(sec.length - 1, "altra causa", "altre cause") : ciOn ? "controindicazioni da conoscere" : "nessuna forma secondaria" }
