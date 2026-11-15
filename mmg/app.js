@@ -466,7 +466,10 @@ const AVATAR = {
   donna:'<path class="ac" d="M13.4 27c-2.2-9 .5-17.6 8.6-17.6s10.8 8.6 8.6 17.6c-2.4 1.3-5.1 1.8-8.6 1.8s-6.2-.5-8.6-1.8z"/><path class="ab" d="M6 46c0-10 7.2-17 16-17s16 7 16 17z"/><circle class="ah" cx="22" cy="18" r="6.9"/><path class="ac" d="M15.1 17.4c.4-5 3.3-7.6 6.9-7.6 3.1 0 5.8 1.8 6.8 5.7-3.3-.2-7-1.5-8.8-3.7-.9 2.2-2.6 4.3-4.9 5.6z"/>',
   "":'<path class="ab" d="M6 46c0-10 7.2-17 16-17s16 7 16 17z"/><circle class="ah" cx="22" cy="18" r="7.2"/>'
 };
-const avatar = p => `<span class="pav" aria-hidden="true"><svg viewBox="3 4 38 38">${AVATAR[p.sesso || ""] || AVATAR[""]}</svg></span>`;
+const avatar = p => { const v = figViso(p); return v ? `<span class="pav img" aria-hidden="true"><img src="${v}" alt=""></span>` : `<span class="pav" aria-hidden="true"><svg viewBox="3 4 38 38">${AVATAR[p.sesso || ""] || AVATAR[""]}</svg></span>`; };
+/* vista del paziente preferita: figura (predefinita) o percorso a passi */
+let VISTA = "figura"; try{ if(localStorage.getItem("oh-mmg-vista") === "percorso") VISTA = "percorso"; }catch(e){}
+const setVista = v => { if(VISTA !== v){ VISTA = v; try{ localStorage.setItem("oh-mmg-vista", v); }catch(e){} } };
 const initials = p => { const w = pzName(p).replace(/[^\p{L}\s.]/gu, " ").split(/[\s.]+/).filter(Boolean); return w.length ? (w[0][0] + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase() : "?"; };
 function vPazienti(){
   const cards = PZ.slice().sort((a, b) => pzName(a).localeCompare(pzName(b), "it", { sensitivity:"base" })).map(p => {
@@ -588,10 +591,9 @@ function vPaz(p){
 /* ---------- 1 · dati e fratture ---------- */
 const segPz = (key, val, txt, cur) => `<button type="button" data-pset="${key}" data-val="${val}" aria-pressed="${cur === val}">${txt}</button>`;
 const ckPz = (attr, key, on, txt) => `<button type="button" class="ck" ${attr}="${key}" aria-pressed="${!!on}"><span class="cb">${TICK}</span><span>${txt}</span></button>`;
-function vPazDati(p){
+function datiAnag(p){
   const F = pzFacts(p);
-  const fxRows = F.fx.map(f => `<li class="rec"><span><b>${FX_SEDI[f.sede] || f.sede}${f.sede === "vertebra" && f.grado ? " · " + f.grado : ""}</b><small>${fmtD(f.data)}${f.inTerapia ? " · durante terapia da ≥1 anno" : ""}</small></span><button type="button" class="x" data-del="fratture:${p.fratture.indexOf(f)}" aria-label="Elimina">✕</button></li>`).join("");
-  return { bar: pzName(p), html: head("Dati e fratture", "Chi è il paziente e quali fratture ha avuto.") + `
+  return `
     <div class="grid2">
       <label class="fld" style="grid-column:1/-1">Nome, iniziali o codice<input type="text" data-pf="nome" value="${hx(p.nome)}" autocomplete="off"></label>
       <label class="fld">Data di nascita<input type="date" data-pf="nascita" value="${hx(p.nascita)}"></label>
@@ -601,8 +603,12 @@ function vPazDati(p){
     </div>
     <p class="small" data-live="bmi">${F.bmi ? "BMI " + fmtN(F.bmi) + " kg/m²" + (F.bmi < 20 ? " — basso peso: è un fattore di rischio" : "") : ""}</p>
     ${p.sesso === "donna" ? `<div class="fld">In postmenopausa?<div class="seg" role="group">${segPz("postmeno", true, "Sì", p.postmeno)}${segPz("postmeno", false, "No", p.postmeno)}</div></div>` : ""}
-    <div class="fld">Frattura di femore o vertebrale in uno dei genitori?<div class="seg" role="group">${segPz("fam", true, "Sì", p.fam)}${segPz("fam", false, "No", p.fam)}</div></div>
-    <p class="lbl">Fratture da fragilità</p>
+    <div class="fld">Frattura di femore o vertebrale in uno dei genitori?<div class="seg" role="group">${segPz("fam", true, "Sì", p.fam)}${segPz("fam", false, "No", p.fam)}</div></div>`;
+}
+function datiFx(p){
+  const F = pzFacts(p);
+  const fxRows = F.fx.map(f => `<li class="rec"><span><b>${FX_SEDI[f.sede] || f.sede}${f.sede === "vertebra" && f.grado ? " · " + f.grado : ""}</b><small>${fmtD(f.data)}${f.inTerapia ? " · durante terapia da ≥1 anno" : ""}</small></span><button type="button" class="x" data-del="fratture:${p.fratture.indexOf(f)}" aria-label="Elimina">✕</button></li>`).join("");
+  return `    <p class="lbl">Fratture da fragilità</p>
     <p class="small">Fratture per traumi minimi (cadere dalla propria altezza o meno). Le vertebrali con il criterio di Genant: lieve 20–25%, moderata 25–40%, grave oltre il 40% di riduzione di un'altezza vertebrale.</p>
     ${fxRows ? `<ul class="list recs">${fxRows}</ul>` : ckPz("data-pbool", "nessunaFx", p.nessunaFx, "Nessuna frattura da fragilità pregressa")}
     <div class="addbox">
@@ -613,7 +619,10 @@ function vPazDati(p){
       </div>
       ${ckPz("data-tmp", "fxInT", false, "Avvenuta nonostante almeno 1 anno di terapia per l'osteoporosi")}
       <button type="button" class="btn sec" data-add="fratture">Aggiungi frattura</button>
-    </div>` };
+    </div>`;
+}
+function vPazDati(p){
+  return { bar: pzName(p), html: head("Dati e fratture", "Chi è il paziente e quali fratture ha avuto.") + datiAnag(p) + datiFx(p) };
 }
 
 /* ---------- 2 · anamnesi e terapie ---------- */
@@ -801,7 +810,7 @@ function therapyLive(p){
 }
 function vPazTerapia(p){
   const F = pzFacts(p), notes = therapyNotes(F), n79 = nota79(p, F);
-  const n79of = id => { const c = n79.filter(c => c.s.some(l => l.includes(id))); return c.length ? "Nota 79: " + c.map(x => x.cond).join(" / ") + (c.some(x => x.spec) ? " (prescrizione su piano terapeutico specialistico)" : "") : "Con i dati inseriti non rientra in una condizione della Nota 79: verifica i dati o prescrivi fuori Nota."; };
+  const n79of = id => { const c = n79.filter(c => c.s.some(l => l.includes(id))); return c.length ? "Nota 79: " + c.map(x => x.cond).join(" / ") + (c.some(x => x.spec) && [T_, AB_, RO_].includes(id) ? " (prescrizione su piano terapeutico specialistico)" : "") : "Con i dati inseriti non rientra in una condizione della Nota 79: verifica i dati o prescrivi fuori Nota."; };
   const all = (p.terapie || []).slice().sort((a, b) => (b.inizio || "").localeCompare(a.inizio || ""));
   const rows = all.map(t => { const i = p.terapie.indexOf(t), nd = !t.fine && nextDose(t);
     return `<li class="rec"><span><b>${DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome : hx(t.farmaco)}</b><small>dal ${fmtD(t.inizio)}${t.fine ? " al " + fmtD(t.fine) : " · in corso"}${t.note ? " · " + hx(t.note) : ""}</small>${nd ? `<small class="dose-i">Ultima dose ${fmtD(lastDose(t))} · <b>prossima ${fmtDt(nd)}</b>${(t.dosi || []).length ? " · " + plural(t.dosi.length + 1, "dose", "dosi") + " registrate" : ""}</small>
@@ -1125,10 +1134,14 @@ function pzView(route){
   if(route.startsWith("farmaco-")) return vFarmaco(route.slice(8));
   const m = /^paz-([a-z0-9]+)(?:-([a-z]+))?$/.exec(route); if(!m) return null;
   const p = pzGet(m[1]); if(!p) return { redirect:"" };
+  if(!m[2]) return { redirect: "paz-" + p.id + "-" + VISTA };
+  if(m[2] === "figura"){ setVista("figura"); return vFigura(p); }
+  if(m[2] === "percorso"){ setVista("percorso"); const v = vPaz(p); v.html = viewSwitch(p, "percorso") + v.html; return v; }
+  if(m[2] === "decidi") return vDecidi(p);
   const V = { "":vPaz, dati:vPazDati, anamnesi:vPazAnamnesi, esami:vPazEsami, dxa:vPazDxa, defra:vPazDefra, terapia:vPazTerapia, storico:vPazStorico, report:vPazReport, lettera:vPazLettera, foglio:vPazFoglio }[m[2] || ""];
   return V ? V(p) : { redirect:"paz-" + p.id };
 }
-const pzParent = r => /^paz-[a-z0-9]+-/.test(r) ? r.replace(/-[a-z]+$/, "") : r.startsWith("paz-") ? "" : r.startsWith("guida-") || r.startsWith("farmaco-") ? "guida" : null;
+const pzParent = r => /^paz-[a-z0-9]+-(figura|percorso)$/.test(r) ? "" : /^paz-[a-z0-9]+-/.test(r) ? r.replace(/-[a-z]+$/, "") : r.startsWith("paz-") ? "" : r.startsWith("guida-") || r.startsWith("farmaco-") ? "guida" : null;
 
 /* aggiornamento delle parti che dipendono dai dati, senza ridisegnare i campi */
 const PZ_LIVE = {
@@ -1170,7 +1183,7 @@ document.addEventListener("click", e => {
   if(t.closest("#pzLockNow")){ showLock(); return; }
   if(t.closest("#lockForgot")){ if(confirm("Senza il codice l'unico modo per riaprire l'app è cancellare l'archivio di questo browser (potrai poi ripristinare un backup). Cancellare tutto?")){ try{ localStorage.removeItem(PZ_KEY); localStorage.removeItem(PIN_KEY); }catch(e){} location.hash = ""; location.reload(); } return; }
   const sc = t.closest("[data-scroll]"); if(sc){ const el = $(sc.dataset.scroll); if(el){ el.scrollIntoView({ behavior:"smooth", block:"center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } return; }
-  if(t.closest("#pzNew")){ const p = pzBlank(); PZ.push(p); savePz(); go("paz-" + p.id + "-dati"); return; }
+  if(t.closest("#pzNew")){ const p = pzBlank(); PZ.push(p); savePz(); go("paz-" + p.id + (VISTA === "figura" ? "-figura" : "-dati")); return; }
   if(t.closest("#pzPrint")){ window.print(); return; }
   if(t.closest("#qReset")){ const { p } = pzRoute(); if(p){ p.quesito = ""; savePz(p); render(); } return; }
   const zb = t.closest(".zbtn"); if(zb){ document.querySelectorAll(".zbtn").forEach(x => x.setAttribute("aria-pressed", x === zb)); return; }
@@ -1238,11 +1251,14 @@ function render(){
   if(v.redirect !== undefined){ history.replaceState(null, "", v.redirect ? "#" + v.redirect : location.pathname + location.search); return render(); }
   const changed = route !== current; current = route;
   /* sezioni del paziente: «Fatto» riporta alla scheda; nella scheda riporta all'elenco */
-  const m = /^paz-([a-z0-9]+)(-[a-z]+)?$/.exec(route), back = m ? (m[2] ? "paz-" + m[1] : "") : null;
+  const m = /^paz-([a-z0-9]+)(-[a-z]+)?$/.exec(route), back = m ? (m[2] && m[2] !== "-figura" && m[2] !== "-percorso" ? "paz-" + m[1] : "") : null;
   const sk = m && m[2] ? m[2].slice(1) : null, isStep = sk && STEP_IX[sk] !== undefined, pp = m ? pzGet(m[1]) : null;
   const top = isStep && pp ? `<div class="stepper noprint" data-live="stepper">${stepperInner(pp, sk)}</div>` : "";
   const nav = isStep && pp ? stepNav(pp, sk) : "";
+  const fsb = document.querySelector(".fsheet-b"), fsTop = fsb ? fsb.scrollTop : 0;
   $("#main").innerHTML = `<div class="screen">${top}${v.html}${nav}</div>`;
+  if(!changed){ const nb = document.querySelector(".fsheet-b"); if(nb) nb.scrollTop = fsTop; }
+  document.body.classList.toggle("fopen", !!document.querySelector(".fsheet"));
   doneTo = back; $("#act").hidden = back === null;
   const home = !route;
   $(".bar").classList.toggle("home", home);
@@ -1254,6 +1270,7 @@ function goBack(){ if(stack.length > 1) history.back(); else go(pzParent(current
 $("#back").addEventListener("click", goBack);
 $("#act").addEventListener("click", () => { if(doneTo !== null) go(doneTo); });
 window.addEventListener("hashchange", () => {
+  FIG.open = null;
   const r = routeNow();
   if(stack.length > 1 && stack[stack.length - 2] === r) stack.pop(); else stack.push(r);
   render();

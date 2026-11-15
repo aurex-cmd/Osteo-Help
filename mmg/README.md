@@ -25,6 +25,17 @@ Per ogni paziente un **percorso guidato in 7 passi**: in cima a ogni pagina una 
   - **Report** stampabile o da salvare in PDF.
 - **Guida per il MMG**: cos'è l'osteoporosi, cosa comporta, perché si cura, perché cercare le forme secondarie, esami di I livello, DeFRA e Nota 79, calcio, vitamina D e stile di vita, follow-up; una scheda per ognuno dei 10 farmaci.
 
+## Vista a figura
+
+La scheda del paziente si apre come **figura** (la si può cambiare con «Percorso a passi»; l'app ricorda la scelta). La figura dipende da sesso, età e fratture recenti: donna o uomo giovane (sotto i 60 anni), donna o uomo anziano, donna con il polso ingessato (frattura di polso negli ultimi 24 mesi), uomo in carrozzina con frattura di femore (negli ultimi 24 mesi). Per un paziente nuovo si sceglie prima «Chi entra in ambulatorio?».
+
+- **Punti sulla figura** («indizi»): testa → chi è (età, peso, menopausa, familiarità); frattura → fratture da fragilità; busto → malattie e farmaci (con «Incolla dal gestionale»). Ogni punto pulsa finché manca, diventa verde quando è completo e rosso quando contiene qualcosa che pesa sulla decisione; l'etichetta accanto riassume il dato.
+- **Sulla scrivania**: esami del sangue, densitometria, DeFRA e, dopo la decisione, i controlli. Ogni punto o referto apre un riquadro dal basso con la stessa parte della scheda a passi.
+- **In evidenza** restano i dati che contano: frattura recente (rischio imminente), rischio molto alto, controindicazioni (esofago, eGFR, fosfatasi alcalina bassa, rischio cardiovascolare, TEV, denti), vitamina D bassa, glucocorticoidi, forme secondarie, zona del DeFRA, T-score minimo, più le prime cose da fare.
+- **Decidi la terapia** (si sblocca con la zona del DeFRA): zona verde → nessun farmaco; zona gialla → prima linea dal MMG con il primo farmaco senza controindicazioni tra alendronato, risedronato, denosumab e zoledronato, gli altri barrati con il motivo o con le cautele, e la condizione della Nota 79 per ciascuno; zona arancione o rossa → invio allo specialista, con gli anabolici che potrà valutare e le loro controindicazioni. Sotto, «Prima della prima dose» (esami, forme secondarie, ipofosfatasia, vitamina D, visita odontoiatrica, calcemia ed eGFR). «Prescrivo…» registra la decisione e il farmaco da oggi; «Invia allo specialista» registra la decisione e apre la lettera.
+
+Le illustrazioni sono in `img/` (figura intera e viso, usato anche come avatar nell'elenco dei pazienti).
+
 ## Privacy
 
 I dati restano solo nel browser del dispositivo (localStorage), senza server. Backup e ripristino con un file JSON. Se il dispositivo è condiviso conviene usare iniziali o un codice al posto del nome e attivare il **blocco con codice**: l'app chiede il codice all'apertura e dopo 15 minuti senza attività. Il blocco nasconde l'archivio a chi usa lo stesso computer ma non cifra i dati; se si dimentica il codice si può solo cancellare l'archivio e ripristinare un backup.
@@ -36,6 +47,8 @@ I dati restano solo nel browser del dispositivo (localStorage), senza server. Ba
 | `index.html` | Pagina dell'app e stile (ripreso da Osteo Help) |
 | `app.js` | Schede del paziente, DeFRA, Nota 79, storico, report, guida e farmaci |
 | `riconosci.js` | Dizionario e riconoscimento del testo copiato dal gestionale (farmaci, malattie, sinonimi, errori di battitura) |
+| `figura.js` | Vista a figura del paziente e decisione terapeutica |
+| `img/` | Illustrazioni dei pazienti (figura intera e viso) |
 | `osteohelp-dati.js` | **Generato**: dati clinici e motori copiati senza modifiche da `../index.html` |
 | `tools/aggiorna-dati.py` | Rigenera `osteohelp-dati.js` |
 | `manifest.webmanifest` | Installazione come app (PWA), con le icone di Osteo Help |

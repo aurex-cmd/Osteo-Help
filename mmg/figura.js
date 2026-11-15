@@ -1,0 +1,208 @@
+/* ============================================================
+   OSTEO HELP MMG — vista a figura del paziente
+   Il paziente è una figura con punti da toccare («indizi»): ogni punto apre
+   la parte della scheda da compilare; i dati che contano restano in evidenza;
+   alla fine «Decidi la terapia» propone la scelta, con gli avvisi.
+   Usa gli stessi dati e gli stessi motori della scheda a passi (app.js).
+   ============================================================ */
+
+/* figure: immagine, viso per l'elenco, punti (in % dell'immagine) */
+const FIGURE = {
+  "donna-giovane": { alt:"Donna giovane", testa:[57, 7],  busto:[58, 58], fx:[30, 72] },
+  "donna-anziana": { alt:"Donna anziana", testa:[50, 5],  busto:[62, 52], fx:[44, 78] },
+  "donna-polso":   { alt:"Donna anziana con il polso ingessato", testa:[50, 5], busto:[66, 44], fx:[52, 63], fxLbl:"Il polso" },
+  "uomo-giovane":  { alt:"Uomo giovane", testa:[50, 6],  busto:[58, 56], fx:[26, 70] },
+  "uomo-anziano":  { alt:"Uomo anziano", testa:[50, 6],  busto:[58, 58], fx:[27, 72] },
+  "uomo-femore":   { alt:"Uomo anziano in carrozzina, con frattura di femore", testa:[36, 4], busto:[44, 44], fx:[78, 23], fxLbl:"Il femore" }
+};
+function figOf(p){
+  if(!p.sesso) return null;
+  const age = ageOf(p.nascita), old = age === null || age >= 60, fx = (p.fratture || []).slice().sort(byDateDesc);
+  const recent = sede => fx.some(f => f.sede === sede && (monthsSince(f.data) ?? 999) <= 24);
+  if(p.sesso === "uomo") return recent("femore") ? "uomo-femore" : old ? "uomo-anziano" : "uomo-giovane";
+  return recent("polso") && old ? "donna-polso" : old ? "donna-anziana" : "donna-giovane";
+}
+const figViso = p => { const f = figOf(p); return f ? `img/${f}-viso.jpg` : null; };
+
+/* stato della vista: quale riquadro è aperto */
+const FIG = { open:null };
+const FIG_SHEETS = {
+  chi:   { t:"Chi è", ic:"👤", k:"dati", body: p => datiAnag(p) },
+  fx:    { t:"Le fratture", ic:"🦴", k:"dati", body: p => datiFx(p) },
+  anam:  { t:"Malattie e farmaci", ic:"💊", k:"anamnesi", body: p => noHead(vPazAnamnesi(p).html) },
+  esami: { t:"Esami del sangue", ic:"🧪", k:"esami", body: p => noHead(vPazEsami(p).html) },
+  dxa:   { t:"Densitometria", ic:"🩻", k:"dxa", body: p => noHead(vPazDxa(p).html) },
+  defra: { t:"DeFRA", ic:"🎯", k:"defra", body: p => noHead(vPazDefra(p).html) },
+  storico:{ t:"Controlli nel tempo", ic:"📈", k:"storico", body: p => noHead(vPazStorico(p).html) }
+};
+const noHead = h => h.replace(/^\s*<h1>[\s\S]*?<div class="rule"><\/div>/, "");
+
+/* ---------- cosa resta in evidenza ---------- */
+function figChips(p, F, S){
+  const c = [], add = (cls, t) => c.push(`<span class="fchip ${cls}">${t}</span>`), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
+  if(F.recent.length) add("r", "⚡ Frattura recente: rischio imminente");
+  if(vh.filter(x => !/24 mesi/.test(x)).length) add("r", "Rischio di frattura molto alto");
+  if(S.hpp) add("r", "⚠ Fosfatasi alcalina bassa: no bisfosfonati");
+  if(ci.esofago) add("r", "⚠ Esofago: no bisfosfonati orali");
+  if(eg !== null && eg < 35) add("r", `⚠ eGFR ${fmtN(eg, 0)}: no alendronato né zoledronato`);
+  if(ci.cv || F.feats.has("ictus_emiplegia")) add("a", "Cardiovascolare: no romosozumab");
+  if(ci.tev) add("a", "TEV: no raloxifene");
+  if(ci.denti) add("a", "Denti da sistemare");
+  if(vdLow(vd)) add("a", "Vitamina D " + vdTxt(vd));
+  if(F.gc) add("a", "Glucocorticoidi");
+  const nsec = S.N.note.length + S.N.sosp.length + S.A.forms.length; if(nsec) add("a", plural(nsec, "forma secondaria", "forme secondarie"));
+  if(F.zona) add("z z-" + F.zona, `<i></i>DeFRA zona ${ZONE[F.zona].t.toLowerCase()}${F.rischio !== null ? " · " + fmtN(F.rischio, 0) + "%" : ""}`);
+  if(F.minT !== null) add("p", "T-score " + fmtN(F.minT));
+  return c.join("");
+}
+
+/* ---------- i punti sulla figura ---------- */
+function figSpots(p, F, S){
+  const anagMiss = !p.nascita || !p.sesso || !F.bmi || p.fam === null || (p.sesso === "donna" && p.postmeno === null);
+  const st = k => stepStatus(p, k, F, S);
+  const an = st("anamnesi"), ciOn = Object.values(p.ci || {}).some(Boolean);
+  const sec = [...S.N.note, ...S.N.sosp].map(x => x.f.nome);
+  return {
+    chi: { n:1, st: anagMiss ? "miss" : "ok", t: anagMiss ? "Chi è" : (F.age + " anni"),
+      s: anagMiss ? "età, peso, familiarità" : ["BMI " + fmtN(F.bmi), p.fam ? "familiarità sì" : "", p.sesso === "donna" && p.postmeno ? "in menopausa" : ""].filter(Boolean).join(" · ") },
+    fx: { n:2, st: F.fx.length ? (F.recent.length ? "al" : "ok") : p.nessunaFx ? "ok" : "miss",
+      t: F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura") + (F.fx.length > 1 ? " +" + (F.fx.length - 1) : "") : p.nessunaFx ? "Nessuna frattura" : "Le fratture",
+      s: F.fx.length ? (F.recent.length ? "recente · " + fmtD(F.fx[0].data) : fmtD(F.fx[0].data)) : p.nessunaFx ? "da fragilità" : "quando, dove, come" },
+    anam: { n:3, st: an.st === "miss" ? "miss" : (sec.length || ciOn ? "al" : "ok"), t: an.st === "miss" ? "Malattie e farmaci" : sec.length ? sec[0] : "Anamnesi verificata",
+      s: an.st === "miss" ? "incolla dal gestionale" : sec.length > 1 ? "+ " + plural(sec.length - 1, "altra causa", "altre cause") : ciOn ? "controindicazioni da conoscere" : "nessuna forma secondaria" }
+  };
+}
+function figStage(p, fig, spots){
+  const d = FIGURE[fig], lblFx = d.fxLbl;
+  const pos = { chi:d.testa, fx:d.fx, anam:d.busto };
+  return `<div class="fstage"><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">` +
+    Object.entries(spots).map(([k, s]) => { const [x, y] = pos[k], left = x > 52;
+      const t = k === "fx" && s.st === "miss" && lblFx ? lblFx : s.t;
+      return `<button type="button" class="fhs ${s.st}${left ? " l" : ""}" data-fsheet="${k}" style="left:${x}%;top:${y}%" aria-label="${hx(t)}: ${hx(s.s)}"><span class="fdot">${s.st === "ok" ? "✓" : s.st === "al" ? "!" : s.n}</span><span class="ftag"><b>${hx(t)}</b><small>${hx(s.s)}</small></span></button>`;
+    }).join("") + `</div></div>`;
+}
+function figDesk(p, F, S){
+  const it = (k, ic, t, s, st) => `<button type="button" class="fitem ${st}" data-fsheet="${k}"><span class="fic">${ic}</span><span><b>${t}</b><small>${s}</small></span>${st === "ok" ? `<i class="fck">✓</i>` : st === "al" ? `<i class="fck al">!</i>` : ""}</button>`;
+  const ls = labStatus(p), e = stepStatus(p, "esami", F, S), dx = stepStatus(p, "dxa", F, S), df = stepStatus(p, "defra", F, S);
+  return `<div class="fdesk"><span class="flbl">Sulla scrivania · referti</span>
+    ${it("esami", "🧪", "Esami del sangue", e.st === "miss" ? `${ls.done} di ${ls.tot} esami` : e.s, e.st === "miss" ? "miss" : e.st === "warn" ? "al" : "ok")}
+    ${it("dxa", "🩻", F.minT !== null ? "DXA: " + fmtN(F.minT) : "Densitometria", F.lastDxa ? fmtD(F.lastDxa.data) + (F.dxaAge > 24 ? " · da ripetere" : "") : "T-score di colonna e femore", dx.st === "miss" ? "miss" : dx.st === "warn" ? "al" : "ok")}
+    ${it("defra", "🎯", F.zona ? "DeFRA: zona " + ZONE[F.zona].t.toLowerCase() : "DeFRA", F.zona ? ZONE[F.zona].r : "calcola e riporta la zona", df.st === "miss" ? "miss" : "ok")}
+    ${p.decisione ? it("storico", "📈", "Controlli", dxaPlan(F).t, "ok") : ""}
+  </div>`;
+}
+function figSheet(p){
+  const sh = FIG_SHEETS[FIG.open]; if(!sh) return "";
+  return `<div class="fdim" data-fclose></div><div class="fsheet" role="dialog" aria-label="${sh.t}"><div class="fsheet-h"><span class="fic">${sh.ic}</span><b>${sh.t}</b><button type="button" class="btn" data-fclose>Fatto</button></div>
+    <div class="fsheet-b">${sh.body(p)}</div></div>`;
+}
+
+/* ---------- la vista ---------- */
+function vFigura(p){
+  const fig = figOf(p);
+  if(!fig) return { bar: pzName(p), html: viewSwitch(p, "figura") + `<div class="fpick"><p class="flbl">Chi entra in ambulatorio?</p><div class="fpick-b">
+      <button type="button" data-pset="sesso" data-val="donna"><img src="img/donna-anziana.jpg" alt=""><b>Una donna</b></button>
+      <button type="button" data-pset="sesso" data-val="uomo"><img src="img/uomo-anziano.jpg" alt=""><b>Un uomo</b></button></div>
+      <p class="small">Poi tocca i punti sulla figura per raccogliere gli indizi.</p></div>` };
+  const F = pzFacts(p), S = pzSecondary(p), all = allSteps(p), done = all.filter(x => x.st !== "miss").length, spots = figSpots(p, F, S);
+  const dec = p.decisione && DECISIONI[p.decisione.tipo], ready = !!F.zona;
+  const title = [hx(pzName(p)), F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
+  const banner = dec ? `<a class="fwin" href="#paz-${p.id}-decidi"><span class="fwin-f" style="background-image:url(img/${fig}-viso.jpg)"></span><span><small>Caso completato · ${fmtD(p.decisione.data)}</small><b>${dec.t}</b><span class="fstars">★★★</span></span></a>` : "";
+  const td = pzTodo(p, F);
+  return { bar: pzName(p), html: viewSwitch(p, "figura") + `
+    <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} indizi raccolti${done < STEPS.length ? " · tocca i punti sulla figura" : ""}</small></div></div>
+    <div class="fprog">${all.map(x => `<i class="${x.st}" title="${x.t}"></i>`).join("")}</div>
+    <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots)}</div>
+    <div class="fcol-r">
+      ${banner}
+      <div class="fchips">${figChips(p, F, S) || `<span class="small">Qui restano in evidenza i dati che contano per la decisione.</span>`}</div>
+      ${td.length ? `<div class="todo">${td.slice(0, 3).map(x => todoItem(x, false)).join("")}</div>` : ""}
+      ${figDesk(p, F, S)}
+      <a class="fcta${ready ? " on" : ""}" href="${ready ? `#paz-${p.id}-decidi` : `#paz-${p.id}-figura`}"${ready ? "" : ` data-fsheet="defra"`}>${ready ? (dec ? "Rivedi la decisione" : "▶ Decidi la terapia") : "🔒 Decidi la terapia"}<small>${ready ? (all.find(x => x.st === "miss" && x.k !== "terapia" && x.k !== "storico") ? "alcuni indizi mancano: la proposta sarà meno sicura" : "tutti gli indizi raccolti") : "serve la zona del DeFRA"}</small></a>
+      <div class="docs">
+        <button type="button" class="doc" data-copy="riepilogo"><b>Copia per la cartella</b><small>Riepilogo da incollare nel gestionale</small></button>
+        <a class="doc" href="#paz-${p.id}-lettera"><b>Lettera allo specialista</b><small>Già compilata</small></a>
+        <a class="doc" href="#paz-${p.id}-foglio"><b>Foglio per il paziente</b><small>Terapia e consigli</small></a>
+        <a class="doc" href="#paz-${p.id}-report"><b>Report</b><small>Da stampare</small></a>
+      </div>
+    </div></div>` + figSheet(p) };
+}
+function viewSwitch(p, cur){
+  return `<div class="vsw" role="group" aria-label="Vista"><a href="#paz-${p.id}-figura" aria-pressed="${cur === "figura"}">Figura</a><a href="#paz-${p.id}-percorso" aria-pressed="${cur === "percorso"}">Percorso a passi</a></div>`;
+}
+
+/* ---------- decisione terapeutica ---------- */
+function proposta(p, F, S, fl){
+  const okd = id => !(fl[id] && fl[id].ci.length);
+  if(!F.zona) return null;
+  if(F.zona === "verde") return { tipo:"nessuno", t:"Nessun farmaco per l'osteoporosi", s:ZONE.verde.azione, opz:[] };
+  if(zoneHigh(F.zona)){
+    const spec = [T_, ...(F.donna ? [AB_, RO_] : [])];
+    return { tipo:"spec", t:"Invio allo specialista dell'osso" + (F.zona === "rossa" ? ", con priorità" : ""), s:ZONE[F.zona].azione, opz: spec, nota:"Cosa potrà valutare lo specialista" };
+  }
+  /* zona gialla: prima linea dal MMG, bisfosfonati o denosumab, il primo senza controindicazioni */
+  const ord = [A_, R_, D_, Z_], best = ord.find(okd);
+  return { tipo:"mmg", t: best ? "Terapia di prima linea: " + dnome(best) : "Prima linea non utilizzabile", s:ZONE.gialla.azione, opz: ord, best };
+}
+function vDecidi(p){
+  const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), pr = proposta(p, F, S, fl), fig = figOf(p), vh = veryHigh(p, F);
+  if(!pr) return { redirect: "paz-" + p.id + "-figura" };
+  const n79of = id => n79.filter(c => c.s.some(l => l.includes(id)));
+  const drug = (id, best) => { const f = fl[id] || { ci:[], warn:[] }, c = n79of(id), ci = f.ci.length;
+    return `<div class="fdrug${best ? " best" : ""}${ci ? " no" : ""}">${best ? `<span class="frk">Consigliato</span>` : ""}<b>${dnome(id)}</b><small>${DRUGS[id].via}</small>
+      ${f.ci.map(x => `<div class="fwarn">Controindicato: ${x}</div>`).join("")}${f.warn.map(x => `<div class="fwarn a">Cautela: ${x}</div>`).join("")}
+      ${!ci ? `<div class="fn79">${c.length ? "Nota 79: " + c.map(x => x.cond).join(" / ") + (c.some(x => x.spec) && [T_, AB_, RO_].includes(id) ? " (piano terapeutico specialistico)" : "") : "Con i dati inseriti è fuori dalle condizioni della Nota 79."}</div>` : ""}</div>`; };
+  const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
+  const chk = [];
+  const c = (st, t, s) => chk.push(`<div class="td ${st}"><i>${st === "ok" ? "✓" : "!"}</i><span>${t}<small>${s}</small></span></div>`);
+  if(ls.done < ls.tot) c("w", "Completa gli esami di I livello", `${ls.done} di ${ls.tot}: servono a escludere le forme secondarie`);
+  if(S.N.note.length + S.N.sosp.length + S.A.forms.length) c("w", "Forme secondarie da considerare", [...S.N.note, ...S.N.sosp].map(x => x.f.nome).concat(S.A.forms.map(x => COND[x.cid])).slice(0, 3).join(", "));
+  if(S.hpp) c("w", "Escludi l'ipofosfatasia", "fosfatasi alcalina bassa: bisfosfonati controindicati");
+  if(vd === null && lab.D !== "norm") c("w", "Dosa la 25-OH-vitamina D", "o correggila comunque: in terapia per l'osteoporosi è rimborsabile (Nota 96)");
+  else if(vdLow(vd) || lab.D === "basso") c("w", "Correggi la vitamina D", (vd !== null ? vdTxt(vd) + ": " : "") + "sotto 75 nmol/L, il valore da raggiungere (Nota 96)");
+  else c("ok", "Vitamina D adeguata", vd !== null ? vdTxt(vd) : "nella norma");
+  if(pr.tipo !== "nessuno") p.dentista ? c("ok", "Visita odontoiatrica eseguita", "bocca in ordine") : c("w", "Visita odontoiatrica", "prima di bisfosfonati, denosumab o romosozumab");
+  if(lab.Ca === "norm" && (eg === null || eg >= 35)) c("ok", "Calcemia" + (eg !== null ? " ed eGFR" : "") + " nella norma", [AUTO.Ca(p) ? AUTO.Ca(p).val : "", eg !== null ? fmtN(eg, 0) + " mL/min" : ""].filter(Boolean).join(" · ") || "dagli esami");
+  else if(lab.Ca === "basso") c("w", "Correggi l'ipocalcemia", "prima di qualsiasi antiriassorbitivo");
+  const keys = [
+    ["Frattura", F.fx.length ? (FX_SEDI[F.fx[0].sede] || "") + " · " + fmtD(F.fx[0].data) : "nessuna", F.recent.length ? "r" : ""],
+    ["T-score minimo", F.minT !== null ? fmtN(F.minT) : "—", ""],
+    ["DeFRA", `<span class="zn z-${F.zona}"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()}</span>`, "y"],
+    ["Da sapere", [p.ci && p.ci.esofago ? "esofago" : "", S.hpp ? "ALP bassa" : "", eg !== null && eg < 35 ? "eGFR " + fmtN(eg, 0) : "", p.ci && p.ci.cv ? "cardiovascolare" : ""].filter(Boolean).join(", ") || "nessuna controindicazione", (p.ci && (p.ci.esofago || p.ci.cv)) || S.hpp || (eg !== null && eg < 35) ? "r" : ""]
+  ];
+  const cur = p.decisione && p.decisione.tipo;
+  let actions = "";
+  if(pr.tipo === "mmg" && pr.best) actions = `<button type="button" class="btn sec" data-fdec="spec">Invia allo specialista</button><button type="button" class="btn" data-fdec="mmg:${pr.best}">Prescrivo ${dnome(pr.best).replace(/ \(.*\)$/, "").toLowerCase()}</button>`;
+  else if(pr.tipo === "mmg") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
+  else if(pr.tipo === "spec") actions = `<a class="btn sec" href="#paz-${p.id}-terapia">Imposto io la terapia</a><button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
+  else actions = `<a class="btn sec" href="#paz-${p.id}-terapia">Valuto un farmaco</a><button type="button" class="btn" data-fdec="nessuno">Confermo: nessun farmaco</button>`;
+  return { bar:"Decisione terapeutica", html: `
+    <div class="fwin big"><span class="fwin-f" style="background-image:url(img/${fig}-viso.jpg)"></span><span><small>${hx(pzName(p))}${F.age !== null ? " · " + F.age + " anni" : ""}</small><b>Obiettivo: evitare la prossima frattura</b></span></div>
+    <div class="fkeys">${keys.map(k => `<div class="fkey ${k[2]}"><small>${k[0]}</small><b>${k[1]}</b></div>`).join("")}</div>
+    ${vh.length ? `<div class="alert"><b>Rischio molto alto</b>${vh.join("; ")}.${pr.tipo === "mmg" ? " Valuta comunque l'invio allo specialista per un anabolico." : ""}</div>` : ""}
+    <p class="lbl">${pr.tipo === "spec" ? "Indicazione · zona " + ZONE[F.zona].t.toLowerCase() : pr.tipo === "nessuno" ? "Indicazione · zona verde" : "Terapia consigliata · zona gialla, la imposti tu"}</p>
+    <div class="fprop ${pr.tipo}"><b>${pr.t}</b><small>${pr.s}</small></div>
+    ${pr.tipo === "mmg" ? (pr.best ? drug(pr.best, true) : "") + pr.opz.filter(id => id !== pr.best).map(id => drug(id, false)).join("") : ""}
+    ${pr.tipo === "spec" ? `<p class="lbl">${pr.nota}</p>` + pr.opz.map(id => drug(id, false)).join("") + `<p class="small">Nell'attesa: calcio con la dieta, vitamina D, prevenzione delle cadute. La lettera allo specialista è già compilata.</p>` : ""}
+    <p class="lbl">Prima della prima dose</p><div class="todo fchk">${chk.join("")}</div>
+    ${cur ? `<p class="small">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
+    <div class="fact">${actions}</div>
+    <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della Nota 79 e le schede tecniche.</p>` };
+}
+
+/* ---------- interazioni ---------- */
+document.addEventListener("click", e => {
+  const t = e.target;
+  const op = t.closest("[data-fsheet]");
+  if(op){ e.preventDefault(); FIG.open = op.dataset.fsheet; render(); const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0; return; }
+  if(t.closest("[data-fclose]")){ FIG.open = null; render(); return; }
+  const fd = t.closest("[data-fdec]");
+  if(fd){ const { p } = pzRoute(); if(!p) return; const [tipo, farm] = fd.dataset.fdec.split(":");
+    p.decisione = { tipo, data: todayISO() };
+    if(farm && !(p.terapie || []).some(x => x.farmaco === farm && !x.fine)) (p.terapie = p.terapie || []).push({ farmaco: farm, inizio: todayISO(), fine:"", note:"" });
+    savePz(p);
+    if(tipo === "spec"){ toast("Invio allo specialista registrato: ecco la lettera."); go("paz-" + p.id + "-lettera"); }
+    else { toast(farm ? dnome(farm) + " registrato da oggi. Prossimo passo: il foglio per il paziente." : "Decisione registrata."); go("paz-" + p.id + "-figura"); }
+  }
+});
+document.addEventListener("keydown", e => { if(e.key === "Escape" && FIG.open){ FIG.open = null; render(); } });
