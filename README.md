@@ -122,6 +122,7 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 ### Video «Primaria o secondaria?»
 
 - **Tondo «i»** nella barra della home, in alto a destra: apre un video verticale di circa 55 secondi, saltabile, con voce narrante (ElevenLabs, voce «Marco Romeo») e musica di sottofondo («Calm Care», ElevenLabs Music).
+- **Su PC** (finestra larga almeno 1000 px) l'app si divide in due colonne: a sinistra l'elenco o l'inserimento, a destra la scheda o il risultato, che negli esami alterati e normali si aggiorna mentre si spunta. La home mette titolo e riquadri a sinistra e Consulta a destra, come con il telefono in orizzontale. Sotto i 1000 px resta una schermata per volta.
 - **Contenuto**: nella maggior parte dei casi l'osteoporosi è primaria (donna in post-menopausa 7–8 casi su 10, uomo circa la metà); è una diagnosi di esclusione; bastano gli esami di primo livello (con TSH e PTH, a rigore di secondo livello) e, se sono nella norma, si esclude quasi il 90% delle forme secondarie; dimostrazione animata dell'app (esami alterati: calcio e PTH alti → iperparatiroidismo primario; esami normali: glucocorticoidi e inibitori di pompa protonica → forme da considerare; la scheda con le fonti).
 - **Senza audio**: niente sottotitoli; titoli ed etichette accanto al telefono spiegano ogni passo anche con l'iPhone in modalità silenziosa.
 - **Riserva**: se il video non si carica parte un'animazione HTML con le stesse informazioni e la sintesi vocale del dispositivo.
