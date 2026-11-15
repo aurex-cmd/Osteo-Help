@@ -302,6 +302,10 @@ const RIVAL_ANNI = { [A_]:5, [R_]:5, [I_]:5, [Z_]:3 };
 const dnome = id => DRUGS[id] ? DRUGS[id].nome : String(id || "Terapia");
 const lastDose = t => (t.dosi || []).concat(t.inizio ? [t.inizio] : []).filter(x => pDate(x)).sort().pop() || null;
 function nextDose(t){ const m = DOSE_MESI[t.farmaco], l = lastDose(t); return m && l ? addMonths(pDate(l), m) : null; }
+/* come si somministra: iniezione, infusione o compressa (per icone e parole giuste) */
+const SOMM = { [D_]:"iniezione", [T_]:"iniezione", [AB_]:"iniezione", [RO_]:"iniezione", [Z_]:"infusione" };
+const sommOf = id => SOMM[id] || "compressa";
+const doseWord = id => sommOf(id) === "compressa" ? "dose" : sommOf(id);
 const daysTo = d => Math.round((d - new Date(new Date().toDateString())) / 864e5);
 const fmtDt = d => String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
 /* u: 0 urgente, 1 da fare presto, 2 da programmare */
@@ -310,8 +314,8 @@ function pzTodo(p, F){
   F.ther.forEach(t => {
     const n = nextDose(t), m = monthsSince(t.inizio);
     if(n){ const dd = daysTo(n);
-      if(t.farmaco === D_ && dd < -28) add(0, "Denosumab: dose in ritardo", `Era prevista il ${fmtDt(n)}, ${-dd} giorni fa. Oltre 4 settimane di ritardo aumenta il rischio di fratture vertebrali multiple: somministrare al più presto.`, "terapia");
-      else if(dd <= 30) add(dd < 0 ? 0 : 1, `${dnome(t.farmaco)}: prossima dose`, (dd < 0 ? `Prevista il ${fmtDt(n)}, ${-dd} giorni fa.` : dd === 0 ? "Prevista oggi." : `Il ${fmtDt(n)}, tra ${dd} giorni.`) + (t.farmaco === D_ ? " Calcemia prima della dose." : ""), "terapia"); }
+      if(t.farmaco === D_ && dd < -28) add(0, "Denosumab: iniezione in ritardo", `Era prevista il ${fmtDt(n)}, ${-dd} giorni fa. Oltre 4 settimane di ritardo aumenta il rischio di fratture vertebrali multiple: somministrare al più presto.`, "terapia");
+      else if(dd <= 30) add(dd < 0 ? 0 : 1, `${dnome(t.farmaco)}: prossima ${doseWord(t.farmaco)}`, (dd < 0 ? `Prevista il ${fmtDt(n)}, ${-dd} giorni fa.` : dd === 0 ? "Prevista oggi." : `Il ${fmtDt(n)}, tra ${dd} giorni.`) + (t.farmaco === D_ ? " Calcemia prima della dose." : ""), "terapia"); }
     const fm = FINE_MESI[t.farmaco];
     if(fm && m !== null && m >= fm - 3) add(m >= fm ? 0 : 1, `${dnome(t.farmaco)}: ${m >= fm ? "periodo concluso" : "si avvicina la fine"}`, `Iniziato il ${fmtD(t.inizio)}, durata massima ${fm} mesi: subito dopo serve un antiriassorbitivo.`, "terapia");
     const ra = RIVAL_ANNI[t.farmaco];
@@ -365,7 +369,7 @@ function pzText(p){
   if(S.hpp) L.push("Fosfatasi alcalina bassa: escludere l'ipofosfatasia (bisfosfonati controindicati)");
   if(n79.length) L.push("Nota 79: " + n79.map(c => c.cond).join("; "));
   if(p.decisione && DECISIONI[p.decisione.tipo]) L.push("Decisione: " + DECISIONI[p.decisione.tipo].t + " (" + fmtD(p.decisione.data) + ")");
-  if(F.ther.length) L.push("Terapia in corso: " + F.ther.map(t => dnome(t.farmaco) + " dal " + fmtD(t.inizio) + (nextDose(t) ? ", prossima dose " + fmtDt(nextDose(t)) : "")).join("; "));
+  if(F.ther.length) L.push("Terapia in corso: " + F.ther.map(t => dnome(t.farmaco) + " dal " + fmtD(t.inizio) + (nextDose(t) ? ", prossima " + doseWord(t.farmaco) + " " + fmtDt(nextDose(t)) : "")).join("; "));
   L.push(pl.t);
   const td = pzTodo(p, F); if(td.length) L.push("Da fare: " + td.map(x => x.t).join("; "));
   return L.join("\n").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
@@ -1019,7 +1023,7 @@ const PAZ_ISTR = {
 function vPazFoglio(p){
   const F = pzFacts(p), pl = dxaPlan(F), ther = F.ther, antir = ther.some(t => [...BISF, D_, RO_].includes(t.farmaco));
   const drugs = ther.length ? ther.map(t => { const n = nextDose(t);
-    return `<div class="fg-d"><b>${dnome(t.farmaco)}</b><p>${PAZ_ISTR[t.farmaco] || ""}</p>${n ? `<p class="fg-next">${daysTo(n) < 0 ? `La dose era prevista il <b>${fmtDt(n)}</b>: la faccia al più presto.` : `Prossima dose: <b>${fmtDt(n)}</b>`}</p>` : ""}</div>`; }).join("")
+    return `<div class="fg-d"><b>${dnome(t.farmaco)}</b><p>${PAZ_ISTR[t.farmaco] || ""}</p>${n ? `<p class="fg-next">${daysTo(n) < 0 ? `${sommOf(t.farmaco) === "infusione" ? "L'infusione" : sommOf(t.farmaco) === "iniezione" ? "L'iniezione" : "La dose"} era prevista il <b>${fmtDt(n)}</b>: la faccia al più presto.` : `Prossima ${doseWord(t.farmaco)}: <b>${fmtDt(n)}</b>`}</p>` : ""}</div>`; }).join("")
     : `<p class="note">Al momento non è prevista una terapia specifica per l'osteoporosi: sono importanti i consigli qui sotto.</p>`;
   return { bar:"Foglio per il paziente", html: `<div class="report foglio">
     <div class="btns noprint"><button type="button" class="btn" id="pzPrint">Stampa</button></div>

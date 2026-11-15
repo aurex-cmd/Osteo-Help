@@ -113,14 +113,14 @@ function figNext(p, F, S, spots){
   if(dec){
     /* decisione presa: in primo piano il farmaco, poi due date grandi: prossima dose e prossima densitometria */
     const th = F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco];
-    const drug = th ? `<div class="fdrugbig"><span class="fpill">💊</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>`
+    const drug = th ? `<div class="fdrugbig"><span class="fpill">${{ iniezione:"💉", infusione:"💧", compressa:"💊" }[sommOf(th.farmaco)]}</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>`
       : p.decisione.tipo === "spec" ? `<div class="fdrugbig spec"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>in attesa della terapia indicata dallo specialista</small></span></div>`
       : `<div class="fdrugbig none"><span class="fpill">🥛</span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
     const quando = dt => { const g = daysTo(dt); return g < 0 ? `in ritardo di ${-g} giorni` : g === 0 ? "oggi" : g < 45 ? `tra ${g} giorni` : `tra ${Math.round(g / 30.4)} mesi`; };
     const cal = (cls, lbl, top, big, bot, rel, note) => `<div class="fcal ${cls}"><small>${lbl}</small><div class="fcal-d"><span>${top}</span><b>${big}</b><span>${bot}</span></div><em>${rel}</em>${note ? `<i>${note}</i>` : ""}</div>`;
     const tiles = [];
-    if(nd){ const late = daysTo(nd) < 0; tiles.push(cal(late ? "late" : "dose", "Prossima dose", MESI[nd.getMonth()], nd.getDate(), nd.getFullYear(), quando(nd), late ? "farla al più presto" : th.farmaco === D_ ? "calcemia prima della dose" : "")); }
+    if(nd){ const late = daysTo(nd) < 0; tiles.push(cal(late ? "late" : "dose", "Prossima " + doseWord(th.farmaco), MESI[nd.getMonth()], nd.getDate(), nd.getFullYear(), quando(nd), late ? "farla al più presto" : th.farmaco === D_ ? "calcemia prima della dose" : "")); }
     if(F.lastDxa){ const ld = pDate(F.lastDxa.data), from = addMonths(ld, 18), to = addMonths(ld, 24), pl = dxaPlan(F);
       const okp = pl.st === "ok";
       tiles.push(cal(pl.st === "miss" ? "late" : pl.st === "warn" ? "now" : "dxa", "Prossima densitometria", okp ? "da" : "entro", MESI[(okp ? from : to).getMonth()], (okp ? from : to).getFullYear(), pl.st === "miss" ? "da fare subito" : pl.st === "warn" ? "da programmare ora" : quando(from), okp ? "finestra fino a " + MESI[to.getMonth()] + " " + to.getFullYear() : "ultima " + fmtD(F.lastDxa.data))); }
