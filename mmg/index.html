@@ -516,6 +516,26 @@ main{padding-bottom:40px}
 .fpick-b{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
 .fpick-b button{border:1.5px solid var(--line);border-radius:16px;background:#fff;padding:8px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font:inherit}
 .fpick-b img{width:100%;border-radius:10px} .fpick-b b{font-size:1rem} .fpick-b button:hover{border-color:var(--pri)}
+/* colonna destra: prossima mossa, in evidenza, referti, documenti */
+.fsec{display:flex;flex-direction:column;gap:7px}
+.fsec > .flbl{margin:0}
+.fnext{position:relative;display:flex;flex-direction:column;gap:2px;text-align:left;border:0;border-radius:16px;padding:14px 44px 14px 16px;background:var(--home-p);color:#2B2550;font:inherit;cursor:pointer;width:100%}
+.fnext small{font-size:.64rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.fnext b{font-size:1.15rem;letter-spacing:-.01em} .fnext span{font-size:.84rem;opacity:.85;line-height:1.4}
+.fnext em{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-style:normal;font-weight:800;font-size:.9rem}
+.fnext.go{background:var(--pri);color:#fff;box-shadow:0 8px 20px rgba(79,67,145,.28)}
+.fnext.urg{background:var(--coral);color:#fff}
+.fnext.done{background:var(--teal-box);color:#0B4D4A;cursor:default}
+.fnext-l{margin-top:6px;font-weight:700;font-size:.84rem;color:var(--teal);align-self:flex-start}
+.finv{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
+.finv-i{display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px dashed #CFC8E8;border-radius:12px;background:#fff;padding:8px 4px;font:inherit;color:var(--ink);cursor:pointer;min-width:0}
+.finv-i .fic{width:30px;height:30px;font-size:1rem;border-radius:9px}
+.finv-i b{font-size:.78rem} .finv-i small{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.finv-i.ok{border:1.5px solid var(--teal-box);background:#F6FBFA} .finv-i.ok .fic{background:var(--teal-box)}
+.finv-i.al{border:1.5px solid var(--coral-box);background:#FDF8F6} .finv-i.al .fic{background:var(--coral-box)} .finv-i.al small{color:var(--coral)}
+.fdocs{margin:0;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.86rem}
+.fdocs a,.fdocs .lnk{color:var(--pri);font-weight:600;text-decoration:none;font-size:.86rem}
+.fcol-r{gap:18px}
 /* riquadro che sale dal basso */
 .fdim{position:fixed;inset:0;background:rgba(27,36,51,.38);z-index:20}
 .fsheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:640px;max-height:86vh;z-index:21;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -10px 30px rgba(20,15,60,.2);display:flex;flex-direction:column;animation:fup .22s ease-out}
