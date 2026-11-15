@@ -631,14 +631,15 @@ function vPazTerapia(p){
 const SERIES = [["tL", "Colonna", "#2a78d6"], ["tFt", "Femore totale", "#eb6834"], ["tFn", "Collo femorale", "#1baf7a"]];
 function lineChart(points, series, opt){
   /* points: [{x:Date, ...valori}]; un asse solo, etichette dirette sull'ultimo punto */
-  const W = 520, H = opt.h || 200, L = 40, R = 104, T = 14, B = 26;
+  const W = 520, H = opt.h || 220, L = 34, R = 132, T = 14, B = 26;
   const xs = points.map(pt => pt.x.getTime()), x0 = Math.min(...xs), x1 = Math.max(...xs), span = x1 - x0 || 1;
   const vals = points.flatMap(pt => series.map(s => pt[s[0]]).filter(v => v !== null));
   let y0 = Math.min(...vals, ...(opt.ref || [])), y1 = Math.max(...vals, ...(opt.ref || []));
   y0 = Math.floor(y0 - .5); y1 = Math.ceil(y1 + .5); if(opt.min !== undefined) y0 = Math.min(y0, opt.min); if(opt.max !== undefined) y1 = Math.max(y1, opt.max);
   const X = t => points.length === 1 ? L + (W - L - R) / 2 : L + (t - x0) / span * (W - L - R), Y = v => T + (y1 - v) / (y1 - y0 || 1) * (H - T - B);
   const step = (y1 - y0) > 12 ? 5 : (y1 - y0) > 5 ? 2 : 1, ticks = []; for(let v = Math.ceil(y0 / step) * step; v <= y1; v += step) ticks.push(v);
-  let g = ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" class="ax">${String(v).replace("-", "−")}</text>`).join("");
+  let g = (opt.bands || []).map(b => { const ya = Y(Math.min(b[1], y1)), yb = Y(Math.max(b[0], y0)); return yb > ya ? `<rect x="${L}" y="${ya}" width="${W - L - R}" height="${yb - ya}" class="${b[2]}"/><text x="${L + 6}" y="${b[4] ? ya + 14 : yb - 6}" class="bl ${b[2]}">${b[3]}</text>` : ""; }).join("");
+  g += ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" class="ax">${String(v).replace("-", "−")}</text>`).join("");
   (opt.ref || []).forEach((v, i) => { g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="rl"/><text x="${L + 4}" y="${Y(v) - 4}" class="ax">${opt.refLbl[i]}</text>`; });
   g += [points[0], points[points.length - 1]].filter((v, i, a) => a.indexOf(v) === i).map(pt => `<text x="${X(pt.x.getTime())}" y="${H - 6}" text-anchor="middle" class="ax">${fmtM(pt.x)}</text>`).join("");
   const used = [];
@@ -647,18 +648,35 @@ function lineChart(points, series, opt){
     if(pts.length > 1) g += `<polyline fill="none" stroke="${s[2]}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(pt => X(pt.x.getTime()) + "," + Y(pt[s[0]])).join(" ")}"/>`;
     g += pts.map(pt => `<circle cx="${X(pt.x.getTime())}" cy="${Y(pt[s[0]])}" r="4.5" fill="${s[2]}" stroke="var(--bg)" stroke-width="2"><title>${s[1]} · ${fmtM(pt.x)}: ${fmtN(pt[s[0]])}${opt.unit || ""}</title></circle>`).join("");
     const last = pts[pts.length - 1]; let ly = Y(last[s[0]]) + 4; while(used.some(u => Math.abs(u - ly) < 13)) ly += 13; used.push(ly);
-    if(series.length > 1) g += `<text x="${W - R + 22}" y="${ly}" class="dl">${s[1]}</text>`;
+    if(series.length > 1) g += `<text x="${W - R + 12}" y="${ly}" class="dl" fill="${s[2]}">${fmtN(last[s[0]])}<tspan class="dn"> ${s[1]}</tspan></text>`;
   });
-  return `<figure class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">${g}</svg>${series.length > 1 ? `<figcaption class="legend">${series.map(s => `<span><i style="background:${s[2]}"></i>${s[1]}</span>`).join("")}</figcaption>` : ""}</figure>`;
+  return `<figure class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">${g}</svg></figure>`;
 }
 function dxaChartHTML(F){
   const asc = F.dxa.slice().reverse().filter(d => pDate(d.data) && [d.tL, d.tFt, d.tFn].some(v => num(v) !== null));
-  return asc.length ? lineChart(asc.map(d => ({ x: pDate(d.data), tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES, { label:"Andamento del T-score", ref:[-2.5], refLbl:["−2,5"] }) : "";
+  if(!asc.length) return "";
+  const chart = asc.length > 1 ? lineChart(asc.map(d => ({ x: pDate(d.data), tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES,
+    { label:"Andamento del T-score", bands:[[-99, -2.5, "b-op", "Osteoporosi"], [-2.5, -1, "b-on", "Osteopenia", 1], [-1, 99, "b-ok", "Normale", 1]] }) : "";
+  return `<div class="tsum">${tsSummary(asc)}</div>${chart}`;
+}
+/* variazione minima considerata reale tra due DXA: circa 0,3 di T-score (≈ 3% di densità) */
+const TS_LSC = 0.3;
+const tsCat = v => v <= -2.5 ? ["op", "Osteoporosi"] : v < -1 ? ["on", "Osteopenia"] : ["ok", "Normale"];
+function tsSummary(asc){
+  return SERIES.map(([k, nome, col]) => {
+    const pts = asc.filter(d => num(d[k]) !== null); if(!pts.length) return "";
+    const v = num(pts[pts.length - 1][k]), prev = pts.length > 1 ? num(pts[pts.length - 2][k]) : null, c = tsCat(v);
+    let tr = "";
+    if(prev !== null){ const dl = Math.round((v - prev) * 10) / 10;
+      tr = Math.abs(dl) < TS_LSC ? `<span class="tr st">= stabile</span>`
+        : dl > 0 ? `<span class="tr up">▲ migliorata di ${fmtN(dl)}</span>` : `<span class="tr dn">▼ peggiorata di ${fmtN(-dl)}</span>`; }
+    return `<div class="ts-r"><i style="background:${col}"></i><span class="ts-n">${nome}</span><b class="ts-v">${fmtN(v)}</b><span class="ts-c ${c[0]}">${c[1]}</span>${tr}</div>`;
+  }).join("") + (asc.length > 1 ? `<p class="small">Variazioni rispetto alla DXA precedente; sotto ${fmtN(TS_LSC)} si considerano stabili (entro l'errore di misura).</p>` : "");
 }
 function vPazDxa(p){
   const F = pzFacts(p), pl = dxaPlan(F);
-  const dxaRows = F.dxa.map((d, i) => { const prev = F.dxa[i + 1], dl = prev && num(d.tL) !== null && num(prev.tL) !== null ? num(d.tL) - num(prev.tL) : null;
-    return `<li class="rec"><span><b>${fmtD(d.data)}</b><small>colonna ${fmtN(num(d.tL))} · femore totale ${fmtN(num(d.tFt))} · collo ${fmtN(num(d.tFn))}${dl !== null ? ` · colonna ${dl >= 0 ? "+" : "−"}${fmtN(Math.abs(dl))} rispetto alla precedente` : ""}</small></span><button type="button" class="x" data-del="dxa:${p.dxa.indexOf(d)}" aria-label="Elimina">✕</button></li>`; }).join("");
+  const dxaRows = F.dxa.map(d => {
+    return `<li class="rec"><span><b>${fmtD(d.data)}</b><small>colonna ${fmtN(num(d.tL))} · femore totale ${fmtN(num(d.tFt))} · collo ${fmtN(num(d.tFn))}</small></span><button type="button" class="x" data-del="dxa:${p.dxa.indexOf(d)}" aria-label="Elimina">✕</button></li>`; }).join("");
   return { bar: pzName(p), html: head("Densitometria", "Riporta il T-score di colonna lombare e femore dal referto della DXA.") + `
     ${F.lastDxa ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
     <div class="addbox">
