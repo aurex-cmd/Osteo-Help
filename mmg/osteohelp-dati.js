@@ -1,5 +1,5 @@
 /* File generato da mmg/tools/aggiorna-dati.py: NON modificare a mano.
-   Dati clinici e motori copiati senza modifiche da Osteo Help (index.html, sha256 d212f8e73c21). */
+   Dati clinici e motori copiati senza modifiche da Osteo Help (index.html, sha256 562b18a7f1ad). */
 /* ============================================================
    DATI CLINICI — copiati senza modifiche dall'Osteo Help originale
    ============================================================ */
@@ -55,7 +55,16 @@ const LAB2 = {
   farmaciD:["Revisione farmacologica","25-OH-vit D"]
 };
 
-const FIRST_LEVEL = new Set(["Fosforo","Calciuria 24h","25-OH-vit D"]);
+const FIRST_LEVEL = new Set(["Fosforo","Calciuria 24h","25-OH-vit D","25-OH-vitamina D"]);
+
+/* Frequenza delle forme nella pratica (1 frequente, 2 meno frequente, 3 rara): ordina le forme compatibili,
+   così la causa più probabile viene per prima (es. ipocalciuria isolata → ridotto introito di calcio) */
+const FREQ = {
+  ridIntroito:1, deficitD:1.1, iperpara:1, farmaciCa:1, ipertiroid:1, irc:1, ipercalciuriaId:1, flogosi:1, talassemia:1, immobiliz:1,
+  malassorb:2, mgus:2, epatopatia:2, colestasi:2, ipotiroid:2, connettiv:2, farmaciD:2, ipomagne:2, malnutriz:2, neoplasia:2, mieloma:2, nefrosica:2, paget:2,
+  fhh:3, sarcoidosi:3, intoxD:3, osteomalIpoP:3, fanconi:3, acidosiTub:3, ipopara:3, ipofosfatasia:3, ipercalcemiaMaligna:3
+};
+const byFreq = (a, b) => (FREQ[a.cid] || 2) - (FREQ[b.cid] || 2);
 
 const exams = [
   { name:"VES", chip:"VES", screens:"Indice di flogosi", alts:[
@@ -736,17 +745,24 @@ function computeA(){
   const elig = FORMS.filter(f => !normEx(f) && !contradicted(f, sel));
   const inter = elig.filter(f => sel.every(s => covers(f, s)));
   let kind, forms = [], leftover = [];
-  if(inter.length){ kind = "inter"; forms = inter.map(f => ({ cid: f.cid })); }
+  if(inter.length){ kind = "inter"; forms = inter.map(f => ({ cid: f.cid })).sort(byFreq); }
   else {
     const mc = multiCauseF(elig, sel);
-    if(mc.chosen.length){ kind = "multi"; forms = mc.chosen.map(c => ({ cid: c.f.cid, sub: "spiega " + c.covers.map(ftag).join(" · ") })); leftover = mc.leftover; }
+    if(mc.chosen.length){ kind = "multi"; forms = mc.chosen.map(c => ({ cid: c.f.cid, sub: "spiega " + c.covers.map(ftag).join(" · ") })).sort(byFreq); leftover = mc.leftover; }
     else kind = "empty";
   }
   const sels = new Set(); for(const ex in cstate){ if(cstate[ex]) sels.add(CEXNAME[ex]); }
   const freq = {}; forms.forEach(x => (LAB2[x.cid]||[]).forEach(ex => { if(!FIRST_LEVEL.has(ex) && !sels.has(ex)) freq[ex] = (freq[ex]||0) + 1; }));
   const panel = Object.keys(freq).sort((a,b) => freq[b]-freq[a]).map(ex => [ex, freq[ex]]);
+  /* esami di II livello forma per forma, nello stesso ordine (dalla più probabile) */
+  const byForm = forms.map(x => [x.cid, (LAB2[x.cid]||[]).filter(ex => !FIRST_LEVEL.has(ex) && !sels.has(ex))]).filter(x => x[1].length);
   const excluded = FORMS.filter(f => { const e = normEx(f); return e && !contradicted(f, sel) && sel.some(s => covers(f, s)); }).map(f => [f.cid, CEXNAME[normEx(f)]]);
-  return { sel, kind, forms, leftover, panel, excluded };
+  return { sel, kind, forms, leftover, panel, byForm, excluded };
+}
+/* esami di II livello per forma: aperti quelli della causa più probabile; solo su sospetto clinico */
+const L2_NOTE = "Da richiedere solo se c'è un sospetto clinico, partendo dalla causa più probabile.";
+function l2ByFormHTML(byForm, name){
+  return byForm.map((x, i) => `<details class="acc l2f"${i ? "" : " open"}><summary><span>${name(x[0])}<small>${x[1].length === 1 ? "1 esame" : x[1].length + " esami"}${i ? "" : " · causa più probabile"}</small></span>${'<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>'}</summary><div class="accbody"><ul class="list">${x[1].map((e, j) => `<li><i>${j+1}</i>${e}</li>`).join("")}</ul></div></details>`).join("");
 }
 
 function axisFeats(a){ return a.groups ? a.groups.flatMap(g=>g.feats) : a.feats; }
