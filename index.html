@@ -236,12 +236,15 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
   body.split .pane-l{padding-right:28px;scrollbar-width:thin}
   body.split .pane-r{border-left:1px solid var(--line);padding-left:40px;padding-right:8px}
   body.split .pane-r > .screen{max-width:680px}
-  body.split .pane-l a.sel{background:var(--box);border-radius:8px}
-  body.split .pane-l .rowlink.sel{padding-left:10px;padding-right:8px;margin:0 -10px;width:calc(100% + 20px)}
+  /* voce aperta: fondo grigio disegnato dietro la riga, che resta ferma (testo e pallino al loro posto);
+     la colonna ha 12px di margine a sinistra perché il fondo non venga tagliato */
+  body.split .pane-l{padding-left:12px;margin-left:-12px}
+  body.split .pane-l .rowlink.sel{position:relative;z-index:0}
+  body.split .pane-l .rowlink.sel::after{content:"";position:absolute;inset:0 -10px;z-index:-1;background:var(--box);border-radius:8px}
   body.split .pane-l .entry.sel{outline:2px solid var(--ink);outline-offset:-2px}
   body.split .dock{display:none}
   /* catalogo ed esame per esame: titolo e ricerca restano fermi in alto, scorre solo l'elenco */
-  body.split .pane-l .cat-top{position:sticky;top:-4px;z-index:2;background:var(--bg);margin-top:-4px;padding:4px 0 12px;box-shadow:0 1px 0 var(--line)}
+  body.split .pane-l .cat-top{position:sticky;top:-4px;z-index:2;background:var(--bg);margin-top:-4px;padding:4px 0 12px;box-shadow:-12px 0 0 var(--bg),12px 0 0 var(--bg),0 1px 0 var(--line)}
   /* home: come col telefono in orizzontale, titolo e riquadri a sinistra, Consulta a destra */
   body.is-home main{max-width:1040px;padding-left:24px;padding-right:24px}
   body.is-home .bar-in{max-width:992px}
