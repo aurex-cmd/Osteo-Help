@@ -617,6 +617,28 @@ function vPazDati(p){
 }
 
 /* ---------- 2 · anamnesi e terapie ---------- */
+const CI_LBL = { esofago:"Disturbi esofagei (stenosi, acalasia) o impossibilità a stare in piedi o seduti per 30 minuti", tev:"Tromboembolismo venoso pregresso",
+  cv:"Pregresso infarto o ictus, alto rischio cardiovascolare", rt:"Radioterapia sullo scheletro, tumori o metastasi ossee", denti:"Problemi dentari aperti o cure dentarie invasive programmate" };
+/* testo copiato dal gestionale → voci proposte (riconosci.js) */
+function gestItems(p){
+  const own = new Set(p.feats || []), ci = p.ci || {}, seen = new Set();
+  return riconosci(p.testoGest || "").map(r => {
+    let id = r.id, note = r.o.n || "", v = !!r.o.v;
+    if(id === "gnrh_o_adt"){ id = p.sesso === "donna" ? "gnrh" : "adt"; if(!p.sesso){ v = true; note = "Analogo del GnRH: nell'uomo con carcinoma prostatico è deprivazione androgenica."; } }
+    if(id === "diabete_tipo") id = "diabete_t2";
+    const label = r.tipo === "f" ? FEATLABEL[id] : CI_LBL[id], key = r.tipo + ":" + id;
+    if(!label || seen.has(key) || (r.tipo === "f" && FEATSEX[id] && p.sesso && FEATSEX[id] !== p.sesso)) return null; seen.add(key);
+    return { key, tipo:r.tipo, id, label, seg:r.seg, neg:r.neg, v, note, has: r.tipo === "f" ? own.has(id) : !!ci[id] };
+  }).filter(Boolean);
+}
+function gestResHTML(p){
+  if(!(p.testoGest || "").trim()) return "";
+  const it = gestItems(p); if(!it.length) return `<p class="hint">Nessuna voce riconosciuta nel testo. Spunta le voci a mano nelle sezioni qui sotto.</p>`;
+  const sel = it.filter(x => !x.has && !x.neg && !x.v).length;
+  return `<p class="small">${plural(it.length, "voce riconosciuta", "voci riconosciute")}. Quelle spuntate verranno aggiunte; le altre sono da controllare (dubbie o negate nel testo).</p>
+    <div class="gres">${it.map(x => `<button type="button" class="ck${x.has ? " has" : ""}" data-gsel="${x.key}" aria-pressed="${!x.has && !x.neg && !x.v}"${x.has ? " disabled" : ""}><span class="cb">${TICK}</span><span><b>${x.label}</b><small>«${hx(x.seg)}»${x.has ? " · già presente" : ""}${x.neg ? ` · <em class="gneg">sembra negata nel testo</em>` : ""}${x.note ? " · " + x.note : ""}</small></span></button>`).join("")}</div>
+    <div class="btns"><button type="button" class="btn" id="gestAdd">Aggiungi le voci spuntate${sel ? " (" + sel + ")" : ""}</button></div>`;
+}
 const pzOpenAx = new Set();
 function secReport(p, S){
   const item = (x, isSosp) => `<a class="entry ${x.hasForte ? "teal" : ""}" target="_blank" rel="noopener" href="${OH}#causa-${x.f.id}"><div><b>${x.f.nome}</b><small>${FORMA_CAT[x.f.cat] || x.f.cat} · <span class="badge ${x.hasForte ? "forte" : "lieve"}">${badgeOf(x, isSosp)}</span> · ${x.fired.filter(t => t[2] !== "supp").map(t => FEATLABEL[t[0]]).join(", ")}</small></div>${CHEV}</a>`;
@@ -635,6 +657,12 @@ function vPazAnamnesi(p){
   }).join("");
   return { bar: pzName(p), html: head("Anamnesi e farmaci", "Spunta malattie, farmaci e abitudini: le forme secondarie compaiono in fondo alla pagina. Alla fine conferma l'anamnesi.") + `
     ${p.sesso ? "" : `<p class="hint">Indica il sesso nei dati del paziente per nascondere le voci non pertinenti.</p>`}
+    <details class="acc gest"${(p.testoGest || "").trim() || !(p.feats || []).length ? " open" : ""}><summary><span>Incolla dal gestionale<small>Copia il riassunto di patologie e farmaci: l'app propone le voci da spuntare</small></span>${CHEV}</summary><div class="accbody">
+      <textarea class="area" data-pf="testoGest" id="gestIn" rows="6" placeholder="Incolla qui l'elenco dei problemi e la terapia in corso (anche con nomi commerciali e dosi)">${hx(p.testoGest)}</textarea>
+      <div class="btns"><button type="button" class="btn" id="gestGo">Riconosci</button></div>
+      <div id="gestRes">${gestResHTML(p)}</div>
+      <p class="small">Riconosce principi attivi e nomi commerciali, sinonimi, abbreviazioni (BPCO, AR, DM2, TVP…) e parole scritte in modo un po' diverso. Il testo resta in questo browser. Controlla sempre le proposte prima di aggiungerle.</p>
+    </div></details>
     <div>${axes}</div>
     <p class="lbl">Altri dati per DeFRA e Nota 79</p>
     <div>
@@ -643,11 +671,7 @@ function vPazAnamnesi(p){
     </div>
     <p class="lbl">Controindicazioni da conoscere prima della terapia</p>
     <div>
-      ${ckPz("data-pci", "esofago", (p.ci || {}).esofago, "Disturbi esofagei (stenosi, acalasia) o impossibilità a stare in piedi o seduti per 30 minuti")}
-      ${ckPz("data-pci", "tev", (p.ci || {}).tev, "Tromboembolismo venoso pregresso")}
-      ${ckPz("data-pci", "cv", (p.ci || {}).cv, "Pregresso infarto o ictus, alto rischio cardiovascolare")}
-      ${ckPz("data-pci", "rt", (p.ci || {}).rt, "Radioterapia sullo scheletro, tumori o metastasi ossee")}
-      ${ckPz("data-pci", "denti", (p.ci || {}).denti, "Problemi dentari aperti o cure dentarie invasive programmate")}
+      ${Object.entries(CI_LBL).map(([k, t]) => ckPz("data-pci", k, (p.ci || {})[k], t)).join("")}
       ${ckPz("data-pbool", "dentista", p.dentista, "Visita odontoiatrica recente, bocca in ordine (da fare prima di bisfosfonati, denosumab o romosozumab)")}
     </div>
     <div class="confirm">${ckPz("data-pbool", "anamOk", p.anamOk, "<b>Anamnesi e terapie verificate</b> (anche se non c'è nulla da spuntare)")}</div>
@@ -1174,6 +1198,14 @@ document.addEventListener("click", e => {
   if(del){ const [k, i] = del.dataset.del.split(":"); if(p[k] && p[k][+i] && confirm("Eliminare questa voce?")){ p[k].splice(+i, 1); savePz(p); render(); } return; }
   const dc = t.closest(".dec[data-dec]");
   if(dc){ const k = dc.dataset.dec; p.decisione = p.decisione && p.decisione.tipo === k ? null : { tipo:k, data:todayISO() }; savePz(p); render(); return; }
+  if(t.closest("#gestGo")){ const el = $("#gestIn"); if(el){ p.testoGest = el.value; savePz(p); } $("#gestRes").innerHTML = gestResHTML(p); if(!$("#gestRes").innerHTML) toast("Incolla prima il testo dal gestionale."); return; }
+  const gs = t.closest(".ck[data-gsel]"); if(gs){ if(!gs.disabled) gs.setAttribute("aria-pressed", gs.getAttribute("aria-pressed") !== "true"); return; }
+  if(t.closest("#gestAdd")){
+    const keys = [...document.querySelectorAll('.ck[data-gsel][aria-pressed="true"]')].map(x => x.dataset.gsel); if(!keys.length){ toast("Nessuna voce spuntata."); return; }
+    const set = new Set(p.feats || []); p.ci = p.ci || {};
+    keys.forEach(k => { const [tp, id] = k.split(":"); if(tp === "f") set.add(id); else p.ci[id] = true; });
+    p.feats = [...set]; savePz(p); render(); toast(plural(keys.length, "voce aggiunta", "voci aggiunte") + ": controlla e conferma l'anamnesi."); return;
+  }
   const dz = t.closest("[data-dose]");
   if(dz){ const th = p.terapie[+dz.dataset.dose], el = document.getElementById("dz" + dz.dataset.dose); if(th && el && el.value){ th.dosi = (th.dosi || []).concat(el.value).sort(); savePz(p); render(); toast("Dose registrata: prossima il " + fmtDt(nextDose(th)) + "."); } return; }
   const cp = t.closest("[data-copy]");

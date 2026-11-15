@@ -462,6 +462,13 @@ main{padding-bottom:40px}
 .ztl{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
 .ztl-i{flex:1 0 96px;border-radius:10px;background:var(--zb);padding:9px 10px;border-top:5px solid var(--zc);display:flex;flex-direction:column;gap:1px}
 .ztl-i i{display:none} .ztl-i b{font-size:.9rem} .ztl-i small{font-size:.74rem;color:var(--muted)}
+/* testo dal gestionale */
+details.acc.gest{border:1px solid var(--line);border-radius:12px;padding:0 14px;background:var(--blue-box)}
+details.acc.gest .accbody{display:flex;flex-direction:column;gap:10px;padding-bottom:14px}
+details.acc.gest .area{background:var(--bg)}
+.gres{display:flex;flex-direction:column;background:var(--bg);border-radius:10px;padding:2px 12px}
+.gres .ck small{display:block;color:var(--muted);font-size:.8rem;font-weight:400;margin-top:1px}
+.gres .ck.has{opacity:.55} .gneg{font-style:normal;color:var(--coral);font-weight:600}
 /* da fare: scadenze dei pazienti, ordinate per urgenza */
 .todo{display:flex;flex-direction:column;gap:6px}
 .todo-i{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;background:var(--box)}
@@ -552,6 +559,7 @@ body.locked .bar{visibility:hidden}
 
 <!-- dati clinici e motori di Osteo Help (copiati da ../index.html con tools/aggiorna-dati.py), poi l'app -->
 <script src="osteohelp-dati.js"></script>
+<script src="riconosci.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
