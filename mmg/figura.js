@@ -12,6 +12,9 @@ const FIGURE = {
   "donna-anziana": { alt:"Donna anziana", testa:[50, 5],  busto:[62, 52], fx:[44, 78] },
   "donna-polso":   { alt:"Donna anziana con il polso ingessato", testa:[50, 5], busto:[66, 44], fx:[52, 63], fxLbl:"Il polso" },
   "donna-vertebre":{ alt:"Donna anziana con il busto ortopedico per una frattura vertebrale", testa:[50, 4], busto:[27, 58], fx:[62, 74], fxLbl:"Le vertebre" },
+  "donna-femore":  { alt:"Donna anziana in carrozzina dopo una frattura di femore", testa:[40, 4], busto:[57, 40], fx:[62, 63], fxLbl:"Il femore" },
+  "uomo-polso":    { alt:"Uomo anziano con il polso immobilizzato", testa:[50, 4], busto:[70, 46], fx:[44, 70], fxLbl:"Il polso" },
+  "uomo-vertebre": { alt:"Uomo anziano con il busto ortopedico per una frattura vertebrale", testa:[50, 4], busto:[24, 58], fx:[62, 74], fxLbl:"Le vertebre" },
   "uomo-giovane":  { alt:"Uomo giovane", testa:[50, 6],  busto:[58, 56], fx:[26, 70] },
   "uomo-anziano":  { alt:"Uomo anziano", testa:[50, 6],  busto:[58, 58], fx:[27, 72] },
   "uomo-femore":   { alt:"Uomo anziano in carrozzina, con frattura di femore", testa:[36, 4], busto:[44, 44], fx:[78, 23], fxLbl:"Il femore" }
@@ -20,9 +23,12 @@ function figOf(p){
   if(!p.sesso) return null;
   const age = ageOf(p.nascita), old = age === null || age >= 60, fx = (p.fratture || []).slice().sort(byDateDesc);
   const recent = sede => fx.some(f => f.sede === sede && (monthsSince(f.data) ?? 999) <= 24);
-  if(p.sesso === "uomo") return recent("femore") ? "uomo-femore" : old ? "uomo-anziano" : "uomo-giovane";
-  /* la frattura vertebrale recente ha la precedenza: è la più importante per il rischio */
-  return recent("vertebra") && old ? "donna-vertebre" : recent("polso") && old ? "donna-polso" : old ? "donna-anziana" : "donna-giovane";
+  /* frattura recente (24 mesi), dalla più grave: femore, vertebre, polso */
+  const sx = p.sesso === "uomo" ? "uomo" : "donna";
+  if(recent("femore")) return sx + "-femore";
+  if(old && recent("vertebra")) return sx + "-vertebre";
+  if(old && recent("polso")) return sx + "-polso";
+  return sx + (old ? "-anziano" : "-giovane").replace("anziano", sx === "donna" ? "anziana" : "anziano");
 }
 const figViso = p => { const f = figOf(p); return f ? `img/${f}-viso.jpg` : null; };
 
@@ -41,22 +47,22 @@ const noHead = h => h.replace(/^\s*<h1>[\s\S]*?<div class="rule"><\/div>/, "");
 
 /* ---------- cosa resta in evidenza ---------- */
 function figChips(p, F, S){
-  /* riquadri tutti uguali: categoria in piccolo, dato in grassetto; il colore dice solo quanto pesa (rosso, ambra, neutro) */
-  const c = [], add = (sev, lbl, val) => c.push({ sev, lbl, val }), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
-  if(F.recent.length) add("r", "Rischio di rifrattura", "Imminente: frattura recente");
-  else if(vh.length) add("r", "Rischio di frattura", "Molto alto");
-  if(F.zona) add(F.zona === "verde" ? "n" : zoneHigh(F.zona) ? "r" : "a", "DeFRA", `<span class="zn z-${F.zona}"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()}${F.rischio !== null ? " · " + fmtN(F.rischio, 0) + "%" : ""}</span>`);
-  if(F.minT !== null) add(F.minT <= -2.5 ? "a" : "n", "T-score minimo", fmtN(F.minT));
-  if(S.hpp) add("r", "Controindicazione", "Bisfosfonati: ALP bassa");
-  if(ci.esofago) add("r", "Controindicazione", "Bisfosfonati orali: esofago");
-  if(eg !== null && eg < 35) add("r", "Controindicazione", `Alendronato e zoledronato: eGFR ${fmtN(eg, 0)}`);
-  if(ci.cv || F.feats.has("ictus_emiplegia")) add("a", "Controindicazione", "Romosozumab: cardiovascolare");
-  if(ci.tev) add("a", "Controindicazione", "Raloxifene: TEV");
-  if(ci.denti) add("a", "Prima della terapia", "Denti da sistemare");
-  if(vdLow(vd)) add("a", "Vitamina D", vdTxt(vd));
-  const nsec = S.N.note.length + S.N.sosp.length + S.A.forms.length; if(nsec) add("a", "Forme secondarie", nsec + " da considerare");
-  if(F.gc) add("a", "Farmaci", "Glucocorticoidi");
-  return c.map(x => `<div class="fev-i ${x.sev}"><small>${x.lbl}</small><b>${x.val}</b></div>`).join("");
+  /* etichette brevi (2-3 parole) e di lunghezza simile; il colore dice quanto pesa */
+  const c = [], add = (cls, t) => c.push(`<span class="fchip ${cls}">${t}</span>`), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
+  if(F.recent.length) add("r", "⚡ Rischio imminente");
+  else if(vh.length) add("r", "⚡ Rischio molto alto");
+  if(F.zona) add("z z-" + F.zona, `<i></i>Zona ${ZONE[F.zona].t.toLowerCase()}${F.rischio !== null ? " · " + fmtN(F.rischio, 0) + "%" : ""}`);
+  if(F.minT !== null) add("p", "T-score " + fmtN(F.minT));
+  if(S.hpp) add("r", "⚠ ALP bassa");
+  if(ci.esofago) add("r", "⚠ No bisfosfonati orali");
+  if(eg !== null && eg < 35) add("r", "⚠ eGFR " + fmtN(eg, 0));
+  if(ci.cv || F.feats.has("ictus_emiplegia")) add("a", "⚠ No romosozumab");
+  if(ci.tev) add("a", "⚠ No raloxifene");
+  if(ci.denti) add("a", "Denti da sistemare");
+  if(vdLow(vd)) add("a", "Vitamina D " + vdTxt(vd).replace(" nmol/L", "").replace(" ng/mL", ""));
+  const nsec = S.N.note.length + S.N.sosp.length + S.A.forms.length; if(nsec) add("a", plural(nsec, "forma secondaria", "forme secondarie"));
+  if(F.gc) add("a", "Glucocorticoidi");
+  return c.join("");
 }
 
 /* ---------- i punti sulla figura ---------- */
@@ -118,7 +124,7 @@ function vFigura(p){
     <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots)}</div>
     <div class="fcol-r">
       ${banner}
-      <div class="fev"><span class="flbl">In evidenza</span>${figChips(p, F, S) || `<p class="small">Qui restano in evidenza i dati che contano per la decisione.</p>`}</div>
+      <div class="fchips">${figChips(p, F, S) || `<span class="small">Qui restano in evidenza i dati che contano per la decisione.</span>`}</div>
       ${td.length ? `<div class="todo">${td.slice(0, 3).map(x => todoItem(x, false)).join("")}</div>` : ""}
       ${figDesk(p, F, S)}
       <a class="fcta${ready ? " on" : ""}" href="${ready ? `#paz-${p.id}-decidi` : `#paz-${p.id}-figura`}"${ready ? "" : ` data-fsheet="defra"`}>${ready ? (dec ? "Rivedi la decisione" : "▶ Decidi la terapia") : "🔒 Decidi la terapia"}<small>${ready ? (all.find(x => x.st === "miss" && x.k !== "terapia" && x.k !== "storico") ? "alcuni indizi mancano: la proposta sarà meno sicura" : "tutti gli indizi raccolti") : "serve la zona del DeFRA"}</small></a>
