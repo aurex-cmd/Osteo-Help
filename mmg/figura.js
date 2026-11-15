@@ -47,22 +47,39 @@ const noHead = h => h.replace(/^\s*<h1>[\s\S]*?<div class="rule"><\/div>/, "");
 
 /* ---------- cosa resta in evidenza ---------- */
 function figChips(p, F, S){
-  /* etichette brevi (2-3 parole) e di lunghezza simile; il colore dice quanto pesa */
-  const c = [], add = (cls, t) => c.push(`<span class="fchip ${cls}">${t}</span>`), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
-  if(F.recent.length) add("r", "⚡ Rischio imminente");
-  else if(vh.length) add("r", "⚡ Rischio molto alto");
-  if(F.zona) add("z z-" + F.zona, `<i></i>Zona ${ZONE[F.zona].t.toLowerCase()}${F.rischio !== null ? " · " + fmtN(F.rischio, 0) + "%" : ""}`);
-  if(F.minT !== null) add("p", "T-score " + fmtN(F.minT));
-  if(S.hpp) add("r", "⚠ ALP bassa");
-  if(ci.esofago) add("r", "⚠ No bisfosfonati orali");
-  if(eg !== null && eg < 35) add("r", "⚠ eGFR " + fmtN(eg, 0));
-  if(ci.cv || F.feats.has("ictus_emiplegia")) add("a", "⚠ No romosozumab");
-  if(ci.tev) add("a", "⚠ No raloxifene");
-  if(ci.denti) add("a", "Denti da sistemare");
-  if(vdLow(vd)) add("a", "Vitamina D " + vdTxt(vd).replace(" nmol/L", "").replace(" ng/mL", ""));
-  const nsec = S.N.note.length + S.N.sosp.length + S.A.forms.length; if(nsec) add("a", plural(nsec, "forma secondaria", "forme secondarie"));
-  if(F.gc) add("a", "Glucocorticoidi");
-  return c.join("");
+  /* mosaico: la dimensione dice l'importanza (3 grande 2×2, 2 media 2×1, 1 piccola 1×1), il colore il tipo; insieme formano un rettangolo */
+  const c = [], add = (lv, cls, lbl, val) => c.push({ lv, cls, lbl, val }), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
+  if(F.recent.length) add(3, "r", "Rischio di rifrattura", "⚡ Imminente");
+  else if(vh.length) add(3, "r", "Rischio di frattura", "⚡ Molto alto");
+  if(F.zona) add(zoneHigh(F.zona) && !c.length ? 3 : 2, "z z-" + F.zona, "DeFRA", `<span class="zn"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()}</span>${F.rischio !== null ? ` <em>${fmtN(F.rischio, 0)}%</em>` : ""}`);
+  if(S.hpp) add(2, "r", "Controindicazione", "No bisfosfonati: ALP bassa");
+  if(ci.esofago) add(2, "r", "Controindicazione", "No bisfosfonati orali");
+  if(eg !== null && eg < 35) add(2, "r", "Controindicazione", "eGFR " + fmtN(eg, 0) + " mL/min");
+  if(F.minT !== null) add(2, "p", "T-score minimo", fmtN(F.minT));
+  if(ci.cv || F.feats.has("ictus_emiplegia")) add(1, "a", "", "No romosozumab");
+  if(ci.tev) add(1, "a", "", "No raloxifene");
+  const nA = S.N.note.length + S.N.sosp.length, nE = S.A.forms.length;
+  if(nA || nE) add(1, "a", "", "Forme secondarie: " + [nA ? nA + " dall'anamnesi" : "", nE ? nE + " dagli esami" : ""].filter(Boolean).join(", "));
+  if(vdLow(vd)) add(1, "a", "", "Vitamina D " + vdTxt(vd));
+  if(F.gc) add(1, "a", "", "Glucocorticoidi");
+  if(ci.denti) add(1, "a", "", "Denti da sistemare");
+  if(!c.length) return "";
+  /* impaginazione su 6 colonne: la grande occupa metà larghezza e due righe con due riquadri accanto;
+     le altre vanno a righe (media 3 colonne, piccola 2) e ogni riga viene allargata fino a riempirsi: il blocco resta un rettangolo */
+  c.sort((a, b) => b.lv - a.lv);
+  const out = [], q = c.slice();
+  while(q.length && q[0].lv === 3){
+    const big = q.shift(), side = q.splice(0, 2);
+    if(!side.length){ out.push([big, 6, 1]); continue; }
+    out.push([big, 3, 2]); side.forEach(x => out.push([x, 3, side.length === 1 ? 2 : 1]));
+  }
+  /* medie a coppie (3+3); una media rimasta va con una piccola (3+3); le piccole in righe equilibrate (3, 2 o 1 per riga) */
+  const mids = q.filter(x => x.lv === 2), smalls = q.filter(x => x.lv === 1);
+  while(mids.length >= 2) out.push([mids.shift(), 3, 1], [mids.shift(), 3, 1]);
+  if(mids.length) out.push([mids.shift(), smalls.length ? 3 : 6, 1]), smalls.length && out.push([smalls.shift(), 3, 1]);
+  const rows = Math.ceil(smalls.length / 3);
+  for(let r = 0; r < rows; r++){ const n = Math.ceil(smalls.length / (rows - r)), cw = 6 / n; for(let k = 0; k < n; k++) out.push([smalls.shift(), cw, 1]); }
+  return out.map(([x, cs, rs]) => `<div class="fev-i lv${x.lv} ${x.cls}" style="grid-column:span ${cs};grid-row:span ${rs}">${x.lbl ? `<small>${x.lbl}</small>` : ""}<b>${x.val}</b></div>`).join("");
 }
 
 /* ---------- i punti sulla figura ---------- */
@@ -124,7 +141,7 @@ function vFigura(p){
     <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots)}</div>
     <div class="fcol-r">
       ${banner}
-      <div class="fchips">${figChips(p, F, S) || `<span class="small">Qui restano in evidenza i dati che contano per la decisione.</span>`}</div>
+      ${(h => h ? `<div class="fmos">${h}</div>` : `<p class="small">Qui restano in evidenza i dati che contano per la decisione.</p>`)(figChips(p, F, S))}
       ${td.length ? `<div class="todo">${td.slice(0, 3).map(x => todoItem(x, false)).join("")}</div>` : ""}
       ${figDesk(p, F, S)}
       <a class="fcta${ready ? " on" : ""}" href="${ready ? `#paz-${p.id}-decidi` : `#paz-${p.id}-figura`}"${ready ? "" : ` data-fsheet="defra"`}>${ready ? (dec ? "Rivedi la decisione" : "▶ Decidi la terapia") : "🔒 Decidi la terapia"}<small>${ready ? (all.find(x => x.st === "miss" && x.k !== "terapia" && x.k !== "storico") ? "alcuni indizi mancano: la proposta sarà meno sicura" : "tutti gli indizi raccolti") : "serve la zona del DeFRA"}</small></a>
