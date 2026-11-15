@@ -347,6 +347,18 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted);margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
 .report .list li{display:block}
+/* pulsante «Fatto» (in alto a destra e in fondo alle sezioni del paziente) */
+.bar #act{color:var(--focus);font-weight:700;font-size:.95rem}
+.done{margin-top:10px} .done .btn{width:100%;padding:14px 16px;font-size:1rem}
+/* campi tutti alti uguali; su iPhone il campo data non deve uscire dalla sua colonna */
+.fld input,.fld select{height:46px}
+.fld input[type="date"]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;text-align:left;line-height:normal}
+.fld input[type="date"]::-webkit-date-and-time-value{text-align:left}
+.grid2 > *{min-width:0}
+/* intestazioni di sezione non coperte dal riquadro che segue; riquadri distanziati */
+.lbl{margin-bottom:-2px}
+div[data-live]{display:flex;flex-direction:column;gap:14px}
+div[data-live]:empty{display:none}
 /* zone del DeFRA (colori come nel calcolatore): il colore segna la zona, il testo resta in inchiostro */
 .z-verde{--zc:#3A9A3A;--zb:#E6F3E4} .z-gialla{--zc:#E3B21A;--zb:#FBF3D6} .z-arancione{--zc:#E8641E;--zb:#FCE9DC} .z-rossa{--zc:#B3261E;--zb:#F8E3E1}
 .zn{display:inline-flex;align-items:center;gap:7px;font-weight:700;color:var(--ink)} .zn i{width:13px;height:13px;border-radius:50%;background:var(--zc);flex:0 0 auto}
@@ -370,6 +382,7 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
   <div class="bar-in">
     <button type="button" id="back" aria-label="Indietro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m15 5-7 7 7 7"/></svg></button>
     <div class="bar-t" id="barT">Osteo Help MMG</div>
+    <button type="button" id="act" hidden>Fatto</button>
   </div>
 </header>
 

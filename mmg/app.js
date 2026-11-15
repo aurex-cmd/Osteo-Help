@@ -788,13 +788,17 @@ document.addEventListener("click", e => {
 
 /* ---------- navigazione ---------- */
 const stack = [];
-let current = null, actFn = null;
+let current = null, actFn = null, doneTo = null;
 function render(){
   const route = routeNow();
   const v = pzView(route) || { redirect:"" };
   if(v.redirect !== undefined){ history.replaceState(null, "", v.redirect ? "#" + v.redirect : location.pathname + location.search); return render(); }
   const changed = route !== current; current = route;
-  $("#main").innerHTML = `<div class="screen">${v.html}</div>`;
+  /* sezioni del paziente: «Fatto» riporta alla scheda; nella scheda riporta all'elenco */
+  const m = /^paz-([a-z0-9]+)(-[a-z]+)?$/.exec(route), back = m ? (m[2] ? "paz-" + m[1] : "") : null;
+  const done = m && m[2] && m[2] !== "-report" ? `<div class="btns done noprint"><a class="btn" href="#${back}">Fatto</a></div>` : "";
+  $("#main").innerHTML = `<div class="screen">${v.html}${done}</div>`;
+  doneTo = back; $("#act").hidden = back === null;
   const home = !route;
   $(".bar").classList.toggle("home", home);
   if(home) $("#barT").innerHTML = `<span class="oh">OH</span>Osteo Help <span class="mmg">MMG</span>`; else $("#barT").textContent = v.bar;
@@ -803,6 +807,7 @@ function render(){
 }
 function goBack(){ if(stack.length > 1) history.back(); else go(pzParent(current) || ""); }
 $("#back").addEventListener("click", goBack);
+$("#act").addEventListener("click", () => { if(doneTo !== null) go(doneTo); });
 window.addEventListener("hashchange", () => {
   const r = routeNow();
   if(stack.length > 1 && stack[stack.length - 2] === r) stack.pop(); else stack.push(r);
