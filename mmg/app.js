@@ -15,8 +15,10 @@ const VD_F = 2.496;
 let VD_U = "nmol"; try{ if(localStorage.getItem("oh-mmg-vitd-unit") === "ng") VD_U = "ng"; }catch(e){}   /* nmol/L come unità predefinita */
 const vdUnit = () => VD_U === "nmol" ? "nmol/L" : "ng/mL";
 const vdShow = ng => ng === null ? "" : VD_U === "nmol" ? String(Math.round(ng * VD_F)) : String(Math.round(ng * 10) / 10);
-/* soglie in nmol/L: bassa sotto 75 (obiettivo nel paziente con osteoporosi o a rischio, Nota 96), alta sopra 250;
+/* soglie in nmol/L (Linee guida SIOMMMS, Adami et al., Reumatismo 2011;63:129-147, Tabella I: carenza <50, insufficienza 50-75,
+   eccesso >250, intossicazione >375): bassa sotto 75 (obiettivo nel paziente con osteoporosi o a rischio, Nota 96), alta (eccesso) sopra 250;
    solo sopra 375 (150 ng/mL) la vitamina D entra nel motore come «alta» e fa sospettare un'intossicazione */
+const SIOMMMS_VD = "Linee guida SIOMMMS, Reumatismo 2011";
 const VD_BASSA = 75, VD_ALTA = 250, VD_TOSS = 375, vdNmol = ng => Math.round(ng * VD_F);
 const vdLow = ng => ng !== null && vdNmol(ng) < VD_BASSA, vdHigh = ng => ng !== null && vdNmol(ng) > VD_ALTA, vdToss = ng => ng !== null && vdNmol(ng) > VD_TOSS;
 const vdTxt = ng => VD_U === "nmol" ? fmtN(ng * VD_F, 0) + " nmol/L" : fmtN(ng, 0) + " ng/mL";
@@ -659,9 +661,9 @@ function labReport(p, S){
   if(S.hpp) out.push(`<div class="alert"><b>Fosfatasi alcalina bassa: pensa all'ipofosfatasia</b>Prima di un antiriassorbitivo dosa la vitamina B6 (piridossal-5-fosfato) e, se serve, la fosfoetanolammina urinaria. I bisfosfonati sono controindicati. <a target="_blank" rel="noopener" href="${OH}#causa-gen_ipofosfatasia">Scheda</a></div>`);
   if(lab.Ca === "basso") out.push(`<div class="alert"><b>Ipocalcemia</b>Va corretta (e spiegata) prima di qualsiasi antiriassorbitivo, in particolare denosumab e zoledronato.</div>`);
   const vd = num(p.vitd);
-  if(vdHigh(vd)) out.push(vdToss(vd) ? `<div class="alert"><b>Vitamina D molto alta · ${vdTxt(vd)}</b>Sopra 375 nmol/L (150 ng/mL): sospendi l'integrazione e controlla calcemia e calciuria per escludere un'intossicazione.</div>`
-    : `<div class="alert warn"><b>Vitamina D alta · ${vdTxt(vd)}</b>Sopra 250 nmol/L (100 ng/mL): riduci o sospendi l'integrazione e ricontrolla. Si sospetta un'intossicazione solo sopra 375 nmol/L (150 ng/mL).</div>`);
-  if(vdLow(vd) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa${vd !== null ? " · " + vdTxt(vd) : ""}</b>Sotto 75 nmol/L (30 ng/mL), il valore da raggiungere nel paziente con osteoporosi o a rischio di ipovitaminosi D (Nota 96). Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
+  if(vdHigh(vd)) out.push(vdToss(vd) ? `<div class="alert"><b>Vitamina D nel range di intossicazione · ${vdTxt(vd)}</b>Sopra 375 nmol/L (150 ng/mL; ${SIOMMMS_VD}): sospendi l'integrazione e controlla calcemia e calciuria. L'intossicazione si caratterizza per ipercalcemia e rapido peggioramento della funzione renale.</div>`
+    : `<div class="alert warn"><b>Vitamina D in eccesso · ${vdTxt(vd)}</b>Sopra 250 nmol/L (100 ng/mL): riduci o sospendi l'integrazione e ricontrolla. Si parla di intossicazione sopra 375 nmol/L (150 ng/mL; ${SIOMMMS_VD}).</div>`);
+  if(vdLow(vd) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa${vd !== null ? " · " + vdTxt(vd) : ""}</b>Sotto 75 nmol/L (30 ng/mL): carenza sotto 50, insufficienza tra 50 e 75 (${SIOMMMS_VD}); 75 nmol/L è il valore da raggiungere nel paziente con osteoporosi o a rischio di ipovitaminosi D (Nota 96). Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
   if(A.kind === "none") out.push(`<p class="hint">${labStatus(p).done ? "Tutti gli esami registrati sono nella norma." : "Segna ▲ o ▼ gli esami fuori norma e N quelli nella norma."}</p>`);
   else {
     const tags = `<div class="tags">${A.sel.map(s => `<span class="tag ${s[1]}">${ftag(s)}</span>`).join("")}</div>`;
@@ -1055,7 +1057,7 @@ const GUIDA = [
     <div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>` },
   { k:"base", t:"Calcio, vitamina D e stile di vita", s:"Per tutti, prima e durante la terapia", html:`
     <ul class="list"><li><i>1</i><span><b>Calcio</b>: 1000–1200 mg al giorno, possibilmente con la dieta (latte, yogurt, formaggi, acque ricche di calcio); integratore solo per la quota mancante.</span></li>
-    <li><i>2</i><span><b>Vitamina D</b>: correggere la carenza prima di iniziare un farmaco (la carenza ne riduce l'efficacia e favorisce l'ipocalcemia). In chi è in terapia per l'osteoporosi si punta ad almeno 75 nmol/L (30 ng/mL); colecalciferolo rimborsabile senza dosaggio in corso di terapia remineralizzante (Nota 96).</span></li>
+    <li><i>2</i><span><b>Vitamina D</b>: correggere la carenza prima di iniziare un farmaco (la carenza ne riduce l'efficacia e favorisce l'ipocalcemia). In chi è in terapia per l'osteoporosi si punta ad almeno 75 nmol/L (30 ng/mL); colecalciferolo rimborsabile senza dosaggio in corso di terapia remineralizzante (Nota 96). Secondo le linee guida SIOMMMS (Adami et al., Reumatismo 2011;63:129-147) si parla di carenza sotto 50 nmol/L, insufficienza tra 50 e 75, eccesso sopra 250 e intossicazione sopra 375 nmol/L (150 ng/mL); nei pazienti con malattie granulomatose o iperparatiroidismo primitivo l'integrazione va fatta con cautela, controllando periodicamente la 25(OH)D.</span></li>
     <li><i>3</i><span><b>Attività fisica</b> regolare, con esercizi di carico e di equilibrio.</span></li>
     <li><i>4</i><span><b>Cadute</b>: vista, farmaci sedativi e ipotensivi, casa sicura, calzature.</span></li>
     <li><i>5</i><span><b>Fumo</b> da sospendere, <b>alcol</b> sotto le 3 unità al giorno, peso adeguato.</span></li>
