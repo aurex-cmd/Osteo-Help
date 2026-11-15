@@ -25,6 +25,7 @@ Il catalogo riunisce le forme dei due percorsi. Le forme che si evidenziano agli
 
 ## Correzioni rispetto all'Osteo Help originale
 
+- **Ipofosfatasia dell'adulto**: nella scheda i criteri diagnostici del 2024 (Khan et al.): presupposto della fosfatasi alcalina persistentemente bassa con l'elenco delle altre cause da escludere (anche gli errori di prelievo), criteri maggiori e minori, regola «2 maggiori, oppure 1 maggiore e 2 minori», criteri del bambino; vitamina B6 dopo 1 settimana senza integratori; gene ALPL non indispensabile. Nuove voci del quadro clinico, che orientano verso l'ipofosfatasia: fratture metatarsali ricorrenti e frattura femorale atipica (forti), condrocalcinosi e nefrocalcinosi (lievi).
 - **Ordine delle forme compatibili**: dalla più frequente alla più rara (tre livelli di frequenza, costante `FREQ`), non più nell'ordine dell'elenco. Esempio: ipocalciuria isolata → prima il ridotto introito di calcio, poi la carenza di vitamina D e il malassorbimento.
 - **Esami di II livello**: divisi per forma, nello stesso ordine; aperti quelli della causa più probabile, con l'avvertenza che vanno richiesti solo su sospetto clinico. La 25-OH-vitamina D, esame di I livello, non compare più tra quelli di II livello.
 - **Malassorbimento**: nel nome «bariatrica» diventa «chirurgia bariatrica».
@@ -121,7 +122,8 @@ Riscritte in italiano più naturale, senza cambiarne il contenuto clinico, le no
 - Aggiunte 2 fonti per l'intossicazione da vitamina D (elenco "alterati"): studio randomizzato sulle alte dosi e la densità ossea (Burt 2019), boli annuali, cadute e fratture (Sanders 2010).
 - Aggiunte 2 fonti per il trapianto d'organo (elenco "esami normali"), che prima citava solo la KDIGO sul rene: revisione ECTS sul trapianto di organo solido (Anastasilakis 2019) e sintesi IOF sul trapianto di cellule staminali ematopoietiche (Kendler 2021).
 - Aggiornata la nota finale dell'elenco: glitazoni, SGLT2-inibitori, diabete, cause gastro-epatiche (tranne la gastrectomia), acidosi tubulare, lesione midollare, stili di vita (tranne l'immobilizzazione), HIV, fibrosi cistica e gravidanza ora hanno una fonte propria.
-- Nuovo gruppo «Epidemiologia e work-up iniziale» (rif. 86–88): Tannenbaum 2002 (resa degli esami di primo livello), Fitzpatrick 2002 (frequenza delle forme secondarie), Ebeling 2008 (osteoporosi maschile).
+- Nuovo gruppo «Epidemiologia e work-up iniziale» (oggi rif. 90–92): Tannenbaum 2002 (resa degli esami di primo livello), Fitzpatrick 2002 (frequenza delle forme secondarie), Ebeling 2008 (osteoporosi maschile).
+- Aggiunta la fonte per i **criteri diagnostici dell'ipofosfatasia**: Khan AA, Brandi ML, Rush ET, et al., Osteoporos Int 2024 (rif. 65, nel gruppo Genetiche). La bibliografia passa a 92 voci e le voci successive scalano di un numero. I rimandi dell'animazione introduttiva ora si legano alla voce (Tannenbaum, Fitzpatrick, Ebeling) e non a un numero fisso, che era rimasto indietro.
 
 ### Video «Primaria o secondaria?»
 
