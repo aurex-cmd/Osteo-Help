@@ -484,10 +484,11 @@ function vPazienti(){
     const F = pzFacts(p), all = allSteps(p), nx = nextStep(all), pl = dxaPlan(F);
     const bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
     const where = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}` : pl.st !== "ok" ? pl.t : "Percorso completo";
-    return `<a class="pcard" href="#paz-${p.id}" data-q="${hx(pzName(p).toLowerCase())}">
+    const anon = !(p.nome && p.nome.trim());
+    return `<div class="pitem${anon ? " anon" : ""}" data-q="${hx(pzName(p).toLowerCase())}"><a class="pcard" href="#paz-${p.id}">
       ${avatar(p)}
       <span class="pbody"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}${F.zona ? ` · <span class="zn z-${F.zona}"><i></i>zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</small>
-        <span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small class="pwhere">${where}</small></span>${CHEV}</a>`;
+        <span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small class="pwhere">${where}</small></span>${CHEV}</a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
   }).join("");
   const todo = PZ.flatMap(p => pzTodo(p).map(x => Object.assign({ p }, x))).sort((a, b) => a.u - b.u);
   return { bar:"Pazienti", html: `<div class="mhome"><div class="mh-l">` + `<div class="mh-h">` + head("I miei pazienti", "Per ogni paziente con osteoporosi, un percorso guidato in 7 passi: dai dati alla terapia, fino ai controlli.") + `</div>
@@ -1169,7 +1170,7 @@ document.addEventListener("input", e => {
   const ce = e.target.closest("[data-ce]"); if(ce){ const { p } = pzRoute(); if(p){ p[ce.dataset.ce] = ce.innerText.trim(); savePz(p); } return; }
   if(e.target.id === "medNome"){ try{ localStorage.setItem("oh-mmg-medico", e.target.value); }catch(err){} return; }
   const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(["egfr", "caTot", "albVal"].includes(el.dataset.pf)) applyAuto(p); savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
-  if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); document.querySelectorAll("#pzList .pcard").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); }); }
+  if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); document.querySelectorAll("#pzList .pitem").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); }); }
 });
 document.addEventListener("change", e => {
   if(e.target.closest("[data-pf]") || e.target.id === "vdIn"){ const { p } = pzRoute(); if(p) pzLive(p); return; }
@@ -1191,6 +1192,8 @@ document.addEventListener("click", e => {
   if(t.closest("#pzLockNow")){ showLock(); return; }
   if(t.closest("#lockForgot")){ if(confirm("Senza il codice l'unico modo per riaprire l'app è cancellare l'archivio di questo browser (potrai poi ripristinare un backup). Cancellare tutto?")){ try{ localStorage.removeItem(PZ_KEY); localStorage.removeItem(PIN_KEY); }catch(e){} location.hash = ""; location.reload(); } return; }
   const sc = t.closest("[data-scroll]"); if(sc){ const el = $(sc.dataset.scroll); if(el){ el.scrollIntoView({ behavior:"smooth", block:"center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } return; }
+  const pdel = t.closest("[data-pzdel]");
+  if(pdel){ const q = PZ.find(x => String(x.id) === pdel.dataset.pzdel); if(q && confirm("Eliminare questo paziente senza nome e i dati inseriti?")){ PZ.splice(PZ.indexOf(q), 1); savePz(); render(); } return; }
   if(t.closest("#pzNew")){ const p = pzBlank(); PZ.push(p); savePz(); go("paz-" + p.id + (VISTA === "figura" ? "-figura" : "-dati")); return; }
   if(t.closest("#pzPrint")){ window.print(); return; }
   if(t.closest("#qReset")){ const { p } = pzRoute(); if(p){ p.quesito = ""; savePz(p); render(); } return; }

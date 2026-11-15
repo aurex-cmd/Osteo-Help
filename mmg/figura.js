@@ -52,11 +52,9 @@ function figChips(p, F, S){
   const c = [], add = (cls, lbl, val, short) => c.push({ cls, lbl, val, short: short || val }), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
   if(F.recent.length) add("r", "Rischio di rifrattura", "Imminente");
   else if(vh.length) add("r", "Rischio di frattura", "Molto alto");
-  if(F.zona) add("z z-" + F.zona, "DeFRA", `<span class="zn"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()}</span>`, "zona " + ZONE[F.zona].t.toLowerCase());
   if(S.hpp) add("r", "Attenzione", "No bisfosfonati", "ALP bassa: no bisfosfonati");
   else if(ci.esofago) add("r", "Attenzione", "No bisfosfonati orali");
   else if(eg !== null && eg < 35) add("r", "Attenzione", "eGFR " + fmtN(eg, 0), "eGFR " + fmtN(eg, 0) + " mL/min");
-  if(F.minT !== null) add("p", "T-score", fmtN(F.minT), "T-score " + fmtN(F.minT));
   if(ci.cv || F.feats.has("ictus_emiplegia")) add("a", "", "", "no romosozumab");
   if(ci.tev) add("a", "", "", "no raloxifene");
   if(vdLow(vd)) add("a", "", "", "vitamina D " + vdTxt(vd));
@@ -89,14 +87,24 @@ function figSpots(p, F, S){
       s: an.st === "miss" ? "incolla dal gestionale" : sec.length ? sec[0] : ciOn ? "da conoscere per la terapia" : "nessuna forma secondaria" }
   };
 }
-function figStage(p, fig, spots){
+/* sulla figura: zona e rischio DeFRA, T-score di colonna e femore */
+function figBadges(p, F){
+  const dx = F.lastDxa, tF = dx ? [num(dx.tFt), num(dx.tFn)].filter(v => v !== null) : [];
+  const ts = (lbl, v) => { if(v === null) return `<button type="button" class="fbd miss" data-fsheet="dxa"><span class="fbd-c">?</span><span class="fbd-t"><b>${lbl}</b><small>DXA da inserire</small></span></button>`;
+    const c = tsCat(v); return `<button type="button" class="fbd t-${c[0]}" data-fsheet="dxa" aria-label="T-score ${lbl.toLowerCase()} ${fmtN(v)}, ${c[1].toLowerCase()}"><span class="fbd-c">${fmtN(v)}</span><span class="fbd-t"><b>${lbl}</b><small>${c[1].toLowerCase()}${F.dxaAge > 24 ? " · " + dx.data.slice(0, 4) : ""}</small></span></button>`; };
+  const z = F.zona, r = F.rischio;
+  const df = z ? `<button type="button" class="fbd zf z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio " + fmtN(r, 0) + "%" : ""}"><span class="fbd-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "!"}</span><span class="fbd-t"><b>DeFRA</b><small>zona ${ZONE[z].t.toLowerCase()}</small></span></button>`
+    : `<button type="button" class="fbd miss" data-fsheet="defra"><span class="fbd-c">?</span><span class="fbd-t"><b>DeFRA</b><small>da calcolare</small></span></button>`;
+  return `<div class="fbads">${df}${ts("Colonna", dx ? num(dx.tL) : null)}${ts("Femore", tF.length ? Math.min(...tF) : null)}</div>`;
+}
+function figStage(p, fig, spots, F){
   const d = FIGURE[fig], lblFx = d.fxLbl;
   const pos = { chi:d.testa, fx:d.fx, anam:d.busto };
   return `<div class="fstage"><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">` +
     Object.entries(spots).map(([k, s]) => { const [x, y] = pos[k], left = x > 52;
       const t = k === "fx" && s.st === "miss" && lblFx ? lblFx : s.t;
       return `<button type="button" class="fhs ${s.st}${left ? " l" : ""}" data-fsheet="${k}" style="left:${x}%;top:${y}%" aria-label="${hx(t)}: ${hx(s.s)}"><span class="fdot">${s.st === "ok" ? "✓" : s.st === "al" ? "!" : s.n}</span><span class="ftag"><b>${hx(t)}</b><small>${hx(s.s)}</small></span></button>`;
-    }).join("") + `</div></div>`;
+    }).join("") + (F ? figBadges(p, F) : "") + `</div></div>`;
 }
 /* la prossima mossa: una sola cosa da fare, la più utile adesso */
 function figNext(p, F, S, spots){
@@ -137,8 +145,6 @@ function figInv(p, F, S){
   const it = (k, ic, t, v, st) => `<button type="button" class="finv-i ${st}" data-fsheet="${k}"><span class="fic">${ic}</span><b>${t}</b><small>${v}</small></button>`;
   return `<div class="finv">
     ${it("esami", "🧪", "Esami", e.st === "miss" ? ls.done + "/" + ls.tot : e.st === "warn" ? "da vedere" : "nella norma", e.st === "miss" ? "miss" : e.st === "warn" ? "al" : "ok")}
-    ${it("dxa", "🩻", "DXA", F.minT !== null ? fmtN(F.minT) + (F.dxaAge > 24 ? " · vecchia" : "") : "manca", !F.lastDxa ? "miss" : F.dxaAge > 24 ? "al" : "ok")}
-    ${it("defra", "🎯", "DeFRA", F.zona ? "zona " + ZONE[F.zona].t.toLowerCase() : "manca", F.zona ? "ok" : "miss")}
     ${p.decisione ? it("storico", "📈", "Controlli", "DXA " + (dxaPlan(F).st === "ok" ? "in programma" : "da fare"), dxaPlan(F).st === "ok" ? "ok" : "al") : ""}
   </div>`;
 }
@@ -161,12 +167,13 @@ function vFigura(p){
   return { bar: pzName(p), html: viewSwitch(p, "figura") + `
     <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} indizi raccolti</small></div></div>
     <div class="fprog">${all.map(x => `<i class="${x.st}" title="${x.t}"></i>`).join("")}</div>
-    <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots)}</div>
+    <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots, F)}</div>
     <div class="fcol-r">
       ${figNext(p, F, S, spots)}
       <div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>
       <div class="fsec"><p class="flbl">Referti</p>${figInv(p, F, S)}</div>
       ${p.decisione ? `<div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>` : ""}
+      <p class="fdel"><button type="button" class="lnk" id="pzDel">Elimina paziente</button></p>
     </div></div>` + figSheet(p) };
 }
 function viewSwitch(p, cur){
