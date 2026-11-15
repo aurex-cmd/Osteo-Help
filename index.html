@@ -77,6 +77,7 @@ h1{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.025em;mar
 .dot.no{visibility:hidden}
 .cat .rowlink{position:relative} .cat .rowlink > .dot{position:absolute;left:1px;top:21px}
 .cat-key{margin:-4px 0 0}
+.cat-top{display:flex;flex-direction:column;gap:14px}
 .seg + .lbl{margin-top:18px}
 .cat-key .dot{margin:0 6px 0 0}
 .entry > div{flex:1;min-width:0}
@@ -239,6 +240,8 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
   body.split .pane-l .rowlink.sel{padding-left:10px;padding-right:8px;margin:0 -10px;width:calc(100% + 20px)}
   body.split .pane-l .entry.sel{outline:2px solid var(--ink);outline-offset:-2px}
   body.split .dock{display:none}
+  /* catalogo: titolo e ricerca restano fermi in alto, scorre solo l'elenco */
+  body.split .pane-l .cat-top{position:sticky;top:-4px;z-index:2;background:var(--bg);margin-top:-4px;padding:4px 0 12px;box-shadow:0 1px 0 var(--line)}
   /* home: come col telefono in orizzontale, titolo e riquadri a sinistra, Consulta a destra */
   body.is-home main{max-width:1040px;padding-left:24px;padding-right:24px}
   body.is-home .bar-in{max-width:992px}
@@ -1634,7 +1637,7 @@ function catHTML(q){
   }).join("")}</div></div></details>`).join("");
 }
 function vCatalogo(){
-  return { bar:"Catalogo", html: head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca" value="${catQ.replace(/"/g,"&quot;")}"><p class="small cat-key"><span class="dot"></span>si evidenzia agli esami di primo livello</p><div id="catList" class="cat">${catHTML(catQ)}</div>` };
+  return { bar:"Catalogo", html: `<div class="cat-top">` + head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca" value="${catQ.replace(/"/g,"&quot;")}"><p class="small cat-key"><span class="dot"></span>si evidenzia agli esami di primo livello</p></div><div id="catList" class="cat">${catHTML(catQ)}</div>` };
 }
 function vCalcio(){
   return { bar:"Calcio corretto", html: head("Calcio corretto") + `
