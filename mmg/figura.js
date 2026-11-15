@@ -110,7 +110,14 @@ function figNext(p, F, S, spots){
     ["dxa", !F.lastDxa, "Densitometria", "T-score di colonna e femore"],
     ["defra", !F.zona, "DeFRA", "calcola il rischio e riporta la zona"]
   ], miss = clues.filter(c => c[1]), dec = p.decisione && DECISIONI[p.decisione.tipo];
-  if(dec) return `<div class="fnext done"><small>Caso completato · ${fmtD(p.decisione.data)}</small><b>${dec.t}</b><span>${dxaPlan(F).t}</span><a class="fnext-l" href="#paz-${p.id}-decidi">Rivedi la decisione</a></div>`;
+  if(dec){
+    /* decisione presa: in primo piano il farmaco in corso */
+    const th = F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco];
+    const drug = th ? `<div class="fdrugbig"><span class="fpill">💊</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""}</small><small>dal ${fmtD(th.inizio)}${nd ? ` · <strong>prossima dose ${fmtDt(nd)}</strong>` : ""}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>`
+      : p.decisione.tipo === "spec" ? `<div class="fdrugbig spec"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>in attesa della terapia indicata dallo specialista</small></span></div>`
+      : `<div class="fdrugbig none"><span class="fpill">🥛</span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
+    return `<div class="fnext done"><small>Caso completato · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${drug}<span>${dxaPlan(F).t}</span><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
+  }
   if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
     return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo indizio · ne ${miss.length === 1 ? "manca 1" : "mancano " + miss.length}</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
   return `<a class="fnext go" href="#paz-${p.id}-decidi"><small>${miss.length ? "Manca ancora: " + miss[0][2].toLowerCase() : "Tutti gli indizi raccolti"}</small><b>Decidi la terapia</b><span>La proposta tiene conto di zona, Nota 79 e controindicazioni</span><em>▶</em></a>`;
@@ -150,7 +157,7 @@ function vFigura(p){
       ${figNext(p, F, S, spots)}
       <div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>
       <div class="fsec"><p class="flbl">Referti</p>${figInv(p, F, S)}</div>
-      <div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>
+      ${p.decisione ? `<div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>` : ""}
     </div></div>` + figSheet(p) };
 }
 function viewSwitch(p, cur){
