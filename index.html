@@ -1889,7 +1889,13 @@ function render(fromNav){
   if(changed && route === "catalogo" && catY !== null){ window.scrollTo(0, catY); catY = null; }
   if(route === "bibliografia") showPendingRef();
 }
-function goBack(){ if(stack.length > 1) history.back(); else go(PARENT(current)); }
+/* su PC «indietro» lascia la colonna di sinistra, non la scheda vista prima:
+   dal catalogo (o da esame per esame, pattern, inserimento) alla home, dai risultati all'inserimento */
+const LEFT_PARENT = { risultato:"alterati", considerare:"normali" };
+function goBack(){
+  if(document.body.classList.contains("split") && leftRoute){ go(LEFT_PARENT[leftRoute] || ""); return; }
+  if(stack.length > 1) history.back(); else go(PARENT(current));
+}
 function updateDock(){
   const d = dockCfg === "alterati" ? dockA() : dockCfg === "normali" ? dockN() : null;
   $("#dock").hidden = !d;
