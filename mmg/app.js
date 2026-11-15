@@ -305,20 +305,39 @@ const ST_LBL = { ok:"ok", miss:"manca", warn:"attenzione" };
 const stTag = st => `<span class="st ${st}">${ST_LBL[st]}</span>`;
 
 /* ---------- elenco pazienti ---------- */
+/* icone a tratto (24×24) della pagina iniziale */
+const MIC = {
+  add:'<circle cx="10" cy="8" r="3.6"/><path d="M3.5 20c0-3.8 2.9-6.3 6.5-6.3s6.5 2.5 6.5 6.3"/><path d="M18.5 7.5v6M15.5 10.5h6"/>',
+  book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8.5 7.5h7M8.5 11h5"/>',
+  down:'<path d="M12 3v12m-5-5 5 5 5-5"/><path d="M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17"/>',
+  up:'<path d="M12 15V3m-5 5 5-5 5 5"/><path d="M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>'
+};
+const mic = (n, c) => `<svg class="${c || "mi"}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${MIC[n]}</svg>`;
+const initials = p => { const w = pzName(p).replace(/[^\p{L}\s.]/gu, " ").split(/[\s.]+/).filter(Boolean); return w.length ? (w[0][0] + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase() : "?"; };
 function vPazienti(){
-  const rows = PZ.slice().sort((a, b) => pzName(a).localeCompare(pzName(b), "it", { sensitivity:"base" })).map(p => {
-    const F = pzFacts(p), pl = dxaPlan(F), bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : "", F.zona ? "DeFRA zona " + ZONE[F.zona].t.toLowerCase() : ""].filter(Boolean).join(" · ");
-    const nx = nextStep(allSteps(p)), prog = nx ? `<b class="st-t miss">Passo ${nx.i + 1} di ${STEPS.length}: ${nx.t}</b>` : pl.st !== "ok" ? `<b class="st-t ${pl.st}">${pl.t}</b>` : `<b class="st-t ok">Percorso completo</b>`;
-    return `<a class="rowlink pzrow" href="#paz-${p.id}" data-q="${hx(pzName(p).toLowerCase())}"><span>${hx(pzName(p))}<small>${bits ? bits + " · " : ""}${prog}</small></span>${CHEV}</a>`;
+  const cards = PZ.slice().sort((a, b) => pzName(a).localeCompare(pzName(b), "it", { sensitivity:"base" })).map(p => {
+    const F = pzFacts(p), all = allSteps(p), nx = nextStep(all), pl = dxaPlan(F);
+    const bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
+    const where = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}` : pl.st !== "ok" ? pl.t : "Percorso completo";
+    return `<a class="pcard" href="#paz-${p.id}" data-q="${hx(pzName(p).toLowerCase())}">
+      <span class="pav">${hx(initials(p))}</span>
+      <span class="pbody"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}${F.zona ? ` · <span class="zn z-${F.zona}"><i></i>zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</small>
+        <span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small class="pwhere">${where}</small></span>${CHEV}</a>`;
   }).join("");
-  return { bar:"Pazienti", html: head("I miei pazienti", "Per ogni paziente un percorso in 7 passi: dati, anamnesi, esami, densitometria, DeFRA, terapia, follow-up.") + `
-    <div class="btns"><button type="button" class="btn" id="pzNew">+ Nuovo paziente</button><a class="btn sec" href="#guida">Guida per il MMG</a><a class="btn sec" href="${OH}" target="_blank" rel="noopener">Osteo Help ↗</a></div>
+  return { bar:"Pazienti", html: `<div class="mhome">` + head("I miei pazienti", "Per ogni paziente con osteoporosi, un percorso guidato in 7 passi: dai dati alla terapia, fino ai controlli.") + `
+    <button type="button" class="entry big violet" id="pzNew"><span class="ibox">${mic("add", "ic")}</span><div><b>Nuovo paziente</b><small>Inizia il percorso dal passo 1</small></div>${CHEV}</button>
+    ${PZ.length ? `<p class="lbl">Pazienti · ${PZ.length}</p>` : ""}
     ${PZ.length > 5 ? `<input class="search" id="pzQ" type="search" placeholder="Cerca un paziente" autocomplete="off">` : ""}
-    ${PZ.length ? `<div class="rows" id="pzList">${rows}</div>` : `<p class="hint">Nessun paziente in archivio. Inizia con «Nuovo paziente».</p>`}
+    ${PZ.length ? `<div class="pcards" id="pzList">${cards}</div>` : `<div class="pempty">Nessun paziente in archivio.<br>Inizia con «Nuovo paziente».</div>`}
     ${pzStorageOk ? "" : `<div class="alert"><b>Archivio non disponibile</b>Il browser non permette di salvare i dati (navigazione privata o dati del sito bloccati): i pazienti inseriti andranno persi alla chiusura.</div>`}
-    <p class="lbl">Privacy e backup</p>
-    <p class="small">I dati restano <b>solo in questo browser, su questo dispositivo</b>: non vengono inviati a nessun server. Se il dispositivo è condiviso usa le iniziali o un codice al posto del nome. Cancellando i dati del browser si perde l'archivio: salva ogni tanto un backup, che serve anche a spostare l'archivio su un altro dispositivo.</p>
-    <div class="btns"><button type="button" class="btn sec" id="pzExport"${PZ.length ? "" : " disabled"}>Salva backup</button><label class="btn sec">Ripristina backup<input type="file" id="pzImport" accept="application/json,.json" hidden></label></div>` };
+    <p class="lbl">Consulta</p>
+    <div class="rows mrows">
+      <a class="rowlink" href="#guida"><span class="ibox s">${mic("book")}</span><span>Guida per il medico di medicina generale<small>Cos'è l'osteoporosi, perché si cura, i farmaci</small></span>${CHEV}</a>
+      <button type="button" class="rowlink" id="pzExport"${PZ.length ? "" : " disabled"}><span class="ibox s">${mic("down")}</span><span>Salva backup<small>Un file con tutto l'archivio</small></span>${CHEV}</button>
+      <label class="rowlink"><span class="ibox s">${mic("up")}</span><span>Ripristina backup<small>Anche per spostare l'archivio su un altro dispositivo</small></span>${CHEV}<input type="file" id="pzImport" accept="application/json,.json" hidden></label>
+    </div>
+    <p class="foot">${mic("lock", "fi")} I dati restano solo su questo dispositivo, nel browser, e non vengono inviati a nessun server. Se il dispositivo è condiviso usa le iniziali o un codice.<br>Ausilio alla decisione, non sostitutivo del giudizio del medico.</p></div>` };
 }
 
 /* ---------- il percorso: sette passi in ordine, ognuno con il suo stato ---------- */
@@ -796,7 +815,7 @@ function pzLive(p){ document.querySelectorAll("[data-live]").forEach(el => { con
 
 document.addEventListener("input", e => {
   const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
-  if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); document.querySelectorAll("#pzList .pzrow").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); }); }
+  if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); document.querySelectorAll("#pzList .pcard").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); }); }
 });
 document.addEventListener("change", e => {
   if(e.target.closest("[data-pf]")){ const { p } = pzRoute(); if(p) pzLive(p); return; }

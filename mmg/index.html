@@ -394,6 +394,41 @@ main{padding-bottom:40px}
 .dec[aria-pressed="true"]{border-color:var(--teal);background:var(--teal-box)}
 .dec[aria-pressed="true"] .cb{background:var(--teal);border-color:var(--teal)} .dec[aria-pressed="true"] .cb svg{display:block}
 .st-t.ok{color:var(--teal)}
+/* pagina iniziale: come la home di Osteo Help (riquadro pastello, righe Consulta con icona nel riquadrino), niente nero */
+:root{--pri:#4F4391}
+.btn{background:var(--pri)} .btn.sec{background:var(--box)}
+.oh{background:var(--home-p);color:#3B2F6B}
+.mmg{background:none;padding:0;font-size:inherit;letter-spacing:-.01em;font-weight:500;color:var(--muted)}
+.mhome{display:flex;flex-direction:column;gap:14px}
+.mhome h1{margin-top:18px}
+.mhome .rule{width:36px;height:3px;border-radius:2px;background:var(--pri)}
+.mhome .entry.big{min-height:84px;border-radius:22px;color:var(--ink);margin-top:4px;padding:14px 16px 14px 14px;gap:14px}
+.mhome .entry.big b{font-size:1.12rem} .mhome .entry.big small{color:var(--home-sub)}
+.mhome .entry.big .chev{width:28px;height:28px;padding:7px;margin:0 -7px 0 -6px;border-radius:50%;background:rgba(255,255,255,.65);color:var(--ink);stroke-width:2.2}
+.mhome .entry.big.violet{background:var(--home-p)}
+.mrows .rowlink > .ibox{flex:0 0 40px}
+.ibox{width:54px;height:54px;border-radius:14px;background:#fff;display:grid;place-items:center;flex:0 0 auto;color:#2B2550}
+.ibox .ic{width:28px;height:28px;color:inherit}
+.ibox.s{width:40px;height:40px;border-radius:12px;background:var(--box);color:var(--home-sub)} .ibox.s .mi{width:21px;height:21px}
+.mrows .rowlink{padding:9px 0;gap:14px;cursor:pointer} .mrows .rowlink:disabled{opacity:.45;cursor:default}
+.pcards{display:flex;flex-direction:column;gap:8px}
+.pcard{display:flex;align-items:center;gap:14px;padding:14px 14px 14px 14px;border-radius:16px;background:var(--box)}
+.pcard:active{transform:scale(.99)}
+.pav{width:44px;height:44px;border-radius:50%;background:var(--home-p);color:#3B2F6B;display:grid;place-items:center;font-weight:800;font-size:.95rem;flex:0 0 auto;letter-spacing:.02em}
+.pbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pbody b{font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbody small{font-size:.82rem;color:var(--muted)} .pbody .zn{font-weight:600;color:var(--muted);gap:5px} .pbody .zn i{width:9px;height:9px}
+.pprog{display:flex;gap:3px;margin-top:6px;max-width:180px}
+.pprog i{flex:1;height:5px;border-radius:3px;background:var(--line)} .pprog i.ok{background:var(--teal)} .pprog i.warn{background:var(--amber)}
+.pwhere{font-size:.78rem!important}
+.pempty{border:1.5px dashed var(--line);border-radius:16px;padding:22px 16px;text-align:center;color:var(--muted);font-size:.92rem;line-height:1.5}
+.foot .fi{width:14px;height:14px;vertical-align:-2px}
+.mhome .foot{margin-top:18px}
+.cont{background:var(--home-p);color:var(--ink)} .cont small,.cont span{opacity:1;color:#3B2F6B}
+.cont em{background:var(--pri);color:#fff}
+.path .st.miss{background:var(--home-p);color:#3B2F6B}
+.bar #act{color:var(--pri)}
+.stp-s.cur{outline-color:var(--pri)}
 /* zone del DeFRA (colori come nel calcolatore): il colore segna la zona, il testo resta in inchiostro */
 .z-verde{--zc:#3A9A3A;--zb:#E6F3E4} .z-gialla{--zc:#E3B21A;--zb:#FBF3D6} .z-arancione{--zc:#E8641E;--zb:#FCE9DC} .z-rossa{--zc:#B3261E;--zb:#F8E3E1}
 .zn{display:inline-flex;align-items:center;gap:7px;font-weight:700;color:var(--ink)} .zn i{width:13px;height:13px;border-radius:50%;background:var(--zc);flex:0 0 auto}
