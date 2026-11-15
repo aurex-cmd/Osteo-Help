@@ -485,6 +485,22 @@ main{padding-bottom:40px}
 .ftag b{display:block;font-size:.8rem;color:var(--ink)} .ftag small{display:block;font-size:.72rem;color:var(--muted)}
 .fhs.ok .ftag b{color:var(--teal)} .fhs.al .ftag b{color:var(--coral)}
 .fhs:hover .fdot,.fhs:focus-visible .fdot{transform:scale(1.08)}
+/* medaglioni sulla figura: DeFRA, colonna, femore */
+.fbads{position:absolute;left:50%;bottom:1.5%;transform:translateX(-50%);display:flex;gap:5px;z-index:3;width:max-content;max-width:98%}
+.fbd{display:flex;align-items:center;gap:5px;border:0;border-radius:999px;background:rgba(255,255,255,.96);padding:4px 9px 4px 4px;box-shadow:0 4px 14px rgba(30,20,70,.2);cursor:pointer;font:inherit;color:var(--ink);text-align:left}
+.fbd-c{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;white-space:nowrap;font-weight:800;font-size:.95rem;letter-spacing:-.02em;background:#ECE9F5;color:var(--muted);flex:0 0 auto}
+.fbd-c i{font-style:normal;font-size:.62rem;margin-left:1px}
+.fbd-t b{display:block;font-size:.72rem;line-height:1.15} .fbd-t small{display:block;font-size:.64rem;color:var(--muted);line-height:1.2;white-space:nowrap}
+.fbd.zf .fbd-c{background:var(--zc);color:#fff} .fbd.z-gialla .fbd-c{color:#3D2F00}
+.fbd.t-op .fbd-c{background:var(--coral);color:#fff} .fbd.t-on .fbd-c{background:#E3B21A;color:#3D2F00} .fbd.t-ok .fbd-c{background:var(--teal);color:#fff}
+.fbd.t-op small{color:var(--coral);font-weight:700}
+.fbd.miss{background:rgba(255,255,255,.85);border:1.5px dashed #CFC8E8} .fbd.miss .fbd-c{background:transparent;border:2px dashed #B9B0DA;width:36px;height:36px}
+.fbd:hover .fbd-c,.fbd:focus-visible .fbd-c{transform:scale(1.06)}
+@media (max-width:420px){.fbd{padding-right:7px;gap:4px}.fbd-c{width:36px;height:36px;font-size:.84rem}.fbd-t small{font-size:.6rem}}
+.fdel{margin:6px 0 0;text-align:right} .fdel .lnk{color:var(--coral);font-size:.8rem}
+.pitem{position:relative} .pitem.anon .pcard{padding-right:50px}
+.pdel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:0;background:var(--coral-box);color:var(--coral);font-weight:800;cursor:pointer}
+.pdel:hover{background:var(--coral);color:#fff}
 .fmos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(40px,auto);gap:5px}
 .fev-i{border-radius:10px;background:var(--box);padding:6px 10px;display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0}
 .fev-i small{font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
