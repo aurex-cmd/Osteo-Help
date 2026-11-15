@@ -58,7 +58,8 @@ function figChips(p, F, S){
   if(F.minT !== null) add(2, "p", "T-score minimo", fmtN(F.minT));
   if(ci.cv || F.feats.has("ictus_emiplegia")) add(1, "a", "", "No romosozumab");
   if(ci.tev) add(1, "a", "", "No raloxifene");
-  const nsec = S.N.note.length + S.N.sosp.length + S.A.forms.length; if(nsec) add(1, "a", "", plural(nsec, "forma secondaria", "forme secondarie"));
+  const nA = S.N.note.length + S.N.sosp.length, nE = S.A.forms.length;
+  if(nA || nE) add(1, "a", "", "Forme secondarie: " + [nA ? nA + " dall'anamnesi" : "", nE ? nE + " dagli esami" : ""].filter(Boolean).join(", "));
   if(vdLow(vd)) add(1, "a", "", "Vitamina D " + vdTxt(vd));
   if(F.gc) add(1, "a", "", "Glucocorticoidi");
   if(ci.denti) add(1, "a", "", "Denti da sistemare");
