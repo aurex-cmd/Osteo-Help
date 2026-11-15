@@ -237,7 +237,7 @@ const ZONE = {
   verde:{ t:"Verde", r:"basso rischio", cls:"ok", chi:"Medico di medicina generale",
     azione:"Nessun farmaco per l'osteoporosi. Vitamina D (Nota 96), calcio con la dieta, attività fisica e prevenzione delle cadute; nuova valutazione nel tempo." },
   gialla:{ t:"Gialla", r:"rischio moderato", cls:"warn", chi:"Medico di medicina generale",
-    azione:"Terapia di prima linea: bisfosfonati orali o denosumab, sempre con vitamina D. Nella donna in postmenopausa recente può valutarsi la terapia ormonale con il ginecologo." },
+    azione:"Terapia di prima linea: bisfosfonati orali o denosumab, sempre con vitamina D." },
   arancione:{ t:"Arancione", r:"alto rischio", cls:"d", chi:"Specialista dell'osso",
     azione:"Invio allo specialista per una terapia di II o III livello: anabolico (teriparatide, abaloparatide) o romosozumab, seguito da un antiriassorbitivo; sempre con vitamina D." },
   rossa:{ t:"Rossa", r:"altissimo rischio", cls:"d", chi:"Specialista dell'osso, con priorità",
