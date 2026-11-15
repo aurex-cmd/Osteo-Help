@@ -15,6 +15,9 @@ const VD_F = 2.496;
 let VD_U = "nmol"; try{ if(localStorage.getItem("oh-mmg-vitd-unit") === "ng") VD_U = "ng"; }catch(e){}   /* nmol/L come unità predefinita */
 const vdUnit = () => VD_U === "nmol" ? "nmol/L" : "ng/mL";
 const vdShow = ng => ng === null ? "" : VD_U === "nmol" ? String(Math.round(ng * VD_F)) : String(Math.round(ng * 10) / 10);
+/* soglie in nmol/L: bassa sotto 75 (obiettivo nel paziente con osteoporosi o a rischio, Nota 96), alta sopra 250 */
+const VD_BASSA = 75, VD_ALTA = 250, vdNmol = ng => Math.round(ng * VD_F);
+const vdLow = ng => ng !== null && vdNmol(ng) < VD_BASSA, vdHigh = ng => ng !== null && vdNmol(ng) > VD_ALTA;
 const vdTxt = ng => VD_U === "nmol" ? fmtN(ng * VD_F, 0) + " nmol/L" : fmtN(ng, 0) + " ng/mL";
 const todayISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 const pDate = s => { if(!s) return null; const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(s); return m ? new Date(+m[1], +m[2] - 1, +(m[3] || 1)) : null; };
@@ -229,7 +232,7 @@ function drugFlags(p, F, S){
   if(lab.Ca === "alto") add(ANABOL, "ci", "ipercalcemia");
   if(lab.PTH === "alto" && lab.Ca === "alto") add(ANABOL, "ci", "sospetto iperparatiroidismo");
   if(lab.ALP === "alto") add(ANABOL, "warn", "fosfatasi alcalina elevata da spiegare (Paget?)");
-  if((vd !== null && vd < 20) || lab.D === "basso") add([...ANTIRIASS, ...ANABOL], "warn", "correggere prima la carenza di vitamina D" + (vd !== null ? ` (${vdTxt(vd)})` : ""));
+  if(vdLow(vd) || lab.D === "basso") add([...ANTIRIASS, ...ANABOL], "warn", "correggere prima la carenza di vitamina D" + (vd !== null ? ` (${vdTxt(vd)})` : ""));
   if(ci.esofago) add(ORALI, "ci", "disturbi esofagei o impossibilità a restare in piedi/seduti");
   if(ci.tev) add([RX_, BZ_], "ci", "tromboembolismo venoso pregresso");
   if(ci.cv || F.feats.has("ictus_emiplegia")){ add([RO_], "ci", "pregresso infarto o ictus / rischio cardiovascolare"); add([RX_, BZ_], "warn", "rischio di ictus"); }
@@ -322,7 +325,7 @@ const todoItem = (x, who) => `<a class="todo-i u${x.u}" href="${x.href}"><i></i>
 const albGdl = p => { const v = num(p.albVal); return v === null ? null : v > 15 ? v / 10 : v; };   /* accetta anche g/L */
 const caCorr = p => { const c = num(p.caTot), a = albGdl(p); return c === null || a === null ? null : c + 0.8 * (4 - a); };
 const AUTO = {
-  D:    p => { const v = num(p.vitd); return v === null ? null : { st: v < 20 ? "basso" : v > 150 ? "alto" : "norm", val: vdTxt(v) }; },
+  D:    p => { const v = num(p.vitd); return v === null ? null : { st: vdLow(v) ? "basso" : vdHigh(v) ? "alto" : "norm", val: vdTxt(v) }; },
   eGFR: p => { const v = num(p.egfr); return v === null ? null : { st: v < 60 ? "basso" : "norm", val: fmtN(v, 0) + " mL/min" }; },
   Ca:   p => { const c = caCorr(p); return c === null ? null : { st: c < 8.5 ? "basso" : c > 10.5 ? "alto" : "norm", val: fmtN(c) + " mg/dL" }; },
   Alb:  p => { const a = albGdl(p); return a === null ? null : { st: a < 3.5 ? "basso" : a > 5.2 ? "alto" : "norm", val: fmtN(a) + " g/dL" }; }
@@ -654,7 +657,7 @@ function labReport(p, S){
   if(S.hpp) out.push(`<div class="alert"><b>Fosfatasi alcalina bassa: pensa all'ipofosfatasia</b>Prima di un antiriassorbitivo dosa la vitamina B6 (piridossal-5-fosfato) e, se serve, la fosfoetanolammina urinaria. I bisfosfonati sono controindicati. <a target="_blank" rel="noopener" href="${OH}#causa-gen_ipofosfatasia">Scheda</a></div>`);
   if(lab.Ca === "basso") out.push(`<div class="alert"><b>Ipocalcemia</b>Va corretta (e spiegata) prima di qualsiasi antiriassorbitivo, in particolare denosumab e zoledronato.</div>`);
   const vd = num(p.vitd);
-  if((vd !== null && vd < 20) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa${vd !== null ? " · " + vdTxt(vd) : ""}</b>Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
+  if(vdLow(vd) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa${vd !== null ? " · " + vdTxt(vd) : ""}</b>Sotto 75 nmol/L (30 ng/mL), il valore da raggiungere nel paziente con osteoporosi o a rischio di ipovitaminosi D (Nota 96). Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
   if(A.kind === "none") out.push(`<p class="hint">${labStatus(p).done ? "Tutti gli esami registrati sono nella norma." : "Segna ▲ o ▼ gli esami fuori norma e N quelli nella norma."}</p>`);
   else {
     const tags = `<div class="tags">${A.sel.map(s => `<span class="tag ${s[1]}">${ftag(s)}</span>`).join("")}</div>`;
