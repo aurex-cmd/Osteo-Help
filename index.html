@@ -246,7 +246,8 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
   /* catalogo ed esame per esame: titolo e ricerca restano fermi in alto, scorre solo l'elenco */
   body.split .pane-l .cat-top{position:sticky;top:-4px;z-index:2;background:var(--bg);margin-top:-4px;padding:4px 0 12px;box-shadow:-12px 0 0 var(--bg),12px 0 0 var(--bg),0 1px 0 var(--line)}
   /* home: come col telefono in orizzontale, titolo e riquadri a sinistra, Consulta a destra */
-  body.is-home main{max-width:1040px;padding-left:24px;padding-right:24px}
+  /* il contenuto della home al centro dell'altezza (un po' più su, per l'occhio): meno bianco in fondo */
+  body.is-home main{max-width:1040px;padding-left:24px;padding-right:24px;min-height:calc(100vh - 60px - env(safe-area-inset-top));display:grid;align-content:center;padding-top:0;padding-bottom:8vh}
   body.is-home .bar-in{max-width:992px}
   body.is-home main > .screen{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;align-items:start;padding-top:12px}
   body.is-home .home-r > .lbl:first-child{margin-top:22px}
