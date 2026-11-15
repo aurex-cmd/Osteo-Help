@@ -1,5 +1,5 @@
 /* File generato da mmg/tools/aggiorna-dati.py: NON modificare a mano.
-   Dati clinici e motori copiati senza modifiche da Osteo Help (index.html, sha256 562b18a7f1ad). */
+   Dati clinici e motori copiati senza modifiche da Osteo Help (index.html, sha256 7f2b1eebed70). */
 /* ============================================================
    DATI CLINICI — copiati senza modifiche dall'Osteo Help originale
    ============================================================ */
@@ -43,7 +43,7 @@ const LAB2 = {
   colestasi:["GGT","Fosfatasi alcalina frazionata (ossea o epatica)","Bilirubina","Anticorpi antimitocondrio (AMA)","Ecografia epatica"],
   epatopatia:["Transaminasi","GGT","Bilirubina","Ecografia epatica"],
   nefrosica:["Proteinuria 24h","Albuminemia","Esame urine"],
-  ipofosfatasia:["PLP (vit B6) sierico","Fosfoetanolammina urinaria","Test genetico ALPL"],
+  ipofosfatasia:["Vitamina B6 plasmatica (piridossal-5-fosfato), dopo 1 settimana senza integratori di piridossina","Fosfoetanolammina urinaria","Test genetico ALPL (conferma, non indispensabile)"],
   ipotiroid:["TSH","FT4","Anti-TPO"],
   malnutriz:["Albumina e prealbumina","Magnesemia","Zinco sierico","25-OH-vitamina D","Se la fosfatasi alcalina resta bassa senza malnutrizione: vitamina B6 (ipofosfatasia)"],
   ipercalciuriaId:["Calciuria 24h","PTH","Ca/creatinina urinario","Sodiuria 24h"],
@@ -184,7 +184,7 @@ const NOTES = {
   colestasi:"Nelle epatopatie colestatiche (es. colangite biliare primitiva) il malassorbimento della vitamina D e l'effetto tossico di bilirubina e acidi biliari sull'osso causano l'osteodistrofia epatica. GGT e fosfatasi alcalina frazionata indicano se la fosfatasi alta viene dal fegato o dall'osso; gli AMA orientano verso la colangite biliare primitiva.",
   epatopatia:"Nell'epatopatia cronica concorrono malnutrizione, ipogonadismo, calo di IGF-1, infiammazione e, nelle forme avanzate, una ridotta attivazione della vitamina D: la perdita ossea è frequente, soprattutto nella cirrosi. Transaminasi, GGT ed ecografia servono per l'inquadramento.",
   nefrosica:"Con la proteinuria nefrosica si perde nelle urine la proteina che trasporta la vitamina D: ne derivano carenza di vitamina D e bilancio del calcio negativo, a cui spesso si aggiungono i glucocorticoidi usati per la terapia. Spie: proteinuria 24h e albumina bassa.",
-  ipofosfatasia:"Deficit genetico di fosfatasi alcalina (gene ALPL): si accumula il pirofosfato, che blocca la mineralizzazione, con fratture e pseudofratture, perdita precoce dei denti, condrocalcinosi. La spia è la fosfatasi alcalina sempre bassa, dopo aver escluso le cause comuni (terapia antiriassorbitiva, ipotiroidismo, carenza di zinco o magnesio, malnutrizione). I bisfosfonati, analoghi del pirofosfato, peggiorano il difetto e sono controindicati. Conferma con vitamina B6 elevata (a integratori sospesi) e test genetico.",
+  ipofosfatasia:"Deficit genetico di fosfatasi alcalina (gene ALPL): si accumula il pirofosfato, che blocca la mineralizzazione, con fratture e pseudofratture, perdita precoce dei denti, condrocalcinosi. La spia è la fosfatasi alcalina sempre bassa, dopo aver escluso le cause comuni (terapia antiriassorbitiva, ipotiroidismo, carenza di zinco o magnesio, malnutrizione). I bisfosfonati, analoghi del pirofosfato, peggiorano il difetto e sono controindicati. Con la fosfatasi alcalina persistentemente bassa, la diagnosi nell'adulto richiede 2 criteri maggiori (variante ALPL, vitamina B6 o fosfoetanolammina elevate, fratture femorali atipiche, fratture metatarsali ricorrenti) oppure 1 maggiore e 2 minori (fratture che guariscono male, dolore cronico, perdita precoce dei denti, condrocalcinosi, nefrocalcinosi): criteri 2024, dettagliati nella scheda del catalogo.",
   ipotiroid:"L'ipotiroidismo rallenta il turnover osseo e di per sé pesa poco sull'osteoporosi; il rischio viene soprattutto da una terapia sostitutiva sovradosata (TSH basso). Può abbassare la fosfatasi alcalina.",
   malnutriz:"La carenza di proteine e calorie riduce la formazione di osso; quelle di magnesio e zinco ne ostacolano anche la mineralizzazione. La fosfatasi alcalina è bassa perché è un enzima che contiene zinco e ha bisogno del magnesio. Albumina e prealbumina basse. Se la fosfatasi resta bassa a carenze corrette, va considerata l'ipofosfatasia.",
   ipercalciuriaId:"Il rene perde troppo calcio con calcemia normale: il bilancio del calcio diventa negativo, con calcoli e BMD ridotta. Calciuria 24h alta con PTH di solito normale; un PTH alto con calcemia normale fa pensare piuttosto a una carenza di vitamina D o a un iperparatiroidismo normocalcemico. La dieta ricca di sale aumenta la calciuria. Risponde ai tiazidici.",
@@ -350,7 +350,8 @@ const AXES = [
       ["lombalgia_infiammatoria","Lombalgia infiammatoria (esordio <45 anni, notturna, rigidità mattutina, migliora col movimento)"],
       ["artropatia_mcf","Artropatia delle metacarpo-falangee (2ª–3ª)"],
       ["artralgie_migranti","Artralgie o artrite migrante da anni, sieronegativa"],
-      ["ipermobilita","Ipermobilità articolare marcata"]
+      ["ipermobilita","Ipermobilità articolare marcata"],
+      ["condrocalcinosi","Condrocalcinosi"]
     ]},
     { sub:"Gastrointestinale", feats:[
       ["s_diarrea","Diarrea cronica"],
@@ -372,7 +373,9 @@ const AXES = [
       ["frattura_inspiegata","Osteoporosi o fratture inspiegate in età giovane"],
       ["vertebrali_giovane","Fratture vertebrali in soggetto giovane"],
       ["fratture_infanzia","Fratture multiple fin dall'infanzia"],
-      ["familiarita_fratture","Familiarità per fratture"]
+      ["familiarita_fratture","Familiarità per fratture"],
+      ["fratture_metatarsali","Fratture metatarsali ricorrenti (da stress)"],
+      ["frattura_femorale_atipica","Frattura femorale atipica o pseudofratture"]
     ]},
     { sub:"Storia riproduttiva", feats:[
       ["menopausa_precoce","Menopausa prima dei 45 anni","donna"],
@@ -685,9 +688,14 @@ const FORME = [
     osso:["DXA (Z-score) se l'amenorrea dura da almeno 6 mesi, o prima se ci sono fratture da stress","25-OH-vitamina D"],
     nota:"Nella giovane donna con bassa disponibilità energetica (restrizione alimentare, attività fisica intensa o stress) l'ipotalamo spegne l'asse gonadico: estrogeni bassi e perdita ossea (triade dell'atleta, oggi REDs). Ha gli stessi effetti sull'osso dell'anoressia, ma passa più spesso inosservata: va sospettata davanti a osteoporosi o fratture da stress con amenorrea. La terapia è ripristinare il bilancio energetico; la pillola estroprogestinica non protegge l'osso e provoca sanguinamenti che simulano il ciclo." },
   { kind:"sospetto", id:"gen_ipofosfatasia", nome:"Ipofosfatasia dell'adulto (HPP)", cat:"Genetica",
-    trigger:[["perdita_denti_precoce","forte"],["frattura_inspiegata","lieve"]],
-    conferma:["Fosfatasi alcalina bassa e confermata più volte, escluse le altre cause (terapia antiriassorbitiva, ipotiroidismo, carenza di zinco o magnesio, celiachia, malnutrizione)","Vitamina B6 (piridossal-5-fosfato) elevata, dopo aver sospeso gli integratori di B6","Fosfoetanolammina urinaria a supporto","Gene ALPL"],
-    nota:"È una causa di fratture nel giovane adulto che spesso non viene riconosciuta. Si presenta con fratture e pseudofratture ricorrenti (metatarsi, femore), perdita precoce dei denti con la radice intatta, condrocalcinosi e dolori muscolari. Il segnale è la fosfatasi alcalina sempre bassa, che spesso passa inosservata perché i referti mettono in evidenza solo i valori alti. Senza fosfatasi alcalina si accumula il pirofosfato, che impedisce la mineralizzazione dell'osso. I bisfosfonati sono analoghi strutturali del pirofosfato e possono ridurre ancora l'attività della fosfatasi alcalina: aggravano il difetto di mineralizzazione e sono controindicati, e con il loro uso sono state descritte anche fratture atipiche. Di solito si evita anche il denosumab. Esiste una terapia enzimatica sostitutiva (asfotase alfa), approvata per le forme a esordio pediatrico." },
+    trigger:[["perdita_denti_precoce","forte"],["fratture_metatarsali","forte"],["frattura_femorale_atipica","forte"],["condrocalcinosi","lieve"],["nefrolitiasi_ricorrente","lieve"],["frattura_inspiegata","lieve"]],
+    conferma:["Fosfatasi alcalina persistentemente bassa per età e sesso, ripetuta, senza altre cause (vedi criteri sotto)","Vitamina B6 plasmatica (piridossal-5-fosfato) elevata, dopo aver sospeso da 1 settimana gli integratori di piridossina (anche nei multivitaminici)","Fosfoetanolammina urinaria a supporto","Gene ALPL: conferma la diagnosi, ma non è indispensabile (una variante patogena non si trova in tutti i pazienti)"],
+    criteri:{ anno:"2024",
+      pre:"Si applicano solo con <b>fosfatasi alcalina persistentemente bassa</b> per età e sesso, dopo aver escluso le altre cause: farmaci antiriassorbitivi, chemioterapia, eccesso di vitamina D; ipoparatiroidismo, ipotiroidismo, ipercortisolismo, osteodistrofia renale e osso adinamico; anemia perniciosa, mieloma, malattie mieloproliferative, trasfusioni massive; carenze di magnesio, zinco, rame, vitamina C, B6, B12, folati, proteine e calorie, celiachia; malattia grave, chirurgia o trauma maggiore, malattia di Wilson. Attenzione anche agli errori di prelievo: EDTA, citrato o ossalato nella provetta ed emolisi abbassano la fosfatasi alcalina.",
+      maggiori:["Variante patogena o probabilmente patogena del gene ALPL","Aumento dei substrati naturali dell'enzima (vitamina B6 plasmatica dopo 1 settimana senza integratori; fosfoetanolammina urinaria)","Fratture femorali atipiche (pseudofratture)","Fratture metatarsali ricorrenti"],
+      minori:["Fratture che guariscono male","Dolore muscolo-scheletrico cronico","Perdita precoce e atraumatica dei denti","Condrocalcinosi","Nefrocalcinosi"],
+      regola:"<b>Diagnosi nell'adulto: 2 criteri maggiori, oppure 1 maggiore e 2 minori.</b> Nel bambino i criteri maggiori sono variante ALPL, substrati elevati, perdita precoce non traumatica dei denti decidui e rachitismo alle radiografie; i minori bassa statura o crescita insufficiente, ritardo delle tappe motorie, craniosinostosi, nefrocalcinosi, convulsioni che rispondono alla vitamina B6." },
+    nota:"È una causa di fratture nel giovane adulto che spesso non viene riconosciuta. Si presenta con fratture e pseudofratture ricorrenti (metatarsi, femore), perdita precoce dei denti con la radice intatta, condrocalcinosi e dolori muscolari. Il segnale è la fosfatasi alcalina sempre bassa, che spesso passa inosservata perché i referti mettono in evidenza solo i valori alti. Senza fosfatasi alcalina si accumula il pirofosfato, che impedisce la mineralizzazione dell'osso. I bisfosfonati sono analoghi strutturali del pirofosfato e possono ridurre ancora l'attività della fosfatasi alcalina: aggravano il difetto di mineralizzazione e sono controindicati, e con il loro uso sono state descritte anche fratture atipiche. Di solito si evita anche il denosumab. Esiste una terapia enzimatica sostitutiva (asfotase alfa), approvata per le forme a esordio pediatrico. I criteri diagnostici per adulti e bambini sono quelli proposti nel 2024 da un gruppo di lavoro internazionale." },
 
   { id:"neuro_ictus", nome:"Ictus / emiplegia", cat:"Neurologica",
     trigger:[["ictus_emiplegia","forte"]],
