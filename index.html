@@ -772,7 +772,8 @@ const AXES = [
       ["orticaria_pigmentosa","Orticaria pigmentosa"],
       ["prurito","Prurito"],
       ["strie_rubre","Strie rubre"],
-      ["g_cute_fragile","Fragilità cutanea o ecchimosi facili"],
+      ["fragilita_cutanea","Fragilità cutanea"],
+      ["ecchimosi","Ecchimosi facili"],
       ["anafilassi","Anafilassi ricorrente / idiopatica"],
       ["anafilassi_imenotteri","Anafilassi da puntura di imenotteri"],
       ["dermatite_erpetiforme","Dermatite erpetiforme"],
@@ -792,7 +793,8 @@ const AXES = [
       ["lussazione_cristallino","Lussazione del cristallino (ectopia lentis)"]
     ]},
     { sub:"Muscolo-scheletrico e connettivo", feats:[
-      ["g_muscolo","Debolezza muscolare prossimale o perdita di massa muscolare"],
+      ["miopatia","Miopatia prossimale"],
+      ["sarcopenia","Sarcopenia / perdita di massa muscolare"],
       ["sclere_blu","Sclere blu"],
       ["dentinogenesi","Dentinogenesi imperfetta"],
       ["perdita_denti_precoce","Perdita precoce dei denti (radice integra)"],
@@ -803,7 +805,10 @@ const AXES = [
       ["ipermobilita","Ipermobilità articolare marcata"]
     ]},
     { sub:"Gastrointestinale", feats:[
-      ["g_gi","Disturbi intestinali cronici (diarrea, steatorrea, meteorismo, dolore addominale)"]
+      ["s_diarrea","Diarrea cronica"],
+      ["s_steatorrea","Steatorrea"],
+      ["s_meteorismo","Meteorismo"],
+      ["s_dolore_addominale","Dolore addominale ricorrente"]
     ]},
     { sub:"Generali e habitus", feats:[
       ["astenia","Astenia"],
@@ -816,7 +821,8 @@ const AXES = [
   ]},
   { label:"Anamnesi e pattern fratturativo", groups:[
     { sub:"Pattern fratturativo", feats:[
-      ["g_fratture_giovane","Osteoporosi o fratture inspiegate in età giovane, anche vertebrali"],
+      ["frattura_inspiegata","Osteoporosi o fratture inspiegate in età giovane"],
+      ["vertebrali_giovane","Fratture vertebrali in soggetto giovane"],
       ["fratture_infanzia","Fratture multiple fin dall'infanzia"],
       ["familiarita_fratture","Familiarità per fratture"]
     ]},
@@ -845,25 +851,20 @@ const AXES = [
   ]}
 ];
 
-/* Voci generiche della pagina di scelta: ognuna accende le voci più specifiche usate nelle schede.
-   Le voci specifiche restano nelle schede ("Quando considerarla") con le loro etichette. */
-const GENERICHE = {
-  g_cute_fragile:["fragilita_cutanea","ecchimosi"],
-  g_muscolo:["miopatia","sarcopenia"],
-  g_gi:["sintomi_gi","diarrea_steatorrea","meteorismo"],
-  g_fratture_giovane:["frattura_inspiegata","vertebrali_giovane"]
+/* Un sintomo per voce nella pagina di scelta: ogni sintomo accende le frasi delle schede che lo contengono,
+   così chi ha solo la steatorrea la spunta e ritrova la celiachia. Le frasi delle schede restano come sono. */
+const ACCENDE = {
+  s_diarrea:["sintomi_gi","diarrea_steatorrea"],
+  s_steatorrea:["diarrea_steatorrea"],
+  s_meteorismo:["meteorismo"],
+  s_dolore_addominale:["sintomi_gi","meteorismo"],
+  vertebrali_giovane:["frattura_inspiegata"]
 };
+/* frasi usate solo nelle schede */
 const SPECIFICHE = { "Sintomi e segni":[
-    ["fragilita_cutanea","Fragilità cutanea"],
-    ["ecchimosi","Ecchimosi facili"],
-    ["miopatia","Miopatia prossimale"],
-    ["sarcopenia","Sarcopenia / perdita di massa muscolare"],
     ["sintomi_gi","Sintomi GI ricorrenti (dolore addominale, diarrea)"],
     ["diarrea_steatorrea","Diarrea cronica / steatorrea"],
     ["meteorismo","Meteorismo / dolore addominale ricorrente"]
-  ], "Anamnesi e pattern fratturativo":[
-    ["frattura_inspiegata","Osteoporosi o fratture inspiegate in età giovane"],
-    ["vertebrali_giovane","Fratture vertebrali in soggetto giovane"]
   ] };
 
 const FORME = [
@@ -1213,13 +1214,13 @@ function axisFeats(a){ return a.groups ? a.groups.flatMap(g=>g.feats) : a.feats;
 const FEATLABEL = {}, FEATSEX = {};
 AXES.forEach(a => axisFeats(a).forEach(f => { FEATLABEL[f[0]] = f[1]; if(f[2]) FEATSEX[f[0]] = f[2]; }));
 Object.values(SPECIFICHE).forEach(l => l.forEach(f => { FEATLABEL[f[0]] = f[1]; }));
-const GENOF = {}; Object.entries(GENERICHE).forEach(([g, l]) => l.forEach(id => { GENOF[id] = g; }));
+
 const FORMA = {}; FORME.forEach(f => { FORMA[f.id] = f; });
 const W = { forte:2, lieve:1 };
 let sex = null;
 const selected = new Set();
 /* voci spuntate più le voci specifiche accese da quelle generiche */
-function active(){ const a = new Set(selected); selected.forEach(id => (GENERICHE[id]||[]).forEach(x => a.add(x))); return a; }
+function active(){ const a = new Set(selected); selected.forEach(id => (ACCENDE[id]||[]).forEach(x => a.add(x))); return a; }
 function visibleForms(){ return FORME.filter(f => !f.sesso || !sex || f.sesso === sex); }
 function featVisible(id){ return !FEATSEX[id] || !sex || FEATSEX[id] === sex; }
 function computeN(){
@@ -1227,9 +1228,12 @@ function computeN(){
   const matched = visibleForms().map(f => {
     const fired = f.trigger.filter(t => act.has(t[0]));
     const primary = fired.filter(t => t[2] !== "supp");
-    /* più voci specifiche accese dalla stessa voce generica contano una volta sola (la più forte) */
-    const best = {}; fired.forEach(t => { const k = GENOF[t[0]] || t[0]; best[k] = Math.max(best[k]||0, W[t[1]]); });
-    const score = Object.values(best).reduce((s,w) => s + w, 0);
+    /* ogni voce spuntata conta una volta sola per scheda, anche se accende più frasi (prima le più forti) */
+    const used = new Set(); let score = 0;
+    [...fired].sort((a,b) => W[b[1]] - W[a[1]]).forEach(t => {
+      const s = [...selected].find(x => !used.has(x) && (x === t[0] || (ACCENDE[x]||[]).includes(t[0])));
+      if(s){ used.add(s); score += W[t[1]]; }
+    });
     const hasForte = primary.some(t => t[1] === "forte");
     return { f, fired, primary, score, hasForte };
   }).filter(x => x.primary.length > 0 && !(x.f.suppressedBy && x.f.suppressedBy.some(id => act.has(id))));
