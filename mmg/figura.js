@@ -113,9 +113,9 @@ function figNext(p, F, S, spots){
   if(dec){
     /* decisione presa: in primo piano il farmaco, poi due date grandi: prossima dose e prossima densitometria */
     const th = F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco];
-    const drug = th ? `<div class="fdrugbig"><span class="fpill">${{ iniezione:"💉", infusione:"💧", compressa:"💊" }[sommOf(th.farmaco)]}</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>`
+    const drug = th ? `<div class="fdrugbig"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>`
       : p.decisione.tipo === "spec" ? `<div class="fdrugbig spec"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>in attesa della terapia indicata dallo specialista</small></span></div>`
-      : `<div class="fdrugbig none"><span class="fpill">🥛</span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
+      : `<div class="fdrugbig none"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
     const quando = dt => { const g = daysTo(dt); return g < 0 ? `in ritardo di ${-g} giorni` : g === 0 ? "oggi" : g < 45 ? `tra ${g} giorni` : `tra ${Math.round(g / 30.4)} mesi`; };
     const cal = (cls, lbl, top, big, bot, rel, note) => `<div class="fcal ${cls}"><small>${lbl}</small><div class="fcal-d"><span>${top}</span><b>${big}</b><span>${bot}</span></div><em>${rel}</em>${note ? `<i>${note}</i>` : ""}</div>`;
@@ -191,7 +191,7 @@ function vDecidi(p){
   if(!pr) return { redirect: "paz-" + p.id + "-figura" };
   const n79of = id => n79.filter(c => c.s.some(l => l.includes(id)));
   const drug = (id, best) => { const f = fl[id] || { ci:[], warn:[] }, c = n79of(id), ci = f.ci.length;
-    return `<div class="fdrug${best ? " best" : ""}${ci ? " no" : ""}">${best ? `<span class="frk">Consigliato</span>` : ""}<b>${dnome(id)}</b><small>${DRUGS[id].via}</small>
+    return `<div class="fdrug${best ? " best" : ""}${ci ? " no" : ""}">${best ? `<span class="frk">Consigliato</span>` : ""}<b class="fdn">${drugIcon(id)}${dnome(id)}</b><small>${DRUGS[id].via}</small>
       ${f.ci.map(x => `<div class="fwarn">Controindicato: ${x}</div>`).join("")}${f.warn.map(x => `<div class="fwarn a">Cautela: ${x}</div>`).join("")}
       ${!ci ? `<div class="fn79">${c.length ? "Nota 79: " + c.map(x => x.cond).join(" / ") + (c.some(x => x.spec) && [T_, AB_, RO_].includes(id) ? " (piano terapeutico specialistico)" : "") : "Con i dati inseriti è fuori dalle condizioni della Nota 79."}</div>` : ""}</div>`; };
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
