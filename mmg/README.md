@@ -6,6 +6,11 @@ Software per il medico di medicina generale: gestione del paziente con osteoporo
 
 ## Come si usa
 
+Per ogni paziente un **percorso guidato in 7 passi**: in cima a ogni pagina una barra mostra a che passo si è («Passo 3 di 7») e quale viene dopo; in fondo «Indietro» e «Avanti». La scheda del paziente mostra il percorso con lo stato di ogni passo (fatto, attenzione, da fare) e un pulsante «Continua» che porta al prossimo passo da fare. L'elenco dei pazienti dice per ognuno a che passo è rimasto.
+
+1. Dati e fratture · 2. Anamnesi e farmaci · 3. Esami del sangue · 4. Densitometria · 5. DeFRA · 6. Terapia (con la decisione del medico: terapia avviata, invio allo specialista, nessun farmaco, decisione rimandata) · 7. Follow-up.
+
+
 - **I miei pazienti** (pagina iniziale): elenco, nuovo paziente, backup e ripristino.
 - **Scheda del paziente**: zona del DeFRA e T-score minimo, avvisi, sei sezioni con lo stato (ok, manca, attenzione).
   1. **Dati e fratture**: anagrafica, BMI, menopausa, familiarità per fratture di femore o vertebre, fratture da fragilità (sede, data, gravità vertebrale secondo Genant, frattura nonostante almeno un anno di terapia).
