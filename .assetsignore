@@ -7,3 +7,6 @@ wrangler.jsonc
 .nojekyll
 # progetto sorgente del video (il video pubblicato è in media/)
 video
+# strumenti dell'app MMG (non da pubblicare)
+mmg/tools
+mmg/README.md
