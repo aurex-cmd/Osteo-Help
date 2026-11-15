@@ -176,6 +176,7 @@ details.acc > summary::-webkit-details-marker{display:none}
 details.acc > summary > span:first-child{flex:1;min-width:0}
 details.acc > summary small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
 details.acc[open] > summary .chev{transform:rotate(90deg)}
+details.acc.approf{margin-top:8px;border:0;border-radius:10px;background:var(--blue-box);padding:0 14px} details.acc.approf > summary{padding:13px 0;color:var(--blue)} details.acc.approf > summary small{color:var(--muted)} details.acc.approf[open] > summary{border-bottom:1px solid var(--line)} details.acc.approf .accbody{padding:10px 0 14px}
 .accbody{padding:0 2px 14px;display:flex;flex-direction:column;gap:6px}
 .n{font-size:.75rem;font-weight:700;color:var(--teal);background:var(--teal-box);padding:2px 8px;border-radius:20px}
 .ck{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;border:0;background:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:.93rem;line-height:1.4}
@@ -1186,7 +1187,7 @@ const FORME = [
     nota:"Nella giovane donna con bassa disponibilità energetica (restrizione alimentare, attività fisica intensa o stress) l'ipotalamo spegne l'asse gonadico: estrogeni bassi e perdita ossea (triade dell'atleta, oggi REDs). Ha gli stessi effetti sull'osso dell'anoressia, ma passa più spesso inosservata: va sospettata davanti a osteoporosi o fratture da stress con amenorrea. La terapia è ripristinare il bilancio energetico; la pillola estroprogestinica non protegge l'osso e provoca sanguinamenti che simulano il ciclo." },
   { kind:"sospetto", id:"gen_ipofosfatasia", nome:"Ipofosfatasia dell'adulto (HPP)", cat:"Genetica",
     trigger:[["perdita_denti_precoce","forte"],["fratture_metatarsali","forte"],["frattura_femorale_atipica","forte"],["condrocalcinosi","lieve"],["nefrolitiasi_ricorrente","lieve"],["frattura_inspiegata","lieve"]],
-    conferma:["Fosfatasi alcalina persistentemente bassa per età e sesso, ripetuta, senza altre cause (vedi criteri sotto)","Vitamina B6 plasmatica (piridossal-5-fosfato) elevata, dopo aver sospeso da 1 settimana gli integratori di piridossina (anche nei multivitaminici)","Fosfoetanolammina urinaria a supporto","Gene ALPL: conferma la diagnosi, ma non è indispensabile (una variante patogena non si trova in tutti i pazienti)"],
+    conferma:["Fosfatasi alcalina persistentemente bassa per età e sesso, ripetuta, senza altre cause (vedi l'approfondimento)","Vitamina B6 plasmatica (piridossal-5-fosfato) elevata, dopo aver sospeso da 1 settimana gli integratori di piridossina (anche nei multivitaminici)","Fosfoetanolammina urinaria a supporto","Gene ALPL: conferma la diagnosi, ma non è indispensabile (una variante patogena non si trova in tutti i pazienti)"],
     criteri:{ anno:"2024",
       pre:"Si applicano solo con <b>fosfatasi alcalina persistentemente bassa</b> per età e sesso, dopo aver escluso le altre cause: farmaci antiriassorbitivi, chemioterapia, eccesso di vitamina D; ipoparatiroidismo, ipotiroidismo, ipercortisolismo, osteodistrofia renale e osso adinamico; anemia perniciosa, mieloma, malattie mieloproliferative, trasfusioni massive; carenze di magnesio, zinco, rame, vitamina C, B6, B12, folati, proteine e calorie, celiachia; malattia grave, chirurgia o trauma maggiore, malattia di Wilson. Attenzione anche agli errori di prelievo: EDTA, citrato o ossalato nella provetta ed emolisi abbassano la fosfatasi alcalina.",
       maggiori:["Variante patogena o probabilmente patogena del gene ALPL","Aumento dei substrati naturali dell'enzima (vitamina B6 plasmatica dopo 1 settimana senza integratori; fosfoetanolammina urinaria)","Fratture femorali atipiche (pseudofratture)","Fratture metatarsali ricorrenti"],
@@ -1538,10 +1539,11 @@ function causaBody(id){
     <p class="small"><b>Forte</b>: da solo è sufficiente per sospettare questa forma.<br><b>Lieve</b>: da solo non basta, ma aumenta il sospetto se presente insieme ad altri elementi.</p>
     ${B_TAGS[id] ? `<p class="lbl">Agli esami di I livello</p><div class="tags">${B_TAGS[id].map(t => `<span class="tag ${TAGDIR[t]==="up"?"u":"d"}">${t}</span>`).join("")}</div>` : ""}
     ${confHTML(f.conferma)}
-    ${f.criteri ? `<p class="lbl">Criteri diagnostici (${f.criteri.anno})</p><p class="note">${f.criteri.pre}</p>
+    ${f.criteri ? `<details class="acc approf"><summary><span>Approfondimento: criteri diagnostici (${f.criteri.anno})<small>Presupposto, criteri maggiori e minori, regola per la diagnosi</small></span>${CHEV}</summary><div class="accbody">
+      <p class="note">${f.criteri.pre}</p>
       <p class="lbl" style="margin-top:6px">Criteri maggiori</p><ul class="list">${f.criteri.maggiori.map((c,i) => `<li><i>${i+1}</i>${c}</li>`).join("")}</ul>
       <p class="lbl" style="margin-top:6px">Criteri minori</p><ul class="list">${f.criteri.minori.map((c,i) => `<li><i>${i+1}</i>${c}</li>`).join("")}</ul>
-      <p class="note">${f.criteri.regola}</p>` : ""}
+      <p class="note">${f.criteri.regola}</p></div></details>` : ""}
     ${f.osso ? `<p class="lbl">Esami per valutare l'osso</p>${f.osso.length === 1 ? `<p class="note">${f.osso[0]}</p>` : `<ul class="list">${f.osso.map((c,i) => `<li><i>${i+1}</i>${c}</li>`).join("")}</ul>`}` : ""}
     ${f.nota ? `<p class="lbl">Nota</p><p class="note">${f.nota}</p>` : ""}
     ${f.calc === "vermeulen" ? vermeulenWidget() : ""}`;
