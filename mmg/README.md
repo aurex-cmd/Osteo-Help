@@ -27,7 +27,7 @@ Per ogni paziente un **percorso guidato in 7 passi**: in cima a ogni pagina una 
 
 ## Vista a figura
 
-La scheda del paziente si apre come **figura** (la si può cambiare con «Percorso a passi»; l'app ricorda la scelta). La figura dipende da sesso, età e fratture recenti: donna o uomo giovane (sotto i 60 anni), donna o uomo anziano, donna con il polso ingessato (frattura di polso negli ultimi 24 mesi), uomo in carrozzina con frattura di femore (negli ultimi 24 mesi). Per un paziente nuovo si sceglie prima «Chi entra in ambulatorio?».
+La scheda del paziente si apre come **figura** (la si può cambiare con «Percorso a passi»; l'app ricorda la scelta). La figura dipende da sesso, età e fratture recenti: donna o uomo giovane (sotto i 60 anni), donna o uomo anziano, donna con il busto ortopedico (frattura vertebrale negli ultimi 24 mesi, ha la precedenza), donna con il polso ingessato (frattura di polso negli ultimi 24 mesi), uomo in carrozzina con frattura di femore (negli ultimi 24 mesi). Per un paziente nuovo si sceglie prima «Chi entra in ambulatorio?».
 
 - **Punti sulla figura** («indizi»): testa → chi è (età, peso, menopausa, familiarità); frattura → fratture da fragilità; busto → malattie e farmaci (con «Incolla dal gestionale»). Ogni punto pulsa finché manca, diventa verde quando è completo e rosso quando contiene qualcosa che pesa sulla decisione; l'etichetta accanto riassume il dato.
 - **Sulla scrivania**: esami del sangue, densitometria, DeFRA e, dopo la decisione, i controlli. Ogni punto o referto apre un riquadro dal basso con la stessa parte della scheda a passi.
