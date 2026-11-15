@@ -659,8 +659,8 @@ function dxaChartHTML(F){
     { label:"Andamento del T-score", bands:[[-99, -2.5, "b-op", "Osteoporosi"], [-2.5, -1, "b-on", "Osteopenia", 1], [-1, 99, "b-ok", "Normale", 1]] }) : "";
   return `<div class="tsum">${tsSummary(asc)}</div>${chart}`;
 }
-/* variazione minima considerata reale tra due DXA: circa 0,3 di T-score (≈ 3% di densità) */
-const TS_LSC = 0.3;
+/* variazione minima considerata reale tra due DXA: 0,2 di T-score */
+const TS_LSC = 0.2;
 const tsCat = v => v <= -2.5 ? ["op", "Osteoporosi"] : v < -1 ? ["on", "Osteopenia"] : ["ok", "Normale"];
 function tsSummary(asc){
   return SERIES.map(([k, nome, col]) => {
