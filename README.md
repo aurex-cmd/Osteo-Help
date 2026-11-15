@@ -25,6 +25,7 @@ Il catalogo riunisce le forme dei due percorsi. Le forme che si evidenziano agli
 
 ## Correzioni rispetto all'Osteo Help originale
 
+- **Malassorbimento**: nel nome «bariatrica» diventa «chirurgia bariatrica».
 - **Ipercalcemia ipocalciurica familiare**: un calcio corretto segnato N la esclude (l'ipercalcemia è il reperto chiave). Con la sola ipocalciuria e il calcio normale non compare più tra le forme compatibili, ma tra quelle escluse da un esame normale.
 - **Osteoporosi da inibitori dell'aromatasi**: non più limitata alla donna. Il farmaco si usa, raramente, anche nell'uomo; la voce compare quindi con entrambi i sessi.
 
