@@ -23,6 +23,21 @@ Il catalogo riunisce le forme dei due percorsi. Le forme che si evidenziano agli
 - *Esami alterati*: compaiono le forme compatibili con **tutti** i reperti segnati. Se nessuna forma da sola li spiega, il quadro viene letto come più cause indipendenti. Un esame segnato N esclude le forme in cui quell'esame è un reperto chiave.
 - *Esami normali*: ogni forma ha trigger forti (bastano da soli) o lievi (contano se si sommano). Le forme sono divise in cause note presenti e sospetti da approfondire. Il sesso nasconde le voci non pertinenti.
 
+## I miei pazienti (per il medico di medicina generale)
+
+Terzo riquadro della home. Archivio dei propri assistiti con osteoporosi, collegato ai motori di Osteo Help.
+
+- **Scheda del paziente**: rischio DeFRA e T-score minimo in alto, avvisi (rischio molto alto, fosfatasi alcalina bassa), sei sezioni con lo stato (ok, manca, attenzione).
+  1. **Dati e fratture**: anagrafica, BMI, menopausa, familiarità per fratture di femore o vertebre, fratture da fragilità (sede, data, gravità vertebrale secondo Genant, frattura nonostante almeno un anno di terapia).
+  2. **Anamnesi e terapie**: le stesse voci di «Esami normali»; le forme secondarie sono riconosciute in automatico con lo stesso motore e rimandano alle schede. In più: glucocorticoidi da oltre 12 mesi, grave disabilità motoria e le controindicazioni da conoscere (esofago, tromboembolismo, eventi cardiovascolari, radioterapia scheletrica, problemi dentari).
+  3. **Esami di I livello**: la griglia ▲ N ▼ di «Esami alterati», più eGFR e 25-OH-vitamina D in numeri; forme compatibili ed esami di II livello con lo stesso motore. Avvisi per fosfatasi alcalina bassa (ipofosfatasia: bisfosfonati controindicati), ipocalcemia e carenza di vitamina D.
+  4. **DeFRA**: cosa serve per completarlo (età, sesso, peso e altezza, fratture, familiarità, glucocorticoidi, fumo, alcol, malattie, terapia adiuvante, DXA), il riepilogo dei dati da riportare, il collegamento al calcolatore (defra-osteoporosi.it) e l'inserimento del rischio. Soglie orientative: sotto 10% basso, 10–20% moderato, 20% e oltre alto.
+  5. **Indicazioni alla terapia**: condizioni della Nota 79 nel testo della determina AIFA dell'8 settembre 2025 (n. 1127/2025), con I, II e III scelta; ogni farmaco è segnato «controindicato» o «cautela» in base ai dati del paziente (ipofosfatasia sospetta, eGFR sotto 35 o 30, ipocalcemia, ipercalcemia, vitamina D bassa, esofago, tromboembolismo, rischio cardiovascolare, radioterapia, denti). Terapie in corso con i promemoria (denosumab da non interrompere, rivalutazione dei bisfosfonati a 5 anni o 3 per lo zoledronato, durata massima degli anabolici).
+  6. **Storico e follow-up**: DXA nel tempo (grafico e differenza con la precedente), prossima DXA tra 18 e 24 mesi dall'ultima, rischio DeFRA nel tempo, rischio imminente di rifrattura se c'è una frattura negli ultimi 24 mesi.
+  - **Report**: riepilogo stampabile o da salvare in PDF.
+- **Privacy**: i dati restano solo nel browser del dispositivo (localStorage), senza server. Backup e ripristino con un file JSON, utile anche per spostare l'archivio. Se il dispositivo è condiviso conviene usare iniziali o un codice.
+- **Guida per il MMG** (da Consulta e dall'elenco pazienti): cos'è l'osteoporosi, cosa comporta, perché si cura, perché cercare le forme secondarie, esami di I livello, DeFRA e Nota 79, calcio, vitamina D e stile di vita, follow-up; una scheda per farmaco (alendronato, risedronato, ibandronato, zoledronato, denosumab, raloxifene, bazedoxifene, teriparatide, abaloparatide, romosozumab) con meccanismo, efficacia, dose, assunzione, controindicazioni, avvertenze e regole della Nota 79.
+
 ## Correzioni rispetto all'Osteo Help originale
 
 - **Osteoporosi da inibitori dell'aromatasi**: non più limitata alla donna. Il farmaco si usa, raramente, anche nell'uomo; la voce compare quindi con entrambi i sessi.
