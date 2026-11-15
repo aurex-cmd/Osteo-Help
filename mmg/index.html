@@ -347,6 +347,20 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted);margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
 .report .list li{display:block}
+/* zone del DeFRA (colori come nel calcolatore): il colore segna la zona, il testo resta in inchiostro */
+.z-verde{--zc:#3A9A3A;--zb:#E6F3E4} .z-gialla{--zc:#E3B21A;--zb:#FBF3D6} .z-arancione{--zc:#E8641E;--zb:#FCE9DC} .z-rossa{--zc:#B3261E;--zb:#F8E3E1}
+.zn{display:inline-flex;align-items:center;gap:7px;font-weight:700;color:var(--ink)} .zn i{width:13px;height:13px;border-radius:50%;background:var(--zc);flex:0 0 auto}
+.kpi .zn{font-size:1.25rem}
+.alert.zal{background:var(--zb)} .alert.zal::before{background:var(--zc);width:5px} .alert.zal b{color:var(--ink)}
+.zpick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.zbtn{display:flex;align-items:center;gap:10px;text-align:left;border:2px solid transparent;border-radius:10px;background:var(--bg);padding:10px 12px}
+.zbtn i{width:18px;height:18px;border-radius:50%;background:var(--zc);flex:0 0 auto}
+.zbtn b{display:block;font-size:.95rem} .zbtn small{display:block;color:var(--muted);font-size:.78rem}
+.zbtn[aria-pressed="true"]{border-color:var(--zc);background:var(--zb)}
+.list.zleg li{align-items:flex-start} .list.zleg li .zn{min-width:96px;padding-top:1px} .list.zleg small{display:block;color:var(--muted);font-size:.82rem;font-weight:400}
+.ztl{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.ztl-i{flex:1 0 96px;border-radius:10px;background:var(--zb);padding:9px 10px;border-top:5px solid var(--zc);display:flex;flex-direction:column;gap:1px}
+.ztl-i i{display:none} .ztl-i b{font-size:.9rem} .ztl-i small{font-size:.74rem;color:var(--muted)}
 @media (min-width:1000px){ .bar-in{max-width:560px} }
 </style>
 </head>

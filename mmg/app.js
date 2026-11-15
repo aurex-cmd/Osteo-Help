@@ -148,14 +148,14 @@ function pzFacts(p){
   const tv = lastDxa ? [num(lastDxa.tL), num(lastDxa.tFt), num(lastDxa.tFn)].filter(x => x !== null) : [];
   const minT = tv.length ? Math.min(...tv) : null;
   const defra = (p.defra || []).slice().sort(byDateDesc), lastDefra = defra[0] || null;
-  const risk = lastDefra ? num(lastDefra.rischio) : null;
+  const zona = lastDefra && ZONE[lastDefra.zona] ? lastDefra.zona : null;
   const feats = new Set(p.feats || []);
   const recent = fx.filter(f => { const m = monthsSince(f.data); return m !== null && m <= 24; });
   const peso = num(p.peso), alt = num(p.altezza);
   const bmi = peso && alt ? peso / Math.pow(alt / 100, 2) : null;
   const dxaAge = lastDxa ? monthsSince(lastDxa.data) : null;
   const ther = (p.terapie || []).filter(t => !t.fine).sort((a, b) => (b.inizio || "").localeCompare(a.inizio || ""));
-  return { age, fx, vert, fem, oth, nVF: vert.length + fem.length, dxa, lastDxa, minT, defra, lastDefra, risk, feats, recent, bmi, dxaAge, ther,
+  return { age, fx, vert, fem, oth, nVF: vert.length + fem.length, dxa, lastDxa, minT, defra, lastDefra, zona, feats, recent, bmi, dxaAge, ther,
     vertModGr: vert.filter(f => f.grado === "moderata" || f.grado === "grave").length,
     vertLievi: vert.filter(f => f.grado === "lieve" || !f.grado).length,
     femRecent2y: fem.some(f => { const m = monthsSince(f.data); return m !== null && m <= 24; }),
@@ -183,15 +183,15 @@ function nota79(p, F){
     if(F.minT < lim && F.minT > -5 && (F.vertLievi >= 2 || F.vertModGr >= 1 || site5))
       out.push({ sez:"Prevenzione secondaria", cond:`Donna in postmenopausa, T-score tra ${fmtN(lim)} e −5 con fratture vertebrali o frattura di avambraccio, omero, bacino, femore o tibia negli ultimi 5 anni`, s:[[AB_], [D_, Z_], [A_, R_, I_]], spec:true, alt:true });
   }
-  if(F.donna && F.minT !== null && F.risk !== null && F.risk >= 20){
+  if(F.donna && F.minT !== null && zoneHigh(F.zona)){
     const lim = F.vertModGr >= 2 || F.femRecent2y ? -2 : -2.5;
     if(F.minT < lim && (F.vertModGr >= 1 || F.vertLievi >= 2 || F.fem.length >= 1))
-      out.push({ sez:"Prevenzione secondaria", cond:"Fratture vertebrali o di femore, T-score sotto " + fmtN(lim) + ", rischio a 10 anni ≥ 20%: solo se non è possibile seguire altri trattamenti efficaci (intolleranza, inefficacia, fine del periodo consentito)", s:[[RO_]], spec:true, alt:true });
+      out.push({ sez:"Prevenzione secondaria", cond:"Fratture vertebrali o di femore, T-score sotto " + fmtN(lim) + ", rischio a 10 anni ≥ 20% (da confermare sul DeFRA): solo se non è possibile seguire altri trattamenti efficaci (intolleranza, inefficacia, fine del periodo consentito)", s:[[RO_]], spec:true, alt:true });
   }
   if(F.oth.length >= 1 && F.minT !== null && F.minT <= -3)
     out.push({ sez:"Prevenzione secondaria", cond:"Frattura non vertebrale e non femorale con T-score ≤ −3", s:[[A_, R_, Z_], [D_, I_, ...serm]] });
-  if(F.donna && F.oth.length >= 2 && F.minT !== null && F.minT < -2.5 && F.risk !== null && F.risk >= 20)
-    out.push({ sez:"Prevenzione secondaria", cond:"2 o più fratture non vertebrali, T-score sotto −2,5, rischio a 10 anni ≥ 20%: solo se non è possibile seguire altri trattamenti efficaci", s:[[RO_]], spec:true, alt:true });
+  if(F.donna && F.oth.length >= 2 && F.minT !== null && F.minT < -2.5 && zoneHigh(F.zona))
+    out.push({ sez:"Prevenzione secondaria", cond:"2 o più fratture non vertebrali, T-score sotto −2,5, rischio a 10 anni ≥ 20% (da confermare sul DeFRA): solo se non è possibile seguire altri trattamenti efficaci", s:[[RO_]], spec:true, alt:true });
   const prim = F.donna ? p.postmeno !== false : (F.age === null || F.age >= 50);
   if(prim){
     if(F.gc) out.push({ sez:"Prevenzione primaria", cond:"Prednisone equivalente ≥5 mg/die in atto o previsto per più di 3 mesi", s:[[A_, R_, Z_], [D_]] });
@@ -232,12 +232,22 @@ function drugFlags(p, F, S){
 }
 
 /* ---------- rischio: categoria del DeFRA e rischio imminente ---------- */
-function riskCat(r){
-  if(r === null) return null;
-  if(r >= 20) return { k:"alto", t:"Alto", cls:"d", txt:"Rischio a 10 anni ≥ 20%: la terapia farmacologica è indicata, accanto a calcio, vitamina D e prevenzione delle cadute." };
-  if(r >= 10) return { k:"moderato", t:"Moderato", cls:"w", txt:"Rischio a 10 anni tra 10 e 20%: la terapia va decisa caso per caso; si prescrive a carico del SSN se il paziente rientra in una condizione della Nota 79." };
-  return { k:"basso", t:"Basso", cls:"ok", txt:"Rischio a 10 anni sotto il 10%: di regola nessun farmaco per l'osteoporosi; stile di vita, calcio e vitamina D se carenti, e nuova valutazione nel tempo." };
-}
+/* zone del DeFRA: le soglie cambiano con l'età e le indica il calcolatore; il medico inserisce solo la zona */
+const ZONE = {
+  verde:{ t:"Verde", r:"basso rischio", cls:"ok", chi:"Medico di medicina generale",
+    azione:"Nessun farmaco per l'osteoporosi. Vitamina D (Nota 96), calcio con la dieta, attività fisica e prevenzione delle cadute; nuova valutazione nel tempo." },
+  gialla:{ t:"Gialla", r:"rischio moderato", cls:"warn", chi:"Medico di medicina generale",
+    azione:"Terapia di prima linea: bisfosfonati orali o denosumab, sempre con vitamina D. Nella donna in postmenopausa recente può valutarsi la terapia ormonale con il ginecologo." },
+  arancione:{ t:"Arancione", r:"alto rischio", cls:"d", chi:"Specialista dell'osso",
+    azione:"Invio allo specialista per una terapia di II o III livello: anabolico (teriparatide, abaloparatide) o romosozumab, seguito da un antiriassorbitivo; sempre con vitamina D." },
+  rossa:{ t:"Rossa", r:"altissimo rischio", cls:"d", chi:"Specialista dell'osso, con priorità",
+    azione:"Invio prioritario allo specialista per anabolico o romosozumab, seguito da un antiriassorbitivo; sempre con vitamina D. Nell'attesa non lasciare il paziente senza protezione: calcio, vitamina D e prevenzione delle cadute." }
+};
+const ZONE_ORDER = ["verde", "gialla", "arancione", "rossa"];
+const zoneHigh = z => z === "arancione" || z === "rossa";
+const zchip = z => ZONE[z] ? `<span class="zn z-${z}"><i></i>${ZONE[z].t}</span>` : "—";
+function riskCat(z){ return z && ZONE[z] ? Object.assign({ k:z }, ZONE[z]) : null; }
+const zoneAlert = (rc, extra) => `<div class="alert zal z-${rc.k}"><b>Zona ${rc.t.toLowerCase()} · ${rc.r} → ${rc.chi}</b>${rc.azione}${extra || ""}</div>`;
 function veryHigh(p, F){
   const r = [];
   if(F.recent.length) r.push("frattura da fragilità negli ultimi 24 mesi (rischio imminente di rifrattura)");
@@ -245,7 +255,7 @@ function veryHigh(p, F){
   if(F.nVF >= 1 && F.minT !== null && F.minT <= -4) r.push("frattura con T-score ≤ −4");
   if(F.nVF >= 1 && F.gc) r.push("frattura in terapia con glucocorticoidi");
   if(F.fxInTerapia) r.push("nuova frattura durante la terapia");
-  if(F.risk !== null && F.risk >= 30) r.push("rischio DeFRA ≥ 30%");
+  if(F.zona === "rossa") r.push("zona rossa del DeFRA (altissimo rischio)");
   return r;
 }
 
@@ -297,7 +307,7 @@ const stTag = st => `<span class="st ${st}">${ST_LBL[st]}</span>`;
 /* ---------- elenco pazienti ---------- */
 function vPazienti(){
   const rows = PZ.slice().sort((a, b) => pzName(a).localeCompare(pzName(b), "it", { sensitivity:"base" })).map(p => {
-    const F = pzFacts(p), pl = dxaPlan(F), bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : "", F.risk !== null ? "DeFRA " + fmtN(F.risk) + "%" : ""].filter(Boolean).join(" · ");
+    const F = pzFacts(p), pl = dxaPlan(F), bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : "", F.zona ? "DeFRA zona " + ZONE[F.zona].t.toLowerCase() : ""].filter(Boolean).join(" · ");
     return `<a class="rowlink pzrow" href="#paz-${p.id}" data-q="${hx(pzName(p).toLowerCase())}"><span>${hx(pzName(p))}<small>${bits || "Dati da completare"}${pl.st !== "ok" ? ` · <b class="st-t ${pl.st}">${pl.t}</b>` : ""}</small></span>${CHEV}</a>`;
   }).join("");
   return { bar:"Pazienti", html: head("I miei pazienti", "Dalla raccolta dei dati al DeFRA, alla terapia e al follow-up.") + `
@@ -316,11 +326,11 @@ function pzLink(p, sez, title, sub, st, icon){
 }
 function vPaz(p){
   const F = pzFacts(p), S = pzSecondary(p), chk = defraChecklist(p, F), miss = chk.filter(x => x.st !== "ok").length, ls = labStatus(p), pl = dxaPlan(F);
-  const nSec = S.N.note.length + S.N.sosp.length, nA = S.A.forms.length, rc = riskCat(F.risk), vh = veryHigh(p, F);
+  const nSec = S.N.note.length + S.N.sosp.length, nA = S.A.forms.length, rc = riskCat(F.zona), vh = veryHigh(p, F);
   const info = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : "", F.bmi ? "BMI " + fmtN(F.bmi) : ""].filter(Boolean).join(" · ");
   return { bar:"Scheda paziente", html: head(hx(pzName(p)), info || "Dati anagrafici da completare") + `
     <div class="kpis">
-      <div class="kpi"><small>Rischio DeFRA</small><b>${F.risk !== null ? fmtN(F.risk) + "%" : "—"}</b><span>${rc ? rc.t + " · " + fmtD(F.lastDefra.data) : "non inserito"}</span></div>
+      <div class="kpi"><small>Zona DeFRA</small><b>${rc ? zchip(F.zona) : "—"}</b><span>${rc ? rc.r + " · " + fmtD(F.lastDefra.data) : "non inserita"}</span></div>
       <div class="kpi"><small>T-score minimo</small><b>${F.minT !== null ? fmtN(F.minT) : "—"}</b><span>${F.lastDxa ? "DXA " + fmtD(F.lastDxa.data) : "nessuna DXA"}</span></div>
     </div>
     ${vh.length ? `<div class="alert"><b>Rischio di frattura molto alto</b>${vh.join("; ")}. Priorità alla terapia; valuta l'invio allo specialista per un farmaco anabolico.</div>` : ""}
@@ -329,7 +339,7 @@ function vPaz(p){
       ${pzLink(p, "dati", "1 · Dati e fratture", "Anagrafica, menopausa, fratture, familiarità", F.bmi && (F.fx.length || p.nessunaFx) && p.fam !== null ? "ok" : "miss")}
       ${pzLink(p, "anamnesi", "2 · Anamnesi e terapie", (p.feats || []).length ? plural(p.feats.length, "elemento", "elementi") + " · " + (nSec ? plural(nSec, "forma secondaria", "forme secondarie") + " da considerare" : "nessuna forma secondaria associata") : "Farmaci, malattie, segni, stile di vita", p.anamOk ? (nSec ? "warn" : "ok") : "miss")}
       ${pzLink(p, "esami", "3 · Esami di I livello", `${ls.done} di ${ls.tot} esami registrati` + (nA ? " · " + plural(nA, "forma compatibile", "forme compatibili") : ""), ls.done < ls.tot ? "miss" : nA || S.hpp ? "warn" : "ok")}
-      ${pzLink(p, "defra", "4 · DeFRA e rischio di frattura", miss ? plural(miss, "dato da completare", "dati da completare") + " per il DeFRA" : "Dati pronti" + (F.risk === null ? ": calcola il rischio" : ""), miss ? "miss" : F.risk === null ? "warn" : "ok")}
+      ${pzLink(p, "defra", "4 · DeFRA e rischio di frattura", miss ? plural(miss, "dato da completare", "dati da completare") + " per il DeFRA" : (F.zona ? "Zona " + ZONE[F.zona].t.toLowerCase() + " · " + ZONE[F.zona].chi : "Dati pronti: inserisci la zona"), miss ? "miss" : !F.zona ? "warn" : "ok")}
       ${pzLink(p, "terapia", "5 · Indicazioni alla terapia", F.ther.length ? "In corso: " + F.ther.map(t => DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome : t.farmaco).join(", ") : "Nota 79, controindicazioni, terapia in corso", "")}
       ${pzLink(p, "storico", "6 · Storico e follow-up", pl.t, pl.st)}
       ${pzLink(p, "report", "Report", "Riepilogo da stampare o salvare in PDF", "")}
@@ -464,24 +474,26 @@ function defraLive(p){
     <p class="lbl">Da riportare nel DeFRA</p>${defraSummary(p, F)}`;
 }
 function vPazDefra(p){
-  const F = pzFacts(p), rc = riskCat(F.risk);
-  const hist = F.defra.map(d => `<li class="rec"><span><b>${fmtN(num(d.rischio))}%</b><small>${fmtD(d.data)}${d.note ? " · " + hx(d.note) : ""}</small></span><button type="button" class="x" data-del="defra:${p.defra.indexOf(d)}" aria-label="Elimina">✕</button></li>`).join("");
-  return { bar: pzName(p), html: head("DeFRA e rischio di frattura", "Il DeFRA (SIOMMMS e SIR) stima il rischio di frattura osteoporotica maggiore a 10 anni, unendo DXA e fattori clinici.") + `
+  const F = pzFacts(p), rc = riskCat(F.zona);
+  const hist = F.defra.map(d => `<li class="rec"><span><b>${zchip(d.zona)}</b><small>${fmtD(d.data)}${d.note ? " · " + hx(d.note) : ""}</small></span><button type="button" class="x" data-del="defra:${p.defra.indexOf(d)}" aria-label="Elimina">✕</button></li>`).join("");
+  return { bar: pzName(p), html: head("DeFRA e rischio di frattura", "Il DeFRA (SIOMMMS e SIR) stima il rischio di fratture maggiori a 10 anni, unendo DXA e fattori clinici, e lo colloca in una zona di colore.") + `
     <p class="lbl">Cosa serve</p>
     <div data-live="defra">${defraLive(p)}</div>
     <div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>
-    <p class="lbl">Rischio calcolato</p>
-    ${rc ? `<div class="alert ${rc.cls === "d" ? "" : rc.cls === "w" ? "warn" : "ok"}"><b>${rc.t}: ${fmtN(F.risk)}% a 10 anni (${fmtD(F.lastDefra.data)})</b>${rc.txt} <a href="#paz-${p.id}-terapia">Indicazioni alla terapia</a></div>` : ""}
+    <p class="lbl">Zona di rischio</p>
+    ${rc ? zoneAlert(rc, ` <a href="#paz-${p.id}-terapia">Indicazioni alla terapia</a>`) + `<p class="small">Inserita il ${fmtD(F.lastDefra.data)}.</p>` : ""}
     ${hist ? `<ul class="list recs">${hist}</ul>` : ""}
     <div class="addbox">
+      <div class="zpick" role="group" aria-label="Zona del DeFRA">${ZONE_ORDER.map(z => `<button type="button" class="zbtn z-${z}" data-zona="${z}" aria-pressed="false"><i></i><span><b>${ZONE[z].t}</b><small>${ZONE[z].r}</small></span></button>`).join("")}</div>
       <div class="grid2">
-        <label class="fld">Rischio a 10 anni (%)<input type="number" inputmode="decimal" id="dfR" step="0.1"></label>
         <label class="fld">Data<input type="date" id="dfD" value="${todayISO()}"></label>
-        <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" id="dfN"></label>
+        <label class="fld">Nota (facoltativa)<input type="text" id="dfN"></label>
       </div>
-      <button type="button" class="btn sec" data-add="defra">Aggiungi risultato</button>
+      <button type="button" class="btn sec" data-add="defra">Aggiungi zona</button>
     </div>
-    <p class="small">Soglie usate dall'app (orientative): sotto il 10% basso, 10–20% moderato, 20% e oltre alto. La soglia del 20% è quella che la Nota 79 usa per il romosozumab. La rimborsabilità dipende comunque dalle condizioni della Nota 79, nella pagina successiva.</p>` };
+    <p class="lbl">Cosa significano le zone</p>
+    <ul class="list zleg">${ZONE_ORDER.map(z => `<li>${zchip(z)}<span><b>${ZONE[z].r[0].toUpperCase() + ZONE[z].r.slice(1)} → ${ZONE[z].chi}</b><small>${ZONE[z].azione}</small></span></li>`).join("")}</ul>
+    <p class="small">Le soglie delle zone dipendono dall'età (a parità di rischio percentuale, un paziente giovane cade in una zona più alta): per questo basta riportare la zona che indica il DeFRA. La rimborsabilità resta legata alle condizioni della Nota 79, nella pagina successiva.</p>` };
 }
 
 /* ---------- 5 · terapia ---------- */
@@ -490,21 +502,21 @@ function choiceHTML(p, F, fl, ids){
     return `<span class="dchip${f && f.ci.length ? " ci" : f && f.warn.length ? " warn" : ""}">${dlink(id)}${f && f.ci.length ? " <i>controindicato</i>" : f && f.warn.length ? " <i>cautela</i>" : ""}</span>`; }).join("");
 }
 function therapyLive(p){
-  const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), rc = riskCat(F.risk), vh = veryHigh(p, F), ls = labStatus(p);
+  const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), rc = riskCat(F.zona), vh = veryHigh(p, F), ls = labStatus(p);
   const pre = [];
   if(ls.done < ls.tot) pre.push(`Esami di I livello incompleti (${ls.done} di ${ls.tot}): <a href="#paz-${p.id}-esami">completa</a> per escludere le forme secondarie.`);
   if(S.N.sosp.length || S.N.note.length) pre.push(`${plural(S.N.note.length + S.N.sosp.length, "forma secondaria", "forme secondarie")} dall'anamnesi: <a href="#paz-${p.id}-anamnesi">vedi</a>. Alcune si curano rimuovendo la causa.`);
   if(S.A.forms.length) pre.push(`Esami compatibili con: ${S.A.forms.map(x => COND[x.cid]).join(", ")}.`);
-  if(F.risk === null) pre.push(`Manca il rischio del DeFRA: <a href="#paz-${p.id}-defra">calcolalo</a>.`);
+  if(!F.zona) pre.push(`Manca la zona del DeFRA: <a href="#paz-${p.id}-defra">inseriscila</a>.`);
   if(!F.lastDxa) pre.push("Manca la densitometria: senza T-score molte condizioni della Nota 79 non si possono valutare.");
   const tiers = ["I scelta", "II scelta", "III scelta"];
   const n79html = n79.length ? n79.map(c => `<div class="n79${c.spec ? " spec" : ""}"><small>${c.sez}${c.spec ? " · specialista, piano terapeutico" : ""}</small><b>${c.cond}</b>${c.s.map((l, i) => l.length ? `<div class="tier"><span>${c.alt && c.s.length === 1 ? "Opzione" : tiers[i]}</span><div>${choiceHTML(p, F, fl, l)}</div></div>` : "").join("")}</div>`).join("")
     : `<p class="hint">Con i dati inseriti il paziente non rientra in nessuna condizione della Nota 79${F.minT === null ? " (manca il T-score)" : ""}. Un farmaco resta possibile fuori Nota (a carico del paziente) se il rischio lo giustifica.</p>`;
   const flagList = DRUG_ORDER.filter(id => fl[id] && (fl[id].ci.length || fl[id].warn.length)).map(id => `<li><span><b>${DRUGS[id].nome}</b><small>${[...fl[id].ci.map(x => "controindicato: " + x), ...fl[id].warn.map(x => "cautela: " + x)].join(" · ")}</small></span></li>`).join("");
   return `
+    ${rc ? `<p class="lbl">Indicazione dalla zona del DeFRA</p>` + zoneAlert(rc) : ""}
     ${pre.length ? `<div class="alert info"><b>Prima di scegliere</b>${pre.join("<br>")}</div>` : ""}
-    ${vh.length ? `<div class="alert"><b>Rischio molto alto</b>${vh.join("; ")}. Considera l'invio allo specialista per un anabolico (teriparatide, abaloparatide, romosozumab) seguito da un antiriassorbitivo.</div>` : ""}
-    ${rc ? `<div class="alert ${rc.cls === "d" ? "" : rc.cls === "w" ? "warn" : "ok"}"><b>DeFRA ${fmtN(F.risk)}% · rischio ${rc.t.toLowerCase()}</b>${rc.txt}</div>` : ""}
+    ${vh.length ? `<div class="alert"><b>Rischio molto alto</b>${vh.join("; ")}. ${zoneHigh(F.zona) ? "Conferma l'invio" : "Considera l'invio"} allo specialista per un anabolico (teriparatide, abaloparatide, romosozumab) seguito da un antiriassorbitivo.</div>` : ""}
     <p class="lbl">Condizioni della Nota 79</p>${n79html}
     ${flagList ? `<p class="lbl">Controindicazioni e cautele per questo paziente</p><ul class="list chk">${flagList}</ul>` : ""}
     <p class="lbl">Per tutti</p>
@@ -514,7 +526,7 @@ function vPazTerapia(p){
   const F = pzFacts(p), notes = therapyNotes(F);
   const all = (p.terapie || []).slice().sort((a, b) => (b.inizio || "").localeCompare(a.inizio || ""));
   const rows = all.map(t => `<li class="rec"><span><b>${DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome : hx(t.farmaco)}</b><small>dal ${fmtD(t.inizio)}${t.fine ? " al " + fmtD(t.fine) : " · in corso"}${t.note ? " · " + hx(t.note) : ""}</small></span>${t.fine ? "" : `<button type="button" class="btn sec mini" data-stop="${p.terapie.indexOf(t)}">Termina</button>`}<button type="button" class="x" data-del="terapie:${p.terapie.indexOf(t)}" aria-label="Elimina">✕</button></li>`).join("");
-  return { bar: pzName(p), html: head("Indicazioni alla terapia", "Dal rischio del DeFRA e dalle condizioni della Nota 79 (determina AIFA dell'8 settembre 2025), con le controindicazioni del paziente.") + `
+  return { bar: pzName(p), html: head("Indicazioni alla terapia", "Dalla zona del DeFRA e dalle condizioni della Nota 79 (determina AIFA dell'8 settembre 2025), con le controindicazioni del paziente.") + `
     <div data-live="ter">${therapyLive(p)}</div>
     <p class="lbl">Terapie per l'osteoporosi</p>
     ${notes.length ? notes.map(n => `<div class="alert info"><b>${n.nome} · ${n.durata ? "da " + n.durata : "in corso"}</b>${n.s}</div>`).join("") : ""}
@@ -559,11 +571,12 @@ function vPazStorico(p){
   const dxaRows = F.dxa.map((d, i) => { const prev = F.dxa[i + 1], dl = prev && num(d.tL) !== null && num(prev.tL) !== null ? num(d.tL) - num(prev.tL) : null;
     return `<li class="rec"><span><b>${fmtD(d.data)}</b><small>colonna ${fmtN(num(d.tL))} · femore totale ${fmtN(num(d.tFt))} · collo ${fmtN(num(d.tFn))}${dl !== null ? ` · colonna ${dl >= 0 ? "+" : "−"}${fmtN(Math.abs(dl))} rispetto alla precedente` : ""}</small></span><button type="button" class="x" data-del="dxa:${p.dxa.indexOf(d)}" aria-label="Elimina">✕</button></li>`; }).join("");
   const dxaChart = asc.length >= 1 && asc.some(d => [d.tL, d.tFt, d.tFn].some(v => num(v) !== null)) ? lineChart(asc.filter(d => pDate(d.data)).map(d => ({ x: pDate(d.data), tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES, { label:"Andamento del T-score", ref:[-2.5], refLbl:["−2,5"] }) : "";
-  const dfAsc = F.defra.slice().reverse().filter(d => pDate(d.data) && num(d.rischio) !== null);
-  const dfChart = dfAsc.length ? lineChart(dfAsc.map(d => ({ x: pDate(d.data), r: num(d.rischio) })), [["r", "Rischio DeFRA", "#2a78d6"]], { label:"Andamento del rischio DeFRA", ref:[10, 20], refLbl:["10%", "20%"], min:0, unit:"%" }) : "";
+  const dfAsc = F.defra.slice().reverse().filter(d => pDate(d.data) && ZONE[d.zona]);
+  const dfChart = dfAsc.length ? `<div class="ztl">${dfAsc.map((d, i) => { const prev = dfAsc[i - 1], dir = prev ? Math.sign(ZONE_ORDER.indexOf(d.zona) - ZONE_ORDER.indexOf(prev.zona)) : 0;
+    return `<div class="ztl-i z-${d.zona}"><i></i><b>${ZONE[d.zona].t}</b><small>${fmtM(pDate(d.data))}${dir > 0 ? " · peggiorata" : dir < 0 ? " · migliorata" : ""}</small></div>`; }).join("")}</div>` : "";
   const imm = F.recent.length ? `<div class="alert"><b>Rischio imminente di rifrattura</b>${plural(F.recent.length, "frattura", "fratture")} negli ultimi 24 mesi (l'ultima il ${fmtD(F.recent[0].data)}). Dopo una frattura il rischio di una nuova frattura è massimo nei primi 1–2 anni: la terapia va iniziata o rivista subito, insieme alla prevenzione delle cadute.</div>`
     : F.fx.length ? `<div class="alert info"><b>Rischio di rifrattura</b>Una frattura da fragilità all'incirca raddoppia il rischio di altre fratture, anche dopo anni. Ultima frattura: ${fmtD(F.fx[0].data)}.</div>` : "";
-  return { bar: pzName(p), html: head("Storico e follow-up", "Densitometrie, rischio DeFRA e fratture nel tempo.") + `
+  return { bar: pzName(p), html: head("Storico e follow-up", "Densitometrie, zone del DeFRA e fratture nel tempo.") + `
     <div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}${F.gc ? " Con glucocorticoidi ad alte dosi si può anticipare a 12 mesi." : ""}</div>
     ${imm}
     <p class="lbl">Densitometria (T-score)</p>
@@ -579,8 +592,8 @@ function vPazStorico(p){
       <p class="small">I T-score sono negativi: scrivi per esempio −2,7 come -2.7.</p>
       <button type="button" class="btn sec" data-add="dxa">Aggiungi DXA</button>
     </div>
-    <p class="lbl">Rischio DeFRA nel tempo</p>
-    ${dfChart || `<p class="hint">Nessun rischio registrato. <a href="#paz-${p.id}-defra">Inseriscilo</a>.</p>`}
+    <p class="lbl">Zona del DeFRA nel tempo</p>
+    ${dfChart || `<p class="hint">Nessuna zona registrata. <a href="#paz-${p.id}-defra">Inseriscilo</a>.</p>`}
     <p class="lbl">Fratture</p>
     ${F.fx.length ? `<ul class="list recs">${F.fx.map(f => `<li class="rec"><span><b>${FX_SEDI[f.sede]}${f.grado ? " · " + f.grado : ""}</b><small>${fmtD(f.data)}</small></span></li>`).join("")}</ul>` : `<p class="hint">${p.nessunaFx ? "Nessuna frattura da fragilità." : "Nessuna frattura registrata."}</p>`}
     <p class="small"><a href="#paz-${p.id}-dati">Aggiungi una frattura</a></p>` };
@@ -588,7 +601,7 @@ function vPazStorico(p){
 
 /* ---------- report ---------- */
 function vPazReport(p){
-  const F = pzFacts(p), S = pzSecondary(p), n79 = nota79(p, F), fl = drugFlags(p, F, S), rc = riskCat(F.risk), pl = dxaPlan(F), vh = veryHigh(p, F), lab = p.lab || {};
+  const F = pzFacts(p), S = pzSecondary(p), n79 = nota79(p, F), fl = drugFlags(p, F, S), rc = riskCat(F.zona), pl = dxaPlan(F), vh = veryHigh(p, F), lab = p.lab || {};
   const li = a => a.length ? `<ul class="list">${a.map(x => `<li>${x}</li>`).join("")}</ul>` : `<p class="note">—</p>`;
   const anam = (p.feats || []).map(id => FEATLABEL[id]).filter(Boolean);
   const labNorm = PZ_EXAMS.filter(e => lab[e.id] === "norm").map(e => e.name + (e.binary ? " (assente)" : ""));
@@ -604,8 +617,8 @@ function vPazReport(p){
     ${S.hpp ? `<p class="note"><b>Fosfatasi alcalina bassa:</b> escludere l'ipofosfatasia; bisfosfonati controindicati.</p>` : ""}
     <p class="lbl">Densitometria</p>${li(F.dxa.map(d => fmtD(d.data) + " — colonna " + fmtN(num(d.tL)) + ", femore totale " + fmtN(num(d.tFt)) + ", collo " + fmtN(num(d.tFn))))}
     <p class="note">${pl.t}.</p>
-    <p class="lbl">Rischio di frattura (DeFRA)</p>${li(F.defra.map(d => fmtD(d.data) + " — " + fmtN(num(d.rischio)) + "% a 10 anni"))}
-    ${rc ? `<p class="note"><b>Rischio ${rc.t.toLowerCase()}.</b> ${rc.txt}</p>` : ""}
+    <p class="lbl">Rischio di frattura (DeFRA)</p>${li(F.defra.filter(d => ZONE[d.zona]).map(d => fmtD(d.data) + " — zona " + ZONE[d.zona].t.toLowerCase() + " (" + ZONE[d.zona].r + ")"))}
+    ${rc ? `<p class="note"><b>Zona ${rc.t.toLowerCase()} → ${rc.chi}.</b> ${rc.azione}</p>` : ""}
     ${vh.length ? `<p class="note"><b>Rischio molto alto:</b> ${vh.join("; ")}.</p>` : ""}
     <p class="lbl">Nota 79</p>${li(n79.map(c => `<b>${c.cond}</b> — ${c.s.map((l, i) => l.length ? ["I", "II", "III"][i] + " scelta: " + nomi(l) : "").filter(Boolean).join("; ")}`))}
     <p class="lbl">Terapie per l'osteoporosi</p>${li((p.terapie || []).map(t => (DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome : t.farmaco) + " dal " + fmtD(t.inizio) + (t.fine ? " al " + fmtD(t.fine) : " (in corso)")))}
@@ -651,8 +664,9 @@ const GUIDA = [
     <li><i>8</i><span>Nell'uomo <b>testosterone totale</b>; in base alla clinica anti-transglutaminasi con IgA totali</span></li></ul>` },
   { k:"defra", t:"DeFRA e Nota 79", s:"Dal rischio di frattura alla prescrizione", html:`
     <p class="note">Il <b>DeFRA</b> è il calcolatore italiano del rischio di frattura a 10 anni, sviluppato da SIOMMMS e SIR a partire dal FRAX. Rispetto al FRAX considera numero e sede delle fratture, la dose dei glucocorticoidi, più malattie e la densità di colonna e femore. Si usa dai 50 anni.</p>
+    <p class="note">Il risultato cade in una di <b>quattro zone</b>, con soglie che salgono con l'età: <b>verde</b> (basso rischio) solo vitamina D, calcio e stile di vita; <b>gialla</b> (rischio moderato) terapia di prima linea dal MMG, bisfosfonati orali o denosumab; <b>arancione</b> (alto) e <b>rossa</b> (altissimo) invio allo specialista per anabolici o romosozumab. La stima del rischio aiuta così sia a scegliere la terapia più appropriata sia a decidere chi deve prescriverla.</p>
     <p class="note">Servono: età, sesso, peso, altezza, fratture da fragilità (sede, numero), familiarità per frattura di femore o vertebre, fumo, alcol, glucocorticoidi, malattie (artrite reumatoide e connettiviti, diabete, BPCO, MICI, HIV, Parkinson, sclerosi multipla, grave disabilità motoria), terapia ormonale adiuvante, T-score di colonna e femore.</p>
-    <p class="note">La <b>Nota 79</b> stabilisce quando i farmaci sono a carico del SSN: in prevenzione secondaria (fratture vertebrali o di femore; altre fratture con T-score ≤ −3) e in prevenzione primaria (glucocorticoidi ≥5 mg/die per più di 3 mesi, blocco ormonale adiuvante, T-score ≤ −4, oppure ≤ −3 con familiarità o comorbilità). Il rischio a 10 anni ≥ 20% calcolato con un calcolatore validato entra nei criteri del romosozumab. Fumo e alcol, in quanto modificabili, non contano ai fini della rimborsabilità.</p>
+    <p class="note">La <b>Nota 79</b> stabilisce quando i farmaci sono a carico del SSN: in prevenzione secondaria (fratture vertebrali o di femore; altre fratture con T-score ≤ −3) e in prevenzione primaria (glucocorticoidi ≥5 mg/die per più di 3 mesi, blocco ormonale adiuvante, T-score ≤ −4, oppure ≤ −3 con familiarità o comorbilità). Il rischio a 10 anni ≥ 20% calcolato con un calcolatore validato entra nei criteri del romosozumab (per la donna in zona arancione o rossa). Fumo e alcol, in quanto modificabili, non contano ai fini della rimborsabilità.</p>
     <p class="note">Il passaggio dalla I alla II scelta richiede intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni; una nuova frattura dopo almeno un anno di terapia giustifica un cambio di classe. Zoledronato solo in strutture ospedaliere; denosumab prescrivibile dal MMG; teriparatide, abaloparatide e romosozumab su piano terapeutico specialistico.</p>
     <div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>` },
   { k:"base", t:"Calcio, vitamina D e stile di vita", s:"Per tutti, prima e durante la terapia", html:`
@@ -737,6 +751,7 @@ document.addEventListener("click", e => {
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "osteo-help-pazienti-" + todayISO() + ".json"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); return;
   }
   if(t.closest("#pzPrint")){ window.print(); return; }
+  const zb = t.closest(".zbtn"); if(zb){ document.querySelectorAll(".zbtn").forEach(x => x.setAttribute("aria-pressed", x === zb)); return; }
   const tmp = t.closest(".ck[data-tmp]"); if(tmp){ tmp.setAttribute("aria-pressed", tmp.getAttribute("aria-pressed") !== "true"); return; }
   const { p } = pzRoute(); if(!p) return;
   if(t.closest("#pzDel")){ if(confirm("Eliminare " + pzName(p) + " e tutti i suoi dati?")){ PZ.splice(PZ.indexOf(p), 1); savePz(); history.replaceState(null, "", location.pathname + location.search); stack.length = 0; stack.push(""); render(); } return; }
@@ -765,7 +780,7 @@ document.addEventListener("click", e => {
     if(k === "dxa"){ if(!v("dxD") || ![v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null)){ alert("Indica la data e almeno un T-score."); return; }
       const T = x => { const n = num(x); return n === null ? "" : String(n > 0 && n < 6 && /^\d/.test(x) && confirm("Il T-score " + x + " è positivo: intendevi −" + x + "?") ? -n : n); };
       p.dxa.push({ data: v("dxD"), tL: T(v("dxL")), tFt: T(v("dxFt")), tFn: T(v("dxFn")) }); }
-    if(k === "defra"){ const r = num(v("dfR")); if(r === null || r < 0 || r > 100 || !v("dfD")){ alert("Indica il rischio (0–100%) e la data."); return; } p.defra.push({ data: v("dfD"), rischio: String(r), note: v("dfN") }); }
+    if(k === "defra"){ const zb = document.querySelector('.zbtn[aria-pressed="true"]'); if(!zb || !v("dfD")){ alert("Scegli la zona indicata dal DeFRA e la data."); return; } p.defra.push({ data: v("dfD"), zona: zb.dataset.zona, note: v("dfN") }); }
     if(k === "terapie"){ if(!v("thI")){ alert("Indica la data di inizio."); return; } p.terapie.push({ farmaco: v("thF"), inizio: v("thI"), fine:"", note: v("thN") }); }
     savePz(p); render(); return;
   }
