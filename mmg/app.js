@@ -664,11 +664,11 @@ function vPazDxa(p){
     <div class="addbox">
       <div class="grid2">
         <label class="fld">Data della DXA<input type="date" id="dxD" value="${todayISO()}"></label>
-        <label class="fld">T-score colonna (L1–L4)<input type="number" inputmode="decimal" step="0.1" id="dxL"></label>
-        <label class="fld">T-score femore totale<input type="number" inputmode="decimal" step="0.1" id="dxFt"></label>
-        <label class="fld">T-score collo femorale<input type="number" inputmode="decimal" step="0.1" id="dxFn"></label>
+        <div class="fld">T-score colonna (L1–L4)<div class="tsrow"><button type="button" class="sgn" data-sgn="dxL" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxL" aria-label="T-score colonna (L1–L4)"></div></div>
+        <div class="fld">T-score femore totale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFt" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFt" aria-label="T-score femore totale"></div></div>
+        <div class="fld">T-score collo femorale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFn" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFn" aria-label="T-score collo femorale"></div></div>
       </div>
-      <p class="small">I T-score sono quasi sempre negativi: scrivi per esempio −2,7 come -2.7.</p>
+      <p class="small">Il segno meno è già inserito: per −2,7 scrivi solo 2,7. Tocca «−» per cambiarlo in «+» se il T-score è positivo.</p>
       <button type="button" class="btn sec" data-add="dxa">Aggiungi DXA</button>
     </div>
     ${dxaChartHTML(F)}
@@ -854,6 +854,8 @@ document.addEventListener("click", e => {
   const zb = t.closest(".zbtn"); if(zb){ document.querySelectorAll(".zbtn").forEach(x => x.setAttribute("aria-pressed", x === zb)); return; }
   const vu = t.closest("[data-vdu]");
   if(vu){ VD_U = vu.dataset.vdu; try{ localStorage.setItem("oh-mmg-vitd-unit", VD_U); }catch(e){} render(); return; }
+  const sg = t.closest(".sgn[data-sgn]");
+  if(sg){ const neg = sg.getAttribute("aria-pressed") !== "true"; sg.setAttribute("aria-pressed", neg); sg.textContent = neg ? "−" : "+"; sg.setAttribute("aria-label", "Segno del T-score: " + (neg ? "meno (tocca per più)" : "più (tocca per meno)")); return; }
   const tmp = t.closest(".ck[data-tmp]"); if(tmp){ tmp.setAttribute("aria-pressed", tmp.getAttribute("aria-pressed") !== "true"); return; }
   const { p } = pzRoute(); if(!p) return;
   if(t.closest("#pzDel")){ if(confirm("Eliminare " + pzName(p) + " e tutti i suoi dati?")){ PZ.splice(PZ.indexOf(p), 1); savePz(); history.replaceState(null, "", location.pathname + location.search); stack.length = 0; stack.push(""); render(); } return; }
@@ -882,8 +884,9 @@ document.addEventListener("click", e => {
     if(k === "fratture"){ if(!v("fxData")){ alert("Indica la data della frattura (anche approssimativa)."); return; }
       p.fratture.push({ sede: v("fxSede"), data: v("fxData"), grado: v("fxSede") === "vertebra" ? v("fxGrado") : "", inTerapia: $('.ck[data-tmp="fxInT"]').getAttribute("aria-pressed") === "true" }); p.nessunaFx = false; }
     if(k === "dxa"){ if(!v("dxD") || ![v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null)){ alert("Indica la data e almeno un T-score."); return; }
-      const T = x => { const n = num(x); return n === null ? "" : String(n > 0 && n < 6 && /^\d/.test(x) && confirm("Il T-score " + x + " è positivo: intendevi −" + x + "?") ? -n : n); };
-      p.dxa.push({ data: v("dxD"), tL: T(v("dxL")), tFt: T(v("dxFt")), tFn: T(v("dxFn")) }); }
+      /* il segno viene dal pulsante −/+ (già su «−»); un «-» o «−» scritto a mano vale comunque come negativo */
+      const T = id => { const raw = v(id).replace("−", "-"), n = num(raw); if(n === null) return ""; const neg = /^\s*-/.test(raw) || document.querySelector(`[data-sgn="${id}"]`).getAttribute("aria-pressed") === "true"; return String(neg ? -Math.abs(n) : Math.abs(n)); };
+      p.dxa.push({ data: v("dxD"), tL: T("dxL"), tFt: T("dxFt"), tFn: T("dxFn") }); }
     if(k === "defra"){ const zb = document.querySelector('.zbtn[aria-pressed="true"]'); if(!zb || !v("dfD")){ alert("Scegli la zona indicata dal DeFRA e la data."); return; } p.defra.push({ data: v("dfD"), zona: zb.dataset.zona, note: v("dfN") }); }
     if(k === "terapie"){ if(!v("thI")){ alert("Indica la data di inizio."); return; } p.terapie.push({ farmaco: v("thF"), inizio: v("thI"), fine:"", note: v("thN") }); }
     savePz(p); render(); return;
