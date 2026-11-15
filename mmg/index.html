@@ -480,7 +480,8 @@ main{padding-bottom:40px}
 @keyframes fpulse{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.6);opacity:0}}
 .fhs.ok .fdot{background:var(--teal);box-shadow:0 0 0 5px rgba(14,117,113,.18)}
 .fhs.al .fdot{background:var(--coral);box-shadow:0 0 0 5px rgba(176,78,55,.2)}
-.ftag{background:rgba(255,255,255,.96);border-radius:10px;padding:5px 9px;line-height:1.25;box-shadow:0 3px 12px rgba(30,20,70,.16);max-width:150px}
+.ftag{background:rgba(255,255,255,.96);border-radius:10px;padding:5px 9px;line-height:1.25;box-shadow:0 3px 12px rgba(30,20,70,.16);width:160px}
+.ftag b,.ftag small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ftag b{display:block;font-size:.8rem;color:var(--ink)} .ftag small{display:block;font-size:.72rem;color:var(--muted)}
 .fhs.ok .ftag b{color:var(--teal)} .fhs.al .ftag b{color:var(--coral)}
 .fhs:hover .fdot,.fhs:focus-visible .fdot{transform:scale(1.08)}
@@ -548,7 +549,7 @@ body.fopen{overflow:hidden}
   .fimg{height:560px}
   .fcol-r{position:sticky;top:70px}
 }
-@media (max-width:380px){ .fimg{height:420px} .ftag{max-width:128px} }
+@media (max-width:380px){ .fimg{height:420px} .ftag{width:136px} }
 /* testo dal gestionale */
 details.acc.gest{border:1px solid var(--line);border-radius:12px;padding:0 14px;background:var(--blue-box)}
 details.acc.gest .accbody{display:flex;flex-direction:column;gap:10px;padding-bottom:14px}
