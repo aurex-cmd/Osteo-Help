@@ -60,14 +60,14 @@ const DRUGS = {
     efficacia:"Riduce le fratture vertebrali, di femore e non vertebrali. È il farmaco di prima scelta più usato.",
     assunzione:"Al mattino a digiuno, con un bicchiere pieno di acqua naturale, restando in piedi o seduti per almeno 30 minuti; poi colazione e altri farmaci.",
     ci:["Anomalie dell'esofago che ne rallentano lo svuotamento (stenosi, acalasia)","Impossibilità a stare in piedi o seduti per 30 minuti","Ipocalcemia","Insufficienza renale: non raccomandato con clearance della creatinina sotto 35 mL/min","Ipofosfatasia (bisfosfonati controindicati)"],
-    avv:["Esofagite e disturbi gastrici, soprattutto con reflusso o assunzione scorretta","Osteonecrosi della mandibola e fratture atipiche di femore: rare, legate soprattutto alla durata","Rivalutare la necessità di proseguire dopo 5 anni"],
+    avv:["Esofagite e disturbi gastrici, soprattutto con reflusso o assunzione scorretta","Osteonecrosi della mandibola e fratture atipiche di femore: rare, legate soprattutto alla durata","Dopo 5 anni rivalutare il rischio di frattura per decidere se proseguire o fare una pausa terapeutica (la DXA di controllo resta ogni 18–24 mesi)"],
     nota79:"I scelta in quasi tutte le condizioni della Nota 79. Prescrivibile dal MMG." },
   [R_]: { nome:"Risedronato", classe:"Bisfosfonato (orale)", via:"35 mg una volta alla settimana (anche gastroresistente, da prendere dopo colazione), oppure 75 mg per due giorni consecutivi al mese.",
     come:"Come l'alendronato: frena il riassorbimento osseo.",
     efficacia:"Riduce le fratture vertebrali, di femore e non vertebrali.",
     assunzione:"Formulazione standard: a digiuno, con acqua naturale, in piedi o seduti per 30 minuti. Formulazione gastroresistente: subito dopo la colazione.",
     ci:["Ipocalcemia","Insufficienza renale grave (clearance della creatinina sotto 30 mL/min)","Gravidanza e allattamento","Ipofosfatasia (bisfosfonati controindicati)"],
-    avv:["Disturbi esofagei e gastrici","Osteonecrosi della mandibola e fratture atipiche di femore: rare","Rivalutare dopo 5 anni"],
+    avv:["Disturbi esofagei e gastrici","Osteonecrosi della mandibola e fratture atipiche di femore: rare","Dopo 5 anni rivalutare il rischio di frattura per decidere se proseguire o fare una pausa terapeutica (la DXA di controllo resta ogni 18–24 mesi)"],
     nota79:"I scelta in quasi tutte le condizioni della Nota 79. Prescrivibile dal MMG." },
   [I_]: { nome:"Ibandronato", classe:"Bisfosfonato (orale o endovena)", via:"150 mg per bocca una volta al mese, oppure 3 mg endovena ogni 3 mesi.",
     come:"Bisfosfonato: frena il riassorbimento osseo.",
@@ -81,7 +81,7 @@ const DRUGS = {
     efficacia:"Riduce le fratture vertebrali, di femore e non vertebrali; utile anche dopo una frattura di femore e quando l'aderenza ai farmaci orali è scarsa.",
     assunzione:"Paziente ben idratato, calcemia e vitamina D normali prima dell'infusione. Nei primi giorni può dare febbre e dolori simil-influenzali (paracetamolo).",
     ci:["Ipocalcemia (correggere prima)","Clearance della creatinina sotto 35 mL/min","Gravidanza e allattamento","Ipofosfatasia (bisfosfonati controindicati)"],
-    avv:["Reazione di fase acuta dopo la prima infusione","Osteonecrosi della mandibola e fratture atipiche: rare","Rivalutare dopo 3 anni"],
+    avv:["Reazione di fase acuta dopo la prima infusione","Osteonecrosi della mandibola e fratture atipiche: rare","Dopo 3 anni rivalutare il rischio di frattura per decidere se proseguire o fare una pausa terapeutica (la DXA di controllo resta ogni 18–24 mesi)"],
     nota79:"I o II scelta. Si prescrive e si somministra solo in strutture ospedaliere pubbliche o convenzionate." },
   [D_]: { nome:"Denosumab", classe:"Anticorpo monoclonale anti-RANKL", via:"60 mg sottocute ogni 6 mesi.",
     come:"Blocca RANKL, il segnale che attiva gli osteoclasti: il riassorbimento si ferma, ma l'effetto finisce rapidamente se si salta la dose.",
@@ -278,13 +278,13 @@ function therapyNotes(F){
     const m = monthsSince(t.inizio), y = m === null ? null : m / 12, nome = DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome : (t.farmaco || "Terapia");
     let s = "";
     if(t.farmaco === D_) s = "Non sospendere né ritardare (una dose ogni 6 mesi, al massimo 4 settimane di ritardo). Calcemia prima di ogni dose. Se si decide di sospendere, serve il passaggio a un bisfosfonato.";
-    else if(ORALI.includes(t.farmaco)) s = y !== null && y >= 5 ? "Oltre 5 anni di bisfosfonato orale: rivalutare se proseguire o fare una pausa (se il rischio non è più alto)." : "Rivalutare dopo 5 anni. Controllare l'assunzione corretta e l'aderenza.";
-    else if(t.farmaco === Z_) s = y !== null && y >= 3 ? "Oltre 3 anni di zoledronato: rivalutare se proseguire o sospendere." : "Rivalutare dopo 3 infusioni annuali.";
+    else if(ORALI.includes(t.farmaco)) s = y !== null && y >= 5 ? "Oltre 5 anni di bisfosfonato orale: rivalutare il rischio di frattura (DXA, nuove fratture, zona del DeFRA) per decidere se proseguire o fare una pausa terapeutica; la pausa solo se il rischio non è più alto." : "Controllare l'assunzione corretta e l'aderenza. DXA di controllo ogni 18–24 mesi. Dopo 5 anni di terapia si rivaluta il rischio di frattura per decidere se proseguire o fare una pausa terapeutica.";
+    else if(t.farmaco === Z_) s = y !== null && y >= 3 ? "Oltre 3 anni di zoledronato: rivalutare il rischio di frattura (DXA, nuove fratture, zona del DeFRA) per decidere se proseguire o fare una pausa terapeutica; la pausa solo se il rischio non è più alto." : "DXA di controllo ogni 18–24 mesi. Dopo 3 infusioni annuali si rivaluta il rischio di frattura per decidere se proseguire o fare una pausa terapeutica.";
     else if(t.farmaco === T_) s = m !== null && m >= 18 ? "Si avvicina il limite di 24 mesi: pianificare con lo specialista il passaggio a un antiriassorbitivo." : "Massimo 24 mesi, poi sempre un antiriassorbitivo.";
     else if(t.farmaco === AB_) s = m !== null && m >= 12 ? "Si avvicina il limite di 18 mesi: pianificare il passaggio a un antiriassorbitivo." : "Massimo 18 mesi, poi un antiriassorbitivo.";
     else if(t.farmaco === RO_) s = m !== null && m >= 9 ? "Si avvicina il limite di 12 mesi: pianificare il passaggio a un antiriassorbitivo." : "12 mesi, poi un antiriassorbitivo.";
     else if(t.farmaco === RX_ || t.farmaco === BZ_) s = "Attenzione a tromboembolismo e ictus; sospendere in caso di immobilizzazione prolungata.";
-    return { nome, da: t.inizio, durata: m === null ? "" : (m < 12 ? plural(Math.max(m, 0), "mese", "mesi") : fmtN(y, 1) + " anni"), s };
+    return { nome, da: t.inizio, durata: m === null ? "" : (m < 1 ? "meno di un mese" : m < 12 ? plural(m, "mese", "mesi") : fmtN(y, 1) + " anni"), s };
   });
 }
 
@@ -796,7 +796,7 @@ const GUIDA = [
     <ul class="list"><li><i>1</i><span><b>DXA ogni 18–24 mesi</b>, con lo stesso apparecchio (prima non è di solito utile: le variazioni sono minori dell'errore della misura). Si può anticipare a 12 mesi con glucocorticoidi ad alte dosi.</span></li>
     <li><i>2</i><span><b>Rischio di rifrattura</b>: dopo una frattura è massimo nei primi 1–2 anni. Una nuova frattura dopo almeno un anno di terapia è un motivo per cambiare classe di farmaco (Nota 79).</span></li>
     <li><i>3</i><span><b>Aderenza</b>: chiederla a ogni controllo; per i bisfosfonati orali, verificare come vengono assunti.</span></li>
-    <li><i>4</i><span><b>Durata</b>: bisfosfonati da rivalutare dopo 5 anni (3 per lo zoledronato); denosumab da non interrompere senza passare a un bisfosfonato; anabolici per un tempo limitato e poi sempre un antiriassorbitivo.</span></li>
+    <li><i>4</i><span><b>Durata</b>: bisfosfonati: dopo 5 anni (3 per lo zoledronato) si rivaluta il rischio di frattura per decidere un'eventuale pausa terapeutica, mentre la DXA di controllo resta ogni 18–24 mesi; denosumab da non interrompere senza passare a un bisfosfonato; anabolici per un tempo limitato e poi sempre un antiriassorbitivo.</span></li>
     <li><i>5</i><span><b>Calcemia</b> prima di ogni dose di denosumab; vitamina D e funzione renale periodicamente.</span></li></ul>` }
 ];
 function vGuida(){
