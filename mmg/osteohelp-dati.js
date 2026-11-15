@@ -1,5 +1,5 @@
 /* File generato da mmg/tools/aggiorna-dati.py: NON modificare a mano.
-   Dati clinici e motori copiati senza modifiche da Osteo Help (index.html, sha256 7302980f2779). */
+   Dati clinici e motori copiati senza modifiche da Osteo Help (index.html, sha256 71ed076df02b). */
 /* ============================================================
    DATI CLINICI — copiati senza modifiche dall'Osteo Help originale
    ============================================================ */
@@ -205,7 +205,7 @@ const FORMS = [
  {cid:"sarcoidosi",f:[["Ca","u"],["CaU","u"]],k:{PTH:["d",1]}},
  {cid:"intoxD",f:[["Ca","u"],["CaU","u"],["D","u"]],k:{PTH:["d",0],D:["u",0]}},
  {cid:"ipertiroid",f:[["Ca","u"],["CaU","u"],["TSH","d"]],k:{TSH:["d",0]}},
- {cid:"fhh",f:[["Ca","u"],["CaU","d"]],k:{Ca:["u",1],CaU:["d",0]}},
+ {cid:"fhh",f:[["Ca","u"],["CaU","d"]],k:{Ca:["u",0],CaU:["d",0]}},
  {cid:"farmaciCa",f:[["Ca","u"]],k:{}},
  {cid:"ipopara",f:[["Ca","d"],["P","u"],["PTH","d"]],k:{Ca:["d",0],PTH:["d",1]}},
  {cid:"deficitD",f:[["Ca","d"],["P","d"],["ALP","u"],["CaU","d"],["D","d"],["PTH","u"]],k:{D:["d",0],Ca:["d",1]}},
