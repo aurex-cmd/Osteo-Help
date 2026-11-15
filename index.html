@@ -255,6 +255,21 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
   body.is-home main > .screen{grid-template-rows:auto auto auto auto 1fr auto;row-gap:14px}
   /* la riga in fondo, al centro della pagina sotto le due colonne */
   body.is-home .screen > .foot{grid-column:1 / -1;grid-row:6;margin-top:40px}
+  /* titolo su una riga sola, più grande, sopra le due colonne */
+  body.is-home .home-l > h1{grid-column:1 / -1;font-size:42px!important;line-height:1.08;margin-top:0}
+  body.is-home main h1 br{display:none}
+  /* i riquadri si allungano fino al fondo di Consulta: le due colonne finiscono alla stessa altezza */
+  body.is-home .screen > .home-l > .stack.home{grid-row:4 / 6;align-self:stretch}
+  body.is-home .screen > .home-l > .stack.home > *{min-height:0}
+  /* testi un po' più grandi che sul telefono; la riga in fondo più scura */
+  body.is-home main .lbl{font-size:12px}
+  body.is-home main .foot{font-size:13px;color:#4F5967}
+  body.is-home main .sub{text-wrap:pretty}
+  body.is-home main .sub{font-size:16px}
+  body.is-home .entry.big b{font-size:19.5px}
+  body.is-home .entry.big small{font-size:14.5px}
+  body.is-home .rows .rowlink{font-size:16.5px}
+  body.is-home .rows .rowlink small{font-size:14px}
   body.is-home .home-l{display:contents}
   body.is-home .home-l > *{grid-column:1}
   body.is-home .home-r{grid-column:2;grid-row:3 / 6}
@@ -1305,7 +1320,7 @@ const head = (title, sub, label) => `${label?`<div class="katrow">${kat(label)}<
 
 /* ---------- home ---------- */
 function vHome(){
-  return { bar:"Osteo Help", html: `<div class="home-l">` + head("Osteoporosi<br>secondaria", "Dagli esami di primo livello e dalla clinica alle possibili cause secondarie.") + `
+  return { bar:"Osteo Help", html: `<div class="home-l">` + head("Osteoporosi <br>secondaria", "Dagli esami di primo livello e dalla clinica alle possibili cause secondarie.") + `
     <div class="stack home">
       ${entry("alterati", "Esami di I livello alterati", "Dai valori fuori norma alle cause", "blue big", "heroTube")}
       ${entry("normali", "Esami di I livello normali", "Dalla clinica alle cause", "teal big", "heroClip")}
