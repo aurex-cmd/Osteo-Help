@@ -125,7 +125,7 @@ body.is-home .rows .rowlink > .ic{width:40px;height:40px;padding:9px;border-radi
   body.is-home .home-l .entry.big > .ic{width:44px;height:44px;padding:10px;border-radius:12px}
   body.is-home .home-l :is(.stack.home,.heroes){gap:8px;margin-top:2px}
   body.is-home .home-r > .lbl:first-child{margin-top:4px}
-  body.is-home .home-r .foot{margin-top:12px}
+  body.is-home .screen > .foot{grid-column:2;margin-top:12px}
 }
 
 /* righe semplici */
@@ -252,7 +252,9 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
   body.is-home main > .screen{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;align-items:start;padding-top:12px}
   /* il titolo sta sopra, da solo: il sottotitolo e i riquadri a sinistra partono alla stessa altezza di Consulta.
      La colonna di sinistra si scompone nella griglia; l'ultima riga elastica assorbe l'altezza in più di Consulta */
-  body.is-home main > .screen{grid-template-rows:auto auto auto auto 1fr;row-gap:14px}
+  body.is-home main > .screen{grid-template-rows:auto auto auto auto 1fr auto;row-gap:14px}
+  /* la riga in fondo, al centro della pagina sotto le due colonne */
+  body.is-home .screen > .foot{grid-column:1 / -1;grid-row:6;margin-top:40px}
   body.is-home .home-l{display:contents}
   body.is-home .home-l > *{grid-column:1}
   body.is-home .home-r{grid-column:2;grid-row:3 / 6}
@@ -1317,8 +1319,8 @@ function vHome(){
       <a class="rowlink" href="#calcio">${ic("calc")}<span>Calcio corretto<small>Per l'albumina</small></span>${CHEV}</a>
       <a class="rowlink" href="#bibliografia">${ic("book")}<span>Bibliografia</span>${CHEV}</a>
     </div>
-    <p class="foot">Ausilio al ragionamento clinico, non sostitutivo del giudizio specialistico.<br>Creato dal Dr. Aurelio Guarnaccia</p>
-    </div>` };
+    </div>
+    <p class="foot">Ausilio al ragionamento clinico, non sostitutivo del giudizio specialistico.<br>Creato dal Dr. Aurelio Guarnaccia</p>` };
 }
 
 /* ---------- esami alterati: inserimento ---------- */
