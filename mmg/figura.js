@@ -41,21 +41,22 @@ const noHead = h => h.replace(/^\s*<h1>[\s\S]*?<div class="rule"><\/div>/, "");
 
 /* ---------- cosa resta in evidenza ---------- */
 function figChips(p, F, S){
-  const c = [], add = (cls, t) => c.push(`<span class="fchip ${cls}">${t}</span>`), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
-  if(F.recent.length) add("r", "⚡ Frattura recente: rischio imminente");
-  if(vh.filter(x => !/24 mesi/.test(x)).length) add("r", "Rischio di frattura molto alto");
-  if(S.hpp) add("r", "⚠ Fosfatasi alcalina bassa: no bisfosfonati");
-  if(ci.esofago) add("r", "⚠ Esofago: no bisfosfonati orali");
-  if(eg !== null && eg < 35) add("r", `⚠ eGFR ${fmtN(eg, 0)}: no alendronato né zoledronato`);
-  if(ci.cv || F.feats.has("ictus_emiplegia")) add("a", "Cardiovascolare: no romosozumab");
-  if(ci.tev) add("a", "TEV: no raloxifene");
-  if(ci.denti) add("a", "Denti da sistemare");
-  if(vdLow(vd)) add("a", "Vitamina D " + vdTxt(vd));
-  if(F.gc) add("a", "Glucocorticoidi");
-  const nsec = S.N.note.length + S.N.sosp.length + S.A.forms.length; if(nsec) add("a", plural(nsec, "forma secondaria", "forme secondarie"));
-  if(F.zona) add("z z-" + F.zona, `<i></i>DeFRA zona ${ZONE[F.zona].t.toLowerCase()}${F.rischio !== null ? " · " + fmtN(F.rischio, 0) + "%" : ""}`);
-  if(F.minT !== null) add("p", "T-score " + fmtN(F.minT));
-  return c.join("");
+  /* riquadri tutti uguali: categoria in piccolo, dato in grassetto; il colore dice solo quanto pesa (rosso, ambra, neutro) */
+  const c = [], add = (sev, lbl, val) => c.push({ sev, lbl, val }), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
+  if(F.recent.length) add("r", "Rischio di rifrattura", "Imminente: frattura recente");
+  else if(vh.length) add("r", "Rischio di frattura", "Molto alto");
+  if(F.zona) add(F.zona === "verde" ? "n" : zoneHigh(F.zona) ? "r" : "a", "DeFRA", `<span class="zn z-${F.zona}"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()}${F.rischio !== null ? " · " + fmtN(F.rischio, 0) + "%" : ""}</span>`);
+  if(F.minT !== null) add(F.minT <= -2.5 ? "a" : "n", "T-score minimo", fmtN(F.minT));
+  if(S.hpp) add("r", "Controindicazione", "Bisfosfonati: ALP bassa");
+  if(ci.esofago) add("r", "Controindicazione", "Bisfosfonati orali: esofago");
+  if(eg !== null && eg < 35) add("r", "Controindicazione", `Alendronato e zoledronato: eGFR ${fmtN(eg, 0)}`);
+  if(ci.cv || F.feats.has("ictus_emiplegia")) add("a", "Controindicazione", "Romosozumab: cardiovascolare");
+  if(ci.tev) add("a", "Controindicazione", "Raloxifene: TEV");
+  if(ci.denti) add("a", "Prima della terapia", "Denti da sistemare");
+  if(vdLow(vd)) add("a", "Vitamina D", vdTxt(vd));
+  const nsec = S.N.note.length + S.N.sosp.length + S.A.forms.length; if(nsec) add("a", "Forme secondarie", nsec + " da considerare");
+  if(F.gc) add("a", "Farmaci", "Glucocorticoidi");
+  return c.map(x => `<div class="fev-i ${x.sev}"><small>${x.lbl}</small><b>${x.val}</b></div>`).join("");
 }
 
 /* ---------- i punti sulla figura ---------- */
@@ -117,7 +118,7 @@ function vFigura(p){
     <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots)}</div>
     <div class="fcol-r">
       ${banner}
-      <div class="fchips">${figChips(p, F, S) || `<span class="small">Qui restano in evidenza i dati che contano per la decisione.</span>`}</div>
+      <div class="fev"><span class="flbl">In evidenza</span>${figChips(p, F, S) || `<p class="small">Qui restano in evidenza i dati che contano per la decisione.</p>`}</div>
       ${td.length ? `<div class="todo">${td.slice(0, 3).map(x => todoItem(x, false)).join("")}</div>` : ""}
       ${figDesk(p, F, S)}
       <a class="fcta${ready ? " on" : ""}" href="${ready ? `#paz-${p.id}-decidi` : `#paz-${p.id}-figura`}"${ready ? "" : ` data-fsheet="defra"`}>${ready ? (dec ? "Rivedi la decisione" : "▶ Decidi la terapia") : "🔒 Decidi la terapia"}<small>${ready ? (all.find(x => x.st === "miss" && x.k !== "terapia" && x.k !== "storico") ? "alcuni indizi mancano: la proposta sarà meno sicura" : "tutti gli indizi raccolti") : "serve la zona del DeFRA"}</small></a>
