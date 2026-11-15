@@ -314,6 +314,13 @@ const MIC = {
   lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>'
 };
 const mic = (n, c) => `<svg class="${c || "mi"}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${MIC[n]}</svg>`;
+/* avatar a mezzo busto: uomo, donna (capelli lunghi) o neutro se il sesso non è indicato */
+const AVATAR = {
+  uomo:'<path class="ab" d="M5 46c0-10.5 7.6-17.5 17-17.5s17 7 17 17.5z"/><circle class="ah" cx="22" cy="17.5" r="7.2"/><path class="ac" d="M14.6 17.2c-.4-5.6 3-8.8 7.4-8.8s7.8 3.2 7.4 8.8c-1-2.7-3.2-4.2-7.4-4.2s-6.4 1.5-7.4 4.2z"/>',
+  donna:'<path class="ac" d="M13.4 27c-2.2-9 .5-17.6 8.6-17.6s10.8 8.6 8.6 17.6c-2.4 1.3-5.1 1.8-8.6 1.8s-6.2-.5-8.6-1.8z"/><path class="ab" d="M6 46c0-10 7.2-17 16-17s16 7 16 17z"/><circle class="ah" cx="22" cy="18" r="6.9"/><path class="ac" d="M15.1 17.4c.4-5 3.3-7.6 6.9-7.6 3.1 0 5.8 1.8 6.8 5.7-3.3-.2-7-1.5-8.8-3.7-.9 2.2-2.6 4.3-4.9 5.6z"/>',
+  "":'<path class="ab" d="M6 46c0-10 7.2-17 16-17s16 7 16 17z"/><circle class="ah" cx="22" cy="18" r="7.2"/>'
+};
+const avatar = p => `<span class="pav" aria-hidden="true"><svg viewBox="3 4 38 38">${AVATAR[p.sesso || ""] || AVATAR[""]}</svg></span>`;
 const initials = p => { const w = pzName(p).replace(/[^\p{L}\s.]/gu, " ").split(/[\s.]+/).filter(Boolean); return w.length ? (w[0][0] + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase() : "?"; };
 function vPazienti(){
   const cards = PZ.slice().sort((a, b) => pzName(a).localeCompare(pzName(b), "it", { sensitivity:"base" })).map(p => {
@@ -321,7 +328,7 @@ function vPazienti(){
     const bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
     const where = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}` : pl.st !== "ok" ? pl.t : "Percorso completo";
     return `<a class="pcard" href="#paz-${p.id}" data-q="${hx(pzName(p).toLowerCase())}">
-      <span class="pav">${hx(initials(p))}</span>
+      ${avatar(p)}
       <span class="pbody"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}${F.zona ? ` · <span class="zn z-${F.zona}"><i></i>zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</small>
         <span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small class="pwhere">${where}</small></span>${CHEV}</a>`;
   }).join("");
