@@ -1,5 +1,5 @@
 /* File generato da mmg/tools/aggiorna-dati.py: NON modificare a mano.
-   Dati clinici e motori copiati senza modifiche da Osteo Help (index.html, sha256 71ed076df02b). */
+   Dati clinici e motori copiati senza modifiche da Osteo Help (index.html, sha256 d212f8e73c21). */
 /* ============================================================
    DATI CLINICI — copiati senza modifiche dall'Osteo Help originale
    ============================================================ */
@@ -10,7 +10,7 @@ const COND = {
   neoplasia:"Neoplasia / metastasi ossee", ipercalcemiaMaligna:"Ipercalcemia maligna (urgenza)", sarcoidosi:"Sarcoidosi / granulomatosi",
   ipertiroid:"Ipertiroidismo", intoxD:"Intossicazione da vitamina D", farmaciCa:"Farmaci che alzano il calcio (tiazidici, litio)",
   fhh:"Ipercalcemia ipocalciurica familiare", deficitD:"Carenza di vitamina D / osteomalacia",
-  osteomalIpoP:"Osteomalacia ipofosfatemica (FGF23)", malassorb:"Malassorbimento (celiachia, IBD, bariatrica)",
+  osteomalIpoP:"Osteomalacia ipofosfatemica (FGF23)", malassorb:"Malassorbimento (celiachia, IBD, chirurgia bariatrica)",
   ipopara:"Ipoparatiroidismo", irc:"Insufficienza renale cronica (CKD-MBD)", ipomagne:"Ipomagnesiemia",
   fanconi:"Tubulopatia (s. di Fanconi)", paget:"Malattia di Paget", colestasi:"Epatopatia colestatica",
   epatopatia:"Epatopatia cronica / cirrosi", nefrosica:"Sindrome nefrosica", ipofosfatasia:"Ipofosfatasia",
