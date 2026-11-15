@@ -224,6 +224,28 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .refsbody .refs-foot{margin:14px 0 0}
 
 /* barra azione in basso */
+/* PC (da 1000px): due colonne. A sinistra l'elenco o l'inserimento, a destra la scheda
+   o il risultato; ognuna scorre per conto suo */
+.pane-empty{display:grid;place-items:center;align-content:center;gap:10px;min-height:60vh;color:var(--muted);text-align:center;font-size:.95rem}
+.pane-empty .ic{width:44px;height:44px;color:var(--faint)}
+@media (min-width:1000px){
+  .bar-in{max-width:1240px}
+  body.split main{max-width:1240px;padding:0 24px;display:grid;grid-template-columns:minmax(380px,440px) minmax(0,1fr);align-items:start}
+  body.split .pane{position:sticky;top:calc(60px + env(safe-area-inset-top));height:calc(100vh - 60px - env(safe-area-inset-top));overflow-y:auto;overscroll-behavior:contain;padding:4px 0 48px}
+  body.split .pane-l{padding-right:28px;scrollbar-width:thin}
+  body.split .pane-r{border-left:1px solid var(--line);padding-left:40px;padding-right:8px}
+  body.split .pane-r > .screen{max-width:680px}
+  body.split .pane-l a.sel{background:var(--box);border-radius:8px}
+  body.split .pane-l .rowlink.sel{padding-left:10px;padding-right:8px;margin:0 -10px;width:calc(100% + 20px)}
+  body.split .pane-l .entry.sel{outline:2px solid var(--ink);outline-offset:-2px}
+  body.split .dock{display:none}
+  /* home: come col telefono in orizzontale, titolo e riquadri a sinistra, Consulta a destra */
+  body.is-home main{max-width:1040px;padding-left:24px;padding-right:24px}
+  body.is-home .bar-in{max-width:992px}
+  body.is-home main > .screen{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;align-items:start;padding-top:12px}
+  body.is-home .home-r > .lbl:first-child{margin-top:22px}
+  /* le pagine a una colonna (calcio, bibliografia) restano strette e al centro */
+}
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:10px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,transparent)}
 .dock button{width:100%;max-width:528px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:12px;background:var(--ink);color:var(--bg);padding:14px 16px;text-align:left}
 .dock button:disabled{background:var(--box);color:var(--muted);cursor:default}
@@ -1298,7 +1320,7 @@ document.addEventListener("click", e => {
   const ex = b.dataset.ex, kind = b.dataset.kind;
   if(cstate[ex] === kind) delete cstate[ex]; else cstate[ex] = kind;
   b.closest(".tri").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", cstate[ex] === x.dataset.kind));
-  updateDock();
+  updateDock(); refreshRight();
 });
 function dockA(){
   const r = computeA();
@@ -1373,7 +1395,7 @@ document.addEventListener("click", e => {
   b.setAttribute("aria-pressed", selected.has(id));
   const ax = b.closest("details.axis"), n = ax.querySelectorAll('.ck[aria-pressed="true"]').length, badge = ax.querySelector(".n");
   badge.textContent = n; badge.hidden = !n;
-  updateDock();
+  updateDock(); refreshRight();
 });
 function dockN(){
   if(!selected.size) return { t:"Spunta almeno un elemento", disabled:true };
@@ -1529,6 +1551,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-p]"); if(!b) return;
   for(const k in cstate) delete cstate[k];
   patterns[+b.dataset.p].ids.forEach(id => { const m = ALT2STATE[id]; if(m) cstate[m[0]] = m[1]; });
+  if(document.body.classList.contains("split") && leftRoute === "pattern"){ patSel = +b.dataset.p; refreshRight(); return; }
   go("risultato");
 });
 
@@ -1789,22 +1812,70 @@ function view(route){
   if(route.startsWith("esame-")) return vEsame(route.slice(6));
   return (ROUTES[route] || vHome)();
 }
-function render(){
+/* ---------- PC: due colonne ---------- */
+const WIDE = matchMedia("(min-width:1000px)");
+/* da quale elenco si arriva a ogni tipo di scheda; senza un elenco aperto si usa il primo che ha senso */
+const LIST_OF = { forma:["risultato","esami","catalogo"], causa:["considerare","catalogo"], gruppo:["catalogo"], esame:["esami"] };
+const LIVE = { alterati:"risultato", normali:"considerare", pattern:"risultato" };
+const SINGLE = new Set(["", "calcio", "bibliografia"]);
+let leftRoute = null, patSel = null;
+function panes(route){
+  if(SINGLE.has(route) || !ROUTES[route] && !/^(forma|causa|gruppo|esame)-/.test(route)) return null;
+  const t = route.split("-")[0];
+  if(LIST_OF[t] && route.includes("-")){
+    let l = LIST_OF[t].includes(leftRoute) ? leftRoute : null;
+    if(!l) l = t === "forma" ? (computeA().kind !== "none" ? "risultato" : "catalogo") : t === "causa" ? (selected.size ? "considerare" : "catalogo") : LIST_OF[t][0];
+    return { l, r: route };
+  }
+  return { l: route, r: LIVE[route] || null };
+}
+const EMPTY = { alterati:"Segna gli esami fuori norma: qui compaiono le forme compatibili.", normali:"Spunta ciò che il paziente presenta: qui compaiono le forme da considerare.",
+  pattern:"Scegli un pattern per vederne il risultato.", esami:"Scegli un esame dall'elenco.", catalogo:"Scegli una forma dal catalogo.",
+  risultato:"Scegli una forma per aprirne la scheda.", considerare:"Scegli una forma per aprirne la scheda." };
+function rightHTML(p){
+  const v = p.r ? view(p.r) : null;
+  if(!v || v.redirect !== undefined || (p.r === "risultato" && p.l === "pattern" && patSel === null)) return `<div class="pane-empty">${ic("grid")}<p>${EMPTY[p.l] || ""}</p></div>`;
+  return `<div class="screen">${v.html}</div>`;
+}
+function refreshRight(){
+  if(!document.body.classList.contains("split")) return;
+  const p = panes(current); if(p) $("#paneR").innerHTML = rightHTML(p);
+  markSel();
+}
+function markSel(){ document.querySelectorAll("#paneL a.sel, #paneL .sel").forEach(a => a.classList.remove("sel"));
+  const a = current && document.querySelector(`#paneL a[href="#${current}"]`); if(a) a.classList.add("sel");
+  if(patSel !== null && leftRoute === "pattern"){ const b = document.querySelector(`#paneL [data-p="${patSel}"]`); if(b) b.classList.add("sel"); } }
+WIDE.addEventListener("change", () => render());
+function render(fromNav){
   const route = routeNow();
-  const v = view(route);
+  const p = WIDE.matches ? panes(route) : null;
+  const v = view(p ? p.l : route);
   if(v.redirect !== undefined){ history.replaceState(null, "", v.redirect ? "#" + v.redirect : location.pathname + location.search); return render(); }
   const changed = route !== current; current = route;
-  $("#main").innerHTML = `<div class="screen">${v.html}</div>`;
+  document.body.classList.toggle("split", !!p);
+  if(p){
+    const keep = fromNav && p.l === leftRoute && $("#paneL");
+    if(p.l !== "pattern") patSel = null;
+    /* stesso elenco ridisegnato (Azzera, linguette, sesso): resta dov'era; scheda nuova: si apre dall'inizio */
+    const yL = p.l === leftRoute && $("#paneL") ? $("#paneL").scrollTop : 0, yR = !changed && $("#paneR") ? $("#paneR").scrollTop : 0;
+    if(!keep) $("#main").innerHTML = `<div class="pane pane-l" id="paneL"><div class="screen">${v.html}</div></div><div class="pane pane-r" id="paneR"></div>`;
+    if(!keep) $("#paneL").scrollTop = yL;
+    leftRoute = p.l;
+    $("#paneR").innerHTML = rightHTML(p); $("#paneR").scrollTop = yR;
+    markSel();
+  } else { leftRoute = null; $("#main").innerHTML = `<div class="screen">${v.html}</div>`; }
   // in home la barra mostra il marchio OH accanto al nome
   $(".bar").classList.toggle("home", !route);
   document.body.classList.toggle("is-home", !route);
   if(route) $("#barT").textContent = v.bar; else $("#barT").innerHTML = `<span class="oh">OH</span>${v.bar}`;
   $("#back").style.visibility = route ? "visible" : "hidden";
-  $("#help").hidden = !!route; $("#act").hidden = !route;
+  $("#help").hidden = !!route; $("#act").hidden = !route || !v.act;
   $("#act").textContent = v.act ? v.act[0] : ""; actFn = v.act ? v.act[1] : null;
-  dockCfg = v.dock ? route : null;
+  /* su PC «Modifica» riporta all'inserimento, con il risultato accanto */
+  if(p && v.act && v.act[0] === "Modifica") actFn = () => go(p.l === "risultato" ? "alterati" : "normali");
+  dockCfg = v.dock ? (p ? p.l : route) : null;
   updateDock();
-  if(changed) window.scrollTo(0, 0);
+  if(changed && !p) window.scrollTo(0, 0);
   if(changed && route === "catalogo" && catY !== null){ window.scrollTo(0, catY); catY = null; }
   if(route === "bibliografia") showPendingRef();
 }
@@ -1823,7 +1894,7 @@ window.addEventListener("hashchange", () => {
   introClose(); vidClose();
   const r = routeNow();
   if(stack.length > 1 && stack[stack.length - 2] === r) stack.pop(); else stack.push(r);
-  render();
+  render(true);
 });
 stack.push(routeNow());
 render();
