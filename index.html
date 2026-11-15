@@ -240,7 +240,7 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
   body.split .pane-l .rowlink.sel{padding-left:10px;padding-right:8px;margin:0 -10px;width:calc(100% + 20px)}
   body.split .pane-l .entry.sel{outline:2px solid var(--ink);outline-offset:-2px}
   body.split .dock{display:none}
-  /* catalogo: titolo e ricerca restano fermi in alto, scorre solo l'elenco */
+  /* catalogo ed esame per esame: titolo e ricerca restano fermi in alto, scorre solo l'elenco */
   body.split .pane-l .cat-top{position:sticky;top:-4px;z-index:2;background:var(--bg);margin-top:-4px;padding:4px 0 12px;box-shadow:0 1px 0 var(--line)}
   /* home: come col telefono in orizzontale, titolo e riquadri a sinistra, Consulta a destra */
   body.is-home main{max-width:1040px;padding-left:24px;padding-right:24px}
@@ -1568,7 +1568,7 @@ function vEsami(){
     const q = [e.name, e.screens||""].concat(...e.alts.map(a => [a.name, a.clues].concat(a.dx.map(id => COND[id])))).join(" ").toLowerCase();
     return `<a class="rowlink" href="#esame-${i}" data-q="${esc(q)}"><span>${e.name}${complementari.indexOf(e) > -1 ? '<span class="l2">II livello</span>' : ""}${e.screens?`<small>${e.screens}</small>`:""}</span>${CHEV}</a>`;
   }).join("");
-  return { bar:"Esame per esame", html: head("Esame per esame") + `<input class="search" id="exQ" type="search" placeholder="Cerca esame, sintomo o forma" autocomplete="off" aria-label="Cerca"><div class="rows" id="exList">${list}</div><p class="hint" id="exNo" hidden>Nessuna corrispondenza.</p>` };
+  return { bar:"Esame per esame", html: `<div class="cat-top">` + head("Esame per esame") + `<input class="search" id="exQ" type="search" placeholder="Cerca esame, sintomo o forma" autocomplete="off" aria-label="Cerca"></div><div class="rows" id="exList">${list}</div><p class="hint" id="exNo" hidden>Nessuna corrispondenza.</p>` };
 }
 function vEsame(i){
   const e = allExams[+i]; if(!e) return { redirect:"esami" };
