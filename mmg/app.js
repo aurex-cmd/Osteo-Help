@@ -10,9 +10,9 @@ const DEFRA_URL = "https://defra-osteoporosi.it/";
 const hx = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 const num = v => { if(v === "" || v == null) return null; const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) ? n : null; };
 const fmtN = (n, d) => n == null ? "—" : n.toFixed(d == null ? 1 : d).replace(".", ",").replace("-", "−");
-/* vitamina D: si conserva in ng/mL; si mostra e si inserisce nell'unità scelta (1 ng/mL = 2,496 nmol/L) */
+/* vitamina D: si inserisce e si mostra in nmol/L (predefinita) o in ng/mL; internamente si conserva in ng/mL (1 ng/mL = 2,496 nmol/L) */
 const VD_F = 2.496;
-let VD_U = "ng"; try{ if(localStorage.getItem("oh-mmg-vitd-unit") === "nmol") VD_U = "nmol"; }catch(e){}
+let VD_U = "nmol"; try{ if(localStorage.getItem("oh-mmg-vitd-unit") === "ng") VD_U = "ng"; }catch(e){}   /* nmol/L come unità predefinita */
 const vdUnit = () => VD_U === "nmol" ? "nmol/L" : "ng/mL";
 const vdShow = ng => ng === null ? "" : VD_U === "nmol" ? String(Math.round(ng * VD_F)) : String(Math.round(ng * 10) / 10);
 const vdTxt = ng => VD_U === "nmol" ? fmtN(ng * VD_F, 0) + " nmol/L" : fmtN(ng, 0) + " ng/mL";
@@ -684,7 +684,7 @@ function vPazEsami(p){
       <label class="fld">Calcio totale (mg/dL)<input type="text" inputmode="decimal" autocomplete="off" data-pf="caTot" value="${hx(p.caTot)}"></label>
       <label class="fld">Albumina (g/dL)<input type="text" inputmode="decimal" autocomplete="off" data-pf="albVal" value="${hx(p.albVal)}"></label>
       <p class="small" data-live="cacorr" style="grid-column:1/-1;margin:0">${caLine(p)}</p>
-      <div class="fld" style="grid-column:1/-1">25-OH-vitamina D<div class="vdrow"><input type="text" inputmode="decimal" autocomplete="off" id="vdIn" value="${vdShow(num(p.vitd))}" aria-label="25-OH-vitamina D in ${vdUnit()}"><div class="seg" role="group" aria-label="Unità">${["ng", "nmol"].map(u => `<button type="button" data-vdu="${u}" aria-pressed="${VD_U === u}">${u === "ng" ? "ng/mL" : "nmol/L"}</button>`).join("")}</div></div></div>
+      <div class="fld" style="grid-column:1/-1">25-OH-vitamina D<div class="vdrow"><input type="text" inputmode="decimal" autocomplete="off" id="vdIn" value="${vdShow(num(p.vitd))}" aria-label="25-OH-vitamina D in ${vdUnit()}"><div class="seg" role="group" aria-label="Unità">${["nmol", "ng"].map(u => `<button type="button" data-vdu="${u}" aria-pressed="${VD_U === u}">${u === "ng" ? "ng/mL" : "nmol/L"}</button>`).join("")}</div></div></div>
     </div>
     <div class="btns"><button type="button" class="btn sec" id="labAllN">Tutti gli altri nella norma</button></div>
     <div id="pzGrid">${grid}</div>
@@ -1048,7 +1048,7 @@ const GUIDA = [
     <div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>` },
   { k:"base", t:"Calcio, vitamina D e stile di vita", s:"Per tutti, prima e durante la terapia", html:`
     <ul class="list"><li><i>1</i><span><b>Calcio</b>: 1000–1200 mg al giorno, possibilmente con la dieta (latte, yogurt, formaggi, acque ricche di calcio); integratore solo per la quota mancante.</span></li>
-    <li><i>2</i><span><b>Vitamina D</b>: correggere la carenza prima di iniziare un farmaco (la carenza ne riduce l'efficacia e favorisce l'ipocalcemia). In chi è in terapia per l'osteoporosi si punta ad almeno 30 ng/mL (75 nmol/L); colecalciferolo rimborsabile senza dosaggio in corso di terapia remineralizzante (Nota 96).</span></li>
+    <li><i>2</i><span><b>Vitamina D</b>: correggere la carenza prima di iniziare un farmaco (la carenza ne riduce l'efficacia e favorisce l'ipocalcemia). In chi è in terapia per l'osteoporosi si punta ad almeno 75 nmol/L (30 ng/mL); colecalciferolo rimborsabile senza dosaggio in corso di terapia remineralizzante (Nota 96).</span></li>
     <li><i>3</i><span><b>Attività fisica</b> regolare, con esercizi di carico e di equilibrio.</span></li>
     <li><i>4</i><span><b>Cadute</b>: vista, farmaci sedativi e ipotensivi, casa sicura, calzature.</span></li>
     <li><i>5</i><span><b>Fumo</b> da sospendere, <b>alcol</b> sotto le 3 unità al giorno, peso adeguato.</span></li>
