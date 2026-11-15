@@ -509,9 +509,9 @@ function labReport(p, S){
   if(A.kind === "none") out.push(`<p class="hint">${labStatus(p).done ? "Tutti gli esami registrati sono nella norma." : "Segna ▲ o ▼ gli esami fuori norma e N quelli nella norma."}</p>`);
   else {
     const tags = `<div class="tags">${A.sel.map(s => `<span class="tag ${s[1]}">${ftag(s)}</span>`).join("")}</div>`;
-    out.push(`<p class="lbl">${A.kind === "inter" ? "Forme compatibili" : A.kind === "multi" ? "Più cause possibili" : "Nessuna forma nota"}</p>` + tags +
+    out.push(`<p class="lbl">${A.kind === "inter" ? "Forme compatibili" + (A.forms.length > 1 ? " · dalla più frequente" : "") : A.kind === "multi" ? "Più cause possibili" : "Nessuna forma nota"}</p>` + tags +
       (A.forms.length ? `<div class="stack">${A.forms.map(x => ohEntry("forma-" + x.cid, COND[x.cid], x.sub)).join("")}</div>` : `<p class="hint">Nessuna forma in elenco spiega questi reperti.</p>`) +
-      (A.panel.length ? `<p class="lbl">Esami di II livello suggeriti</p><ul class="list">${A.panel.slice(0, 8).map((x, i) => `<li><i>${i + 1}</i>${x[0]}${x[1] > 1 ? `<em>comune a ${x[1]}</em>` : ""}</li>`).join("")}</ul>` : ""));
+      (A.byForm.length ? `<p class="lbl">Esami di II livello</p><p class="small">${L2_NOTE}</p><div>${l2ByFormHTML(A.byForm, cid => COND[cid])}</div>` : ""));
   }
   return out.join("");
 }
@@ -710,7 +710,7 @@ function vPazReport(p){
     <p class="lbl">Anamnesi e terapie</p>${li(anam.concat(p.fam === true ? ["Familiarità per fratture di femore o vertebre"] : []))}
     <p class="lbl">Forme secondarie dall'anamnesi</p>${li([...S.N.note.map(x => x.f.nome + " — " + badgeOf(x, false)), ...S.N.sosp.map(x => x.f.nome + " — " + badgeOf(x, true))])}
     <p class="lbl">Esami di I livello${p.labData ? " (" + fmtD(p.labData) + ")" : ""}</p>${li(labTxt.concat(num(p.egfr) !== null ? ["eGFR " + fmtN(num(p.egfr), 0) + " mL/min"] : [], num(p.vitd) !== null ? ["25-OH-vitamina D " + vdTxt(num(p.vitd))] : []))}
-    ${S.A.forms.length ? `<p class="note"><b>Forme compatibili con gli esami:</b> ${S.A.forms.map(x => COND[x.cid]).join(", ")}.${S.A.panel.length ? " Esami di II livello: " + S.A.panel.slice(0, 6).map(x => x[0]).join("; ") + "." : ""}</p>` : ""}
+    ${S.A.forms.length ? `<p class="note"><b>Forme compatibili con gli esami:</b> ${S.A.forms.map(x => COND[x.cid]).join(", ")}.${S.A.byForm.length ? " Esami di II livello, solo su sospetto clinico, partendo da " + COND[S.A.byForm[0][0]].toLowerCase() + ": " + S.A.byForm[0][1].join("; ") + "." : ""}</p>` : ""}
     ${S.hpp ? `<p class="note"><b>Fosfatasi alcalina bassa:</b> escludere l'ipofosfatasia; bisfosfonati controindicati.</p>` : ""}
     <p class="lbl">Densitometria</p>${li(F.dxa.map(d => fmtD(d.data) + " — colonna " + fmtN(num(d.tL)) + ", femore totale " + fmtN(num(d.tFt)) + ", collo " + fmtN(num(d.tFn))))}
     <p class="note">${pl.t}.</p>

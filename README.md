@@ -10,7 +10,7 @@ L'app procede per schermate, una cosa alla volta:
 
 1. **Home**: si sceglie da dove partire, *Esami alterati* o *Esami normali*.
 2. **Inserimento**: si segnano gli esami (▲ alto, ▼ basso, N normale) oppure si spuntano farmaci, malattie, segni e anamnesi. La barra in basso dice subito quanti risultati ci sono.
-3. **Risultato**: l'elenco delle forme compatibili, con gli esami di II livello consigliati.
+3. **Risultato**: l'elenco delle forme compatibili, dalla più frequente alla più rara, con gli esami di II livello forma per forma (solo su sospetto clinico).
 4. **Scheda**: toccando una forma si apre la sua scheda, con in alto l'etichetta colorata della categoria (es. Endocrinologia, Farmaci) (reperti tipici, esami di II livello, effetti sull'osso; per le forme cliniche: quando considerarla, conferma, nota).
 
 In fondo a ogni scheda la sezione **Fonti** riporta le voci di bibliografia dedicate a quella forma, con il loro numero: toccandolo si apre la bibliografia evidenziando la voce. Le schede senza una fonte dedicata rimandano alle linee guida generali.
@@ -25,6 +25,8 @@ Il catalogo riunisce le forme dei due percorsi. Le forme che si evidenziano agli
 
 ## Correzioni rispetto all'Osteo Help originale
 
+- **Ordine delle forme compatibili**: dalla più frequente alla più rara (tre livelli di frequenza, costante `FREQ`), non più nell'ordine dell'elenco. Esempio: ipocalciuria isolata → prima il ridotto introito di calcio, poi la carenza di vitamina D e il malassorbimento.
+- **Esami di II livello**: divisi per forma, nello stesso ordine; aperti quelli della causa più probabile, con l'avvertenza che vanno richiesti solo su sospetto clinico. La 25-OH-vitamina D, esame di I livello, non compare più tra quelli di II livello.
 - **Malassorbimento**: nel nome «bariatrica» diventa «chirurgia bariatrica».
 - **Ipercalcemia ipocalciurica familiare**: un calcio corretto segnato N la esclude (l'ipercalcemia è il reperto chiave). Con la sola ipocalciuria e il calcio normale non compare più tra le forme compatibili, ma tra quelle escluse da un esame normale.
 - **Osteoporosi da inibitori dell'aromatasi**: non più limitata alla donna. Il farmaco si usa, raramente, anche nell'uomo; la voce compare quindi con entrambi i sessi.
