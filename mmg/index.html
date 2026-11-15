@@ -356,6 +356,7 @@ details.acc[open] > summary .chev{transform:rotate(90deg)}
 .tsum .small{margin-top:8px}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted);margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.report{display:flex;flex-direction:column;gap:12px}
 .report .list li{display:block}
 /* pulsante «Fatto» (in alto a destra e in fondo alle sezioni del paziente) */
 .bar #act{color:var(--focus);font-weight:700;font-size:.95rem}
@@ -461,7 +462,80 @@ main{padding-bottom:40px}
 .ztl{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
 .ztl-i{flex:1 0 96px;border-radius:10px;background:var(--zb);padding:9px 10px;border-top:5px solid var(--zc);display:flex;flex-direction:column;gap:1px}
 .ztl-i i{display:none} .ztl-i b{font-size:.9rem} .ztl-i small{font-size:.74rem;color:var(--muted)}
-@media (min-width:1000px){ .bar-in{max-width:560px} }
+/* da fare: scadenze dei pazienti, ordinate per urgenza */
+.todo{display:flex;flex-direction:column;gap:6px}
+.todo-i{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;background:var(--box)}
+.todo-i > i{width:10px;height:10px;border-radius:50%;flex:0 0 auto;align-self:flex-start;margin-top:6px}
+.todo-i.u0 > i{background:var(--coral)} .todo-i.u1 > i{background:var(--amber)} .todo-i.u2 > i{background:var(--blue)}
+.todo-i.u0{background:var(--coral-box)}
+.todo-i > span{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.todo-i em{font-style:normal;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.todo-i b{font-size:.93rem} .todo-i small{font-size:.8rem;color:var(--muted);line-height:1.35}
+/* documenti del paziente */
+.docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.doc{display:flex;flex-direction:column;gap:2px;text-align:left;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:12px 14px;cursor:pointer;font:inherit;color:var(--ink)}
+.doc b{font-size:.95rem;color:var(--pri)} .doc small{font-size:.8rem;color:var(--muted);line-height:1.35}
+.doc:hover{border-color:var(--pri)}
+/* esami: valore facoltativo e righe ricavate dai valori */
+.rowr{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.lv{width:76px;height:32px;border:1px solid var(--line);border-radius:7px;padding:0 8px;font-size:.85rem;color:var(--ink);background:var(--bg)}
+.lv::placeholder{color:var(--faint)}
+.auto{font-size:.8rem;font-weight:700;padding:6px 10px;border-radius:7px;background:var(--box);color:var(--ink);white-space:nowrap}
+.auto.alto{background:var(--blue-box);color:var(--blue)} .auto.basso{background:var(--coral-box);color:var(--coral)}
+.lgrp > .lbl{margin-top:4px}
+/* dosi e Nota 79 delle terapie */
+.dose-i{margin-top:3px} .dose-i b{color:var(--ink)}
+.dose{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.dose input{height:34px;border:1px solid var(--line);border-radius:7px;padding:0 8px;font-size:.85rem;background:var(--bg);color:var(--ink)}
+.n79l{display:block;margin-top:6px;font-size:.82rem;color:var(--muted)}
+.lnk{border:0;background:none;padding:0;color:var(--focus);font-weight:700;font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#2B2550;color:#fff;padding:11px 16px;border-radius:10px;font-size:.9rem;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:calc(100% - 32px)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.flash{animation:flash 1.4s ease}
+@keyframes flash{0%,60%{box-shadow:0 0 0 4px var(--home-p);border-radius:12px}100%{box-shadow:0 0 0 0 transparent}}
+/* blocco con codice */
+#lock{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:40;padding:16px}
+body.locked .bar{visibility:hidden}
+.lockbox{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:320px;text-align:center}
+.lockbox .ibox{background:var(--home-p)} .lockbox h2{margin:6px 0 0;font-size:1.3rem} .lockbox p{margin:0;color:var(--muted);font-size:.92rem}
+.lockbox input{width:100%;height:48px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font-size:18px;text-align:center;letter-spacing:.2em}
+.lockbox .btn{width:100%} .lockerr{color:var(--coral)!important;font-weight:600}
+/* lettera e foglio per il paziente */
+.letter p{margin:0;line-height:1.6}
+.lt-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:8px} .lt-h span{color:var(--muted)}
+.ce{background:var(--home-p);border-radius:4px;padding:1px 4px;outline:none} .ce:focus{box-shadow:0 0 0 2px var(--pri)}
+.list.kv.lt li{align-items:flex-start} .list.kv.lt li span{flex:0 0 34%;font-size:.85rem} .list.kv.lt li em{text-align:left;font-weight:500}
+.lt-f input{height:44px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:16px;width:100%;max-width:360px}
+.printonly{display:none}
+.foglio .fg-d{border:1px solid var(--line);border-radius:12px;padding:12px 14px} .foglio .fg-d b{font-size:1.05rem} .foglio .fg-d p{margin:6px 0 0;line-height:1.55}
+.fg-next{font-weight:600}
+.list.fg li{display:block;line-height:1.55}
+@media print{
+  .printonly{display:inline} .ce{background:none;padding:0}
+  .letter .lt-f input{display:none}
+  .report{font-size:11pt}
+  .todo-i{background:none!important;padding:4px 0}
+}
+/* computer: colonna più larga e due colonne dove servono */
+@media (min-width:900px){
+  main{max-width:880px;padding-left:28px;padding-right:28px}
+  .bar-in{max-width:880px}
+  #pzGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-items:start}
+  .zpick{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .mhome{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:44px;align-items:start}
+  .mh-l,.mh-r{display:flex;flex-direction:column;gap:14px}
+  .mh-r{padding-top:74px}
+  .mhome .foot{grid-column:1 / -1}
+  .mh-r .foot{margin-top:6px}
+  .report,.letter{max-width:760px}
+}
+@media (max-width:899px){
+  .mh-l,.mh-r{display:contents}
+  .mh-h{order:1} .mh-new{order:2} .bk,.mh-bk{order:3} .mh-todo{order:4} .mh-pl{order:5} .mh-cons{order:6} .mhome .foot{order:7}
+  .mh-pl,.mh-todo,.mh-cons{display:flex;flex-direction:column;gap:14px}
+}
+.mh-pl,.mh-todo,.mh-cons,.mh-h{display:flex;flex-direction:column;gap:14px}
+@media (max-width:420px){ .lv{width:58px} }
 </style>
 </head>
 <body>
