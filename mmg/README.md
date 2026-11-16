@@ -156,3 +156,5 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 - Nella home, «Da fare» propone la «Rivalutazione annuale» quando l'ultima decisione ha più di 12 mesi.
 
 **Icona propria di Osteo Help MMG** (`icone/`): come quella di Osteo Help (OH con la lineetta verde acqua) ma su fondo viola dell'app. Favicon SVG e 32 px, icona per la schermata Home di iPhone/iPad (180 px), icone 192 e 512 px per il manifest, più la versione «maskable» per Android. Il nome sotto l'icona resta «Osteo MMG».
+
+**Anamnesi senza conferma**: tolta la casella «Anamnesi e terapie verificate». L'anamnesi è completa appena si inserisce una patologia, un farmaco o una controindicazione (anche dal testo del gestionale): basta «Fatto». Se non c'è nulla, in fondo c'è il pulsante «Anamnesi muta» (con «annulla»). In rivalutazione l'anamnesi va rivista: si aggiorna una voce oppure si tocca «Nessuna novità dalla valutazione precedente».

@@ -52,6 +52,9 @@ function pzRivaluta(p){
   p.lab = {}; p.labData = ""; p.egfr = ""; p.vitd = ""; p.caTot = ""; p.albVal = ""; p.labVal = {};
   savePz(p);
 }
+/* anamnesi completa: basta aver inserito patologie o farmaci, oppure «Anamnesi muta»; in rivalutazione va rivista */
+const anamHas = p => (p.feats || []).length > 0 || Object.values(p.ci || {}).some(Boolean);
+const anamDone = p => !!p.anamOk || (!p.rival && anamHas(p));
 const pzName = p => p.nome && p.nome.trim() ? p.nome.trim() : "Paziente senza nome";
 function pzRoute(){ const m = /^paz-([a-z0-9]+)(?:-([a-z]+))?$/.exec(routeNow()); return m ? { p: pzGet(m[1]), sez: m[2] || "" } : { p:null, sez:"" }; }
 
@@ -478,8 +481,8 @@ function defraChecklist(p, F){
   push(F.bmi ? "ok" : "miss", "Peso e altezza", F.bmi ? `${fmtN(num(p.peso), 0)} kg, ${fmtN(num(p.altezza), 0)} cm (BMI ${fmtN(F.bmi)})` : "Servono per il calcolo.");
   push(F.fx.length || p.nessunaFx ? "ok" : "miss", "Fratture da fragilità", F.fx.length ? `${F.vert.length} vertebrali, ${F.fem.length} di femore, ${F.oth.length} in altre sedi` : p.nessunaFx ? "Nessuna frattura pregressa" : "Registra le fratture pregresse o conferma che non ce ne sono. Pensa alle vertebrali silenti: una radiografia del rachide dorso-lombare se calo di statura o dorsalgia.");
   push(p.fam === null ? "miss" : "ok", "Familiarità", p.fam === null ? "Frattura di femore o vertebrale nei genitori: da chiedere." : p.fam ? "Sì, fratture di femore o vertebre nei genitori" : "No");
-  push(p.anamOk ? "ok" : "miss", "Glucocorticoidi, fumo, alcol, malattie", p.anamOk ? [F.gc ? "glucocorticoidi" : "", F.feats.has("fumo") ? "fumo" : "", F.feats.has("alcol") ? "alcol ≥ 3 unità/die" : "", ...F.comorb].filter(Boolean).join(", ") || "Nessuno dei fattori del DeFRA" : "Compila anamnesi e terapie e confermale.");
-  push(p.anamOk ? "ok" : "miss", "Terapia ormonale adiuvante", p.anamOk ? (F.adj ? "Sì (" + [F.feats.has("aromatasi") ? "inibitori dell'aromatasi" : "", F.feats.has("adt") ? "deprivazione androgenica" : ""].filter(Boolean).join(", ") + ")" : "No") : "Inibitori dell'aromatasi o deprivazione androgenica: dall'anamnesi.");
+  push(anamDone(p) ? "ok" : "miss", "Glucocorticoidi, fumo, alcol, malattie", anamDone(p) ? [F.gc ? "glucocorticoidi" : "", F.feats.has("fumo") ? "fumo" : "", F.feats.has("alcol") ? "alcol ≥ 3 unità/die" : "", ...F.comorb].filter(Boolean).join(", ") || "Nessuno dei fattori del DeFRA" : "Compila anamnesi e terapie e confermale.");
+  push(anamDone(p) ? "ok" : "miss", "Terapia ormonale adiuvante", anamDone(p) ? (F.adj ? "Sì (" + [F.feats.has("aromatasi") ? "inibitori dell'aromatasi" : "", F.feats.has("adt") ? "deprivazione androgenica" : ""].filter(Boolean).join(", ") + ")" : "No") : "Inibitori dell'aromatasi o deprivazione androgenica: dall'anamnesi.");
   const hasT = F.lastDxa && (num(F.lastDxa.tL) !== null || num(F.lastDxa.tFt) !== null || num(F.lastDxa.tFn) !== null);
   push(!hasT ? "miss" : F.dxaAge > 24 ? "warn" : "ok", "Densitometria (DXA) lombare e femorale", !hasT ? "Serve una DXA con il T-score di colonna e femore." : `T-score del ${fmtD(F.lastDxa.data)}: colonna ${fmtN(num(F.lastDxa.tL))}, femore totale ${fmtN(num(F.lastDxa.tFt))}, collo ${fmtN(num(F.lastDxa.tFn))}` + (F.dxaAge > 24 ? " — più vecchia di 24 mesi" : ""));
   return it;
@@ -598,7 +601,7 @@ function stepStatus(p, k, F, S){
   }
   S = S || pzSecondary(p);
   if(k === "anamnesi"){ const n = S.N.note.length + S.N.sosp.length;
-    return !p.anamOk ? { st:"miss", s:"Da compilare e confermare" } : n ? { st:"warn", s:plural(n, "forma secondaria", "forme secondarie") + " da considerare" } : { st:"ok", s:"Nessuna forma secondaria associata" }; }
+    return !anamDone(p) ? { st:"miss", s:p.rival ? "Da rivedere" : "Da compilare (o anamnesi muta)" } : n ? { st:"warn", s:plural(n, "forma secondaria", "forme secondarie") + " da considerare" } : { st:"ok", s:"Nessuna forma secondaria associata" }; }
   if(k === "esami"){ const ls = labStatus(p), n = S.A.forms.length;
     return ls.done < ls.tot ? { st:"miss", s:`${ls.done} di ${ls.tot} esami registrati` } : n || S.hpp ? { st:"warn", s:n ? plural(n, "forma compatibile", "forme compatibili") + " con gli esami" : "Fosfatasi alcalina bassa" } : { st:"ok", s:"Esami nella norma" }; }
   if(k === "dxa") return !F.lastDxa ? { st:"miss", s:"Nessuna densitometria" } : F.dxaAge > 24 ? { st:"warn", s:`Ultima del ${fmtD(F.lastDxa.data)}: più vecchia di 24 mesi` } : { st:"ok", s:`T-score minimo ${fmtN(F.minT)} (${fmtD(F.lastDxa.data)})` };
@@ -725,6 +728,12 @@ function secReport(p, S){
   return (S.N.note.length ? `<p class="lbl">Cause note presenti</p><div class="stack">${S.N.note.map(x => item(x, false)).join("")}</div>` : "") +
     (S.N.sosp.length ? `<p class="lbl">Sospetti da approfondire</p><div class="stack">${S.N.sosp.map(x => item(x, true)).join("")}</div>` : "");
 }
+function anamMutaHTML(p){
+  if(p.rival && !p.anamOk) return `<div class="amuta"><button type="button" class="btn sec" data-amuta>Nessuna novità dalla valutazione precedente</button><small>Oppure aggiorna le voci qui sopra.</small></div>`;
+  if(p.anamOk && p.anamMuta && !anamHas(p)) return `<div class="amuta on"><span>✓ <b>Anamnesi muta</b>: nessuna malattia o farmaco rilevante</span><button type="button" class="lnk" data-amuta>annulla</button></div>`;
+  if(anamHas(p)) return "";
+  return `<div class="amuta"><button type="button" class="btn sec" data-amuta>Anamnesi muta</button><small>Nessuna malattia o farmaco rilevante per l'osso.</small></div>`;
+}
 function vPazAnamnesi(p){
   const own = new Set(p.feats || []), vis = id => !FEATSEX[id] || !p.sesso || FEATSEX[id] === p.sesso;
   const axes = AXES.map((a, i) => {
@@ -733,7 +742,7 @@ function vPazAnamnesi(p){
     const body = a.groups.map(g => { const fs = g.feats.filter(f => vis(f[0])); return fs.length ? `<p class="lbl" style="margin:10px 0 0">${g.sub}</p><div>` + fs.map(f => ckPz("data-pfeat", f[0], own.has(f[0]), f[1])).join("") + `</div>` : ""; }).join("");
     return `<details class="acc pzax" data-pax="${i}"${pzOpenAx.has(i) ? " open" : ""}><summary><span>${a.label}<small>${all.slice(0, 4).map(f => f[1].replace(/ \(.*$/, "")).join(", ")}${all.length > 4 ? "…" : ""} · ${all.length} voci</small></span><span class="n"${nsel ? "" : " hidden"}>${nsel}</span>${CHEV}</summary><div class="accbody">${body}</div></details>`;
   }).join("");
-  return { bar: pzName(p), html: head("Anamnesi e farmaci", "Spunta malattie, farmaci e abitudini: le forme secondarie compaiono in fondo alla pagina. Alla fine conferma l'anamnesi.") + `
+  return { bar: pzName(p), html: head("Anamnesi e farmaci", "Spunta malattie, farmaci e abitudini: le forme secondarie compaiono in fondo alla pagina. Se non c'è nulla, usa «Anamnesi muta».") + `
     ${p.sesso ? "" : `<p class="hint">Indica il sesso nei dati del paziente per nascondere le voci non pertinenti.</p>`}
     <details class="acc gest"${(p.testoGest || "").trim() || !(p.feats || []).length ? " open" : ""}><summary><span>Incolla dal gestionale<small>Copia il riassunto di patologie e farmaci: l'app propone le voci da spuntare</small></span>${CHEV}</summary><div class="accbody">
       <textarea class="area" data-pf="testoGest" id="gestIn" rows="6" placeholder="Incolla qui l'elenco dei problemi e la terapia in corso (anche con nomi commerciali e dosi)">${hx(p.testoGest)}</textarea>
@@ -752,7 +761,7 @@ function vPazAnamnesi(p){
       ${Object.entries(CI_LBL).filter(([k]) => k !== "denti").map(([k, t]) => ckPz("data-pci", k, (p.ci || {})[k], t)).join("")}
       <div class="fld gcdur"><span>Visita odontoiatrica (prima di bisfosfonati, denosumab o romosozumab)</span><div class="seg wrap" role="group" aria-label="Visita odontoiatrica">${[["ok", "fatta, bocca in ordine"], ["fare", "da fare per il nulla osta"], ["", "non so"]].map(([v, t]) => `<button type="button" data-dent="${v}" aria-pressed="${(p.dentista ? "ok" : (p.ci || {}).denti ? "fare" : "") === v}">${t}</button>`).join("")}</div></div>
     </div>
-    <div class="confirm">${ckPz("data-pbool", "anamOk", p.anamOk, "<b>Anamnesi e terapie verificate</b> (anche se non c'è nulla da spuntare)")}</div>
+    <div data-live="amuta">${anamMutaHTML(p)}</div>
     <p class="lbl">Forme secondarie riconosciute</p>
     <div data-live="sec">${secReport(p, pzSecondary(p))}</div>` };
 }
@@ -985,7 +994,7 @@ function vPazReport(p){
   const nomi = ids => ids.map(id => dnome(id).replace(/ \(.*\)$/, "") + (fl[id] && fl[id].ci.length ? " (controindicato)" : "")).join(", ");
   const ll = labLine(p), td = pzTodo(p, F), dec = p.decisione && DECISIONI[p.decisione.tipo];
   const body = sec("Fratture da fragilità", F.fx.length ? F.fx.map(fxTxt) : p.nessunaFx ? ["Nessuna"] : [], "fratture")
-    + sec("Anamnesi e terapie", anam, p.anamOk ? "" : "anamnesi")
+    + sec("Anamnesi e terapie", anam, anamDone(p) ? "" : "anamnesi")
     + sec("Forme secondarie dall'anamnesi", [...S.N.note.map(x => x.f.nome + " — " + badgeOf(x, false)), ...S.N.sosp.map(x => x.f.nome + " — " + badgeOf(x, true))], "")
     + sec("Esami di I livello" + (p.labData ? " (" + fmtD(p.labData) + ")" : ""), ll ? [ll] : [], "esami")
     + (S.A.forms.length ? `<p class="note"><b>Forme compatibili con gli esami:</b> ${S.A.forms.map(x => COND[x.cid]).join(", ")}.${S.A.byForm.length ? " Esami di II livello, solo su sospetto clinico, partendo da " + COND[S.A.byForm[0][0]].toLowerCase() + ": " + S.A.byForm[0][1].join("; ") + "." : ""}</p>` : "")
@@ -1297,7 +1306,7 @@ const pzParent = r => /^paz-[a-z0-9]+-(figura|percorso)$/.test(r) ? "" : /^paz-[
 const PZ_LIVE = {
   stepper: p => { const m = /-([a-z]+)$/.exec(routeNow()); return m && STEP_IX[m[1]] !== undefined ? stepperInner(p, m[1]) : ""; },
   cacorr: caLine,
-  sec: p => secReport(p, pzSecondary(p)), lab: p => labReport(p, pzSecondary(p)), defra: defraLive,
+  sec: p => secReport(p, pzSecondary(p)), amuta: anamMutaHTML, lab: p => labReport(p, pzSecondary(p)), defra: defraLive,
   bmi: p => bmiTxt(pzFacts(p))
 };
 function pzLive(p){
@@ -1355,11 +1364,11 @@ document.addEventListener("click", e => {
   const b = t.closest(".ck[data-pbool]");
   if(b){ const k = b.dataset.pbool; p[k] = !p[k]; b.setAttribute("aria-pressed", p[k]); savePz(p); pzLive(p); return; }
   const c = t.closest(".ck[data-pci]");
-  if(c){ p.ci = p.ci || {}; const k = c.dataset.pci; p.ci[k] = !p.ci[k]; c.setAttribute("aria-pressed", p.ci[k]); savePz(p); pzLive(p); return; }
+  if(c){ p.ci = p.ci || {}; const k = c.dataset.pci; p.ci[k] = !p.ci[k]; c.setAttribute("aria-pressed", p.ci[k]); p.anamOk = true; p.anamMuta = false; savePz(p); pzLive(p); return; }
   const f = t.closest(".ck[data-pfeat]");
   if(f){ const id = f.dataset.pfeat, set = new Set(p.feats || []); set.has(id) ? set.delete(id) : set.add(id); p.feats = [...set]; f.setAttribute("aria-pressed", set.has(id));
     const ax = f.closest("details.pzax"), n = ax.querySelectorAll('.ck[aria-pressed="true"]').length, badge = ax.querySelector(".n"); badge.textContent = n; badge.hidden = !n;
-    savePz(p); pzLive(p); return; }
+    p.anamOk = true; p.anamMuta = false; savePz(p); pzLive(p); return; }
   const x = t.closest("#pzGrid button[data-pex]");
   if(x){ p.lab = p.lab || {}; const ex = x.dataset.pex, k = x.dataset.kind; if(p.lab[ex] === k) delete p.lab[ex]; else p.lab[ex] = k;
     x.closest(".tri").querySelectorAll("button").forEach(y => y.setAttribute("aria-pressed", p.lab[ex] === y.dataset.kind)); savePz(p); pzLive(p); return; }
@@ -1382,8 +1391,9 @@ document.addEventListener("click", e => {
         const dose = mg ? parseFloat(mg[1].replace(",", ".")) : null, mesi = an ? 12 * ({ un:1, uno:1, due:2, tre:3 }[an[1].toLowerCase()] || +an[1]) : me ? +me[1] : null;
         if(dose !== null && mesi !== null){ p.gcDur = dose < 5 ? "0" : mesi > 12 ? "12" : mesi > 3 ? "3" : "0"; p.gcMesi12 = p.gcDur === "12";
           gcMsg = " Prednisone " + fmtN(dose) + " mg da " + mesi + " mesi: " + (p.gcDur === "12" ? "oltre 12 mesi" : p.gcDur === "3" ? "oltre 3 mesi" : "sotto la soglia della Nota 79") + ", controlla."; } } }
-    savePz(p); render(); toast(plural(keys.length, "voce aggiunta", "voci aggiunte") + ": controlla e conferma l'anamnesi." + gcMsg); return;
+    p.anamOk = true; p.anamMuta = false; savePz(p); render(); toast(plural(keys.length, "voce aggiunta", "voci aggiunte") + ": controlla le voci." + gcMsg); return;
   }
+  if(t.closest("[data-amuta]")){ if(p.anamOk && p.anamMuta){ p.anamOk = false; p.anamMuta = false; } else { p.anamOk = true; p.anamMuta = !anamHas(p); } savePz(p); render(); if(p.anamOk) toast(p.anamMuta ? "Anamnesi muta registrata." : "Anamnesi confermata."); return; }
   const gd = t.closest("[data-gcdur]");
   if(gd){ p.gcDur = gd.dataset.gcdur; p.gcMesi12 = p.gcDur === "12"; savePz(p); render(); return; }
   const dn = t.closest("[data-dent]");
