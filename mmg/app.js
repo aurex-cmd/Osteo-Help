@@ -41,6 +41,17 @@ function pzBlank(){
     feats:[], lab:{}, labData:"", egfr:"", vitd:"", fam:null, nessunaFx:false, gcMesi12:false, disab:false, anamOk:false, ci:{},
     fratture:[], dxa:[], defra:[], terapie:[], note:"", creato: todayISO(), agg: todayISO() };
 }
+/* rivalutazione: si conserva lo storico (fratture, DXA, DeFRA, terapie); si rifanno anamnesi, esami, DeFRA e decisione */
+function pzRivaluta(p){
+  const F = pzFacts(p), S = pzSecondary(p);
+  (p.visite = p.visite || []).push({ data: p.decisione ? p.decisione.data : (p.rival ? p.rival.dal : p.creato), zona: F.zona || "", rischio: F.rischio, minT: F.minT,
+    dec: p.decisione ? p.decisione.tipo : "", farmaci: F.ther.map(t => t.farmaco), fx: F.fx.length,
+    sec: [...S.N.note, ...S.N.sosp].map(x => x.f.nome).concat(S.A.forms.map(x => COND[x.cid])),
+    esami: { lab: p.lab, labData: p.labData, egfr: p.egfr, vitd: p.vitd, caTot: p.caTot, albVal: p.albVal, labVal: p.labVal } });
+  p.rival = { dal: todayISO() }; p.fxRiv = false; if(!(p.fratture || []).length) p.nessunaFx = false; p.anamOk = false; p.decisione = null;
+  p.lab = {}; p.labData = ""; p.egfr = ""; p.vitd = ""; p.caTot = ""; p.albVal = ""; p.labVal = {};
+  savePz(p);
+}
 const pzName = p => p.nome && p.nome.trim() ? p.nome.trim() : "Paziente senza nome";
 function pzRoute(){ const m = /^paz-([a-z0-9]+)(?:-([a-z]+))?$/.exec(routeNow()); return m ? { p: pzGet(m[1]), sez: m[2] || "" } : { p:null, sez:"" }; }
 
@@ -347,6 +358,7 @@ function pzTodo(p, F){
   });
   if(F.recent.length && !F.ther.length && !(p.decisione && p.decisione.tipo === "spec")) add(0, "Frattura recente senza terapia", `Frattura il ${fmtD(F.recent[0].data)}: rischio imminente di rifrattura.`, "terapia");
   if(F.lastDxa){ const pl = dxaPlan(F); if(pl.st !== "ok") add(pl.st === "miss" ? 1 : 2, pl.t, pl.s, "dxa"); }
+  if(p.decisione && p.decisione.tipo !== "attesa" && monthsSince(p.decisione.data) >= 12) add(2, "Rivalutazione annuale", `Ultima valutazione il ${fmtD(p.decisione.data)}: nuove fratture, esami, DeFRA e terapia.`, "figura");
   if(p.decisione && p.decisione.tipo === "attesa") add(2, "Decisione sulla terapia rimandata", `Dal ${fmtD(p.decisione.data)}, in attesa di esami o accertamenti.`, "terapia");
   return out.sort((a, b) => a.u - b.u);
 }
@@ -581,6 +593,7 @@ function stepStatus(p, k, F, S){
     if(!p.nascita) m.push("data di nascita"); if(!p.sesso) m.push("sesso"); if(!F.bmi) m.push("peso e altezza");
     if(p.sesso === "donna" && p.postmeno === null) m.push("menopausa"); if(p.fam === null) m.push("familiarità");
     if(!F.fx.length && !p.nessunaFx) m.push("fratture");
+    else if(p.rival && F.fx.length && !p.fxRiv) m.push("nuove fratture dall'ultima valutazione");
     return m.length ? { st:"miss", s:"Mancano: " + m.join(", ") } : { st:"ok", s:[F.age + " anni", "BMI " + fmtN(F.bmi), F.fx.length ? plural(F.fx.length, "frattura", "fratture") : "nessuna frattura"].join(" · ") };
   }
   S = S || pzSecondary(p);
@@ -589,6 +602,7 @@ function stepStatus(p, k, F, S){
   if(k === "esami"){ const ls = labStatus(p), n = S.A.forms.length;
     return ls.done < ls.tot ? { st:"miss", s:`${ls.done} di ${ls.tot} esami registrati` } : n || S.hpp ? { st:"warn", s:n ? plural(n, "forma compatibile", "forme compatibili") + " con gli esami" : "Fosfatasi alcalina bassa" } : { st:"ok", s:"Esami nella norma" }; }
   if(k === "dxa") return !F.lastDxa ? { st:"miss", s:"Nessuna densitometria" } : F.dxaAge > 24 ? { st:"warn", s:`Ultima del ${fmtD(F.lastDxa.data)}: più vecchia di 24 mesi` } : { st:"ok", s:`T-score minimo ${fmtN(F.minT)} (${fmtD(F.lastDxa.data)})` };
+  if(k === "defra" && p.rival && F.zona && (F.lastDefra.data || "") < p.rival.dal) return { st:"miss", s:`Da ricalcolare: l'ultimo è del ${fmtD(F.lastDefra.data)}` };
   if(k === "defra") return F.zona ? { st:"ok", s:"Zona " + ZONE[F.zona].t.toLowerCase() + " → " + ZONE[F.zona].chi } : { st:"miss", s:"Zona non ancora inserita" };
   if(k === "terapia"){ const d = p.decisione && DECISIONI[p.decisione.tipo];
     return !d ? { st:"miss", s:"Decisione da prendere" } : { st:p.decisione.tipo === "attesa" ? "warn" : "ok", s:d.t + " (" + fmtD(p.decisione.data) + ")" + (F.ther.length ? " · " + F.ther.map(t => DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome.replace(/ \(.*\)$/, "") : t.farmaco).join(", ") : "") }; }
@@ -663,6 +677,7 @@ function datiFx(p){
   return `    <p class="lbl">Fratture da fragilità</p>
     <p class="small">Fratture per traumi minimi (cadere dalla propria altezza o meno). Le vertebrali con il criterio di Genant: lieve 20–25%, moderata 25–40%, grave oltre il 40% di riduzione di un'altezza vertebrale.</p>
     ${fxRows ? `<ul class="list recs">${fxRows}</ul>` : ckPz("data-pbool", "nessunaFx", p.nessunaFx, "Nessuna frattura da fragilità pregressa")}
+    ${p.rival && F.fx.length ? `<div class="confirm">${ckPz("data-pbool", "fxRiv", p.fxRiv, `<b>Nessuna nuova frattura</b> dalla valutazione precedente (prima del ${fmtD(p.rival.dal)})`)}</div>` : ""}
     <div class="addbox">
       <div class="grid2">
         <label class="fld">Sede<select id="fxSede">${Object.entries(FX_SEDI).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
@@ -953,6 +968,7 @@ function vPazStorico(p){
     ${imm}
     ${notes.length ? notes.map((n, i) => `<div class="alert info"><b>${n.nome} · ${n.durata ? "da " + n.durata : "in corso"}</b>${n.s}${i === 0 ? ` <a href="#paz-${p.id}-terapia">Dosi e sospensione</a>` : ""}</div>`).join("")
       : d ? `<div class="alert info"><b>Decisione: ${d.t}</b>${fmtD(p.decisione.data)}. <a href="#paz-${p.id}-decidi">Rivedi</a></div>` : ""}
+    ${(p.visite || []).length ? `<p class="lbl">Valutazioni precedenti</p><ul class="list recs vis">${p.visite.slice().reverse().map(v => `<li class="rec"><span><b>${fmtD(v.data)}${v.zona && ZONE[v.zona] ? ` · <span class="zn z-${v.zona}"><i></i>zona ${ZONE[v.zona].t.toLowerCase()}</span>` : ""}</b><small>${[v.minT !== null && v.minT !== undefined ? "T-score " + fmtN(v.minT) : "", v.dec && DECISIONI[v.dec] ? DECISIONI[v.dec].t.toLowerCase() : "", v.farmaci.length ? v.farmaci.map(id => DRUGS[id] ? DRUGS[id].nome.replace(/ \(.*\)$/, "") : id).join(" + ") : "", v.sec.length ? plural(v.sec.length, "forma secondaria", "forme secondarie") : ""].filter(Boolean).join(" · ")}</small></span></li>`).join("")}</ul>` : ""}
     <p class="lbl">T-score nel tempo</p>
     ${dxaChartHTML(F) || `<p class="hint">Nessuna DXA registrata.</p>`}
     <p class="lbl">Zona del DeFRA nel tempo</p>
@@ -1401,7 +1417,7 @@ function addRec(p, k, auto){
     if(me && pDate(an + "-" + me) > oggi) return no("La data è nel futuro.");
     const it = document.querySelector('.ck[data-tmp="fxInT"]');
     rec = { sede: v("fxSede"), data: dd, grado: v("fxSede") === "vertebra" ? v("fxGrado") : "", inTerapia: !!it && it.getAttribute("aria-pressed") === "true" };
-    p.fratture.push(rec); p.nessunaFx = false; msg = "Frattura aggiunta: " + (FX_SEDI[rec.sede] || rec.sede) + " · " + fmtD(dd); }
+    p.fratture.push(rec); p.nessunaFx = false; if(p.rival) p.fxRiv = true; msg = "Frattura aggiunta: " + (FX_SEDI[rec.sede] || rec.sede) + " · " + fmtD(dd); }
   if(k === "dxa"){ if(!document.getElementById("dxD")) return false;
     const any = [v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null);
     if(auto && !any) return false;

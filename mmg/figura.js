@@ -85,9 +85,9 @@ function figSpots(p, F, S){
   return {
     chi: { n:1, st: anagMiss ? "miss" : "ok", t: anagMiss ? "Chi è" : (F.age + " anni"),
       s: anagMiss ? "età, peso, familiarità" : ["BMI " + fmtN(F.bmi), p.fam ? "familiarità" : ""].filter(Boolean).join(" · ") },
-    fx: { n:2, st: F.fx.length ? (F.recent.length ? "al" : "ok") : p.nessunaFx ? "ok" : "miss",
+    fx: { n:2, st: p.rival && F.fx.length && !p.fxRiv ? "miss" : F.fx.length ? (F.recent.length ? "al" : "ok") : p.nessunaFx ? "ok" : "miss",
       t: F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura") + (F.fx[0].grado ? " " + F.fx[0].grado : "") + (F.fx.length > 1 ? " +" + (F.fx.length - 1) : "") : p.nessunaFx ? "Nessuna frattura" : "Le fratture",
-      s: F.fx.length ? (F.recent.length ? "recente · " + fmtD(F.fx[0].data) : fmtD(F.fx[0].data)) : p.nessunaFx ? "da fragilità" : "quando, dove, come" },
+      s: p.rival && F.fx.length && !p.fxRiv ? "nuove fratture?" : F.fx.length ? (F.recent.length ? "recente · " + fmtD(F.fx[0].data) : fmtD(F.fx[0].data)) : p.nessunaFx ? "da fragilità" : "quando, dove, come" },
     anam: { n:3, st: an.st === "miss" ? "miss" : (sec.length || ciOn ? "al" : "ok"), t: an.st === "miss" ? "Malattie e farmaci" : sec.length ? plural(sec.length, "causa secondaria", "cause secondarie") : ciOn ? "Controindicazioni" : "Anamnesi verificata",
       s: an.st === "miss" ? "incolla dal gestionale" : sec.length ? sec[0] : ciOn ? "da conoscere per la terapia" : "nessuna forma secondaria" }
   };
@@ -189,7 +189,8 @@ function figNext(p, F, S, spots){
     /* decisione presa ma con dati ancora mancanti: lo si dice, e si va dritti a completarli */
     const mancano = allSteps(p).filter(x => x.st === "miss" && STEP_IX[x.k] <= STEP_IX.defra), RS = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra" };
     const avviso = mancano.length ? `<button type="button" class="fmiss" data-fsheet="${RS[mancano[0].k]}"><b>Da completare:</b> ${mancano.map(x => x.t.toLowerCase() + " (" + x.s.replace(/^Mancano?:\s*/, "") + ")").join("; ")} ›</button>` : "";
-    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${p.decisione.tipo === "spec" && th ? "Lo specialista ha cambiato terapia?" : th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
+    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${p.decisione.tipo === "spec" && th ? "Lo specialista ha cambiato terapia?" : th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a>
+      <details class="frival"><summary>Rivaluta il paziente</summary><p>Per il controllo periodico. Restano fratture, densitometrie, DeFRA e terapie in corso; si rifanno la conferma delle nuove fratture, l'anamnesi, gli esami del sangue, il DeFRA e la decisione. La valutazione di oggi resta nei Controlli nel tempo.</p><button type="button" class="btn" data-rival>Inizia la rivalutazione</button></details></div>`;
   }
   if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
     return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo passo da completare</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
@@ -204,7 +205,7 @@ function figSecSt(p, k, F, S, spots){
   if(spots[k]) return spots[k].st === "miss" ? "miss" : spots[k].st === "al" ? "al" : "ok";
   if(k === "esami"){ const e = stepStatus(p, "esami", F, S).st; return e === "warn" ? "al" : e; }
   if(k === "dxa") return F.lastDxa ? (F.dxaAge > 24 ? "al" : "ok") : "miss";
-  return F.zona ? "ok" : "miss";
+  return stepStatus(p, "defra", F, S).st === "miss" ? "miss" : "ok";
 }
 function figSecInner(p, F, S, spots, wide){
   const k = FIG.open, sh = FIG_SHEETS[k], i = FIG_SEQ.indexOf(k === "sec" ? "anam" : k);
@@ -237,7 +238,7 @@ function vFigura(p){
   return { bar: "", html: viewSwitch(p, "figura") + `
     <div class="fhud">
       <h1 class="fhud-n${p.nome && p.nome.trim() ? "" : " anon"}">${hx(pzName(p))}</h1>
-      <div class="fhud-m">${p.sesso ? `<span class="fhud-c">${p.sesso === "donna" ? "Donna" : "Uomo"}</span>` : ""}${F.age !== null ? `<span class="fhud-c">${F.age} anni</span>` : ""}<span class="fhud-p" title="${done} di ${STEPS.length} passi completati"><span class="fhud-pb">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span>${done} di ${STEPS.length} passi</span></div>
+      <div class="fhud-m">${p.rival && !p.decisione ? `<span class="fhud-c riv">Rivalutazione dal ${fmtD(p.rival.dal)}</span>` : ""}${p.sesso ? `<span class="fhud-c">${p.sesso === "donna" ? "Donna" : "Uomo"}</span>` : ""}${F.age !== null ? `<span class="fhud-c">${F.age} anni</span>` : ""}<span class="fhud-p" title="${done} di ${STEPS.length} passi completati"><span class="fhud-pb">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span>${done} di ${STEPS.length} passi</span></div>
     </div>
     <div class="fgrid${panel ? " panel" : ""}"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>${figRoad(p, all)}
     <div class="fcol-r">${panel ? `<div class="fpanel" role="region" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, true)}</div>` : `
@@ -366,6 +367,7 @@ document.addEventListener("click", e => {
   if(op){ e.preventDefault(); if(FIG.open){ const { p } = pzRoute(); commitPending(p); } FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
     const pn = document.querySelector(".fpanel"); if(pn && pn.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + pn.getBoundingClientRect().top - 70 }); return; }
   if(t.closest("[data-fclose]")){ figClose(); return; }
+  if(t.closest("[data-rival]")){ const { p } = pzRoute(); if(!p) return; pzRivaluta(p); toast("Rivalutazione iniziata: la valutazione precedente è salvata nei Controlli nel tempo."); FIG.anim = true; FIG.open = "chi"; render(); return; }
   const fs = t.closest("[data-fspec]");
   if(fs){ const { p } = pzRoute(); if(!p) return; const id = fs.dataset.fspec;
     const ids = id.split("+"), dIn = document.getElementById("fspD"), d = (dIn && dIn.value) || todayISO(), nm = x => dnome(x).replace(/ \(.*\)$/, "");

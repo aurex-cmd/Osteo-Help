@@ -147,3 +147,10 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 **Farmaco nell'archivio**: ogni scheda dell'archivio mostra, sotto età e zona, il farmaco in corso con l'icona e la data di inizio (o «Teriparatide + Denosumab» per l'associazione), oppure «Inviato allo specialista», «Nessun farmaco per l'osteoporosi», «Decisione rimandata». La ricerca trova anche per farmaco (es. «denosumab»).
 
 **iPad come il PC**: la vista da PC (figura, strada dei passi e pannello a destra; home su due colonne) parte da 744 px di larghezza invece che da 900, purché lo schermo sia alto almeno 560 px. Così iPad e iPad mini in verticale e in orizzontale hanno la vista da PC, mentre l'iPhone tenuto in orizzontale resta con le schede dal basso. Tra 744 e 1023 px la strada dei passi mostra solo i numeri.
+
+**Rivalutazione del paziente già visto**: nel riquadro finale «↻ Rivaluta il paziente» spiega cosa succede e ha il pulsante «Inizia la rivalutazione».
+- Si conservano fratture, densitometrie, DeFRA e terapie in corso (le terapie restano attive finché non si decide altro).
+- Si rifanno: conferma «Nessuna nuova frattura dalla valutazione precedente» (o si aggiunge la nuova frattura), anamnesi da riconfermare, esami del sangue (vuoti), un nuovo DeFRA (quello vecchio risulta «da ricalcolare») e la decisione. La DXA si ripete solo se è il momento.
+- La valutazione precedente viene salvata (data, zona, T-score, decisione, farmaci, forme secondarie ed esami) e compare in «Controlli nel tempo» → «Valutazioni precedenti».
+- In intestazione compare l'etichetta «Rivalutazione dal …» finché non c'è la nuova decisione.
+- Nella home, «Da fare» propone la «Rivalutazione annuale» quando l'ultima decisione ha più di 12 mesi.
