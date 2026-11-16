@@ -292,15 +292,19 @@ function vDecidi(p){
     const lv = c.map(x => N79_LEV.indexOf(n79Lev(x, id))), m = Math.min(...lv), cc = c.filter((x, i) => lv[i] === m), L = N79_LEV[m];
     return `<b>Nota 79 · ${L} scelta</b>: ${cc.map(x => x.cond).join(" / ")}` + (m > 0 ? `. <em>Solo dopo intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni ai farmaci di ${N79_LEV[m - 1]} scelta${[T_, AB_].some(x => cc.some(y => y.s[0].includes(x))) ? " (o alla fine del periodo massimo di teriparatide o abaloparatide)" : ""}.</em>` : "")
       + (cc.some(x => x.spec) && [T_, AB_, RO_].includes(id) ? (m > 0 ? " " : ". ") + "Piano terapeutico specialistico." : "") + (id === Z_ ? " Solo in struttura ospedaliera pubblica o convenzionata." : ""); };
-  const drug = (id, best) => { const f = fl[id] || { ci:[], warn:[] }, ci = f.ci.length;
-    return `<div class="fdrug${best ? " best" : ""}${ci ? " no" : ""}">${best ? `<span class="frk">Consigliato</span>` : ""}<b class="fdn">${drugIcon(id)}${dnome(id)}</b><small>${DRUGS[id].via}</small>
+  /* livello di scelta in breve, per l'etichetta del farmaco */
+  const levTag = id => { const f = fl[id] || { ci:[] }; if(f.ci.length) return ["no", "controindicato"]; const c = n79of(id); if(!c.length) return ["out", "fuori Nota 79"];
+    const m = Math.min(...c.map(x => N79_LEV.indexOf(n79Lev(x, id)))); return [m ? "l2" : "l1", N79_LEV[m] + " scelta"]; };
+  /* farmaco: una riga (icona, nome, etichetta) che si apre sui dettagli */
+  const drug = (id, open) => { const f = fl[id] || { ci:[], warn:[] }, ci = f.ci.length, [tc, tt] = levTag(id);
+    return `<details class="dd${ci ? " no" : ""}"${open ? " open" : ""}><summary>${drugIcon(id)}<span class="dd-n"><b>${dnome(id).replace(/ \(.*\)$/, "")}</b><small>${sommOf(id)}${f.warn.length ? " · " + plural(f.warn.length, "cautela", "cautele") : ""}</small></span><em class="dtag ${tc}">${tt}</em></summary>
+      <div class="dd-b"><small>${DRUGS[id].via}</small>
       ${f.ci.map(x => `<div class="fwarn">Controindicato: ${x}</div>`).join("")}${f.warn.map(x => `<div class="fwarn a">Cautela: ${x}</div>`).join("")}
-      ${!ci ? `<div class="fn79">${n79txt(id)}</div>` : ""}${id === D_ ? REBOUND : ""}</div>`; };
+      ${!ci ? `<div class="fn79">${n79txt(id)}</div>` : ""}${id === D_ ? REBOUND : ""}</div></details>`; };
   const pend = nota79Pend(p, F), PSTEP = { chi:"dati", fx:"dati", anam:"anamnesi", defra:"defra", dxa:"dxa" };
-  const pendH = pend.length ? `<div class="alert info n79p"><b>Da completare per la Nota 79</b><ul>${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul></div>` : "";
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
-  const chk = [];
-  const c = (st, t, s) => chk.push(`<div class="td ${st}"><i>${st === "ok" ? "✓" : "!"}</i><span>${t}<small>${s}</small></span></div>`);
+  const chk = []; let nDo = 0;
+  const c = (st, t, s) => { if(st !== "ok") nDo++; chk.push(`<div class="td ${st}"><i>${st === "ok" ? "✓" : "!"}</i><span>${t}<small>${s}</small></span></div>`); };
   if(ls.done < ls.tot) c("w", "Completa gli esami di I livello", `${ls.done} di ${ls.tot}: servono a escludere le forme secondarie`);
   if(S.N.note.length + S.N.sosp.length + S.A.forms.length) c("w", "Forme secondarie da considerare", [...S.N.note, ...S.N.sosp].map(x => x.f.nome).concat(S.A.forms.map(x => COND[x.cid])).slice(0, 3).join(", "));
   if(S.hpp) c("w", "Escludi l'ipofosfatasia", "fosfatasi alcalina bassa: bisfosfonati controindicati");
@@ -310,36 +314,38 @@ function vDecidi(p){
   if(pr.tipo !== "nessuno") p.dentista ? c("ok", "Visita odontoiatrica eseguita", "bocca in ordine") : c("w", "Visita odontoiatrica", "prima di bisfosfonati, denosumab o romosozumab");
   if(lab.Ca === "norm" && (eg === null || eg >= 35)) c("ok", "Calcemia" + (eg !== null ? " ed eGFR" : "") + " nella norma", [AUTO.Ca(p) ? AUTO.Ca(p).val : "", eg !== null ? fmtN(eg, 0) + " mL/min" : ""].filter(Boolean).join(" · ") || "dagli esami");
   else if(lab.Ca === "basso") c("w", "Correggi l'ipocalcemia", "prima di qualsiasi antiriassorbitivo");
-  const keys = [
-    ["Frattura", F.fx.length ? (FX_SEDI[F.fx[0].sede] || "") + " · " + fmtD(F.fx[0].data) : "nessuna", F.recent.length ? "r" : ""],
-    ["T-score minimo", F.minT !== null ? fmtN(F.minT) : "—", ""],
-    ["DeFRA", `<span class="zn z-${F.zona}"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()}</span>`, "y"],
-    ["Da sapere", [p.ci && p.ci.esofago ? "esofago" : "", S.hpp ? "ALP bassa" : "", eg !== null && eg < 35 ? "eGFR " + fmtN(eg, 0) : "", p.ci && p.ci.cv ? "cardiovascolare" : ""].filter(Boolean).join(", ") || "nessuna controindicazione", (p.ci && (p.ci.esofago || p.ci.cv)) || S.hpp || (eg !== null && eg < 35) ? "r" : ""]
-  ];
   const cur = p.decisione && p.decisione.tipo;
   const specBlk = (() => { const att = F.ther.map(t => t.farmaco);
       return `<p class="lbl" id="fspec">Terapia indicata dallo specialista</p>
       <p class="small">Quando arriva la risposta, tocca il farmaco: si registra da oggi (la data si corregge in Terapia) e compaiono le date della prossima dose e della densitometria.</p>
       <div class="fspec">${[D_, Z_, A_, R_, I_, T_, AB_, RO_, RX_, BZ_].map(id => `<button type="button" class="fspec-b${att.includes(id) ? " on" : ""}" data-fspec="${id}"${att.includes(id) ? " disabled" : ""}>${drugIcon(id)}<span><b>${dnome(id).replace(/ \(.*\)$/, "")}</b><small>${att.includes(id) ? "in corso" : sommOf(id)}</small></span></button>`).join("")}</div>`; })();
   let actions = "";
-  if(pr.tipo === "mmg" && pr.best) actions = `<button type="button" class="btn sec" data-fdec="spec">Invia allo specialista</button><button type="button" class="btn" data-fdec="mmg:${pr.best}">Prescrivo ${dnome(pr.best).replace(/ \(.*\)$/, "").toLowerCase()}</button>`;
+  if(pr.tipo === "mmg" && pr.best) actions = `<button type="button" class="btn" data-fdec="mmg:${pr.best}">Prescrivo ${dnome(pr.best).replace(/ \(.*\)$/, "").toLowerCase()}</button><button type="button" class="btn sec" data-fdec="spec">Invia allo specialista</button>`;
   else if(pr.tipo === "mmg") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
-  else if(pr.tipo === "spec") actions = `<a class="btn sec" href="#paz-${p.id}-terapia">Imposto io la terapia</a><button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
-  else actions = `<a class="btn sec" href="#paz-${p.id}-terapia">Valuto un farmaco</a><button type="button" class="btn" data-fdec="nessuno">Confermo: nessun farmaco</button>`;
+  else if(pr.tipo === "spec") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button><a class="btn sec" href="#paz-${p.id}-terapia">Imposto io la terapia</a>`;
+  else actions = `<button type="button" class="btn" data-fdec="nessuno">Confermo: nessun farmaco</button><a class="btn sec" href="#paz-${p.id}-terapia">Valuto un farmaco</a>`;
+  /* i fatti che contano, in una riga */
+  const facts = [F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura").split(" / ")[0] + " " + fmtD(F.fx[0].data) : "nessuna frattura", F.minT !== null ? "T-score " + fmtN(F.minT) : "", F.rischio !== null ? "rischio " + fmtN(F.rischio, 0) + "%" : ""].filter(Boolean).join(" · ");
+  const sec = (t, badge, body, open) => `<details class="dsec"${open ? " open" : ""}><summary><span>${t}</span>${badge ? `<em class="dbadge">${badge}</em>` : ""}</summary><div class="dsec-b">${body}</div></details>`;
+  const others = pr.tipo === "mmg" ? pr.opz.filter(id => id !== pr.best) : pr.tipo === "spec" ? pr.opz : [];
+  const best = pr.tipo === "mmg" && pr.best ? pr.best : null;
   return { bar:"Decisione terapeutica", html: `
-    <div class="fwin big"><span class="fwin-f" style="background-image:url(img/${fig}-viso.jpg)"></span><span><small>${hx(pzName(p))}${F.age !== null ? " · " + F.age + " anni" : ""}</small><b>Obiettivo: evitare la prossima frattura</b></span></div>
+    <div class="dhead"><span class="dav" style="background-image:url(img/${fig}-viso.jpg)"></span><span><b>${hx(pzName(p))}</b><small>${F.age !== null ? F.age + " anni · " : ""}${facts}</small></span></div>
     ${cur === "spec" && !F.ther.length ? specBlk : ""}
-    <div class="fkeys">${keys.map(k => `<div class="fkey ${k[2]}"><small>${k[0]}</small><b>${k[1]}</b></div>`).join("")}</div>
-    ${vh.length ? `<div class="alert"><b>Rischio molto alto</b>${vh.join("; ")}.${pr.tipo === "mmg" ? " Valuta comunque l'invio allo specialista per un anabolico." : ""}</div>` : ""}
-    <p class="lbl">${pr.tipo === "spec" ? "Indicazione · zona " + ZONE[F.zona].t.toLowerCase() : pr.tipo === "nessuno" ? "Indicazione · zona verde" : "Terapia consigliata · zona gialla, la imposti tu"}</p>
-    <div class="fprop ${pr.tipo}"><b>${pr.t}</b><small>${pr.s}</small></div>
-    ${pendH}
-    ${pr.tipo === "mmg" ? (pr.best ? drug(pr.best, true) : "") + pr.opz.filter(id => id !== pr.best).map(id => drug(id, false)).join("") : ""}
-    ${pr.tipo === "spec" ? `<p class="lbl">${pr.nota}</p>` + pr.opz.map(id => drug(id, false)).join("") + `<p class="small">Nell'attesa: calcio con la dieta, vitamina D, prevenzione delle cadute. La lettera allo specialista è già compilata.</p>` : ""}
-    <p class="lbl">Prima della prima dose</p><div class="todo fchk">${chk.join("")}</div>
-    ${cur ? `<p class="small">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
+    <div class="dverd z-${F.zona}">
+      <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
+      <b class="dtit">${pr.tipo === "mmg" && best ? "Prescrivi tu la terapia" : pr.t}</b>
+      ${best ? `<div class="dbest">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span><em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em></div>${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
+      ${(() => { const r = vh.filter(x => !/zona rossa/i.test(x)); return r.length ? `<p class="dvh">Rischio molto alto: ${r.join("; ")}.</p>` : ""; })()}
+      ${pr.tipo === "spec" ? `<p class="dnote">La lettera allo specialista è già compilata. Nell'attesa: calcio, vitamina D, prevenzione delle cadute.</p>` : pr.tipo === "nessuno" ? `<p class="dnote">${ZONE.verde.azione}</p>` : ""}
+      <div class="dact">${actions}</div>
+      ${cur ? `<p class="dcur">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
+    </div>
+    ${pend.length ? sec("Da completare per la Nota 79", pend.length, `<ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>`, false) : ""}
+    ${best ? sec("Dettagli del farmaco consigliato", "", drug(best, true), false) : ""}
+    ${others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : ""}
+    ${sec("Prima della prima dose", nDo ? nDo + " da fare" : "tutto ok", `<div class="todo fchk">${chk.join("")}</div>`, false)}
     ${cur === "spec" && F.ther.length ? specBlk : ""}
-    <div class="fact">${actions}</div>
     <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della <a href="#guida-nota79">Nota 79</a> e le schede tecniche.</p>` };
 }
 
