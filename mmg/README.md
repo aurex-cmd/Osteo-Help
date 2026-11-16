@@ -70,3 +70,11 @@ Ausilio alla decisione, non sostitutivo del giudizio del medico. Verificare semp
 ### Data delle fratture
 
 Basta l'anno; mese e giorno sono facoltativi. La data si salva come «2019», «2019-05» o «2019-05-14» e si mostra nello stesso modo («2019», «05/2019», «14/05/2019»). Con il solo anno, per i calcoli (frattura recente negli ultimi 24 mesi) si conta da metà anno.
+
+### Salvataggio di fratture, densitometrie e DeFRA
+
+I pulsanti «Salva la frattura», «Salva la densitometria» e «Salva la zona del DeFRA» sono in evidenza; dopo il salvataggio compare un avviso («Frattura aggiunta: Polso / avambraccio · 2025») e la voce nuova si illumina nell'elenco. Se si lascia il modulo compilato a metà (anno della frattura scritto, un T-score inserito, zona del DeFRA scelta) e si chiude la scheda, si passa a un'altra sezione o si cambia pagina, i dati si salvano da soli, con lo stesso avviso.
+
+### Dopo l'invio allo specialista
+
+Con la decisione «Invia allo specialista», in cima a «Decidi la terapia» compare «Terapia indicata dallo specialista»: tutti i farmaci, con la loro icona; toccandone uno si registra da oggi (la data si corregge in Terapia) e nella figura compaiono il farmaco, la prossima dose e la prossima densitometria. Dalla figura ci si arriva con «Registra il farmaco dello specialista».
