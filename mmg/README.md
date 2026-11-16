@@ -145,3 +145,5 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 - Nel riquadro finale il link diventa «Lo specialista ha cambiato terapia?».
 
 **Farmaco nell'archivio**: ogni scheda dell'archivio mostra, sotto età e zona, il farmaco in corso con l'icona e la data di inizio (o «Teriparatide + Denosumab» per l'associazione), oppure «Inviato allo specialista», «Nessun farmaco per l'osteoporosi», «Decisione rimandata». La ricerca trova anche per farmaco (es. «denosumab»).
+
+**iPad come il PC**: la vista da PC (figura, strada dei passi e pannello a destra; home su due colonne) parte da 744 px di larghezza invece che da 900, purché lo schermo sia alto almeno 560 px. Così iPad e iPad mini in verticale e in orizzontale hanno la vista da PC, mentre l'iPhone tenuto in orizzontale resta con le schede dal basso. Tra 744 e 1023 px la strada dei passi mostra solo i numeri.

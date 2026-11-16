@@ -199,7 +199,7 @@ const figDocs = p => `<p class="fdocs"><button type="button" class="lnk" data-co
 /* le sezioni in ordine: si naviga con Indietro / Avanti; quella aperta si accende sulla figura */
 const FIG_SEQ = ["chi", "fx", "anam", "esami", "dxa", "defra"];
 const FIG_TAB = { chi:"Chi è", fx:"Fratture", anam:"Anamnesi", esami:"Esami", dxa:"DXA", defra:"DeFRA" };
-const figWide = () => window.matchMedia("(min-width:900px)").matches;
+const figWide = () => window.matchMedia("(min-width:744px) and (min-height:560px)").matches;
 function figSecSt(p, k, F, S, spots){
   if(spots[k]) return spots[k].st === "miss" ? "miss" : spots[k].st === "al" ? "al" : "ok";
   if(k === "esami"){ const e = stepStatus(p, "esami", F, S).st; return e === "warn" ? "al" : e; }
@@ -432,4 +432,4 @@ const figDragEnd = () => {
 document.addEventListener("touchend", figDragEnd);
 document.addEventListener("touchcancel", figDragEnd);
 /* passando da schermo largo a stretto (o viceversa) la sezione aperta passa da pannello a riquadro */
-window.matchMedia("(min-width:900px)").addEventListener("change", () => { if(FIG.open) render(); });
+window.matchMedia("(min-width:744px) and (min-height:560px)").addEventListener("change", () => { if(FIG.open) render(); });
