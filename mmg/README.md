@@ -136,3 +136,10 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 **Inviato allo specialista cliccabile**: nel riquadro finale la scheda «Inviato allo specialista» si tocca e apre la scelta del farmaco indicato dallo specialista (tolto il link ripetuto sotto).
 
 **Icone dei farmaci nei colori dell'app**: i simboli (capsula, compressa, siringa, flebo, penna) passano dal rosa al lilla e viola dell'app, anche lo sfondo dei riquadri.
+
+**Terapia dello specialista più semplice**: in «Decidi la terapia» il riquadro dello specialista sta sempre in cima.
+- Senza farmaco registrato: «Che terapia ha indicato lo specialista?», data di inizio e un solo tocco sul farmaco.
+- Con farmaco registrato: mostra la terapia in corso e «Lo specialista ha cambiato terapia»; la nuova scelta chiude quella in corso alla data indicata e parte dallo stesso giorno. Toccare un secondo farmaco non lo aggiunge più in parallelo.
+- Associazione possibile: «Teriparatide + denosumab» (registra entrambi; il riquadro finale mostra «Teriparatide + Denosumab · in associazione» con la prossima iniezione di denosumab).
+- Nell'uomo non compaiono romosozumab, abaloparatide, ibandronato, raloxifene e bazedoxifene.
+- Nel riquadro finale il link diventa «Lo specialista ha cambiato terapia?».

@@ -611,6 +611,9 @@ button.fcal{border:0;font:inherit;color:inherit;cursor:pointer;width:100%;transi
 @keyframes fup{from{transform:translate(-50%,100%)}to{transform:translate(-50%,0)}}
 @keyframes fdimin{from{opacity:0}to{opacity:1}}
 .fsheet .fstabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.fspecbox{background:var(--teal-box);border-radius:16px;padding:14px;margin:0 0 14px;display:flex;flex-direction:column;gap:10px} .fspec-t{margin:0;font-weight:800;font-size:1.02rem;color:var(--ink)} .fspecbox .small{margin:0}
+.fspec-d{max-width:200px;margin:0} .fspec-cur{display:flex;flex-direction:column;gap:6px} .fspec-cur > div{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:10px 12px} .fspec-cur .dic{width:34px;height:34px;background:#EEEAFB;border-radius:9px;padding:3px;overflow:visible;flex:0 0 auto} .fspec-cur b{display:block;font-size:1.05rem} .fspec-cur small{color:var(--muted)}
+.fspec-ch > summary{cursor:pointer;font-weight:700;color:var(--teal);list-style:none;padding:4px 0} .fspec-ch > summary::-webkit-details-marker{display:none} .fspec-ch[open] > summary{margin-bottom:8px} .fspec-ch{display:flex;flex-direction:column;gap:10px} .fspec-ch > *:not(summary){margin-bottom:10px}
 .fspec{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
 .fspec-b{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:8px 10px;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}
 .fspec-b:hover{border-color:var(--pri)} .fspec-b .dic{width:30px;height:30px;flex:0 0 auto;background:#EEEAFB;border-radius:8px;padding:2px;overflow:visible}

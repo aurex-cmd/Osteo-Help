@@ -173,8 +173,8 @@ function figNext(p, F, S, spots){
   ], miss = clues.filter(c => c[1]), dec = p.decisione && DECISIONI[p.decisione.tipo];
   if(dec){
     /* decisione presa: in primo piano il farmaco, poi due date grandi: prossima dose e prossima densitometria */
-    const th = F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco];
-    const drug = th ? `<div class="fdrugbig"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>${th.farmaco === D_ ? `<p class="freb"><b>Rebound:</b> non sospendere né ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}`
+    const th = F.ther.find(t => nextDose(t)) || F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco], multi = F.ther.length > 1;
+    const drug = th ? `<div class="fdrugbig"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${F.ther.map(t => dnome(t.farmaco).replace(/ \(.*\)$/, "")).join(" + ")}</b><small>${multi ? "in associazione" : d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}</small></span></div>${F.ther.some(t => t.farmaco === D_) ? `<p class="freb"><b>Rebound:</b> non sospendere né ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}`
       : p.decisione.tipo === "spec" ? `<a class="fdrugbig spec go" href="#paz-${p.id}-decidi"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>Tocca per registrare la terapia indicata dallo specialista</small></span>${CHEV}</a>`
       : `<div class="fdrugbig none"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
@@ -189,7 +189,7 @@ function figNext(p, F, S, spots){
     /* decisione presa ma con dati ancora mancanti: lo si dice, e si va dritti a completarli */
     const mancano = allSteps(p).filter(x => x.st === "miss" && STEP_IX[x.k] <= STEP_IX.defra), RS = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra" };
     const avviso = mancano.length ? `<button type="button" class="fmiss" data-fsheet="${RS[mancano[0].k]}"><b>Da completare:</b> ${mancano.map(x => x.t.toLowerCase() + " (" + x.s.replace(/^Mancano?:\s*/, "") + ")").join("; ")} ›</button>` : "";
-    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
+    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${p.decisione.tipo === "spec" && th ? "Lo specialista ha cambiato terapia?" : th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
   }
   if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
     return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo passo da completare</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
@@ -312,10 +312,22 @@ function vDecidi(p, inPanel){
   if(lab.Ca === "norm" && (eg === null || eg >= 35)) c("ok", "Calcemia" + (eg !== null ? " ed eGFR" : "") + " nella norma", [AUTO.Ca(p) ? AUTO.Ca(p).val : "", eg !== null ? fmtN(eg, 0) + " mL/min" : ""].filter(Boolean).join(" · ") || "dagli esami");
   else if(lab.Ca === "basso") c("w", "Correggi l'ipocalcemia", "prima di qualsiasi antiriassorbitivo");
   const cur = p.decisione && p.decisione.tipo;
-  const specBlk = (() => { const att = F.ther.map(t => t.farmaco);
-      return `<p class="lbl" id="fspec">Terapia indicata dallo specialista</p>
-      <p class="small">Quando arriva la risposta, tocca il farmaco: si registra da oggi (la data si corregge in Terapia) e compaiono le date della prossima dose e della densitometria.</p>
-      <div class="fspec">${[D_, Z_, A_, R_, I_, T_, AB_, RO_, RX_, BZ_].map(id => `<button type="button" class="fspec-b${att.includes(id) ? " on" : ""}" data-fspec="${id}"${att.includes(id) ? " disabled" : ""}>${drugIcon(id)}<span><b>${dnome(id).replace(/ \(.*\)$/, "")}</b><small>${att.includes(id) ? "in corso" : sommOf(id)}</small></span></button>`).join("")}</div>`; })();
+  /* terapia indicata dallo specialista: un farmaco alla volta (cambiarlo chiude il precedente), più l'associazione teriparatide + denosumab */
+  const specBlk = (() => {
+    const on = F.ther.filter(t => !t.fine).map(t => t.farmaco), uomo = p.sesso === "uomo";
+    const SOLO_DONNA = [I_, RX_, BZ_, AB_, RO_];
+    const ids = [D_, Z_, A_, R_, I_, T_, AB_, RO_, RX_, BZ_].filter(id => !(uomo && SOLO_DONNA.includes(id)));
+    const opts = ids.map(id => [id, dnome(id).replace(/ \(.*\)$/, ""), sommOf(id)]).concat([[T_ + "+" + D_, "Teriparatide + denosumab", "in associazione"]]);
+    const cur = opts.find(o => o[0].split("+").sort().join("+") === on.slice().sort().join("+"));
+    const btn = o => { const sel = cur && cur[0] === o[0], ic = o[0].includes("+") ? drugIcon(T_) : drugIcon(o[0]);
+      return `<button type="button" class="fspec-b${sel ? " on" : ""}" data-fspec="${o[0]}"${sel ? " disabled" : ""}>${ic}<span><b>${o[1]}</b><small>${sel ? "in corso" : o[2]}</small></span></button>`; };
+    const dt = `<label class="fld fspec-d">Inizio<input type="date" id="fspD" value="${todayISO()}"></label>`;
+    const list = `<div class="fspec">${opts.map(btn).join("")}</div>${uomo ? `<p class="small">Nell'uomo non sono indicati romosozumab, abaloparatide, ibandronato, raloxifene e bazedoxifene.</p>` : ""}`;
+    if(!on.length) return `<div class="fspecbox"><p class="fspec-t">Che terapia ha indicato lo specialista?</p><p class="small">Scegli il farmaco: si registra con la data di inizio e compaiono le date della prossima dose e della densitometria.</p>${dt}${list}</div>`;
+    const tt = F.ther.filter(t => !t.fine);
+    return `<div class="fspecbox"><p class="fspec-t">Terapia indicata dallo specialista</p>
+      <div class="fspec-cur">${tt.map(t => `<div>${drugIcon(t.farmaco)}<span><b>${dnome(t.farmaco).replace(/ \(.*\)$/, "")}</b><small>dal ${fmtD(t.inizio)}</small></span></div>`).join("")}</div>
+      <details class="fspec-ch"><summary>Lo specialista ha cambiato terapia</summary><p class="small">Scegli la nuova terapia: quella in corso si chiude alla data indicata, la nuova parte dallo stesso giorno.</p>${dt}${list}</details></div>`; })();
   let actions = "";
   if(pr.tipo === "mmg" && pr.best) actions = `<button type="button" class="btn" data-fdec="mmg:${pr.best}">Prescrivo ${dnome(pr.best).replace(/ \(.*\)$/, "").toLowerCase()}</button><button type="button" class="btn sec" data-fdec="spec">Invia allo specialista</button>`;
   else if(pr.tipo === "mmg") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
@@ -328,7 +340,7 @@ function vDecidi(p, inPanel){
   const best = pr.tipo === "mmg" && pr.best ? pr.best : null;
   return { bar:"Decisione terapeutica", html: `
     ${inPanel ? "" : `<div class="dhead"><span class="dav" style="background-image:url(img/${fig}-viso.jpg)"></span><span><b>${hx(pzName(p))}</b><small>${F.age !== null ? F.age + " anni · " : ""}${facts}</small></span></div>`}
-    ${cur === "spec" && !F.ther.length ? specBlk : ""}
+    ${cur === "spec" ? specBlk : ""}
     <div class="dverd z-${F.zona}">
       <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
       <b class="dtit">${pr.tipo === "mmg" && best ? "Prescrivi tu la terapia" : pr.t}</b>
@@ -342,7 +354,6 @@ function vDecidi(p, inPanel){
     ${best ? sec("Dettagli del farmaco consigliato", "", drug(best, true), false) : ""}
     ${others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : ""}
     ${sec("Prima della prima dose", nDo ? nDo + " da fare" : "tutto ok", `<div class="todo fchk">${chk.join("")}</div>`, false)}
-    ${cur === "spec" && F.ther.length ? specBlk : ""}
     <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della <a href="#guida-nota79">Nota 79</a> e le schede tecniche.</p>` };
 }
 
@@ -357,8 +368,11 @@ document.addEventListener("click", e => {
   if(t.closest("[data-fclose]")){ figClose(); return; }
   const fs = t.closest("[data-fspec]");
   if(fs){ const { p } = pzRoute(); if(!p) return; const id = fs.dataset.fspec;
-    if(!(p.terapie || []).some(x => x.farmaco === id && !x.fine)) (p.terapie = p.terapie || []).push({ farmaco: id, inizio: todayISO(), fine:"", note:"indicato dallo specialista" });
-    savePz(p); toast(dnome(id) + " registrato da oggi, come indicato dallo specialista."); figBack(p); return; }
+    const ids = id.split("+"), dIn = document.getElementById("fspD"), d = (dIn && dIn.value) || todayISO(), nm = x => dnome(x).replace(/ \(.*\)$/, "");
+    p.terapie = p.terapie || [];
+    const chiusi = p.terapie.filter(x => !x.fine && !ids.includes(x.farmaco)); chiusi.forEach(x => { x.fine = d; });
+    ids.forEach(x => { if(!p.terapie.some(y => y.farmaco === x && !y.fine)) p.terapie.push({ farmaco: x, inizio: d, fine:"", note:"indicato dallo specialista" }); });
+    savePz(p); toast((chiusi.length ? chiusi.map(x => nm(x.farmaco)).join(" e ") + (chiusi.length > 1 ? " chiusi. " : " chiuso. ") : "") + ids.map(nm).join(" + ") + " dal " + fmtD(d) + ", come indicato dallo specialista."); figBack(p); return; }
   const fd = t.closest("[data-fdec]");
   if(fd){ const { p } = pzRoute(); if(!p) return; const [tipo, farm] = fd.dataset.fdec.split(":");
     p.decisione = { tipo, data: todayISO() };
