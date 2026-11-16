@@ -132,3 +132,7 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 - **Su PC** l'avanzamento «N di 7 passi» in alto è nascosto: lo mostra già la strada numerata. Su iPhone resta.
 
 **Home su PC**: a sinistra Nuovo paziente, Archivio, la riga del backup e sotto «Da fare»; a destra sempre «Consulta» in alto, poi Backup e sicurezza. Su iPhone l'ordine non cambia.
+
+**Inviato allo specialista cliccabile**: nel riquadro finale la scheda «Inviato allo specialista» si tocca e apre la scelta del farmaco indicato dallo specialista (tolto il link ripetuto sotto).
+
+**Icone dei farmaci nei colori dell'app**: i simboli (capsula, compressa, siringa, flebo, penna) passano dal rosa al lilla e viola dell'app, anche lo sfondo dei riquadri.

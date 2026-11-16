@@ -175,7 +175,7 @@ function figNext(p, F, S, spots){
     /* decisione presa: in primo piano il farmaco, poi due date grandi: prossima dose e prossima densitometria */
     const th = F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco];
     const drug = th ? `<div class="fdrugbig"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>${th.farmaco === D_ ? `<p class="freb"><b>Rebound:</b> non sospendere né ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}`
-      : p.decisione.tipo === "spec" ? `<div class="fdrugbig spec"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>in attesa della terapia indicata dallo specialista</small></span></div>`
+      : p.decisione.tipo === "spec" ? `<a class="fdrugbig spec go" href="#paz-${p.id}-decidi"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>Tocca per registrare la terapia indicata dallo specialista</small></span>${CHEV}</a>`
       : `<div class="fdrugbig none"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
     const quando = dt => { const g = daysTo(dt); return g < 0 ? `in ritardo di ${-g} giorni` : g === 0 ? "oggi" : g < 45 ? `tra ${g} giorni` : `tra ${Math.round(g / 30.4)} mesi`; };
@@ -189,7 +189,7 @@ function figNext(p, F, S, spots){
     /* decisione presa ma con dati ancora mancanti: lo si dice, e si va dritti a completarli */
     const mancano = allSteps(p).filter(x => x.st === "miss" && STEP_IX[x.k] <= STEP_IX.defra), RS = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra" };
     const avviso = mancano.length ? `<button type="button" class="fmiss" data-fsheet="${RS[mancano[0].k]}"><b>Da completare:</b> ${mancano.map(x => x.t.toLowerCase() + " (" + x.s.replace(/^Mancano?:\s*/, "") + ")").join("; ")} ›</button>` : "";
-    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${!th && p.decisione.tipo === "spec" ? "Registra il farmaco dello specialista" : th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
+    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
   }
   if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
     return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo passo da completare</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
