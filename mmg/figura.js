@@ -170,7 +170,7 @@ function figNext(p, F, S, spots){
   if(dec){
     /* decisione presa: in primo piano il farmaco, poi due date grandi: prossima dose e prossima densitometria */
     const th = F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco];
-    const drug = th ? `<div class="fdrugbig"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>`
+    const drug = th ? `<div class="fdrugbig"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${dnome(th.farmaco).replace(/ \(.*\)$/, "")}</b><small>${d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${F.ther.length > 1 ? " · + " + plural(F.ther.length - 1, "altro farmaco", "altri farmaci") : ""}</small></span></div>${th.farmaco === D_ ? `<p class="freb"><b>Rebound:</b> non sospendere né ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}`
       : p.decisione.tipo === "spec" ? `<div class="fdrugbig spec"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>in attesa della terapia indicata dallo specialista</small></span></div>`
       : `<div class="fdrugbig none"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
@@ -266,6 +266,7 @@ function viewSwitch(p, cur){
 }
 
 /* ---------- decisione terapeutica ---------- */
+const REBOUND = `<div class="fwarn a reb"><b>Effetto rebound</b>: non interrompere né ritardare (una dose ogni 6 mesi, al massimo 4 settimane di ritardo). Alla sospensione il riassorbimento riparte in eccesso con rischio di fratture vertebrali multiple: se si sospende serve un bisfosfonato (di solito zoledronato) per consolidare. Da spiegare al paziente prima di iniziare.</div>`;
 function proposta(p, F, S, fl){
   const okd = id => !(fl[id] && fl[id].ci.length);
   if(!F.zona) return null;
@@ -277,7 +278,9 @@ function proposta(p, F, S, fl){
   /* zona gialla: prima linea dal MMG. L'ordine segue la Nota 79: prima i farmaci di I scelta per la condizione
      del paziente (di solito alendronato, risedronato, zoledronato), poi quelli di II scelta (denosumab) */
   const n79 = nota79(p, F), lev = id => { const l = n79.map(c => n79Lev(c, id)).filter(Boolean).map(x => N79_LEV.indexOf(x)); return l.length ? Math.min(...l) : 9; };
-  const base = [A_, R_, Z_, D_], ord = base.slice().sort((a, b) => lev(a) - lev(b) || base.indexOf(a) - base.indexOf(b)), best = ord.find(okd);
+  /* scelta del medico: dopo gli orali il denosumab, che il MMG prescrive da sé, poi lo zoledronato (solo in ospedale).
+     Il livello di scelta della Nota (I, II) resta scritto su ogni farmaco */
+  const base = [A_, R_, D_, Z_], ord = base.filter(id => lev(id) < 9).concat(base.filter(id => lev(id) === 9)), best = ord.find(okd);
   return { tipo:"mmg", t: best ? "Terapia di prima linea: " + dnome(best) : "Prima linea non utilizzabile", s:ZONE.gialla.azione, opz: ord, best };
 }
 function vDecidi(p){
@@ -292,7 +295,7 @@ function vDecidi(p){
   const drug = (id, best) => { const f = fl[id] || { ci:[], warn:[] }, ci = f.ci.length;
     return `<div class="fdrug${best ? " best" : ""}${ci ? " no" : ""}">${best ? `<span class="frk">Consigliato</span>` : ""}<b class="fdn">${drugIcon(id)}${dnome(id)}</b><small>${DRUGS[id].via}</small>
       ${f.ci.map(x => `<div class="fwarn">Controindicato: ${x}</div>`).join("")}${f.warn.map(x => `<div class="fwarn a">Cautela: ${x}</div>`).join("")}
-      ${!ci ? `<div class="fn79">${n79txt(id)}</div>` : ""}</div>`; };
+      ${!ci ? `<div class="fn79">${n79txt(id)}</div>` : ""}${id === D_ ? REBOUND : ""}</div>`; };
   const pend = nota79Pend(p, F), PSTEP = { chi:"dati", fx:"dati", anam:"anamnesi", defra:"defra", dxa:"dxa" };
   const pendH = pend.length ? `<div class="alert info n79p"><b>Da completare per la Nota 79</b><ul>${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul></div>` : "";
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
@@ -301,7 +304,7 @@ function vDecidi(p){
   if(ls.done < ls.tot) c("w", "Completa gli esami di I livello", `${ls.done} di ${ls.tot}: servono a escludere le forme secondarie`);
   if(S.N.note.length + S.N.sosp.length + S.A.forms.length) c("w", "Forme secondarie da considerare", [...S.N.note, ...S.N.sosp].map(x => x.f.nome).concat(S.A.forms.map(x => COND[x.cid])).slice(0, 3).join(", "));
   if(S.hpp) c("w", "Escludi l'ipofosfatasia", "fosfatasi alcalina bassa: bisfosfonati controindicati");
-  if(vd === null && lab.D !== "norm") c("w", "Dosa la 25-OH-vitamina D", "o correggila comunque: in terapia per l'osteoporosi è rimborsabile (Nota 96)");
+  if(vd === null && lab.D !== "norm") c("w", "Dosa la 25-OH-vitamina D", "sotto 75 nmol/L è rimborsabile (Nota 96) e va corretta prima di iniziare il farmaco");
   else if(vdLow(vd) || lab.D === "basso") c("w", "Correggi la vitamina D", (vd !== null ? vdTxt(vd) + ": " : "") + "sotto 75 nmol/L, il valore da raggiungere (Nota 96)");
   else c("ok", "Vitamina D adeguata", vd !== null ? vdTxt(vd) : "nella norma");
   if(pr.tipo !== "nessuno") p.dentista ? c("ok", "Visita odontoiatrica eseguita", "bocca in ordine") : c("w", "Visita odontoiatrica", "prima di bisfosfonati, denosumab o romosozumab");
