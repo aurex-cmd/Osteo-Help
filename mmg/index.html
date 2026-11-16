@@ -599,9 +599,16 @@ main{padding-bottom:40px}
 .fdocs a,.fdocs .lnk{color:var(--pri);font-weight:600;text-decoration:none;font-size:.86rem}
 .fcol-r{gap:18px}
 /* riquadro che sale dal basso */
+/* stessa curva e durata delle schede di iOS: sale e scende in 0,5 s, il fondo si scurisce insieme */
 .fdim{position:fixed;inset:0;background:rgba(27,36,51,.38);z-index:20}
-.fsheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:640px;max-height:86vh;z-index:21;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -10px 30px rgba(20,15,60,.2);display:flex;flex-direction:column;animation:fup .22s ease-out}
-@keyframes fup{from{transform:translate(-50%,40px);opacity:.4}to{transform:translate(-50%,0);opacity:1}}
+.fsheet{position:fixed;left:50%;transform:translate(-50%,0);bottom:0;width:100%;max-width:640px;max-height:86vh;z-index:21;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -10px 30px rgba(20,15,60,.2);display:flex;flex-direction:column;will-change:transform}
+.fsheet.in{animation:fup .5s cubic-bezier(.32,.72,0,1)} .fdim.in{animation:fdimin .5s cubic-bezier(.32,.72,0,1)}
+.fsheet.out{transform:translate(-50%,100%);transition:transform .5s cubic-bezier(.32,.72,0,1)} .fdim.out{opacity:0;transition:opacity .5s cubic-bezier(.32,.72,0,1)}
+@keyframes fup{from{transform:translate(-50%,100%)}to{transform:translate(-50%,0)}}
+@keyframes fdimin{from{opacity:0}to{opacity:1}}
+.fsheet .fstabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.fgrab{width:36px;height:5px;border-radius:3px;background:#D5D3DC;margin:7px auto -4px;flex:0 0 auto}
+@media (prefers-reduced-motion:reduce){.fsheet.in,.fdim.in{animation-duration:.01s}.fsheet.out,.fdim.out{transition-duration:.01s}}
 .fsheet-h{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;border-bottom:1px solid var(--line)}
 .fsheet-h b{flex:1;font-size:1.15rem} .fsheet-h .btn{padding:9px 16px}
 .fsheet-b{overflow-y:auto;padding:14px 18px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;overscroll-behavior:contain}
