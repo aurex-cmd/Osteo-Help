@@ -95,4 +95,4 @@ Dove la Nota chiede un dato che manca, l'app non lo dà per scontato e lo chiede
 
 ### Home: Consulta e Archivio
 
-«Consulta» è in ordine di priorità: Nota 79, A chi fare la densitometria in LEA, Vitamina D e Nota 96, Guida per il medico di medicina generale. Salvataggio, ripristino e blocco con codice sono in un gruppo a parte, «Archivio».
+«Consulta» è in quest'ordine: Guida per il medico di medicina generale, Nota 79, Vitamina D e Nota 96, A chi fare la densitometria in LEA. Salvataggio, ripristino e blocco con codice sono in un gruppo a parte, «Archivio».
