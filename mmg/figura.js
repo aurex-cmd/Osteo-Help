@@ -182,11 +182,14 @@ function figNext(p, F, S, spots){
       const okp = pl.st === "ok";
       tiles.push(cal(pl.st === "miss" ? "late" : pl.st === "warn" ? "now" : "dxa", "Prossima densitometria", okp ? "da" : "entro", MESI[(okp ? from : to).getMonth()], (okp ? from : to).getFullYear(), pl.st === "miss" ? "da fare subito" : pl.st === "warn" ? "da programmare ora" : quando(from), okp ? "finestra fino a " + MESI[to.getMonth()] + " " + to.getFullYear() : "ultima " + fmtD(F.lastDxa.data))); }
     else tiles.push(cal("late", "Prossima densitometria", "DXA", "?", "", "da richiedere", "nessuna registrata"));
-    return `<div class="fnext done"><small>Caso completato · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${!th && p.decisione.tipo === "spec" ? "Registra il farmaco dello specialista" : th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
+    /* decisione presa ma con dati ancora mancanti: lo si dice, e si va dritti a completarli */
+    const mancano = allSteps(p).filter(x => x.st === "miss" && STEP_IX[x.k] <= STEP_IX.defra), RS = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra" };
+    const avviso = mancano.length ? `<button type="button" class="fmiss" data-fsheet="${RS[mancano[0].k]}"><b>Da completare:</b> ${mancano.map(x => x.t.toLowerCase() + " (" + x.s.replace(/^Mancano?:\s*/, "") + ")").join("; ")} ›</button>` : "";
+    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${!th && p.decisione.tipo === "spec" ? "Registra il farmaco dello specialista" : th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
   }
   if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
-    return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo indizio · ne ${miss.length === 1 ? "manca 1" : "mancano " + miss.length}</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
-  return `<a class="fnext go" href="#paz-${p.id}-decidi"><small>${miss.length ? "Manca ancora: " + miss[0][2].toLowerCase() : "Tutti gli indizi raccolti"}</small><b>Decidi la terapia</b><span>La proposta tiene conto di zona, Nota 79 e controindicazioni</span><em>▶</em></a>`;
+    return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo passo da completare</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
+  return `<a class="fnext go" href="#paz-${p.id}-decidi"><small>${miss.length ? "Manca ancora: " + miss[0][2].toLowerCase() : "Dati completi"}</small><b>Decidi la terapia</b><span>La proposta tiene conto di zona, Nota 79 e controindicazioni</span><em>▶</em></a>`;
 }
 /* referti come una fila di caselle: icona, nome, valore */
 function figInv(p, F, S, done){
@@ -215,7 +218,7 @@ function figSecInner(p, F, S, spots, wide){
   const next = i < 0 ? `<button type="button" class="btn" data-fclose>Fatto</button>`
     : i < FIG_SEQ.length - 1 ? `<button type="button" class="btn" data-fsheet="${FIG_SEQ[i + 1]}">Avanti<small>${FIG_TAB[FIG_SEQ[i + 1]]}</small> ›</button>`
     : `<a class="btn" href="#paz-${p.id}-decidi">Decidi la terapia ›</a>`;
-  return `<div class="fsheet-h"><span class="fic">${sh.ic}</span><span class="fsh-t">${i >= 0 ? `<small>Sezione ${i + 1} di ${FIG_SEQ.length}</small>` : ""}<b>${sh.t}</b></span><button type="button" class="btn sec mini" data-fclose aria-label="Chiudi">${wide ? "Riepilogo" : "Chiudi"}</button></div>
+  return `<div class="fsheet-h"><span class="fic">${sh.ic}</span><span class="fsh-t">${i >= 0 ? `<small>Passo ${[1, 1, 2, 3, 4, 5][i]} di ${STEPS.length}</small>` : ""}<b>${sh.t}</b></span><button type="button" class="btn sec mini" data-fclose aria-label="Chiudi">${wide ? "Riepilogo" : "Chiudi"}</button></div>
     ${tabs}<div class="fsheet-b">${sh.body(p)}</div><div class="fsheet-f">${prev}${next}</div>`;
 }
 function figSheet(p, F, S, spots){
@@ -236,13 +239,13 @@ function vFigura(p){
   const title = [hx(pzName(p)), F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
   const panel = !!FIG_SHEETS[FIG.open] && figWide();
   return { bar: pzName(p), html: viewSwitch(p, "figura") + `
-    <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} indizi raccolti</small></div></div>
+    <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} passi completati</small></div></div>
     <div class="fprog">${all.map(x => `<i class="${x.st}" title="${x.t}"></i>`).join("")}</div>
     <div class="fgrid${panel ? " panel" : ""}"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>${figRoad(p, all)}
     <div class="fcol-r">${panel ? `<div class="fpanel" role="region" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, true)}</div>` : `
       ${figNext(p, F, S, spots)}
       ${figDone(F, spots) ? "" : `<div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S, false) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>`}
-      ${figDone(F, spots) && !p.decisione ? "" : `<div class="fsec"><p class="flbl">${figDone(F, spots) ? "Controlli" : "Referti"}</p>${figInv(p, F, S, figDone(F, spots))}</div>`}
+      ${p.decisione ? `<div class="fsec"><p class="flbl">Controlli</p>${figInv(p, F, S, true)}</div>` : ""}
       ${p.decisione ? `<div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>` : ""}
       <p class="fdel"><button type="button" class="lnk" id="pzDel">Elimina paziente</button></p>`}
     </div></div>` + figSheet(p, F, S, spots) };
@@ -271,18 +274,27 @@ function proposta(p, F, S, fl){
     const spec = [T_, ...(F.donna ? [AB_, RO_] : [])];
     return { tipo:"spec", t:"Invio allo specialista dell'osso" + (F.zona === "rossa" ? ", con priorità" : ""), s:ZONE[F.zona].azione, opz: spec, nota:"Cosa potrà valutare lo specialista" };
   }
-  /* zona gialla: prima linea dal MMG, bisfosfonati o denosumab, il primo senza controindicazioni */
-  const ord = [A_, R_, D_, Z_], best = ord.find(okd);
+  /* zona gialla: prima linea dal MMG. L'ordine segue la Nota 79: prima i farmaci di I scelta per la condizione
+     del paziente (di solito alendronato, risedronato, zoledronato), poi quelli di II scelta (denosumab) */
+  const n79 = nota79(p, F), lev = id => { const l = n79.map(c => n79Lev(c, id)).filter(Boolean).map(x => N79_LEV.indexOf(x)); return l.length ? Math.min(...l) : 9; };
+  const base = [A_, R_, Z_, D_], ord = base.slice().sort((a, b) => lev(a) - lev(b) || base.indexOf(a) - base.indexOf(b)), best = ord.find(okd);
   return { tipo:"mmg", t: best ? "Terapia di prima linea: " + dnome(best) : "Prima linea non utilizzabile", s:ZONE.gialla.azione, opz: ord, best };
 }
 function vDecidi(p){
   const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), pr = proposta(p, F, S, fl), fig = figOf(p), vh = veryHigh(p, F);
   if(!pr) return { redirect: "paz-" + p.id + "-figura" };
   const n79of = id => n79.filter(c => c.s.some(l => l.includes(id)));
-  const drug = (id, best) => { const f = fl[id] || { ci:[], warn:[] }, c = n79of(id), ci = f.ci.length;
+  /* per ogni farmaco: la condizione della Nota in cui rientra e se è di I, II o III scelta */
+  const n79txt = id => { const c = n79of(id); if(!c.length) return "Con i dati inseriti è fuori dalle condizioni della Nota 79.";
+    const lv = c.map(x => N79_LEV.indexOf(n79Lev(x, id))), m = Math.min(...lv), cc = c.filter((x, i) => lv[i] === m), L = N79_LEV[m];
+    return `<b>Nota 79 · ${L} scelta</b>: ${cc.map(x => x.cond).join(" / ")}` + (m > 0 ? `. <em>Solo dopo intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni ai farmaci di ${N79_LEV[m - 1]} scelta${[T_, AB_].some(x => cc.some(y => y.s[0].includes(x))) ? " (o alla fine del periodo massimo di teriparatide o abaloparatide)" : ""}.</em>` : "")
+      + (cc.some(x => x.spec) && [T_, AB_, RO_].includes(id) ? (m > 0 ? " " : ". ") + "Piano terapeutico specialistico." : "") + (id === Z_ ? " Solo in struttura ospedaliera pubblica o convenzionata." : ""); };
+  const drug = (id, best) => { const f = fl[id] || { ci:[], warn:[] }, ci = f.ci.length;
     return `<div class="fdrug${best ? " best" : ""}${ci ? " no" : ""}">${best ? `<span class="frk">Consigliato</span>` : ""}<b class="fdn">${drugIcon(id)}${dnome(id)}</b><small>${DRUGS[id].via}</small>
       ${f.ci.map(x => `<div class="fwarn">Controindicato: ${x}</div>`).join("")}${f.warn.map(x => `<div class="fwarn a">Cautela: ${x}</div>`).join("")}
-      ${!ci ? `<div class="fn79">${c.length ? "Nota 79: " + c.map(x => x.cond).join(" / ") + (c.some(x => x.spec) && [T_, AB_, RO_].includes(id) ? " (piano terapeutico specialistico)" : "") : "Con i dati inseriti è fuori dalle condizioni della Nota 79."}</div>` : ""}</div>`; };
+      ${!ci ? `<div class="fn79">${n79txt(id)}</div>` : ""}</div>`; };
+  const pend = nota79Pend(p, F), PSTEP = { chi:"dati", fx:"dati", anam:"anamnesi", defra:"defra", dxa:"dxa" };
+  const pendH = pend.length ? `<div class="alert info n79p"><b>Da completare per la Nota 79</b><ul>${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul></div>` : "";
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
   const chk = [];
   const c = (st, t, s) => chk.push(`<div class="td ${st}"><i>${st === "ok" ? "✓" : "!"}</i><span>${t}<small>${s}</small></span></div>`);
@@ -318,6 +330,7 @@ function vDecidi(p){
     ${vh.length ? `<div class="alert"><b>Rischio molto alto</b>${vh.join("; ")}.${pr.tipo === "mmg" ? " Valuta comunque l'invio allo specialista per un anabolico." : ""}</div>` : ""}
     <p class="lbl">${pr.tipo === "spec" ? "Indicazione · zona " + ZONE[F.zona].t.toLowerCase() : pr.tipo === "nessuno" ? "Indicazione · zona verde" : "Terapia consigliata · zona gialla, la imposti tu"}</p>
     <div class="fprop ${pr.tipo}"><b>${pr.t}</b><small>${pr.s}</small></div>
+    ${pendH}
     ${pr.tipo === "mmg" ? (pr.best ? drug(pr.best, true) : "") + pr.opz.filter(id => id !== pr.best).map(id => drug(id, false)).join("") : ""}
     ${pr.tipo === "spec" ? `<p class="lbl">${pr.nota}</p>` + pr.opz.map(id => drug(id, false)).join("") + `<p class="small">Nell'attesa: calcio con la dieta, vitamina D, prevenzione delle cadute. La lettera allo specialista è già compilata.</p>` : ""}
     <p class="lbl">Prima della prima dose</p><div class="todo fchk">${chk.join("")}</div>

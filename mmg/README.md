@@ -79,3 +79,9 @@ I pulsanti «Salva la frattura», «Salva la densitometria» e «Salva la zona d
 ### Dopo l'invio allo specialista
 
 Con la decisione «Invia allo specialista», in cima a «Decidi la terapia» compare «Terapia indicata dallo specialista»: tutti i farmaci, con la loro icona; toccandone uno si registra da oggi (la data si corregge in Terapia) e nella figura compaiono il farmaco, la prossima dose e la prossima densitometria. Dalla figura ci si arriva con «Registra il farmaco dello specialista».
+
+### Nota 79: come la applica l'app
+
+Testo di riferimento: determina AIFA dell'8 settembre 2025. Per ogni farmaco la decisione terapeutica indica la condizione della Nota in cui rientra il paziente e se il farmaco è di **I, II o III scelta**; per la II e la III ricorda che servono intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni ai farmaci della scelta precedente (o la fine del periodo massimo di teriparatide o abaloparatide). Lo zoledronato è segnato come somministrabile solo in struttura ospedaliera pubblica o convenzionata. Nella zona gialla il farmaco consigliato segue l'ordine della Nota (prima la I scelta: alendronato, risedronato, zoledronato; poi il denosumab, di II scelta salvo nel blocco ormonale adiuvante).
+
+Dove la Nota chiede un dato che manca, l'app non lo dà per scontato e lo chiede in «Da completare per la Nota 79»: postmenopausa (prevenzione primaria e abaloparatide), dose e durata dei glucocorticoidi (≥5 mg/die da più di 3 mesi per la prevenzione primaria, da più di 12 mesi per il teriparatide), gravità delle fratture vertebrali secondo Genant (abaloparatide e romosozumab), rischio a 10 anni in % (romosozumab: ≥20%; la sola zona del DeFRA non basta). Dal testo del gestionale, «Prednisone 5 mg/die da 2 anni» imposta da solo la durata.
