@@ -53,7 +53,7 @@ function pzRivaluta(p){
   savePz(p);
 }
 /* anamnesi completa: basta aver inserito patologie o farmaci, oppure «Anamnesi muta»; in rivalutazione va rivista */
-const anamHas = p => (p.feats || []).length > 0 || Object.values(p.ci || {}).some(Boolean);
+const anamHas = p => (p.feats || []).length > 0 || Object.entries(p.ci || {}).some(([k, v]) => v && k !== "denti");
 const anamDone = p => !!p.anamOk || (!p.rival && anamHas(p));
 const pzName = p => p.nome && p.nome.trim() ? p.nome.trim() : "Paziente senza nome";
 function pzRoute(){ const m = /^paz-([a-z0-9]+)(?:-([a-z]+))?$/.exec(routeNow()); return m ? { p: pzGet(m[1]), sez: m[2] || "" } : { p:null, sez:"" }; }
@@ -728,12 +728,9 @@ function secReport(p, S){
   return (S.N.note.length ? `<p class="lbl">Cause note presenti</p><div class="stack">${S.N.note.map(x => item(x, false)).join("")}</div>` : "") +
     (S.N.sosp.length ? `<p class="lbl">Sospetti da approfondire</p><div class="stack">${S.N.sosp.map(x => item(x, true)).join("")}</div>` : "");
 }
-function anamMutaHTML(p){
-  if(p.rival && !p.anamOk) return `<div class="amuta"><button type="button" class="btn sec" data-amuta>Nessuna novità dalla valutazione precedente</button><small>Oppure aggiorna le voci qui sopra.</small></div>`;
-  if(p.anamOk && p.anamMuta && !anamHas(p)) return `<div class="amuta on"><span>✓ <b>Anamnesi muta</b>: nessuna malattia o farmaco rilevante</span><button type="button" class="lnk" data-amuta>annulla</button></div>`;
-  if(anamHas(p)) return "";
-  return `<div class="amuta"><button type="button" class="btn sec" data-amuta>Anamnesi muta</button><small>Nessuna malattia o farmaco rilevante per l'osso.</small></div>`;
-}
+/* «Anamnesi muta» come una voce: in cima, selezionabile; toglie le altre e, se la si deseleziona, le rimette */
+const anamMutaHTML = p => `<button type="button" class="ck amuta-ck" data-amuta aria-pressed="${!!(p.anamOk && p.anamMuta)}"><span class="cb">${TICK}</span><span><b>Anamnesi muta</b><small>Nessuna malattia, farmaco o controindicazione rilevante per l'osso</small></span></button>`;
+const anamNovHTML = p => p.rival && !p.anamOk ? `<div class="amuta"><button type="button" class="btn sec" data-anov>Nessuna novità dalla valutazione precedente</button><small>Oppure aggiorna le voci qui sopra.</small></div>` : "";
 function vPazAnamnesi(p){
   const own = new Set(p.feats || []), vis = id => !FEATSEX[id] || !p.sesso || FEATSEX[id] === p.sesso;
   const axes = AXES.map((a, i) => {
@@ -744,12 +741,13 @@ function vPazAnamnesi(p){
   }).join("");
   return { bar: pzName(p), html: head("Anamnesi e farmaci", "Spunta malattie, farmaci e abitudini: le forme secondarie compaiono in fondo alla pagina. Se non c'è nulla, usa «Anamnesi muta».") + `
     ${p.sesso ? "" : `<p class="hint">Indica il sesso nei dati del paziente per nascondere le voci non pertinenti.</p>`}
-    <details class="acc gest"${(p.testoGest || "").trim() || !(p.feats || []).length ? " open" : ""}><summary><span>Incolla dal gestionale<small>Copia il riassunto di patologie e farmaci: l'app propone le voci da spuntare</small></span>${CHEV}</summary><div class="accbody">
+    <details class="acc gest"${(p.testoGest || "").trim() || (!(p.feats || []).length && !p.anamMuta) ? " open" : ""}><summary><span>Incolla dal gestionale<small>Copia il riassunto di patologie e farmaci: l'app propone le voci da spuntare</small></span>${CHEV}</summary><div class="accbody">
       <textarea class="area" data-pf="testoGest" id="gestIn" rows="6" placeholder="Incolla qui l'elenco dei problemi e la terapia in corso (anche con nomi commerciali e dosi)">${hx(p.testoGest)}</textarea>
       <div class="btns"><button type="button" class="btn" id="gestGo">Riconosci</button></div>
       <div id="gestRes">${gestResHTML(p)}</div>
       <p class="small">Riconosce principi attivi e nomi commerciali, sinonimi, abbreviazioni (BPCO, AR, DM2, TVP…) e parole scritte in modo un po' diverso. Il testo resta in questo browser. Controlla sempre le proposte prima di aggiungerle.</p>
     </div></details>
+    <div data-live="amuta">${anamMutaHTML(p)}</div>
     <div>${axes}</div>
     <p class="lbl">Altri dati per DeFRA e Nota 79</p>
     <div>
@@ -761,7 +759,7 @@ function vPazAnamnesi(p){
       ${Object.entries(CI_LBL).filter(([k]) => k !== "denti").map(([k, t]) => ckPz("data-pci", k, (p.ci || {})[k], t)).join("")}
       <div class="fld gcdur"><span>Visita odontoiatrica (prima di bisfosfonati, denosumab o romosozumab)</span><div class="seg wrap" role="group" aria-label="Visita odontoiatrica">${[["ok", "fatta, bocca in ordine"], ["fare", "da fare per il nulla osta"], ["", "non so"]].map(([v, t]) => `<button type="button" data-dent="${v}" aria-pressed="${(p.dentista ? "ok" : (p.ci || {}).denti ? "fare" : "") === v}">${t}</button>`).join("")}</div></div>
     </div>
-    <div data-live="amuta">${anamMutaHTML(p)}</div>
+    <div data-live="anov">${anamNovHTML(p)}</div>
     <p class="lbl">Forme secondarie riconosciute</p>
     <div data-live="sec">${secReport(p, pzSecondary(p))}</div>` };
 }
@@ -1306,7 +1304,7 @@ const pzParent = r => /^paz-[a-z0-9]+-(figura|percorso)$/.test(r) ? "" : /^paz-[
 const PZ_LIVE = {
   stepper: p => { const m = /-([a-z]+)$/.exec(routeNow()); return m && STEP_IX[m[1]] !== undefined ? stepperInner(p, m[1]) : ""; },
   cacorr: caLine,
-  sec: p => secReport(p, pzSecondary(p)), amuta: anamMutaHTML, lab: p => labReport(p, pzSecondary(p)), defra: defraLive,
+  sec: p => secReport(p, pzSecondary(p)), amuta: anamMutaHTML, anov: anamNovHTML, lab: p => labReport(p, pzSecondary(p)), defra: defraLive,
   bmi: p => bmiTxt(pzFacts(p))
 };
 function pzLive(p){
@@ -1362,13 +1360,13 @@ document.addEventListener("click", e => {
   const s = t.closest("[data-pset]");
   if(s){ const k = s.dataset.pset, v = s.dataset.val === "true" ? true : s.dataset.val === "false" ? false : s.dataset.val; p[k] = p[k] === v ? null : v; savePz(p); render(); return; }
   const b = t.closest(".ck[data-pbool]");
-  if(b){ const k = b.dataset.pbool; p[k] = !p[k]; b.setAttribute("aria-pressed", p[k]); savePz(p); pzLive(p); return; }
+  if(b){ const k = b.dataset.pbool; p[k] = !p[k]; b.setAttribute("aria-pressed", p[k]); if(k === "disab"){ p.anamOk = true; p.anamMuta = false; delete p.anamPrev; } savePz(p); pzLive(p); return; }
   const c = t.closest(".ck[data-pci]");
-  if(c){ p.ci = p.ci || {}; const k = c.dataset.pci; p.ci[k] = !p.ci[k]; c.setAttribute("aria-pressed", p.ci[k]); p.anamOk = true; p.anamMuta = false; savePz(p); pzLive(p); return; }
+  if(c){ p.ci = p.ci || {}; const k = c.dataset.pci; p.ci[k] = !p.ci[k]; c.setAttribute("aria-pressed", p.ci[k]); p.anamOk = true; p.anamMuta = false; delete p.anamPrev; savePz(p); pzLive(p); return; }
   const f = t.closest(".ck[data-pfeat]");
   if(f){ const id = f.dataset.pfeat, set = new Set(p.feats || []); set.has(id) ? set.delete(id) : set.add(id); p.feats = [...set]; f.setAttribute("aria-pressed", set.has(id));
     const ax = f.closest("details.pzax"), n = ax.querySelectorAll('.ck[aria-pressed="true"]').length, badge = ax.querySelector(".n"); badge.textContent = n; badge.hidden = !n;
-    p.anamOk = true; p.anamMuta = false; savePz(p); pzLive(p); return; }
+    p.anamOk = true; p.anamMuta = false; delete p.anamPrev; savePz(p); pzLive(p); return; }
   const x = t.closest("#pzGrid button[data-pex]");
   if(x){ p.lab = p.lab || {}; const ex = x.dataset.pex, k = x.dataset.kind; if(p.lab[ex] === k) delete p.lab[ex]; else p.lab[ex] = k;
     x.closest(".tri").querySelectorAll("button").forEach(y => y.setAttribute("aria-pressed", p.lab[ex] === y.dataset.kind)); savePz(p); pzLive(p); return; }
@@ -1391,9 +1389,17 @@ document.addEventListener("click", e => {
         const dose = mg ? parseFloat(mg[1].replace(",", ".")) : null, mesi = an ? 12 * ({ un:1, uno:1, due:2, tre:3 }[an[1].toLowerCase()] || +an[1]) : me ? +me[1] : null;
         if(dose !== null && mesi !== null){ p.gcDur = dose < 5 ? "0" : mesi > 12 ? "12" : mesi > 3 ? "3" : "0"; p.gcMesi12 = p.gcDur === "12";
           gcMsg = " Prednisone " + fmtN(dose) + " mg da " + mesi + " mesi: " + (p.gcDur === "12" ? "oltre 12 mesi" : p.gcDur === "3" ? "oltre 3 mesi" : "sotto la soglia della Nota 79") + ", controlla."; } } }
-    p.anamOk = true; p.anamMuta = false; savePz(p); render(); toast(plural(keys.length, "voce aggiunta", "voci aggiunte") + ": controlla le voci." + gcMsg); return;
+    p.anamOk = true; p.anamMuta = false; delete p.anamPrev; savePz(p); render(); toast(plural(keys.length, "voce aggiunta", "voci aggiunte") + ": controlla le voci." + gcMsg); return;
   }
-  if(t.closest("[data-amuta]")){ if(p.anamOk && p.anamMuta){ p.anamOk = false; p.anamMuta = false; } else { p.anamOk = true; p.anamMuta = !anamHas(p); } savePz(p); render(); if(p.anamOk) toast(p.anamMuta ? "Anamnesi muta registrata." : "Anamnesi confermata."); return; }
+  if(t.closest("[data-amuta]")){
+    if(p.anamOk && p.anamMuta){ const pr = p.anamPrev; p.anamMuta = false;
+      if(pr){ p.feats = pr.feats || []; p.ci = Object.assign({}, pr.ci || {}, { denti: (p.ci || {}).denti }); p.disab = !!pr.disab; delete p.anamPrev; }
+      p.anamOk = anamHas(p) || !!p.disab; savePz(p); render(); if(pr) toast("Ripristinate le voci selezionate prima."); return; }
+    const ci = Object.assign({}, p.ci || {}); delete ci.denti;
+    if(anamHas(p) || p.disab) p.anamPrev = { feats: (p.feats || []).slice(), ci, disab: !!p.disab };
+    p.feats = []; p.ci = { denti: (p.ci || {}).denti }; p.disab = false; p.anamOk = true; p.anamMuta = true;
+    savePz(p); render(); toast(p.anamPrev ? "Anamnesi muta: le altre voci sono state tolte (deselezionala per riaverle)." : "Anamnesi muta."); return; }
+  if(t.closest("[data-anov]")){ p.anamOk = true; savePz(p); render(); toast("Anamnesi confermata."); return; }
   const gd = t.closest("[data-gcdur]");
   if(gd){ p.gcDur = gd.dataset.gcdur; p.gcMesi12 = p.gcDur === "12"; savePz(p); render(); return; }
   const dn = t.closest("[data-dent]");
