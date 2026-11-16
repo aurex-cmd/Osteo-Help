@@ -42,7 +42,8 @@ const FIG_SHEETS = {
   dxa:   { t:"Densitometria", ic:"🩻", k:"dxa", body: p => noHead(vPazDxa(p).html) },
   defra: { t:"DeFRA", ic:"🎯", k:"defra", body: p => noHead(vPazDefra(p).html) },
   sec:   { t:"Osteoporosi secondaria", ic:"⚠️", k:"anamnesi", body: p => { const S = pzSecondary(p);
-    return secReport(p, S) + (S.A.forms.length ? `<p class="lbl">Compatibili con gli esami</p><div class="stack">${S.A.forms.map(x => ohEntry("forma-" + x.cid, COND[x.cid], x.sub)).join("")}</div>` : "") +
+    const irc = (p.ci || {}).irc && !S.A.forms.some(x => x.cid === "irc");
+    return (irc ? `<p class="lbl">Dall'anamnesi</p><div class="stack">${ohEntry("forma-irc", COND.irc, "inserisci l'eGFR negli esami: decide quali farmaci si possono usare")}</div>` : "") + secReport(p, S) + (S.A.forms.length ? `<p class="lbl">Compatibili con gli esami</p><div class="stack">${S.A.forms.map(x => ohEntry("forma-" + x.cid, COND[x.cid], x.sub)).join("")}</div>` : "") +
       `<div class="btns"><button type="button" class="btn sec" data-fsheet="anam">Malattie e farmaci</button><button type="button" class="btn sec" data-fsheet="esami">Esami del sangue</button></div>`; } },
   storico:{ t:"Controlli nel tempo", ic:"📈", k:"storico", body: p => noHead(vPazStorico(p).html) },
   /* su PC la decisione si apre nel pannello di destra; sul telefono resta la sua pagina */
@@ -126,15 +127,16 @@ function figSummary(p, F, S){
   const cis = [];
   if(S.hpp) cis.push(["esami", "No bisfosfonati", "fosfatasi alcalina bassa"]);
   else if(ci.esofago) cis.push(["anam", "No bisfosfonati orali", "esofago"]);
+  if(ci.irc && eg === null) cis.push(["esami", "Insufficienza renale", "inserisci l'eGFR"]);
   if(eg !== null && eg < 35) cis.push(["esami", "eGFR " + fmtN(eg, 0), eg < 30 ? "no bisfosfonati, cautela" : "no alendronato, zoledronato"]);
   if(ci.cv || F.feats.has("ictus_emiplegia")) cis.push(["anam", "No romosozumab", "infarto o ictus"]);
   if(ci.tev) cis.push(["anam", "No raloxifene", "tromboembolismo"]);
   if(ci.denti) cis.push(["anam", "Visita odontoiatrica", "nulla osta alla terapia"]);
-  cis.slice(0, 2).forEach((x, i) => pill(sx, x[0], x[1] === "Visita odontoiatrica" ? "k-a" : "k-r", x[1] === "Visita odontoiatrica" ? "!" : "✕", x[1], i === 1 && cis.length > 2 ? "e altre " + (cis.length - 2) : x[2]));
+  cis.slice(0, 2).forEach((x, i) => pill(sx, x[0], /^(Visita|Insufficienza)/.test(x[1]) ? "k-a" : "k-r", /^(Visita|Insufficienza)/.test(x[1]) ? "!" : "✕", x[1], i === 1 && cis.length > 2 ? "e altre " + (cis.length - 2) : x[2]));
   /* destra: gli esami */
   const d = F.lastDxa, sites = [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]);
   if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(dx, "dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
-  const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid])])];
+  const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid]), ...(ci.irc ? [COND.irc] : [])])];
   const short = n => { const t = n.replace(/^Osteoporosi (indotta )?da /i, ""); return t.charAt(0).toUpperCase() + t.slice(1); };
   /* osteoporosi secondaria: un solo bollino, il numero di condizioni e i nomi su una riga; si apre */
   if(sec.length) dx.push(`<button type="button" class="fbd k-a fsec-b" data-fsheet="sec" aria-label="${hx(plural(sec.length, "condizione", "condizioni") + " di osteoporosi secondaria: " + sec.join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${sec.length}</span><span class="fbd-t"><b>Osteoporosi secondaria</b><small>${hx(sec.map(short).join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`);

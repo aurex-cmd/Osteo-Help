@@ -250,7 +250,7 @@ function drugFlags(p, F, S){
   if(eg !== null){
     if(eg < 35) add([A_, Z_], "ci", `eGFR ${fmtN(eg, 0)} mL/min (sotto 35)`);
     if(eg < 30){ add([R_, I_], "ci", `eGFR ${fmtN(eg, 0)} mL/min (sotto 30)`); add([T_, AB_], "ci", "insufficienza renale grave"); add([D_], "warn", "insufficienza renale grave: escludere CKD-MBD e osso adinamico, rischio di ipocalcemia (valutazione specialistica)"); }
-  } else if(lab.eGFR === "basso") add([A_, R_, I_, Z_, D_], "warn", "eGFR ridotto: inserisci il valore per verificare le soglie");
+  } else if(lab.eGFR === "basso" || ci.irc) add([A_, R_, I_, Z_, D_, T_, AB_], "warn", (ci.irc ? "insufficienza renale cronica" : "eGFR ridotto") + ": inserisci il valore dell'eGFR per verificare le soglie");
   if(lab.Ca === "basso") add(ANTIRIASS, "ci", "ipocalcemia da correggere prima di iniziare");
   if(lab.Ca === "alto") add(ANABOL, "ci", "ipercalcemia");
   if(lab.PTH === "alto" && lab.Ca === "alto") add(ANABOL, "ci", "sospetto iperparatiroidismo");
@@ -675,7 +675,7 @@ function vPazDati(p){
 }
 
 /* ---------- 2 · anamnesi e terapie ---------- */
-const CI_LBL = { esofago:"Disturbi esofagei (stenosi, acalasia) o impossibilità a stare in piedi o seduti per 30 minuti", tev:"Tromboembolismo venoso pregresso",
+const CI_LBL = { esofago:"Disturbi esofagei (stenosi, acalasia) o impossibilità a stare in piedi o seduti per 30 minuti", tev:"Tromboembolismo venoso pregresso", irc:"Insufficienza renale cronica (con l'eGFR negli esami si scelgono i farmaci)",
   cv:"Pregresso infarto o ictus, alto rischio cardiovascolare", rt:"Radioterapia sullo scheletro, tumori o metastasi ossee", reflusso:"Reflusso gastroesofageo o ernia iatale (cautela con i bisfosfonati orali)", denti:"Visita odontoiatrica da fare per il nulla osta alla terapia (problemi dentari aperti o cure invasive programmate)" };
 /* testo copiato dal gestionale → voci proposte (riconosci.js) */
 function gestItems(p){
@@ -1022,7 +1022,7 @@ function letterReasons(p, F, S){
 }
 function letterData(p){
   const F = pzFacts(p), S = pzSecondary(p), n79 = nota79(p, F), ll = labLine(p);
-  const ci = p.ci || {}, ciTxt = [ci.esofago && "disturbi esofagei", ci.tev && "tromboembolismo venoso pregresso", (ci.cv || F.feats.has("ictus_emiplegia")) && "pregresso infarto o ictus / rischio cardiovascolare", ci.rt && "radioterapia scheletrica o tumori ossei", ci.denti && "problemi dentari aperti", num(p.egfr) !== null && num(p.egfr) < 35 && "eGFR " + fmtN(num(p.egfr), 0) + " mL/min"].filter(Boolean);
+  const ci = p.ci || {}, ciTxt = [ci.esofago && "disturbi esofagei", ci.tev && "tromboembolismo venoso pregresso", (ci.cv || F.feats.has("ictus_emiplegia")) && "pregresso infarto o ictus / rischio cardiovascolare", ci.rt && "radioterapia scheletrica o tumori ossei", ci.denti && "problemi dentari aperti", ci.irc && "insufficienza renale cronica", num(p.egfr) !== null && num(p.egfr) < 35 && "eGFR " + fmtN(num(p.egfr), 0) + " mL/min"].filter(Boolean);
   const anam = (p.feats || []).map(id => FEATLABEL[id]).filter(Boolean).concat(p.fam === true ? ["familiarità per fratture di femore o vertebre"] : []);
   const rows = [
     ["Fratture da fragilità", F.fx.length ? F.fx.map(fxTxt).join("; ") : p.nessunaFx ? "nessuna" : "non note"],
