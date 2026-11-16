@@ -524,6 +524,7 @@ function vPazienti(){
       : `<p class="hint">Nessuna scadenza: qui compaiono DXA da ripetere, dosi di denosumab e zoledronato, fine degli anabolici, rivalutazioni dopo 5 anni e fratture recenti senza terapia.</p>`) : ""}</div>
     <div class="mh-cons"><p class="lbl">Consulta</p>
     <div class="rows mrows">
+      <a class="rowlink" href="#guida-dxa-lea"><span class="ibox s">${mic("book")}</span><span>A chi fare la densitometria in LEA<small>Fattori di rischio maggiori e minori, con il conteggio</small></span>${CHEV}</a>
       <a class="rowlink" href="#guida"><span class="ibox s">${mic("book")}</span><span>Guida per il medico di medicina generale<small>Cos'è l'osteoporosi, perché si cura, i farmaci</small></span>${CHEV}</a>
       <button type="button" class="rowlink" id="pzExport"${PZ.length ? "" : " disabled"}><span class="ibox s">${mic("down")}</span><span>Salva backup<small>${LAST_BK ? "Ultimo il " + fmtD(LAST_BK) : "Un file con tutto l'archivio"}</small></span>${CHEV}</button>
       <label class="rowlink"><span class="ibox s">${mic("up")}</span><span>Ripristina backup<small>Anche per spostare l'archivio su un altro computer</small></span>${CHEV}<input type="file" id="pzImport" accept="application/json,.json" hidden></label>
@@ -838,7 +839,7 @@ function therapyLive(p){
     <p class="lbl">Condizioni della Nota 79</p>${n79html}
     ${flagList ? `<p class="lbl">Controindicazioni e cautele per questo paziente</p><ul class="list chk">${flagList}</ul>` : ""}
     <p class="lbl">Per tutti</p>
-    <ul class="list"><li><i>1</i>Calcio con la dieta 1000–1200 mg al giorno (integratore solo se la dieta non basta)</li><li><i>2</i>Vitamina D: correggere la carenza; in terapia per l'osteoporosi è rimborsabile senza dosaggio (Nota 96)</li><li><i>3</i>Attività fisica, prevenzione delle cadute, stop al fumo, alcol con moderazione</li><li><i>4</i>${p.dentista ? "Visita odontoiatrica: eseguita ✓" : "Visita odontoiatrica prima di bisfosfonati, denosumab o romosozumab"}</li></ul>`;
+    <ul class="list"><li><i>1</i>Calcio con la dieta 1000–1200 mg al giorno (integratore solo se la dieta non basta)</li><li><i>2</i>Vitamina D: dosare la 25-OH-vitamina D e, se sotto 75 nmol/L (30 ng/mL), correggerla prima di iniziare il farmaco: in questo caso è rimborsabile (Nota 96)</li><li><i>3</i>Attività fisica, prevenzione delle cadute, stop al fumo, alcol con moderazione</li><li><i>4</i>${p.dentista ? "Visita odontoiatrica: eseguita ✓" : "Visita odontoiatrica prima di bisfosfonati, denosumab o romosozumab"}</li></ul>`;
 }
 function vPazTerapia(p){
   const F = pzFacts(p), notes = therapyNotes(F), n79 = nota79(p, F);
@@ -919,7 +920,7 @@ function vPazDxa(p){
   const dxaRows = F.dxa.map(d => {
     return `<li class="rec"><span><b>${fmtD(d.data)}</b><small>colonna ${fmtN(num(d.tL))} · femore totale ${fmtN(num(d.tFt))} · collo ${fmtN(num(d.tFn))}</small></span><button type="button" class="x" data-del="dxa:${p.dxa.indexOf(d)}" aria-label="Elimina">✕</button></li>`; }).join("");
   return { bar: pzName(p), html: head("Densitometria", "Riporta il T-score di colonna lombare e femore dal referto della DXA.") + `
-    ${F.lastDxa ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
+    ${F.lastDxa ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila (<a href="#guida-dxa-lea">a chi farla in LEA</a>) e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
     <div class="addbox">
       <div class="grid2">
         <label class="fld">Data della DXA<input type="date" id="dxD" value="${todayISO()}"></label>
@@ -1078,6 +1079,56 @@ function vPazFoglio(p){
 }
 
 /* ---------- guida per il MMG ---------- */
+/* ---------- densitometria in LEA: DPCM 12 gennaio 2017, Allegato 4A ---------- */
+const LEA_MAG = [
+  ["Fratture e osteoporosi documentate", ["Precedenti fratture da fragilità (causate da trauma minimo)", "Riscontro radiologico di fratture vertebrali", "Riscontro radiologico di osteoporosi"]],
+  ["Terapie croniche (attuate o previste)", ["Corticosteroidi sistemici per più di 3 mesi a dosi ≥5 mg/die di equivalente prednisonico", "Levotiroxina a dosi soppressive", "Antiepilettici", "Anticoagulanti (eparina)", "Immunosoppressori", "Antiretrovirali", "Sali di litio", "Agonisti del GnRH", "Chemioterapia in età pediatrica *", "Radioterapia in età pediatrica *"]],
+  ["Solo donne in menopausa", ["Anamnesi familiare materna di frattura osteoporotica in età inferiore a 75 anni", "Menopausa prima dei 45 anni", "Magrezza: indice di massa corporea < 19 kg/m²"]]
+];
+const LEA_PAT = [
+  ["Malattie endocrine", "amenorrea primaria non trattata; amenorrea secondaria per oltre un anno; ipogonadismi; iperparatiroidismo; ipertiroidismo; sindrome di Cushing; acromegalia; deficit di GH; iperprolattinemia; diabete mellito tipo 1"],
+  ["Malattie metaboliche e nutrizionali", "rachitismi/osteomalacia; sindromi da denutrizione, compresa l'anoressia nervosa e le sindromi correlate"],
+  ["Malattie gastroenterologiche", "celiachia e sindromi da malassorbimento; malattie infiammatorie intestinali croniche severe; epatopatie croniche colestatiche; fibrosi cistica"],
+  ["Malattie renali", "insufficienza renale cronica; sindrome nefrosica; nefrotubulopatie croniche; ipercalciuria idiopatica"],
+  ["Emopatie con coinvolgimento osseo", "mieloma; linfoma; leucemia; talassemia; drepanocitosi; mastocitosi"],
+  ["Malattie reumatologiche", "artrite reumatoide (incluso morbo di Still); spondilite anchilosante; artropatia psoriasica; connettiviti sistemiche"],
+  ["Altre patologie e condizioni", "patologie genetiche con alterazioni metaboliche e displasiche dell'apparato scheletrico; trapianto d'organo; allettamento e immobilizzazioni prolungate (oltre 3 mesi); paralisi cerebrale, distrofia muscolare, atrofia muscolare e spinale"]
+];
+const LEA_MIN = {
+  donna: ["Età superiore ai 65 anni", "Anamnesi familiare materna di osteoporosi severa", "Amenorrea premenopausale di durata superiore ai 6 mesi", "Scarso apporto di calcio con la dieta (< 1200 mg/die)", "Fumo di sigaretta (> 20 sigarette/die)", "Abuso di alcol (> 60 g/die)"],
+  uomo: ["Anamnesi familiare di osteoporosi severa", "Magrezza: indice di massa corporea < 19 kg/m²", "Scarso apporto di calcio con la dieta (< 1200 mg/die)", "Fumo di sigaretta (> 20 sigarette/die)", "Abuso di alcol (> 60 g/die)"]
+};
+const leaCk = (grp, i, t) => `<button type="button" class="ck" data-lea="${grp}" aria-pressed="false"><span class="cb">${TICK}</span><span>${t}</span></button>`;
+const LEA_DXA_HTML = `
+    <p class="note">La densitometria ossea (DXA) è a carico del SSN se c'è <b>almeno un fattore di rischio maggiore</b> oppure, nella donna in menopausa e nell'uomo oltre i 60 anni, <b>almeno tre fattori di rischio minori</b>. Sono i criteri nazionali dei LEA, che valgono anche in Veneto. Spunta quelli presenti: il risultato compare in fondo.</p>
+    <p class="lbl">Fattori di rischio maggiori · ne basta uno</p>
+    ${LEA_MAG.map(([t, l], g) => `<p class="small"><b>${g + 1}. ${t}</b></p><div class="leag">${l.map((x, i) => leaCk("mag", i, x)).join("")}</div>`).join("")}
+    <p class="small"><b>4. Patologie a rischio di osteoporosi</b></p>
+    <div class="leag">${LEA_PAT.map(([t, l]) => leaCk("mag", 0, `<b>${t}</b><small>${l}</small>`)).join("")}</div>
+    <p class="small">* Chemioterapia e radioterapia in età pediatrica valgono nell'adulto solo se associate a 3 o più fattori di rischio minori.</p>
+    <p class="lbl">Fattori di rischio minori · ne servono almeno tre</p>
+    <div class="seg" role="group" aria-label="Chi è il paziente" id="leaSx"><button type="button" data-leasx="donna" aria-pressed="true">Donna in menopausa</button><button type="button" data-leasx="uomo" aria-pressed="false">Uomo oltre i 60 anni</button></div>
+    <div class="leag" data-leamin="donna">${LEA_MIN.donna.map((x, i) => leaCk("min", i, x)).join("")}</div>
+    <div class="leag" data-leamin="uomo" hidden>${LEA_MIN.uomo.map((x, i) => leaCk("min", i, x)).join("")}</div>
+    <div class="alert info" id="leaOut" role="status"><b>Spunta i fattori presenti</b>Con almeno un fattore maggiore, o tre minori, la DXA rientra nei LEA.</div>
+    <p class="small">Fonte: criteri di accesso alla densitometria ossea, DPCM 12 gennaio 2017, Allegato 4A (LEA nazionali). L'elenco serve da promemoria: la prescrizione resta del medico.</p>`;
+/* ---------- vitamina D: Nota 96 (testo AIFA, aggiornamento del 10 febbraio 2023) ---------- */
+const NOTA96_HTML = `
+    <p class="note">La Nota 96 regola la rimborsabilità di colecalciferolo, colecalciferolo con calcio e calcifediolo nell'adulto (≥18 anni), per la prevenzione e il trattamento della carenza di vitamina D.</p>
+    <p class="lbl">A · Rimborsabile senza dosare la 25-OH-vitamina D</p>
+    <ul class="list"><li><i>1</i><span>Persone istituzionalizzate.</span></li><li><i>2</i><span>Persone con gravi deficit motori o allettate che vivono al proprio domicilio.</span></li><li><i>3</i><span>Donne in gravidanza o in allattamento.</span></li><li><i>4</i><span>Persone con osteoporosi di qualsiasi causa <b>non candidate</b> a terapia remineralizzante (Nota 79).</span></li></ul>
+    <p class="lbl">B · Rimborsabile dopo il dosaggio della 25-OH-vitamina D</p>
+    <ul class="list"><li><i>1</i><span>Sotto <b>30 nmol/L</b> (12 ng/mL) con sintomi attribuibili (astenia intensa, mialgie, dolori diffusi o localizzati, cadute frequenti immotivate), oppure come riscontro occasionale anche senza sintomi.</span></li>
+    <li><i>2</i><span>Sotto <b>50 nmol/L</b> (20 ng/mL) in terapia di lunga durata con farmaci che interferiscono con la vitamina D (antiepilettici, glucocorticoidi, antiretrovirali, antimicotici, colestiramina, orlistat) o con malattie che causano malassorbimento.</span></li>
+    <li><i>3</i><span>Sotto <b>75 nmol/L</b> (30 ng/mL) con iperparatiroidismo primario o secondario.</span></li>
+    <li><i>4</i><span>Sotto <b>75 nmol/L</b> (30 ng/mL) con osteoporosi di qualsiasi causa od osteopatia accertata <b>candidate a terapia remineralizzante</b>: la correzione va fatta <b>prima</b> di iniziare il farmaco.</span></li></ul>
+    <div class="alert info"><b>Nel paziente che inizia un farmaco per l'osteoporosi</b>Si dosa la 25-OH-vitamina D: sotto 75 nmol/L (30 ng/mL) la vitamina D è rimborsabile e la terapia per l'osso si inizia dopo averla corretta.</div>
+    <p class="lbl">Come correggere (Allegato 1 della Nota)</p>
+    <ul class="list"><li><i>1</i><span><b>0–30 nmol/L</b> (0–12 ng/mL): colecalciferolo 300.000 UI in tutto, in non più di 12 settimane (dosi giornaliere, settimanali o mensili, mai oltre 100.000 UI per dose), oppure calcifediolo 0,266 mg due volte al mese.</span></li>
+    <li><i>2</i><span><b>30–50 nmol/L</b> (13–20 ng/mL), quando la Nota lo prevede: colecalciferolo 750–1000 UI al giorno (o dosi settimanali o mensili corrispondenti), oppure calcifediolo 0,266 mg al mese.</span></li>
+    <li><i>3</i><span><b>Sopra 50 nmol/L</b> (20 ng/mL): la supplementazione non è rimborsata, salvo osteoporosi, osteomalacia, patologie ossee riconosciute o iperparatiroidismo (stesse dosi del punto 2).</span></li>
+    <li><i>4</i><span>Ricontrollare la 25-OH-vitamina D dopo circa 3 mesi, soprattutto se i sintomi non passano. Mantenimento per tutta la durata della terapia per l'osteoporosi.</span></li></ul>
+    <p class="small">Lo schema non si applica, e serve lo specialista, con eGFR sotto 30, urolitiasi, ipercalcemia, sarcoidosi, neoplasie metastatiche, linfomi. Il dosaggio non è uno screening: va chiesto con sintomi, farmaci interferenti o malassorbimento, patologia ossea da trattare, PTH elevato. Fonte: Nota AIFA 96 e Allegato 1 (aggiornamento con determina n. 48 del 10 febbraio 2023).</p>`;
 const GUIDA = [
   { k:"cosa", t:"Cos'è l'osteoporosi", s:"In parole semplici", html:`
     <p class="note">È una malattia dello scheletro in cui l'osso diventa meno denso e più fragile, fino a rompersi per traumi minimi: una caduta dalla propria altezza, un colpo di tosse, sollevare un peso. Non dà sintomi finché non compare una frattura.</p>
@@ -1122,11 +1173,13 @@ const GUIDA = [
     <div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>` },
   { k:"base", t:"Calcio, vitamina D e stile di vita", s:"Per tutti, prima e durante la terapia", html:`
     <ul class="list"><li><i>1</i><span><b>Calcio</b>: 1000–1200 mg al giorno, possibilmente con la dieta (latte, yogurt, formaggi, acque ricche di calcio); integratore solo per la quota mancante.</span></li>
-    <li><i>2</i><span><b>Vitamina D</b>: correggere la carenza prima di iniziare un farmaco (la carenza ne riduce l'efficacia e favorisce l'ipocalcemia). In chi è in terapia per l'osteoporosi si punta ad almeno 75 nmol/L (30 ng/mL); colecalciferolo rimborsabile senza dosaggio in corso di terapia remineralizzante (Nota 96). Secondo le linee guida SIOMMMS (Adami et al., Reumatismo 2011;63:129-147) si parla di carenza sotto 50 nmol/L, insufficienza tra 50 e 75, eccesso sopra 250 e intossicazione sopra 375 nmol/L (150 ng/mL); nei pazienti con malattie granulomatose o iperparatiroidismo primitivo l'integrazione va fatta con cautela, controllando periodicamente la 25(OH)D.</span></li>
+    <li><i>2</i><span><b>Vitamina D</b>: correggere la carenza prima di iniziare un farmaco (la carenza ne riduce l'efficacia e favorisce l'ipocalcemia). Nel candidato alla terapia per l'osteoporosi si dosa la 25-OH-vitamina D: sotto 75 nmol/L (30 ng/mL) è rimborsabile e va corretta prima di iniziare il farmaco (Nota 96; vedi la pagina sulla Nota 96). Secondo le linee guida SIOMMMS (Adami et al., Reumatismo 2011;63:129-147) si parla di carenza sotto 50 nmol/L, insufficienza tra 50 e 75, eccesso sopra 250 e intossicazione sopra 375 nmol/L (150 ng/mL); nei pazienti con malattie granulomatose o iperparatiroidismo primitivo l'integrazione va fatta con cautela, controllando periodicamente la 25(OH)D.</span></li>
     <li><i>3</i><span><b>Attività fisica</b> regolare, con esercizi di carico e di equilibrio.</span></li>
     <li><i>4</i><span><b>Cadute</b>: vista, farmaci sedativi e ipotensivi, casa sicura, calzature.</span></li>
     <li><i>5</i><span><b>Fumo</b> da sospendere, <b>alcol</b> sotto le 3 unità al giorno, peso adeguato.</span></li>
     <li><i>6</i><span><b>Bocca</b>: visita odontoiatrica e igiene orale prima di bisfosfonati, denosumab, romosozumab.</span></li></ul>` },
+  { k:"dxa-lea", t:"A chi fare la densitometria in LEA", s:"Criteri di accesso alla DXA a carico del SSN", html: LEA_DXA_HTML },
+  { k:"nota96", t:"Vitamina D e Nota 96", s:"Quando dosarla, quando è rimborsabile, come correggerla", html: NOTA96_HTML },
   { k:"followup", t:"Follow-up", s:"DXA ogni 18–24 mesi, rischio di rifrattura", html:`
     <ul class="list"><li><i>1</i><span><b>DXA ogni 18–24 mesi</b>, con lo stesso apparecchio (prima non è di solito utile: le variazioni sono minori dell'errore della misura). Si può anticipare a 12 mesi con glucocorticoidi ad alte dosi.</span></li>
     <li><i>2</i><span><b>Rischio di rifrattura</b>: dopo una frattura è massimo nei primi 1–2 anni. Una nuova frattura dopo almeno un anno di terapia è un motivo per cambiare classe di farmaco (Nota 79).</span></li>
@@ -1226,6 +1279,10 @@ document.addEventListener("click", e => {
   const sg = t.closest(".sgn[data-sgn]");
   if(sg){ const neg = sg.getAttribute("aria-pressed") !== "true"; sg.setAttribute("aria-pressed", neg); sg.textContent = neg ? "−" : "+"; sg.setAttribute("aria-label", "Segno del T-score: " + (neg ? "meno (tocca per più)" : "più (tocca per meno)")); return; }
   const tmp = t.closest(".ck[data-tmp]"); if(tmp){ tmp.setAttribute("aria-pressed", tmp.getAttribute("aria-pressed") !== "true"); return; }
+  const lc = t.closest(".ck[data-lea]");
+  if(lc){ lc.setAttribute("aria-pressed", lc.getAttribute("aria-pressed") !== "true"); leaUpdate(); return; }
+  const lx = t.closest("[data-leasx]");
+  if(lx){ document.querySelectorAll("[data-leasx]").forEach(b => b.setAttribute("aria-pressed", b === lx)); document.querySelectorAll("[data-leamin]").forEach(g => { g.hidden = g.dataset.leamin !== lx.dataset.leasx; }); leaUpdate(); return; }
   const { p } = pzRoute(); if(!p) return;
   if(t.closest("#pzDel")){ if(confirm("Eliminare " + pzName(p) + " e tutti i suoi dati?")){ PZ.splice(PZ.indexOf(p), 1); savePz(); history.replaceState(null, "", location.pathname + location.search); stack.length = 0; stack.push(""); render(); } return; }
   const s = t.closest("[data-pset]");
@@ -1317,6 +1374,16 @@ function addRec(p, k, auto){
   const el = document.querySelector(`[data-del="${k}:${p[k].indexOf(rec)}"]`), li = el && el.closest("li");
   if(li){ li.scrollIntoView({ block:"nearest", behavior:"smooth" }); li.classList.add("flash"); }
   return true;
+}
+/* conteggio dei fattori di rischio per la DXA in LEA */
+function leaUpdate(){
+  const out = document.getElementById("leaOut"); if(!out) return;
+  const mag = document.querySelectorAll('.ck[data-lea="mag"][aria-pressed="true"]').length;
+  const g = document.querySelector("[data-leamin]:not([hidden])"), min = g ? g.querySelectorAll('.ck[aria-pressed="true"]').length : 0;
+  const ok = mag > 0 || min >= 3;
+  out.className = "alert " + (ok ? "ok" : "info");
+  out.innerHTML = ok ? `<b>Rientra nei LEA</b>${mag ? plural(mag, "fattore maggiore", "fattori maggiori") : ""}${mag && min ? " e " : ""}${min ? plural(min, "fattore minore", "fattori minori") : ""}.${mag && min < 3 ? " Se l'unico fattore maggiore è chemio o radioterapia in età pediatrica, servono anche 3 fattori minori." : ""}`
+    : `<b>${mag + min ? "Non ancora" : "Spunta i fattori presenti"}</b>${min ? plural(min, "fattore minore", "fattori minori") + ": ne servono almeno tre, oppure un fattore maggiore." : "Con almeno un fattore maggiore, o tre minori, la DXA rientra nei LEA."}`;
 }
 /* moduli lasciati a metà: si salvano da soli quando si chiude la scheda, si cambia sezione o si lascia la pagina */
 function commitPending(p){ if(!p) return false; let n = false; ["fratture", "dxa", "defra"].forEach(k => { if(addRec(p, k, true)) n = true; }); return n; }
