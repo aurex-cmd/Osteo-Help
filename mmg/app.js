@@ -525,6 +525,7 @@ function vPazienti(){
     <div class="mh-cons"><p class="lbl">Consulta</p>
     <div class="rows mrows">
       <a class="rowlink" href="#guida-dxa-lea"><span class="ibox s">${mic("book")}</span><span>A chi fare la densitometria in LEA<small>Fattori di rischio maggiori e minori, con il conteggio</small></span>${CHEV}</a>
+      <a class="rowlink" href="#guida-nota79"><span class="ibox s">${mic("book")}</span><span>Nota 79<small>Condizioni di rimborsabilità, I, II e III scelta</small></span>${CHEV}</a>
       <a class="rowlink" href="#guida"><span class="ibox s">${mic("book")}</span><span>Guida per il medico di medicina generale<small>Cos'è l'osteoporosi, perché si cura, i farmaci</small></span>${CHEV}</a>
       <button type="button" class="rowlink" id="pzExport"${PZ.length ? "" : " disabled"}><span class="ibox s">${mic("down")}</span><span>Salva backup<small>${LAST_BK ? "Ultimo il " + fmtD(LAST_BK) : "Un file con tutto l'archivio"}</small></span>${CHEV}</button>
       <label class="rowlink"><span class="ibox s">${mic("up")}</span><span>Ripristina backup<small>Anche per spostare l'archivio su un altro computer</small></span>${CHEV}<input type="file" id="pzImport" accept="application/json,.json" hidden></label>
@@ -1129,6 +1130,45 @@ const NOTA96_HTML = `
     <li><i>3</i><span><b>Sopra 50 nmol/L</b> (20 ng/mL): la supplementazione non è rimborsata, salvo osteoporosi, osteomalacia, patologie ossee riconosciute o iperparatiroidismo (stesse dosi del punto 2).</span></li>
     <li><i>4</i><span>Ricontrollare la 25-OH-vitamina D dopo circa 3 mesi, soprattutto se i sintomi non passano. Mantenimento per tutta la durata della terapia per l'osteoporosi.</span></li></ul>
     <p class="small">Lo schema non si applica, e serve lo specialista, con eGFR sotto 30, urolitiasi, ipercalcemia, sarcoidosi, neoplasie metastatiche, linfomi. Il dosaggio non è uno screening: va chiesto con sintomi, farmaci interferenti o malassorbimento, patologia ossea da trattare, PTH elevato. Fonte: Nota AIFA 96 e Allegato 1 (aggiornamento con determina n. 48 del 10 febbraio 2023).</p>`;
+/* ---------- Nota 79: testo della determina AIFA dell'8 settembre 2025 ---------- */
+const N79_GUIDA = [
+  ["Prevenzione secondaria · fratture vertebrali o di femore", [
+    ["1-2 fratture (b)", "Alendronato (± vit. D), risedronato, zoledronato (d)", "Denosumab (e), ibandronato, raloxifene, bazedoxifene", ""],
+    ["≥3 fratture", "Teriparatide (g)", "Denosumab (e), zoledronato (d)", "Alendronato (± vit. D), risedronato, ibandronato"],
+    ["≥1 frattura + T-score colonna o femore (c) ≤ −4", "Teriparatide (g)", "Denosumab (e), zoledronato (d)", "Alendronato (± vit. D), risedronato, ibandronato"],
+    ["≥1 frattura + trattamento da più di 12 mesi con prednisone o equivalenti ≥5 mg/die", "Teriparatide (g)", "Denosumab (e), zoledronato (d)", "Alendronato (± vit. D), risedronato, ibandronato"],
+    ["Nuova frattura vertebrale o femorale nonostante trattamento in Nota 79 da almeno 1 anno", "Teriparatide (g)", "Denosumab (e), zoledronato (d)", "Alendronato (± vit. D), risedronato, ibandronato"],
+    ["Donne in postmenopausa con T-score colonna o femore < −2,5 e > −5,0 (< −2,0 e > −5,0 oltre i 65 anni) + ≥2 fratture vertebrali lievi o almeno 1 moderata, o storia di frattura di avambraccio, omero, sacro, pelvi, anca, femore o tibia negli ultimi 5 anni", "Abaloparatide (h)", "Denosumab (e), zoledronato (d)", "Alendronato (± vit. D), risedronato, ibandronato"],
+    ["Donne con T-score colonna o femore < −2,5 (< −2,0 se ≥2 fratture vertebrali moderate o gravi, o frattura femorale nei 2 anni precedenti) + almeno 1 frattura vertebrale moderata o grave, o ≥2 lievi, o frattura femorale + rischio di frattura a 10 anni ≥20% (calcolatore validato) + impossibilità a seguire altri trattamenti efficaci (intolleranza, inefficacia o fine del periodo autorizzato)", "Romosozumab (f) per al massimo 12 mesi, seguito da antiriassorbitivi (bisfosfonati o denosumab)", "Denosumab (e), zoledronato (d)", "Alendronato (± vit. D), risedronato, ibandronato"]
+  ]],
+  ["Prevenzione secondaria · fratture non vertebrali e non femorali", [
+    ["+ T-score colonna o femore ≤ −3", "Alendronato (± vit. D), risedronato, zoledronato (d)", "Denosumab (e), ibandronato, raloxifene, bazedoxifene", ""],
+    ["Donne con T-score colonna o femore < −2,5 + ≥2 fratture non vertebrali + rischio di frattura a 10 anni ≥20% (calcolatore validato) + impossibilità a seguire altri trattamenti efficaci", "Romosozumab (f) per al massimo 12 mesi, seguito da antiriassorbitivi (bisfosfonati o denosumab)", "", ""]
+  ]],
+  ["Prevenzione primaria · donne in menopausa o uomini di almeno 50 anni", [
+    ["Trattamento in atto o previsto per più di 3 mesi con prednisone equivalente ≥5 mg/die", "Alendronato (± vit. D), risedronato, zoledronato (d)", "Denosumab (e)", ""],
+    ["Blocco ormonale adiuvante: donne con carcinoma mammario o uomini con carcinoma prostatico", "Alendronato (± vit. D), risedronato, zoledronato (d), denosumab (e)", "", ""],
+    ["T-score colonna o femore (c) ≤ −4", "Alendronato (± vit. D), risedronato", "Denosumab (e), zoledronato (d), ibandronato, raloxifene, bazedoxifene", ""],
+    ["T-score colonna o femore (c) ≤ −3 + familiarità per fratture di vertebre o femore, oppure comorbilità a rischio di frattura (artrite reumatoide o altre connettiviti, diabete, BPCO, malattia infiammatoria cronica intestinale, AIDS, m. di Parkinson, sclerosi multipla, grave disabilità motoria)", "Alendronato (± vit. D), risedronato", "Denosumab (e), zoledronato (d), ibandronato, raloxifene, bazedoxifene", ""]
+  ]]
+];
+const N79_NOTE = [
+  ["a", "Il passaggio dalla I scelta alle successive richiede intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni al farmaco della classe precedente o, per teriparatide e abaloparatide, la fine del periodo massimo di trattamento. Da valutare il cambio di terapia anche per una frattura vertebrale o di femore dopo almeno un anno di trattamento con i farmaci della classe precedente."],
+  ["b", "La frattura vertebrale si diagnostica con il criterio di Genant (riduzione di almeno il 20% di un'altezza vertebrale); per il romosozumab contano in modo diverso le fratture lievi e quelle moderate o gravi."],
+  ["c", "La densitometria deve essere DXA lombare e/o femorale, eseguita in strutture pubbliche o convenzionate con il SSN."],
+  ["d", "Lo zoledronato è prescrivibile e somministrabile solo in strutture ospedaliere pubbliche o convenzionate."],
+  ["e", "Il denosumab è prescrivibile anche dal medico di medicina generale (ricetta ripetibile, RR)."],
+  ["f", "Romosozumab: solo donne, su diagnosi e piano terapeutico di centri ospedalieri o specialisti (internista, reumatologo, endocrinologo, ginecologo, geriatra, ortopedico, fisiatra, nefrologo), per al massimo 12 mesi, non rinnovabile."],
+  ["g", "Teriparatide: su diagnosi e piano terapeutico specialistico di 6 mesi, rinnovabile per altri 6 mesi non più di tre volte (24 mesi in tutto)."],
+  ["h", "Abaloparatide: su diagnosi e piano terapeutico specialistico di 6 mesi, rinnovabile per altri 6 mesi non più di due volte (18 mesi in tutto)."]
+];
+const NOTA79_HTML = `
+    <p class="note">La Nota 79 limita la prescrizione a carico del SSN dei farmaci per l'osteoporosi alle condizioni qui sotto. Per ogni condizione: <b>I scelta</b>, poi <b>II</b> e <b>III</b> solo nei casi della nota (a). Le lettere rimandano alle note in fondo.</p>
+    ${N79_GUIDA.map(([sez, rows]) => `<p class="lbl">${sez}</p><div class="n79g">${rows.map(([c, i1, i2, i3]) => `<div class="n79r"><p class="n79c">${c}</p><dl>${[["I scelta", i1], ["II scelta", i2], ["III scelta", i3]].filter(x => x[1]).map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl></div>`).join("")}</div>`).join("")}
+    <p class="lbl">Note</p>
+    <ul class="list n79n">${N79_NOTE.map(([k, t]) => `<li><i>${k}</i><span>${t}</span></li>`).join("")}</ul>
+    <div class="alert info"><b>Prima di iniziare</b>In tutte le indicazioni è raccomandato un adeguato apporto di calcio e vitamina D (vedi la pagina sulla Nota 96), attività fisica, sospensione del fumo e prevenzione delle cadute; prima di trattare vanno escluse le forme secondarie.</div>
+    <p class="small">Fonte: Nota AIFA 79, allegato alla determina del Presidente AIFA n. 1127 dell'8 settembre 2025. Nella scheda di ogni paziente, in «Decidi la terapia», l'app indica per ciascun farmaco la condizione e il livello di scelta. Verifica sempre il testo vigente.</p>`;
 const GUIDA = [
   { k:"cosa", t:"Cos'è l'osteoporosi", s:"In parole semplici", html:`
     <p class="note">È una malattia dello scheletro in cui l'osso diventa meno denso e più fragile, fino a rompersi per traumi minimi: una caduta dalla propria altezza, un colpo di tosse, sollevare un peso. Non dà sintomi finché non compare una frattura.</p>
@@ -1170,6 +1210,7 @@ const GUIDA = [
     <p class="note">Servono: età, sesso, peso, altezza, fratture da fragilità (sede, numero), familiarità per frattura di femore o vertebre, fumo, alcol, glucocorticoidi, malattie (artrite reumatoide e connettiviti, diabete, BPCO, MICI, HIV, Parkinson, sclerosi multipla, grave disabilità motoria), terapia ormonale adiuvante, T-score di colonna e femore.</p>
     <p class="note">La <b>Nota 79</b> stabilisce quando i farmaci sono a carico del SSN: in prevenzione secondaria (fratture vertebrali o di femore; altre fratture con T-score ≤ −3) e in prevenzione primaria (glucocorticoidi ≥5 mg/die per più di 3 mesi, blocco ormonale adiuvante, T-score ≤ −4, oppure ≤ −3 con familiarità o comorbilità). Il rischio a 10 anni ≥ 20% calcolato con un calcolatore validato entra nei criteri del romosozumab (per la donna in zona arancione o rossa). Fumo e alcol, in quanto modificabili, non contano ai fini della rimborsabilità.</p>
     <p class="note">Il passaggio dalla I alla II scelta richiede intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni; una nuova frattura dopo almeno un anno di terapia giustifica un cambio di classe. Zoledronato solo in strutture ospedaliere; denosumab prescrivibile dal MMG; teriparatide, abaloparatide e romosozumab su piano terapeutico specialistico.</p>
+    <p class="note"><a href="#guida-nota79">Tutte le condizioni della Nota 79, con I, II e III scelta</a></p>
     <div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>` },
   { k:"base", t:"Calcio, vitamina D e stile di vita", s:"Per tutti, prima e durante la terapia", html:`
     <ul class="list"><li><i>1</i><span><b>Calcio</b>: 1000–1200 mg al giorno, possibilmente con la dieta (latte, yogurt, formaggi, acque ricche di calcio); integratore solo per la quota mancante.</span></li>
@@ -1179,6 +1220,7 @@ const GUIDA = [
     <li><i>5</i><span><b>Fumo</b> da sospendere, <b>alcol</b> sotto le 3 unità al giorno, peso adeguato.</span></li>
     <li><i>6</i><span><b>Bocca</b>: visita odontoiatrica e igiene orale prima di bisfosfonati, denosumab, romosozumab.</span></li></ul>` },
   { k:"dxa-lea", t:"A chi fare la densitometria in LEA", s:"Criteri di accesso alla DXA a carico del SSN", html: LEA_DXA_HTML },
+  { k:"nota79", t:"Nota 79", s:"Quando i farmaci per l'osteoporosi sono a carico del SSN", html: NOTA79_HTML },
   { k:"nota96", t:"Vitamina D e Nota 96", s:"Quando dosarla, quando è rimborsabile, come correggerla", html: NOTA96_HTML },
   { k:"followup", t:"Follow-up", s:"DXA ogni 18–24 mesi, rischio di rifrattura", html:`
     <ul class="list"><li><i>1</i><span><b>DXA ogni 18–24 mesi</b>, con lo stesso apparecchio (prima non è di solito utile: le variazioni sono minori dell'errore della misura). Si può anticipare a 12 mesi con glucocorticoidi ad alte dosi.</span></li>

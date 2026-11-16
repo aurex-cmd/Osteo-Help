@@ -340,7 +340,7 @@ function vDecidi(p){
     ${cur ? `<p class="small">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
     ${cur === "spec" && F.ther.length ? specBlk : ""}
     <div class="fact">${actions}</div>
-    <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della Nota 79 e le schede tecniche.</p>` };
+    <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della <a href="#guida-nota79">Nota 79</a> e le schede tecniche.</p>` };
 }
 
 /* ---------- interazioni ---------- */
