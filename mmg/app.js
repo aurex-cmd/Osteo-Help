@@ -524,7 +524,7 @@ function vArchivio(){
 }
 function vPazienti(){
   const todo = PZ.flatMap(p => pzTodo(p).map(x => Object.assign({ p }, x))).sort((a, b) => a.u - b.u);
-  return { bar:"Pazienti", html: `<div class="mhome"><div class="mh-l">` + `<div class="mh-h">` + head("I miei pazienti", "Per ogni paziente con osteoporosi, un percorso guidato in 7 passi: dai dati alla terapia, fino ai controlli.") + `</div>
+  return { bar:"Gestionale osteoporosi", html: `<div class="mhome"><div class="mh-l">` + `<div class="mh-h">` + head("Gestionale osteoporosi", "I tuoi pazienti con osteoporosi: per ognuno un percorso guidato in 7 passi, dai dati alla terapia, fino ai controlli.") + `</div>
     <div class="mh-btns">
     <button type="button" class="entry big violet mh-new" id="pzNew"><span class="ibox">${mic("add", "ic")}</span><div><b>Nuovo paziente</b><small>Inizia il percorso dal passo 1</small></div>${CHEV}</button>
     <a class="entry big arc mh-arc" href="#archivio"><span class="ibox">${mic("users", "ic")}</span><div><b>Archivio pazienti</b><small>${PZ.length ? plural(PZ.length, "paziente", "pazienti") + ", con la ricerca per nome" : "Ancora vuoto"}</small></div>${CHEV}</a>
