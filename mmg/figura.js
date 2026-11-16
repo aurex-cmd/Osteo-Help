@@ -182,7 +182,7 @@ function figNext(p, F, S, spots){
       const okp = pl.st === "ok";
       tiles.push(cal(pl.st === "miss" ? "late" : pl.st === "warn" ? "now" : "dxa", "Prossima densitometria", okp ? "da" : "entro", MESI[(okp ? from : to).getMonth()], (okp ? from : to).getFullYear(), pl.st === "miss" ? "da fare subito" : pl.st === "warn" ? "da programmare ora" : quando(from), okp ? "finestra fino a " + MESI[to.getMonth()] + " " + to.getFullYear() : "ultima " + fmtD(F.lastDxa.data))); }
     else tiles.push(cal("late", "Prossima densitometria", "DXA", "?", "", "da richiedere", "nessuna registrata"));
-    return `<div class="fnext done"><small>Caso completato · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
+    return `<div class="fnext done"><small>Caso completato · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${!th && p.decisione.tipo === "spec" ? "Registra il farmaco dello specialista" : th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a></div>`;
   }
   if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
     return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo indizio · ne ${miss.length === 1 ? "manca 1" : "mancano " + miss.length}</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
@@ -265,7 +265,7 @@ function proposta(p, F, S, fl){
   return { tipo:"mmg", t: best ? "Terapia di prima linea: " + dnome(best) : "Prima linea non utilizzabile", s:ZONE.gialla.azione, opz: ord, best };
 }
 function vDecidi(p){
-  const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), pr = proposta(p, F, S, fl), fig = figOf(p);
+  const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), pr = proposta(p, F, S, fl), fig = figOf(p), vh = veryHigh(p, F);
   if(!pr) return { redirect: "paz-" + p.id + "-figura" };
   const n79of = id => n79.filter(c => c.s.some(l => l.includes(id)));
   const drug = (id, best) => { const f = fl[id] || { ci:[], warn:[] }, c = n79of(id), ci = f.ci.length;
@@ -291,6 +291,10 @@ function vDecidi(p){
     ["Da sapere", [p.ci && p.ci.esofago ? "esofago" : "", S.hpp ? "ALP bassa" : "", eg !== null && eg < 35 ? "eGFR " + fmtN(eg, 0) : "", p.ci && p.ci.cv ? "cardiovascolare" : ""].filter(Boolean).join(", ") || "nessuna controindicazione", (p.ci && (p.ci.esofago || p.ci.cv)) || S.hpp || (eg !== null && eg < 35) ? "r" : ""]
   ];
   const cur = p.decisione && p.decisione.tipo;
+  const specBlk = (() => { const att = F.ther.map(t => t.farmaco);
+      return `<p class="lbl" id="fspec">Terapia indicata dallo specialista</p>
+      <p class="small">Quando arriva la risposta, tocca il farmaco: si registra da oggi (la data si corregge in Terapia) e compaiono le date della prossima dose e della densitometria.</p>
+      <div class="fspec">${[D_, Z_, A_, R_, I_, T_, AB_, RO_, RX_, BZ_].map(id => `<button type="button" class="fspec-b${att.includes(id) ? " on" : ""}" data-fspec="${id}"${att.includes(id) ? " disabled" : ""}>${drugIcon(id)}<span><b>${dnome(id).replace(/ \(.*\)$/, "")}</b><small>${att.includes(id) ? "in corso" : sommOf(id)}</small></span></button>`).join("")}</div>`; })();
   let actions = "";
   if(pr.tipo === "mmg" && pr.best) actions = `<button type="button" class="btn sec" data-fdec="spec">Invia allo specialista</button><button type="button" class="btn" data-fdec="mmg:${pr.best}">Prescrivo ${dnome(pr.best).replace(/ \(.*\)$/, "").toLowerCase()}</button>`;
   else if(pr.tipo === "mmg") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
@@ -298,6 +302,7 @@ function vDecidi(p){
   else actions = `<a class="btn sec" href="#paz-${p.id}-terapia">Valuto un farmaco</a><button type="button" class="btn" data-fdec="nessuno">Confermo: nessun farmaco</button>`;
   return { bar:"Decisione terapeutica", html: `
     <div class="fwin big"><span class="fwin-f" style="background-image:url(img/${fig}-viso.jpg)"></span><span><small>${hx(pzName(p))}${F.age !== null ? " · " + F.age + " anni" : ""}</small><b>Obiettivo: evitare la prossima frattura</b></span></div>
+    ${cur === "spec" && !F.ther.length ? specBlk : ""}
     <div class="fkeys">${keys.map(k => `<div class="fkey ${k[2]}"><small>${k[0]}</small><b>${k[1]}</b></div>`).join("")}</div>
     ${vh.length ? `<div class="alert"><b>Rischio molto alto</b>${vh.join("; ")}.${pr.tipo === "mmg" ? " Valuta comunque l'invio allo specialista per un anabolico." : ""}</div>` : ""}
     <p class="lbl">${pr.tipo === "spec" ? "Indicazione · zona " + ZONE[F.zona].t.toLowerCase() : pr.tipo === "nessuno" ? "Indicazione · zona verde" : "Terapia consigliata · zona gialla, la imposti tu"}</p>
@@ -306,6 +311,7 @@ function vDecidi(p){
     ${pr.tipo === "spec" ? `<p class="lbl">${pr.nota}</p>` + pr.opz.map(id => drug(id, false)).join("") + `<p class="small">Nell'attesa: calcio con la dieta, vitamina D, prevenzione delle cadute. La lettera allo specialista è già compilata.</p>` : ""}
     <p class="lbl">Prima della prima dose</p><div class="todo fchk">${chk.join("")}</div>
     ${cur ? `<p class="small">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
+    ${cur === "spec" && F.ther.length ? specBlk : ""}
     <div class="fact">${actions}</div>
     <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della Nota 79 e le schede tecniche.</p>` };
 }
@@ -314,9 +320,13 @@ function vDecidi(p){
 document.addEventListener("click", e => {
   const t = e.target;
   const op = t.closest("[data-fsheet]");
-  if(op){ e.preventDefault(); FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
+  if(op){ e.preventDefault(); if(FIG.open){ const { p } = pzRoute(); commitPending(p); } FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
     const pn = document.querySelector(".fpanel"); if(pn && pn.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + pn.getBoundingClientRect().top - 70 }); return; }
   if(t.closest("[data-fclose]")){ figClose(); return; }
+  const fs = t.closest("[data-fspec]");
+  if(fs){ const { p } = pzRoute(); if(!p) return; const id = fs.dataset.fspec;
+    if(!(p.terapie || []).some(x => x.farmaco === id && !x.fine)) (p.terapie = p.terapie || []).push({ farmaco: id, inizio: todayISO(), fine:"", note:"indicato dallo specialista" });
+    savePz(p); toast(dnome(id) + " registrato da oggi, come indicato dallo specialista."); go("paz-" + p.id + "-figura"); return; }
   const fd = t.closest("[data-fdec]");
   if(fd){ const { p } = pzRoute(); if(!p) return; const [tipo, farm] = fd.dataset.fdec.split(":");
     p.decisione = { tipo, data: todayISO() };
@@ -330,6 +340,7 @@ document.addEventListener("keydown", e => { if(e.key === "Escape" && FIG.open) f
 
 /* chiusura della scheda dal basso: scende con la stessa curva con cui è salita (come le schede di iOS) */
 function figClose(){
+  { const { p } = pzRoute(); commitPending(p); }
   const sh = document.querySelector(".fsheet"), dm = document.querySelector(".fdim");
   if(!sh){ FIG.open = null; render(); return; }
   if(sh.classList.contains("out")) return;

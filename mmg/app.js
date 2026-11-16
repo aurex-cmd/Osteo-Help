@@ -630,7 +630,7 @@ function datiFx(p){
         <label class="fld">Gravità (vertebre)<select id="fxGrado"><option value="">non nota</option>${Object.entries(FX_GRADO).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
       </div>
       ${ckPz("data-tmp", "fxInT", false, "Avvenuta nonostante almeno 1 anno di terapia per l'osteoporosi")}
-      <button type="button" class="btn sec" data-add="fratture">Aggiungi frattura</button>
+      <button type="button" class="btn" data-add="fratture">Salva la frattura</button>
     </div>`;
 }
 function vPazDati(p){
@@ -787,7 +787,7 @@ function vPazDefra(p){
         <label class="fld">Rischio a 10 anni, % (facoltativo)<input type="text" inputmode="decimal" autocomplete="off" id="dfR" placeholder="fratture maggiori"></label>
         <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" id="dfN"></label>
       </div>
-      <button type="button" class="btn sec" data-add="defra">Aggiungi zona</button>
+      <button type="button" class="btn" data-add="defra">Salva la zona del DeFRA</button>
     </div>
     <p class="lbl">Cosa significano le zone</p>
     <ul class="list zleg">${ZONE_ORDER.map(z => `<li>${zchip(z)}<span><b>${ZONE[z].r[0].toUpperCase() + ZONE[z].r.slice(1)} → ${ZONE[z].chi}</b><small>${ZONE[z].azione}</small></span></li>`).join("")}</ul>
@@ -908,7 +908,7 @@ function vPazDxa(p){
         <div class="fld">T-score collo femorale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFn" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFn" aria-label="T-score collo femorale"></div></div>
       </div>
       <p class="small">Il segno meno è già inserito: per −2,7 scrivi solo 2,7. Tocca «−» per cambiarlo in «+» se il T-score è positivo.</p>
-      <button type="button" class="btn sec" data-add="dxa">Aggiungi DXA</button>
+      <button type="button" class="btn" data-add="dxa">Salva la densitometria</button>
     </div>
     ${dxaChartHTML(F)}
     ${dxaRows ? `<ul class="list recs">${dxaRows}</ul>` : ""}
@@ -1241,24 +1241,49 @@ document.addEventListener("click", e => {
   const st = t.closest("[data-stop]");
   if(st){ const th = p.terapie[+st.dataset.stop]; if(th){ th.fine = todayISO(); savePz(p); render(); } return; }
   const ad = t.closest("[data-add]");
-  if(ad){
-    const k = ad.dataset.add, v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
-    if(k === "fratture"){ const an = +v("fxAnno"), me = v("fxMese"), gi = +v("fxGiorno"), oggi = new Date();
-      if(!an || an < 1930 || an > oggi.getFullYear()){ alert("Indica almeno l'anno della frattura."); return; }
-      if(gi && !me){ alert("Per indicare il giorno scegli anche il mese."); return; }
-      const dd = an + (me ? "-" + me + (gi ? "-" + String(gi).padStart(2, "0") : "") : "");
-      const chk = pDate(dd); if(gi && (gi > 31 || chk.getMonth() !== +me - 1)){ alert("Il giorno non esiste in quel mese."); return; }
-      if(me && pDate(an + "-" + me) > oggi){ alert("La data è nel futuro."); return; }
-      p.fratture.push({ sede: v("fxSede"), data: dd, grado: v("fxSede") === "vertebra" ? v("fxGrado") : "", inTerapia: $('.ck[data-tmp="fxInT"]').getAttribute("aria-pressed") === "true" }); p.nessunaFx = false; }
-    if(k === "dxa"){ if(!v("dxD") || ![v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null)){ alert("Indica la data e almeno un T-score."); return; }
-      /* il segno viene dal pulsante −/+ (già su «−»); un «-» o «−» scritto a mano vale comunque come negativo */
-      const T = id => { const raw = v(id).replace("−", "-"), n = num(raw); if(n === null) return ""; const neg = /^\s*-/.test(raw) || document.querySelector(`[data-sgn="${id}"]`).getAttribute("aria-pressed") === "true"; return String(neg ? -Math.abs(n) : Math.abs(n)); };
-      p.dxa.push({ data: v("dxD"), tL: T("dxL"), tFt: T("dxFt"), tFn: T("dxFn") }); }
-    if(k === "defra"){ const zb = document.querySelector('.zbtn[aria-pressed="true"]'); if(!zb || !v("dfD")){ alert("Scegli la zona indicata dal DeFRA e la data."); return; } p.defra.push({ data: v("dfD"), zona: zb.dataset.zona, rischio: num(v("dfR")) === null ? "" : String(num(v("dfR"))), note: v("dfN") }); }
-    if(k === "terapie"){ if(!v("thI")){ alert("Indica la data di inizio."); return; } p.terapie.push({ farmaco: v("thF"), inizio: v("thI"), fine:"", note: v("thN") }); }
-    savePz(p); render(); return;
-  }
+  if(ad){ addRec(p, ad.dataset.add, false); return; }
 });
+/* aggiunge frattura, DXA, DeFRA o terapia dal modulo aperto. auto = salvataggio da solo quando si chiude
+   la scheda o si va avanti: in quel caso salva solo se nel modulo c'è qualcosa di compilato, senza avvisi */
+function addRec(p, k, auto){
+  const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+  const no = msg => { if(!auto) alert(msg); return false; };
+  let rec = null, msg = "";
+  if(k === "fratture"){ if(!document.getElementById("fxAnno")) return false;
+    const an = +v("fxAnno"), me = v("fxMese"), gi = +v("fxGiorno"), oggi = new Date();
+    if(auto && !an) return false;
+    if(!an || an < 1930 || an > oggi.getFullYear()) return no("Indica almeno l'anno della frattura.");
+    if(gi && !me) return no("Per indicare il giorno scegli anche il mese.");
+    const dd = an + (me ? "-" + me + (gi ? "-" + String(gi).padStart(2, "0") : "") : "");
+    const chk = pDate(dd); if(gi && (gi > 31 || chk.getMonth() !== +me - 1)) return no("Il giorno non esiste in quel mese.");
+    if(me && pDate(an + "-" + me) > oggi) return no("La data è nel futuro.");
+    const it = document.querySelector('.ck[data-tmp="fxInT"]');
+    rec = { sede: v("fxSede"), data: dd, grado: v("fxSede") === "vertebra" ? v("fxGrado") : "", inTerapia: !!it && it.getAttribute("aria-pressed") === "true" };
+    p.fratture.push(rec); p.nessunaFx = false; msg = "Frattura aggiunta: " + (FX_SEDI[rec.sede] || rec.sede) + " · " + fmtD(dd); }
+  if(k === "dxa"){ if(!document.getElementById("dxD")) return false;
+    const any = [v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null);
+    if(auto && !any) return false;
+    if(!v("dxD") || !any) return no("Indica la data e almeno un T-score.");
+    /* il segno viene dal pulsante −/+ (già su «−»); un «-» o «−» scritto a mano vale comunque come negativo */
+    const T = id => { const raw = v(id).replace("−", "-"), n = num(raw); if(n === null) return ""; const sg = document.querySelector(`[data-sgn="${id}"]`), neg = /^\s*-/.test(raw) || (sg && sg.getAttribute("aria-pressed") === "true"); return String(neg ? -Math.abs(n) : Math.abs(n)); };
+    rec = { data: v("dxD"), tL: T("dxL"), tFt: T("dxFt"), tFn: T("dxFn") }; p.dxa.push(rec); msg = "Densitometria del " + fmtD(rec.data) + " salvata"; }
+  if(k === "defra"){ const zb = document.querySelector('.zbtn[aria-pressed="true"]');
+    if(auto && !zb) return false;
+    if(!zb || !v("dfD")) return no("Scegli la zona indicata dal DeFRA e la data.");
+    rec = { data: v("dfD"), zona: zb.dataset.zona, rischio: num(v("dfR")) === null ? "" : String(num(v("dfR"))), note: v("dfN") }; p.defra.push(rec);
+    msg = "DeFRA salvato: zona " + ZONE[rec.zona].t.toLowerCase() + (rec.rischio ? ", " + rec.rischio + "%" : ""); }
+  if(k === "terapie"){ if(auto) return false; if(!v("thI")) return no("Indica la data di inizio."); rec = { farmaco: v("thF"), inizio: v("thI"), fine:"", note: v("thN") }; p.terapie.push(rec); msg = dnome(rec.farmaco) + " aggiunto"; }
+  if(!rec) return false;
+  savePz(p);
+  if(auto){ toast(msg); return true; }
+  render(); toast(msg);
+  /* la voce appena aggiunta si illumina nell'elenco */
+  const el = document.querySelector(`[data-del="${k}:${p[k].indexOf(rec)}"]`), li = el && el.closest("li");
+  if(li){ li.scrollIntoView({ block:"nearest", behavior:"smooth" }); li.classList.add("flash"); }
+  return true;
+}
+/* moduli lasciati a metà: si salvano da soli quando si chiude la scheda, si cambia sezione o si lascia la pagina */
+function commitPending(p){ if(!p) return false; let n = false; ["fratture", "dxa", "defra"].forEach(k => { if(addRec(p, k, true)) n = true; }); return n; }
 
 /* ---------- navigazione ---------- */
 const stack = [];
@@ -1289,6 +1314,7 @@ function goBack(){ if(stack.length > 1) history.back(); else go(pzParent(current
 $("#back").addEventListener("click", goBack);
 $("#act").addEventListener("click", () => { if(doneTo !== null) go(doneTo); });
 window.addEventListener("hashchange", () => {
+  { const m = /^paz-([a-z0-9]+)/.exec(current || ""); if(m) commitPending(pzGet(m[1])); }
   FIG.open = null;
   const r = routeNow();
   if(stack.length > 1 && stack[stack.length - 2] === r) stack.pop(); else stack.push(r);

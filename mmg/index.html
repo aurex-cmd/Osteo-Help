@@ -607,6 +607,11 @@ main{padding-bottom:40px}
 @keyframes fup{from{transform:translate(-50%,100%)}to{transform:translate(-50%,0)}}
 @keyframes fdimin{from{opacity:0}to{opacity:1}}
 .fsheet .fstabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.fspec{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.fspec-b{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:8px 10px;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}
+.fspec-b:hover{border-color:var(--pri)} .fspec-b .dic{width:30px;height:30px;flex:0 0 auto;background:#FCEAF1;border-radius:8px;padding:2px;overflow:visible}
+.fspec-b b{display:block;font-size:.84rem} .fspec-b small{display:block;font-size:.7rem;color:var(--muted)}
+.fspec-b.on{border-color:var(--teal);background:var(--teal-box)} .fspec-b:disabled{cursor:default}
 .fgrab{width:36px;height:5px;border-radius:3px;background:#D5D3DC;margin:7px auto -4px;flex:0 0 auto}
 @media (prefers-reduced-motion:reduce){.fsheet.in,.fdim.in{animation-duration:.01s}.fsheet.out,.fdim.out{transition-duration:.01s}}
 .fsheet-h{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;border-bottom:1px solid var(--line)}
