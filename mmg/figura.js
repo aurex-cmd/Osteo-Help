@@ -97,7 +97,9 @@ function figBadges(p, F){
   const z = F.zona, r = F.rischio;
   const df = z ? `<button type="button" class="fbd zf z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio " + fmtN(r, 0) + "%" : ""}"><span class="fbd-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "!"}</span><span class="fbd-t"><b>DeFRA</b><small>zona ${ZONE[z].t.toLowerCase()}</small></span></button>`
     : `<button type="button" class="fbd miss" data-fsheet="defra"><span class="fbd-c">?</span><span class="fbd-t"><b>DeFRA</b><small>da calcolare</small></span></button>`;
-  return `<div class="fbads">${df}${ts("Colonna", dx ? num(dx.tL) : null)}${ts("Femore", tF.length ? Math.min(...tF) : null)}</div>`;
+  const es = stepStatus(p, "esami", F, pzSecondary(p)), ls = labStatus(p);
+  const ex = `<button type="button" class="fbd ${es.st === "miss" ? "miss" : es.st === "warn" ? "k-a" : "k-ok"}" data-fsheet="esami"><span class="fbd-c">${es.st === "miss" ? "?" : es.st === "warn" ? "!" : "✓"}</span><span class="fbd-t"><b>Esami</b><small>${es.st === "miss" ? ls.done + " di " + ls.tot : es.st === "warn" ? "da rivedere" : "nella norma"}</small></span></button>`;
+  return `<div class="fbads">${df}${ts("Colonna", dx ? num(dx.tL) : null)}${ts("Femore", tF.length ? Math.min(...tF) : null)}${ex}</div>`;
 }
 /* caso completo: tutti gli indizi raccolti (dati, fratture, anamnesi, DXA, DeFRA) */
 const figDone = (F, spots) => !Object.values(spots).some(x => x.st === "miss") && !!F.zona && !!F.lastDxa;
@@ -146,12 +148,12 @@ function figSummary(p, F, S){
 function figStage(p, fig, spots, F, S){
   const d = FIGURE[fig], lblFx = d.fxLbl;
   const pos = { chi:d.testa, fx:d.fx, anam:d.busto };
-  if(F && S && figDone(F, spots)) return `<div class="fstage done"><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>${figSummary(p, F, S)}</div>`;
-  return `<div class="fstage"><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">` +
+  if(F && S && figDone(F, spots)) return `<div class="fstage done"${FIG.open ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>${figSummary(p, F, S)}</div>`;
+  return `<div class="fstage"${FIG.open ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">` +
     Object.entries(spots).map(([k, s]) => { const [x, y] = pos[k], left = x > 52;
       const t = k === "fx" && s.st === "miss" && lblFx ? lblFx : s.t;
       return `<button type="button" class="fhs ${s.st}${left ? " l" : ""}" data-fsheet="${k}" style="left:${x}%;top:${y}%" aria-label="${hx(t)}: ${hx(s.s)}"><span class="fdot">${s.st === "ok" ? "✓" : s.st === "al" ? "!" : s.n}</span><span class="ftag"><b>${hx(t)}</b><small>${hx(s.s)}</small></span></button>`;
-    }).join("") + (F ? figBadges(p, F) : "") + `</div></div>`;
+    }).join("") + `</div>` + (F ? figBadges(p, F) : "") + `</div>`;
 }
 /* la prossima mossa: una sola cosa da fare, la più utile adesso */
 function figNext(p, F, S, spots){
@@ -196,10 +198,29 @@ function figInv(p, F, S, done){
   </div>`;
 }
 const figDocs = p => `<p class="fdocs"><button type="button" class="lnk" data-copy="riepilogo">Copia per la cartella</button><a href="#paz-${p.id}-lettera">Lettera allo specialista</a><a href="#paz-${p.id}-foglio">Foglio per il paziente</a><a href="#paz-${p.id}-report">Report</a></p>`;
-function figSheet(p){
-  const sh = FIG_SHEETS[FIG.open]; if(!sh) return "";
-  return `<div class="fdim" data-fclose></div><div class="fsheet" role="dialog" aria-label="${sh.t}"><div class="fsheet-h"><span class="fic">${sh.ic}</span><b>${sh.t}</b><button type="button" class="btn" data-fclose>Fatto</button></div>
-    <div class="fsheet-b">${sh.body(p)}</div></div>`;
+/* le sezioni in ordine: si naviga con Indietro / Avanti; quella aperta si accende sulla figura */
+const FIG_SEQ = ["chi", "fx", "anam", "esami", "dxa", "defra"];
+const FIG_TAB = { chi:"Chi è", fx:"Fratture", anam:"Anamnesi", esami:"Esami", dxa:"DXA", defra:"DeFRA" };
+const figWide = () => window.matchMedia("(min-width:900px)").matches;
+function figSecSt(p, k, F, S, spots){
+  if(spots[k]) return spots[k].st === "miss" ? "miss" : spots[k].st === "al" ? "al" : "ok";
+  if(k === "esami"){ const e = stepStatus(p, "esami", F, S).st; return e === "warn" ? "al" : e; }
+  if(k === "dxa") return F.lastDxa ? (F.dxaAge > 24 ? "al" : "ok") : "miss";
+  return F.zona ? "ok" : "miss";
+}
+function figSecInner(p, F, S, spots, wide){
+  const k = FIG.open, sh = FIG_SHEETS[k], i = FIG_SEQ.indexOf(k === "sec" ? "anam" : k);
+  const tabs = i < 0 ? "" : `<div class="fstabs" role="tablist">${FIG_SEQ.map((x, j) => `<button type="button" role="tab" class="fstab ${figSecSt(p, x, F, S, spots)}" aria-selected="${j === i}" data-fsheet="${x}"><i></i>${FIG_TAB[x]}</button>`).join("")}</div>`;
+  const prev = i > 0 ? `<button type="button" class="btn sec" data-fsheet="${FIG_SEQ[i - 1]}">‹ Indietro</button>` : `<span></span>`;
+  const next = i < 0 ? `<button type="button" class="btn" data-fclose>Fatto</button>`
+    : i < FIG_SEQ.length - 1 ? `<button type="button" class="btn" data-fsheet="${FIG_SEQ[i + 1]}">Avanti<small>${FIG_TAB[FIG_SEQ[i + 1]]}</small> ›</button>`
+    : `<a class="btn" href="#paz-${p.id}-decidi">Decidi la terapia ›</a>`;
+  return `<div class="fsheet-h"><span class="fic">${sh.ic}</span><span class="fsh-t">${i >= 0 ? `<small>Sezione ${i + 1} di ${FIG_SEQ.length}</small>` : ""}<b>${sh.t}</b></span><button type="button" class="btn sec mini" data-fclose aria-label="Chiudi">${wide ? "Riepilogo" : "Chiudi"}</button></div>
+    ${tabs}<div class="fsheet-b">${sh.body(p)}</div><div class="fsheet-f">${prev}${next}</div>`;
+}
+function figSheet(p, F, S, spots){
+  if(!FIG_SHEETS[FIG.open] || figWide()) return "";
+  return `<div class="fdim" data-fclose></div><div class="fsheet" role="dialog" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, false)}</div>`;
 }
 
 /* ---------- la vista ---------- */
@@ -211,17 +232,18 @@ function vFigura(p){
       <p class="small">Poi tocca i punti sulla figura per raccogliere gli indizi.</p></div>` };
   const F = pzFacts(p), S = pzSecondary(p), all = allSteps(p), done = all.filter(x => x.st !== "miss").length, spots = figSpots(p, F, S);
   const title = [hx(pzName(p)), F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
+  const panel = !!FIG_SHEETS[FIG.open] && figWide();
   return { bar: pzName(p), html: viewSwitch(p, "figura") + `
     <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} indizi raccolti</small></div></div>
     <div class="fprog">${all.map(x => `<i class="${x.st}" title="${x.t}"></i>`).join("")}</div>
-    <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>
-    <div class="fcol-r">
+    <div class="fgrid${panel ? " panel" : ""}"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>
+    <div class="fcol-r">${panel ? `<div class="fpanel" role="region" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, true)}</div>` : `
       ${figNext(p, F, S, spots)}
       ${figDone(F, spots) ? "" : `<div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S, false) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>`}
       ${figDone(F, spots) && !p.decisione ? "" : `<div class="fsec"><p class="flbl">${figDone(F, spots) ? "Controlli" : "Referti"}</p>${figInv(p, F, S, figDone(F, spots))}</div>`}
       ${p.decisione ? `<div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>` : ""}
-      <p class="fdel"><button type="button" class="lnk" id="pzDel">Elimina paziente</button></p>
-    </div></div>` + figSheet(p) };
+      <p class="fdel"><button type="button" class="lnk" id="pzDel">Elimina paziente</button></p>`}
+    </div></div>` + figSheet(p, F, S, spots) };
 }
 function viewSwitch(p, cur){
   return `<div class="vsw" role="group" aria-label="Vista"><a href="#paz-${p.id}-figura" aria-pressed="${cur === "figura"}">Figura</a><a href="#paz-${p.id}-percorso" aria-pressed="${cur === "percorso"}">Percorso a passi</a></div>`;
@@ -290,7 +312,8 @@ function vDecidi(p){
 document.addEventListener("click", e => {
   const t = e.target;
   const op = t.closest("[data-fsheet]");
-  if(op){ e.preventDefault(); FIG.open = op.dataset.fsheet; render(); const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0; return; }
+  if(op){ e.preventDefault(); FIG.open = op.dataset.fsheet; render(); const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
+    const pn = document.querySelector(".fpanel"); if(pn && pn.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + pn.getBoundingClientRect().top - 70 }); return; }
   if(t.closest("[data-fclose]")){ FIG.open = null; render(); return; }
   const fd = t.closest("[data-fdec]");
   if(fd){ const { p } = pzRoute(); if(!p) return; const [tipo, farm] = fd.dataset.fdec.split(":");
@@ -302,3 +325,5 @@ document.addEventListener("click", e => {
   }
 });
 document.addEventListener("keydown", e => { if(e.key === "Escape" && FIG.open){ FIG.open = null; render(); } });
+/* passando da schermo largo a stretto (o viceversa) la sezione aperta passa da pannello a riquadro */
+window.matchMedia("(min-width:900px)").addEventListener("change", () => { if(FIG.open) render(); });

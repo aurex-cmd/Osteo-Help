@@ -606,6 +606,29 @@ main{padding-bottom:40px}
 .fsheet-h b{flex:1;font-size:1.15rem} .fsheet-h .btn{padding:9px 16px}
 .fsheet-b{overflow-y:auto;padding:14px 18px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;overscroll-behavior:contain}
 body.fopen{overflow:hidden}
+.fsh-t{flex:1;min-width:0} .fsh-t small{display:block;font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)} .fsh-t b{display:block;font-size:1.15rem}
+.fstabs{display:flex;flex-wrap:wrap;gap:4px;padding:10px 18px 0}
+.fstab{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:4px;border:0;border-radius:999px;background:var(--box);padding:6px 7px;font:inherit;font-size:.72rem;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+.fstab i{width:8px;height:8px;border-radius:50%;background:#CFC8E8} .fstab.ok i{background:var(--teal)} .fstab.al i{background:var(--coral)}
+.fstab[aria-selected="true"]{background:var(--pri);color:#fff} .fstab[aria-selected="true"] i{box-shadow:0 0 0 2px #fff}
+.fsheet-f{display:flex;justify-content:space-between;gap:10px;padding:10px 18px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fff}
+.fsheet-f .btn{display:inline-flex;align-items:center;gap:6px;padding:12px 18px;text-decoration:none}
+.fsheet-f .btn small{font-size:.72rem;font-weight:600;opacity:.8;margin-left:2px}
+.fsheet .fsheet-b{padding-bottom:16px}
+/* pannello a destra (schermo largo) */
+.fpanel{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 24px rgba(30,20,70,.08)}
+.fpanel .fsheet-h{padding:14px 18px 10px}
+.fpanel .fsheet-b{overflow:visible;padding:14px 18px 18px}
+.fpanel .fsheet-f{position:sticky;bottom:0;border-radius:0 0 18px 18px;box-shadow:0 -6px 14px rgba(30,20,70,.06)}
+/* la sezione aperta si accende sulla figura, il resto si attenua */
+.fstage[data-on] .fhs,.fstage[data-on] .fbd,.fstage[data-on] .fdefra{opacity:.4;transition:opacity .2s}
+.fstage[data-on="chi"] [data-fsheet="chi"],.fstage[data-on="fx"] [data-fsheet="fx"],.fstage[data-on="anam"] [data-fsheet="anam"],.fstage[data-on="anam"] [data-fsheet="sec"],
+.fstage[data-on="esami"] [data-fsheet="esami"],.fstage[data-on="dxa"] [data-fsheet="dxa"],.fstage[data-on="defra"] [data-fsheet="defra"],.fstage[data-on="storico"] [data-fsheet="storico"]{opacity:1!important}
+.fstage[data-on] .fhs[data-fsheet] .fdot{transition:transform .2s}
+.fstage[data-on="chi"] .fhs[data-fsheet="chi"] .fdot,.fstage[data-on="fx"] .fhs[data-fsheet="fx"] .fdot,.fstage[data-on="anam"] .fhs[data-fsheet="anam"] .fdot{transform:scale(1.18);box-shadow:0 0 0 6px #fff,0 0 0 10px var(--pri)}
+.fstage[data-on="chi"] .fbd[data-fsheet="chi"],.fstage[data-on="fx"] .fbd[data-fsheet="fx"],.fstage[data-on="anam"] .fbd[data-fsheet="anam"],.fstage[data-on="anam"] .fbd[data-fsheet="sec"],
+.fstage[data-on="esami"] .fbd[data-fsheet="esami"],.fstage[data-on="dxa"] .fbd[data-fsheet="dxa"],.fstage[data-on="defra"] .fbd[data-fsheet="defra"],.fstage[data-on="defra"] .fdefra{box-shadow:0 0 0 3px var(--pri),0 6px 18px rgba(79,67,145,.35)}
+.fstage[data-on="chi"] .ftag,.fstage[data-on="fx"] .ftag,.fstage[data-on="anam"] .ftag{transition:opacity .2s}
 /* decisione */
 .fkeys{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .fkey{border-radius:12px;background:var(--box);padding:9px 11px} .fkey small{display:block;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)} .fkey b{font-size:.92rem}
@@ -630,7 +653,10 @@ body.fopen{overflow:hidden}
   .fstage{margin:0}
   .fimg{height:560px}
   .fcol-r{position:sticky;top:70px}
+  .fgrid.panel .fcol-r{position:static} .fgrid.panel .fcol-l{position:sticky;top:70px}
+  .fpanel .fstabs{display:grid;grid-template-columns:repeat(6,auto);gap:3px} .fpanel .fstab{padding:6px 5px;font-size:.66rem;min-width:0;gap:3px} .fpanel .fstab i{width:6px;height:6px}
 }
+.fstage{position:relative} .fbads{gap:4px;bottom:1.5%} .fbads .fbd{padding-right:8px;gap:4px} .fbads .fbd-c{width:34px;height:34px;font-size:.8rem} .fbads .fbd-t b{font-size:.7rem} .fbads .fbd-t small{display:none}
 @media (max-width:380px){ .fimg{height:420px} .ftag{width:136px} }
 /* testo dal gestionale */
 details.acc.gest{border:1px solid var(--line);border-radius:12px;padding:0 14px;background:var(--blue-box)}
