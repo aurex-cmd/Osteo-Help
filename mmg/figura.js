@@ -46,7 +46,7 @@ const FIG_SHEETS = {
 const noHead = h => h.replace(/^\s*<h1>[\s\S]*?<div class="rule"><\/div>/, "");
 
 /* ---------- cosa resta in evidenza ---------- */
-function figChips(p, F, S){
+function figChips(p, F, S, done){
   /* poche cose, in ordine di importanza: al massimo 3 riquadri (uno grande se c'è un rischio da segnalare),
      il resto in una riga «altri dati» che si apre solo se serve */
   const c = [], add = (cls, lbl, val, short) => c.push({ cls, lbl, val, short: short || val }), ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), vh = veryHigh(p, F);
@@ -59,8 +59,9 @@ function figChips(p, F, S){
   if(ci.tev) add("a", "", "", "no raloxifene");
   if(vdLow(vd)) add("a", "", "", "vitamina D " + vdTxt(vd));
   const nA = S.N.note.length + S.N.sosp.length, nE = S.A.forms.length;
-  if(nA || nE) add("a", "", "", plural(nA + nE, "forma secondaria", "forme secondarie"));
-  if(F.gc) add("a", "", "", "glucocorticoidi");
+  /* a caso completo cause secondarie e glucocorticoidi sono già sulla figura */
+  if(!done && (nA || nE)) add("a", "", "", plural(nA + nE, "forma secondaria", "forme secondarie"));
+  if(!done && F.gc) add("a", "", "", "glucocorticoidi");
   if(ci.denti) add("a", "", "", "denti da sistemare");
   if(!c.length) return "";
   const main = c.filter(x => x.lbl).slice(0, 3), rest = c.filter(x => !main.includes(x));
@@ -97,9 +98,29 @@ function figBadges(p, F){
     : `<button type="button" class="fbd miss" data-fsheet="defra"><span class="fbd-c">?</span><span class="fbd-t"><b>DeFRA</b><small>da calcolare</small></span></button>`;
   return `<div class="fbads">${df}${ts("Colonna", dx ? num(dx.tL) : null)}${ts("Femore", tF.length ? Math.min(...tF) : null)}</div>`;
 }
-function figStage(p, fig, spots, F){
+/* caso completo: tutti gli indizi raccolti (dati, fratture, anamnesi, DXA, DeFRA) */
+const figDone = (F, spots) => !Object.values(spots).some(x => x.st === "miss") && !!F.zona && !!F.lastDxa;
+/* a caso completo restano sulla figura solo i dati che contano, tutti nello stesso modo */
+function figSummary(p, F, S){
+  const it = [], pill = (k, cls, c, b, sm, aria) => it.push(`<button type="button" class="fbd ${cls}" data-fsheet="${k}" aria-label="${hx(aria || b + ": " + sm)}"><span class="fbd-c">${c}</span><span class="fbd-t"><b>${hx(b)}</b><small>${hx(sm)}</small></span></button>`);
+  if(F.age !== null) pill("chi", "k-n", F.age, "Età", F.bmi && F.bmi < 20 ? "BMI " + fmtN(F.bmi) + ", basso" : "anni", F.age + " anni");
+  if(p.fam) pill("chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
+  if(F.fx.length){ const f = F.fx[0], rec = F.recent.length;
+    pill("fx", rec ? "k-r" : "k-a", F.fx.length, (FX_SEDI[f.sede] || "Frattura") + (f.grado ? " " + f.grado : ""), (rec ? "recente · " : "") + fmtD(f.data).slice(3) + (F.fx.length > 1 ? " · +" + (F.fx.length - 1) : ""), plural(F.fx.length, "frattura", "fratture") + ", l'ultima: " + (FX_SEDI[f.sede] || f.sede)); }
+  const z = F.zona, r = F.rischio;
+  pill("defra", "zf z-" + z, r !== null ? fmtN(r, 0) + "<i>%</i>" : "!", "DeFRA", "zona " + ZONE[z].t.toLowerCase(), "DeFRA zona " + ZONE[z].t.toLowerCase() + (r !== null ? ", rischio " + fmtN(r, 0) + "%" : ""));
+  const dx = F.lastDxa, sites = [["colonna", dx.tL], ["femore", dx.tFt], ["collo femore", dx.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]);
+  if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill("dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + dx.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
+  const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid])])];
+  const short = n => { const t = n.replace(/^Osteoporosi (indotta )?da /i, ""); return t.charAt(0).toUpperCase() + t.slice(1); };
+  sec.slice(0, 3).forEach((n, i) => pill(S.A.forms.some(x => COND[x.cid] === n) ? "esami" : "anam", "k-a", "!", short(n), i === 2 && sec.length > 3 ? "e altre " + (sec.length - 3) : "causa secondaria", n));
+  const h = Math.ceil(it.length / 2);
+  return `<div class="fsum"><div class="fsum-c">${it.slice(0, h).join("")}</div><div class="fsum-c r">${it.slice(h).join("")}</div></div>`;
+}
+function figStage(p, fig, spots, F, S){
   const d = FIGURE[fig], lblFx = d.fxLbl;
   const pos = { chi:d.testa, fx:d.fx, anam:d.busto };
+  if(F && S && figDone(F, spots)) return `<div class="fstage done"><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>${figSummary(p, F, S)}</div>`;
   return `<div class="fstage"><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">` +
     Object.entries(spots).map(([k, s]) => { const [x, y] = pos[k], left = x > 52;
       const t = k === "fx" && s.st === "miss" && lblFx ? lblFx : s.t;
@@ -167,10 +188,10 @@ function vFigura(p){
   return { bar: pzName(p), html: viewSwitch(p, "figura") + `
     <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} indizi raccolti</small></div></div>
     <div class="fprog">${all.map(x => `<i class="${x.st}" title="${x.t}"></i>`).join("")}</div>
-    <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots, F)}</div>
+    <div class="fgrid"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>
     <div class="fcol-r">
       ${figNext(p, F, S, spots)}
-      <div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>
+      <div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S, figDone(F, spots)) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>
       <div class="fsec"><p class="flbl">Referti</p>${figInv(p, F, S)}</div>
       ${p.decisione ? `<div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>` : ""}
       <p class="fdel"><button type="button" class="lnk" id="pzDel">Elimina paziente</button></p>
