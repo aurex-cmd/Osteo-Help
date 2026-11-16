@@ -143,3 +143,5 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 - Associazione possibile: «Teriparatide + denosumab» (registra entrambi; il riquadro finale mostra «Teriparatide + Denosumab · in associazione» con la prossima iniezione di denosumab).
 - Nell'uomo non compaiono romosozumab, abaloparatide, ibandronato, raloxifene e bazedoxifene.
 - Nel riquadro finale il link diventa «Lo specialista ha cambiato terapia?».
+
+**Farmaco nell'archivio**: ogni scheda dell'archivio mostra, sotto età e zona, il farmaco in corso con l'icona e la data di inizio (o «Teriparatide + Denosumab» per l'associazione), oppure «Inviato allo specialista», «Nessun farmaco per l'osteoporosi», «Decisione rimandata». La ricerca trova anche per farmaco (es. «denosumab»).

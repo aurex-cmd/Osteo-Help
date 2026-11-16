@@ -507,17 +507,23 @@ function pzCards(list){
     const F = pzFacts(p), all = allSteps(p), nx = nextStep(all), pl = dxaPlan(F);
     const bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
     const where = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}${nx.s && /^Manca/.test(nx.s) ? " · " + nx.s.toLowerCase() : ""}` : pl.st !== "ok" ? pl.t : "Percorso completo";
-    const anon = !(p.nome && p.nome.trim());
-    return `<div class="pitem${anon ? " anon" : ""}" data-q="${hx(pzName(p).toLowerCase())}"><a class="pcard" href="#paz-${p.id}">
+    const anon = !(p.nome && p.nome.trim()), dn = id => dnome(id).replace(/ \(.*\)$/, "");
+    const dec = p.decisione && p.decisione.tipo;
+    const ter = F.ther.length ? `<span class="pdrug">${drugIcon(F.ther[0].farmaco)}<span>${F.ther.map(t => dn(t.farmaco)).join(" + ")}<em> · dal ${fmtD(F.ther[0].inizio)}</em></span></span>`
+      : dec === "spec" ? `<span class="pdrug none">🩺<span>Inviato allo specialista</span></span>`
+      : dec === "nessuno" ? `<span class="pdrug none">—<span>Nessun farmaco per l'osteoporosi</span></span>`
+      : dec === "attesa" ? `<span class="pdrug none">⏳<span>Decisione rimandata</span></span>` : "";
+    const q = [pzName(p), ...F.ther.map(t => dn(t.farmaco))].join(" ").toLowerCase();
+    return `<div class="pitem${anon ? " anon" : ""}" data-q="${hx(q)}"><a class="pcard" href="#paz-${p.id}">
       ${avatar(p)}
       <span class="pbody"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}${F.zona ? ` · <span class="zn z-${F.zona}"><i></i>zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</small>
-        <span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small class="pwhere">${where}</small></span>${CHEV}</a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
+        ${ter}<span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small class="pwhere">${where}</small></span>${CHEV}</a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
   }).join("");
 }
 /* archivio: tutti i pazienti, con la ricerca */
 function vArchivio(){
   return { bar:"Archivio pazienti", html: head("Archivio pazienti", PZ.length ? plural(PZ.length, "paziente", "pazienti") + " in questo browser, in ordine alfabetico." : "Nessun paziente ancora.") + (PZ.length ? `
-    <input class="search" id="pzQ" type="search" placeholder="Cerca per nome, iniziali o codice" autocomplete="off" aria-label="Cerca un paziente">
+    <input class="search" id="pzQ" type="search" placeholder="Cerca per nome, iniziali, codice o farmaco" autocomplete="off" aria-label="Cerca un paziente">
     <div class="pcards" id="pzList">${pzCards(PZ)}</div><p class="pempty" id="pzNone" hidden>Nessun paziente con questo nome.</p>`
     : `<div class="pempty">Nessun paziente in archivio.<br>Inizia con «Nuovo paziente» dalla home.</div>`) };
 }
