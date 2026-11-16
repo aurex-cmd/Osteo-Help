@@ -41,6 +41,9 @@ const FIG_SHEETS = {
   esami: { t:"Esami del sangue", ic:"🧪", k:"esami", body: p => noHead(vPazEsami(p).html) },
   dxa:   { t:"Densitometria", ic:"🩻", k:"dxa", body: p => noHead(vPazDxa(p).html) },
   defra: { t:"DeFRA", ic:"🎯", k:"defra", body: p => noHead(vPazDefra(p).html) },
+  sec:   { t:"Osteoporosi secondaria", ic:"⚠️", k:"anamnesi", body: p => { const S = pzSecondary(p);
+    return secReport(p, S) + (S.A.forms.length ? `<p class="lbl">Compatibili con gli esami</p><div class="stack">${S.A.forms.map(x => ohEntry("forma-" + x.cid, COND[x.cid], x.sub)).join("")}</div>` : "") +
+      `<div class="btns"><button type="button" class="btn sec" data-fsheet="anam">Malattie e farmaci</button><button type="button" class="btn sec" data-fsheet="esami">Esami del sangue</button></div>`; } },
   storico:{ t:"Controlli nel tempo", ic:"📈", k:"storico", body: p => noHead(vPazStorico(p).html) }
 };
 const noHead = h => h.replace(/^\s*<h1>[\s\S]*?<div class="rule"><\/div>/, "");
@@ -125,7 +128,8 @@ function figSummary(p, F, S){
   if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(dx, "dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
   const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid])])];
   const short = n => { const t = n.replace(/^Osteoporosi (indotta )?da /i, ""); return t.charAt(0).toUpperCase() + t.slice(1); };
-  sec.slice(0, 3).forEach((n, i) => pill(dx, S.A.forms.some(x => COND[x.cid] === n) ? "esami" : "anam", "k-a", "!", short(n), i === 2 && sec.length > 3 ? "e altre " + (sec.length - 3) : "causa secondaria", n));
+  /* osteoporosi secondaria: un solo bollino, il numero di condizioni e i nomi su una riga; si apre */
+  if(sec.length) dx.push(`<button type="button" class="fbd k-a fsec-b" data-fsheet="sec" aria-label="${hx(plural(sec.length, "condizione", "condizioni") + " di osteoporosi secondaria: " + sec.join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${sec.length}</span><span class="fbd-t"><b>Osteoporosi secondaria</b><small>${hx(sec.map(short).join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`);
   const es = stepStatus(p, "esami", F, S), ls = labStatus(p);
   if(es.st === "miss") pill(dx, "esami", "miss", "?", "Esami del sangue", ls.done + " di " + ls.tot + " inseriti");
   else if(vdLow(vd) || es.st === "warn") pill(dx, "esami", "k-a", "!", "Esami del sangue", vdLow(vd) ? "vitamina D " + vdTxt(vd) : "da rivedere");
