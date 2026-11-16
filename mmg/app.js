@@ -23,8 +23,9 @@ const VD_BASSA = 75, VD_ALTA = 250, VD_TOSS = 375, vdNmol = ng => Math.round(ng 
 const vdLow = ng => ng !== null && vdNmol(ng) < VD_BASSA, vdHigh = ng => ng !== null && vdNmol(ng) > VD_ALTA, vdToss = ng => ng !== null && vdNmol(ng) > VD_TOSS;
 const vdTxt = ng => VD_U === "nmol" ? fmtN(ng * VD_F, 0) + " nmol/L" : fmtN(ng, 0) + " ng/mL";
 const todayISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-const pDate = s => { if(!s) return null; const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(s); return m ? new Date(+m[1], +m[2] - 1, +(m[3] || 1)) : null; };
-const fmtD = s => { const d = pDate(s); return d ? (/^\d{4}-\d{2}$/.test(s) ? "" : String(d.getDate()).padStart(2, "0") + "/") + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear() : "—"; };
+/* date anche parziali: «2019» (solo anno: si conta da metà anno), «2019-05», «2019-05-14» */
+const pDate = s => { if(!s) return null; const m = /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(s); return m ? new Date(+m[1], m[2] ? +m[2] - 1 : 6, +(m[3] || 1)) : null; };
+const fmtD = s => { const d = pDate(s); if(!d) return "—"; if(/^\d{4}$/.test(s)) return s; return (/^\d{4}-\d{2}$/.test(s) ? "" : String(d.getDate()).padStart(2, "0") + "/") + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear(); };
 const fmtM = d => d ? ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"][d.getMonth()] + " " + d.getFullYear() : "—";
 const monthsSince = s => { const d = pDate(s); if(!d) return null; const n = new Date(); return (n.getFullYear() - d.getFullYear()) * 12 + (n.getMonth() - d.getMonth()) + (n.getDate() < d.getDate() ? -1 : 0); };
 const addMonths = (d, m) => { const x = new Date(d); x.setMonth(x.getMonth() + m); return x; };
@@ -623,7 +624,9 @@ function datiFx(p){
     <div class="addbox">
       <div class="grid2">
         <label class="fld">Sede<select id="fxSede">${Object.entries(FX_SEDI).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
-        <label class="fld">Data (anche approssimativa)<input type="date" id="fxData"></label>
+        <div class="fld fxwhen"><span>Quando · basta l'anno</span><span class="fxw"><input type="number" id="fxAnno" inputmode="numeric" min="1930" max="${new Date().getFullYear()}" placeholder="Anno" aria-label="Anno della frattura">
+          <select id="fxMese" aria-label="Mese (facoltativo)"><option value="">mese</option>${["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"].map((m, i) => `<option value="${String(i + 1).padStart(2, "0")}">${m}</option>`).join("")}</select>
+          <input type="number" id="fxGiorno" inputmode="numeric" min="1" max="31" placeholder="giorno" aria-label="Giorno (facoltativo)"></span></div>
         <label class="fld">Gravità (vertebre)<select id="fxGrado"><option value="">non nota</option>${Object.entries(FX_GRADO).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
       </div>
       ${ckPz("data-tmp", "fxInT", false, "Avvenuta nonostante almeno 1 anno di terapia per l'osteoporosi")}
@@ -636,7 +639,7 @@ function vPazDati(p){
 
 /* ---------- 2 · anamnesi e terapie ---------- */
 const CI_LBL = { esofago:"Disturbi esofagei (stenosi, acalasia) o impossibilità a stare in piedi o seduti per 30 minuti", tev:"Tromboembolismo venoso pregresso",
-  cv:"Pregresso infarto o ictus, alto rischio cardiovascolare", rt:"Radioterapia sullo scheletro, tumori o metastasi ossee", denti:"Problemi dentari aperti o cure dentarie invasive programmate" };
+  cv:"Pregresso infarto o ictus, alto rischio cardiovascolare", rt:"Radioterapia sullo scheletro, tumori o metastasi ossee", denti:"Visita odontoiatrica da fare per il nulla osta alla terapia (problemi dentari aperti o cure invasive programmate)" };
 /* testo copiato dal gestionale → voci proposte (riconosci.js) */
 function gestItems(p){
   const own = new Set(p.feats || []), ci = p.ci || {}, seen = new Set();
@@ -1240,8 +1243,13 @@ document.addEventListener("click", e => {
   const ad = t.closest("[data-add]");
   if(ad){
     const k = ad.dataset.add, v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
-    if(k === "fratture"){ if(!v("fxData")){ alert("Indica la data della frattura (anche approssimativa)."); return; }
-      p.fratture.push({ sede: v("fxSede"), data: v("fxData"), grado: v("fxSede") === "vertebra" ? v("fxGrado") : "", inTerapia: $('.ck[data-tmp="fxInT"]').getAttribute("aria-pressed") === "true" }); p.nessunaFx = false; }
+    if(k === "fratture"){ const an = +v("fxAnno"), me = v("fxMese"), gi = +v("fxGiorno"), oggi = new Date();
+      if(!an || an < 1930 || an > oggi.getFullYear()){ alert("Indica almeno l'anno della frattura."); return; }
+      if(gi && !me){ alert("Per indicare il giorno scegli anche il mese."); return; }
+      const dd = an + (me ? "-" + me + (gi ? "-" + String(gi).padStart(2, "0") : "") : "");
+      const chk = pDate(dd); if(gi && (gi > 31 || chk.getMonth() !== +me - 1)){ alert("Il giorno non esiste in quel mese."); return; }
+      if(me && pDate(an + "-" + me) > oggi){ alert("La data è nel futuro."); return; }
+      p.fratture.push({ sede: v("fxSede"), data: dd, grado: v("fxSede") === "vertebra" ? v("fxGrado") : "", inTerapia: $('.ck[data-tmp="fxInT"]').getAttribute("aria-pressed") === "true" }); p.nessunaFx = false; }
     if(k === "dxa"){ if(!v("dxD") || ![v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null)){ alert("Indica la data e almeno un T-score."); return; }
       /* il segno viene dal pulsante −/+ (già su «−»); un «-» o «−» scritto a mano vale comunque come negativo */
       const T = id => { const raw = v(id).replace("−", "-"), n = num(raw); if(n === null) return ""; const neg = /^\s*-/.test(raw) || document.querySelector(`[data-sgn="${id}"]`).getAttribute("aria-pressed") === "true"; return String(neg ? -Math.abs(n) : Math.abs(n)); };

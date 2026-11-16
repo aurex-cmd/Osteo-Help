@@ -63,7 +63,7 @@ function figChips(p, F, S, done){
   /* a caso completo cause secondarie e glucocorticoidi sono già sulla figura */
   if(!done && (nA || nE)) add("a", "", "", plural(nA + nE, "forma secondaria", "forme secondarie"));
   if(!done && F.gc) add("a", "", "", "glucocorticoidi");
-  if(ci.denti) add("a", "", "", "denti da sistemare");
+  if(ci.denti) add("a", "", "", "visita odontoiatrica");
   if(!c.length) return "";
   const main = c.filter(x => x.lbl).slice(0, 3), rest = c.filter(x => !main.includes(x));
   const big = main.length === 3 && main[0].cls === "r" && main[0].lbl.startsWith("Rischio");
@@ -112,8 +112,12 @@ function figSummary(p, F, S){
   if(F.age !== null) pill(sx, "chi", "k-n", F.age, "anni", (p.sesso === "uomo" ? "uomo" : "donna") + (F.bmi && F.bmi < 20 ? " · BMI " + fmtN(F.bmi) + " basso" : ""), F.age + " anni");
   if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
   else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
-  if(F.fx.length){ const f = F.fx[0], rec = F.recent.length;
-    pill(sx, "fx", rec ? "k-r" : "k-a", F.fx.length, (FX_SEDI[f.sede] || "Frattura") + (f.grado ? " " + f.grado : ""), (rec ? "recente · " : "") + fmtD(f.data).slice(3) + (F.fx.length > 1 ? " · +" + (F.fx.length - 1) : ""), plural(F.fx.length, "frattura", "fratture") + ", l'ultima: " + (FX_SEDI[f.sede] || f.sede)); }
+  /* una frattura: sede e data; più fratture: «Fratture multiple», le sedi su una riga, si apre l'elenco con le date */
+  const fxNome = f => (FX_SEDI[f.sede] || "Frattura") + (f.grado ? " " + f.grado : "");
+  if(F.fx.length === 1){ const f = F.fx[0], rec = F.recent.length;
+    pill(sx, "fx", rec ? "k-r" : "k-a", "1", fxNome(f), (rec ? "recente · " : "") + fmtD(f.data), "Frattura: " + fxNome(f) + ", " + fmtD(f.data)); }
+  else if(F.fx.length > 1){ const rec = F.recent.length, sedi = [...new Set(F.fx.map(f => (FX_SEDI[f.sede] || f.sede).split(" / ")[0]))];
+    sx.push(`<button type="button" class="fbd ${rec ? "k-r" : "k-a"} fsec-b" data-fsheet="fx" aria-label="${hx(F.fx.length + " fratture: " + F.fx.map(f => fxNome(f) + " " + fmtD(f.data)).join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${F.fx.length}</span><span class="fbd-t"><b>Fratture multiple</b><small>${hx((rec ? "1 recente · " : "") + sedi.join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`); }
   else pill(sx, "fx", "k-ok", "0", "Nessuna frattura", "da fragilità");
   const cis = [];
   if(S.hpp) cis.push(["esami", "No bisfosfonati", "fosfatasi alcalina bassa"]);
@@ -121,8 +125,8 @@ function figSummary(p, F, S){
   if(eg !== null && eg < 35) cis.push(["esami", "eGFR " + fmtN(eg, 0), eg < 30 ? "no bisfosfonati, cautela" : "no alendronato, zoledronato"]);
   if(ci.cv || F.feats.has("ictus_emiplegia")) cis.push(["anam", "No romosozumab", "infarto o ictus"]);
   if(ci.tev) cis.push(["anam", "No raloxifene", "tromboembolismo"]);
-  if(ci.denti) cis.push(["anam", "Denti da sistemare", "prima di antiriassorbitivi"]);
-  cis.slice(0, 2).forEach((x, i) => pill(sx, x[0], x[1] === "Denti da sistemare" ? "k-a" : "k-r", "✕", x[1], i === 1 && cis.length > 2 ? "e altre " + (cis.length - 2) : x[2]));
+  if(ci.denti) cis.push(["anam", "Visita odontoiatrica", "nulla osta alla terapia"]);
+  cis.slice(0, 2).forEach((x, i) => pill(sx, x[0], x[1] === "Visita odontoiatrica" ? "k-a" : "k-r", x[1] === "Visita odontoiatrica" ? "!" : "✕", x[1], i === 1 && cis.length > 2 ? "e altre " + (cis.length - 2) : x[2]));
   /* destra: gli esami */
   const d = F.lastDxa, sites = [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]);
   if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(dx, "dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
