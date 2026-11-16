@@ -612,6 +612,12 @@ main{padding-bottom:40px}
 .fspec-b:hover{border-color:var(--pri)} .fspec-b .dic{width:30px;height:30px;flex:0 0 auto;background:#FCEAF1;border-radius:8px;padding:2px;overflow:visible}
 .fspec-b b{display:block;font-size:.84rem} .fspec-b small{display:block;font-size:.7rem;color:var(--muted)}
 .fspec-b.on{border-color:var(--teal);background:var(--teal-box)} .fspec-b:disabled{cursor:default}
+.seg.wrap{display:flex;flex-wrap:wrap} .seg.wrap button{flex:1 1 auto}
+.gcdur{margin:10px 0 6px}
+.fmiss{display:block;width:100%;text-align:left;border:0;border-radius:10px;background:#FBF1DD;color:#6B4A00;padding:9px 12px;margin:8px 0 2px;font:inherit;font-size:.84rem;cursor:pointer}
+.n79p ul{margin:6px 0 0;padding-left:18px} .n79p li{margin:3px 0} .n79p a{color:inherit}
+.fn79 em{font-style:normal;opacity:.85}
+.fpanel #pzGrid{display:block}
 .fgrab{width:36px;height:5px;border-radius:3px;background:#D5D3DC;margin:7px auto -4px;flex:0 0 auto}
 @media (prefers-reduced-motion:reduce){.fsheet.in,.fdim.in{animation-duration:.01s}.fsheet.out,.fdim.out{transition-duration:.01s}}
 .fsheet-h{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;border-bottom:1px solid var(--line)}
@@ -723,6 +729,8 @@ details.acc.gest .area{background:var(--bg)}
 .lnk{border:0;background:none;padding:0;color:var(--focus);font-weight:700;font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#2B2550;color:#fff;padding:11px 16px;border-radius:10px;font-size:.9rem;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:calc(100% - 32px)}
 #toast.on{opacity:1;transform:translate(-50%,0)}
+/* su PC l'avviso compare in alto, così non copre «Indietro» e «Avanti» */
+@media (min-width:900px){ #toast{bottom:auto;top:72px;transform:translate(-50%,-10px)} #toast.on{transform:translate(-50%,0)} }
 .flash{animation:flash 1.4s ease}
 @keyframes flash{0%,60%{box-shadow:0 0 0 4px var(--home-p);border-radius:12px}100%{box-shadow:0 0 0 0 transparent}}
 /* blocco con codice */
