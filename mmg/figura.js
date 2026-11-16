@@ -105,8 +105,10 @@ function figSummary(p, F, S){
   const it = [], pill = (k, cls, c, b, sm, aria) => it.push(`<button type="button" class="fbd ${cls}" data-fsheet="${k}" aria-label="${hx(aria || b + ": " + sm)}"><span class="fbd-c">${c}</span><span class="fbd-t"><b>${hx(b)}</b><small>${hx(sm)}</small></span></button>`);
   if(F.age !== null) pill("chi", "k-n", F.age, "Età", F.bmi && F.bmi < 20 ? "BMI " + fmtN(F.bmi) + ", basso" : "anni", F.age + " anni");
   if(p.fam) pill("chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
+  else if(p.fam === false) pill("chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
   if(F.fx.length){ const f = F.fx[0], rec = F.recent.length;
     pill("fx", rec ? "k-r" : "k-a", F.fx.length, (FX_SEDI[f.sede] || "Frattura") + (f.grado ? " " + f.grado : ""), (rec ? "recente · " : "") + fmtD(f.data).slice(3) + (F.fx.length > 1 ? " · +" + (F.fx.length - 1) : ""), plural(F.fx.length, "frattura", "fratture") + ", l'ultima: " + (FX_SEDI[f.sede] || f.sede)); }
+  else pill("fx", "k-ok", "0", "Nessuna frattura", "da fragilità");
   const z = F.zona, r = F.rischio;
   pill("defra", "zf z-" + z, r !== null ? fmtN(r, 0) + "<i>%</i>" : "!", "DeFRA", "zona " + ZONE[z].t.toLowerCase(), "DeFRA zona " + ZONE[z].t.toLowerCase() + (r !== null ? ", rischio " + fmtN(r, 0) + "%" : ""));
   const dx = F.lastDxa, sites = [["colonna", dx.tL], ["femore", dx.tFt], ["collo femore", dx.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]);
