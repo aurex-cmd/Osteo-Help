@@ -499,7 +499,7 @@ main{padding-bottom:40px}
 @media (max-width:420px){.fbd{padding-right:7px;gap:4px}.fbd-c{width:36px;height:36px;font-size:.84rem}.fbd-t small{font-size:.6rem}}
 /* caso completo: i dati che contano ai due lati della figura, tutti uguali */
 .fstage.done{position:relative}
-.fsum{position:absolute;inset:auto 8px 3% 8px;top:37%;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:3}
+.fsum{position:absolute;inset:auto 8px auto 8px;top:31%;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:3}
 .fsum-c{display:flex;flex-direction:column;gap:7px;align-items:flex-start;pointer-events:auto;max-width:49%} .fsum-c.r{align-items:flex-end}
 .fsum .fbd{max-width:100%;padding:3px 9px 3px 3px} .fsum .fbd-c{width:36px;height:36px;font-size:.84rem} .fsum .fbd-t{max-width:112px}
 .fsum .fbd-t b{font-size:.7rem} .fsum .fbd-t small{font-size:.6rem}
@@ -507,6 +507,15 @@ main{padding-bottom:40px}
 .fsum .fbd-t small{white-space:normal}
 .fbd.k-n .fbd-c{background:var(--pri);color:#fff} .fbd.k-a .fbd-c{background:#E3B21A;color:#3D2F00} .fbd.k-r .fbd-c{background:var(--coral);color:#fff}
 .fbd.k-r small{color:var(--coral);font-weight:700} .fbd.k-ok .fbd-c{background:var(--teal);color:#fff}
+.fsum .fbd.miss{padding-left:5px}
+.fdefra{position:absolute;left:50%;bottom:2%;transform:translateX(-50%);z-index:4;display:flex;align-items:center;gap:12px;border:0;border-radius:999px;background:var(--zc);color:#fff;padding:6px 22px 6px 6px;box-shadow:0 8px 24px rgba(30,20,70,.3),0 0 0 4px #fff;cursor:pointer;font:inherit;text-align:left;white-space:nowrap}
+.fdefra-c{width:64px;height:64px;border-radius:50%;background:#fff;color:var(--zc);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.45rem;letter-spacing:-.03em;flex:0 0 auto}
+.fdefra-c i{font-style:normal;font-size:.8rem;margin-left:1px}
+.fdefra-t small{display:block;font-size:.58rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;opacity:.9}
+.fdefra-t b{display:block;font-size:1.25rem;line-height:1.1;letter-spacing:-.01em}
+.fdefra-t span{display:block;font-size:.76rem;opacity:.92}
+.fdefra.z-gialla{color:#3D2F00} .fdefra.z-gialla .fdefra-c{color:#8A6A00}
+.fdefra:hover,.fdefra:focus-visible{transform:translateX(-50%) scale(1.03)}
 .fdel{margin:6px 0 0;text-align:right} .fdel .lnk{color:var(--coral);font-size:.8rem}
 .pitem{position:relative} .pitem.anon .pcard{padding-right:50px}
 .pdel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:0;background:var(--coral-box);color:var(--coral);font-weight:800;cursor:pointer}
