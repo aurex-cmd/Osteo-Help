@@ -33,7 +33,7 @@ function figOf(p){
 const figViso = p => { const f = figOf(p); return f ? `img/${f}-viso.jpg` : null; };
 
 /* stato della vista: quale riquadro è aperto */
-const FIG = { open:null };
+const FIG = { open:null, anim:false };
 const FIG_SHEETS = {
   chi:   { t:"Chi è", ic:"👤", k:"dati", body: p => datiAnag(p) },
   fx:    { t:"Le fratture", ic:"🦴", k:"dati", body: p => datiFx(p) },
@@ -220,7 +220,9 @@ function figSecInner(p, F, S, spots, wide){
 }
 function figSheet(p, F, S, spots){
   if(!FIG_SHEETS[FIG.open] || figWide()) return "";
-  return `<div class="fdim" data-fclose></div><div class="fsheet" role="dialog" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, false)}</div>`;
+  /* l'animazione di apertura solo quando la scheda si apre, non a ogni aggiornamento o cambio di sezione */
+  const a = FIG.anim ? " in" : "";
+  return `<div class="fdim${a}" data-fclose></div><div class="fsheet${a}" role="dialog" aria-label="${FIG_SHEETS[FIG.open].t}"><div class="fgrab" aria-hidden="true"></div>${figSecInner(p, F, S, spots, false)}</div>`;
 }
 
 /* ---------- la vista ---------- */
@@ -312,9 +314,9 @@ function vDecidi(p){
 document.addEventListener("click", e => {
   const t = e.target;
   const op = t.closest("[data-fsheet]");
-  if(op){ e.preventDefault(); FIG.open = op.dataset.fsheet; render(); const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
+  if(op){ e.preventDefault(); FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
     const pn = document.querySelector(".fpanel"); if(pn && pn.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + pn.getBoundingClientRect().top - 70 }); return; }
-  if(t.closest("[data-fclose]")){ FIG.open = null; render(); return; }
+  if(t.closest("[data-fclose]")){ figClose(); return; }
   const fd = t.closest("[data-fdec]");
   if(fd){ const { p } = pzRoute(); if(!p) return; const [tipo, farm] = fd.dataset.fdec.split(":");
     p.decisione = { tipo, data: todayISO() };
@@ -324,6 +326,53 @@ document.addEventListener("click", e => {
     else { toast(farm ? dnome(farm) + " registrato da oggi. Prossimo passo: il foglio per il paziente." : "Decisione registrata."); go("paz-" + p.id + "-figura"); }
   }
 });
-document.addEventListener("keydown", e => { if(e.key === "Escape" && FIG.open){ FIG.open = null; render(); } });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && FIG.open) figClose(); });
+
+/* chiusura della scheda dal basso: scende con la stessa curva con cui è salita (come le schede di iOS) */
+function figClose(){
+  const sh = document.querySelector(".fsheet"), dm = document.querySelector(".fdim");
+  if(!sh){ FIG.open = null; render(); return; }
+  if(sh.classList.contains("out")) return;
+  sh.style.transition = ""; sh.style.transform = ""; if(dm){ dm.style.transition = ""; dm.style.opacity = ""; }
+  sh.classList.remove("in"); if(dm) dm.classList.remove("in");
+  void sh.offsetHeight;
+  sh.classList.add("out"); if(dm) dm.classList.add("out");
+  let fatto = false; const fine = () => { if(fatto) return; fatto = true; FIG.open = null; render(); };
+  sh.addEventListener("transitionend", e => { if(e.target === sh) fine(); });
+  setTimeout(fine, 560);
+}
+/* trascinare la scheda verso il basso la chiude: dalla maniglia, dalla testata o dal contenuto già in cima */
+let figDrag = null;
+document.addEventListener("touchstart", e => {
+  const sh = e.target.closest(".fsheet"); if(!sh || sh.classList.contains("out") || e.touches.length > 1) return;
+  if(e.target.closest("select, textarea, input[type=range]")) return;
+  figDrag = { sh, dm: document.querySelector(".fdim"), body: e.target.closest(".fsheet-b"), y0: e.touches[0].clientY, active:false, dy:0, t:0, v:0 };
+}, { passive:true });
+document.addEventListener("touchmove", e => {
+  const g = figDrag; if(!g) return;
+  const y = e.touches[0].clientY;
+  if(!g.active){
+    const d = y - g.y0;
+    if(d < -4 || (g.body && g.body.scrollTop > 0)){ figDrag = null; return; }
+    if(d < 6) return;
+    g.active = true; g.y0 = y; g.ly = y; g.t = performance.now(); g.sh.style.transition = "none"; if(g.dm) g.dm.style.transition = "none";
+  }
+  const now = performance.now(), dy = Math.max(0, y - g.y0);
+  g.v = (y - g.ly) / Math.max(1, now - g.t); g.ly = y; g.t = now; g.dy = dy;
+  g.sh.style.transform = `translate(-50%,${dy}px)`;
+  if(g.dm) g.dm.style.opacity = String(Math.max(0, 1 - dy / g.sh.offsetHeight));
+  e.preventDefault();
+}, { passive:false });
+const figDragEnd = () => {
+  const g = figDrag; figDrag = null; if(!g || !g.active) return;
+  if(g.dy > g.sh.offsetHeight * 0.25 || g.v > 0.5) return figClose();
+  /* non abbastanza: torna su */
+  const ease = "cubic-bezier(.32,.72,0,1)";
+  g.sh.style.transition = `transform .5s ${ease}`; g.sh.style.transform = "translate(-50%,0)";
+  if(g.dm){ g.dm.style.transition = `opacity .5s ${ease}`; g.dm.style.opacity = ""; }
+  setTimeout(() => { if(!g.sh.classList.contains("out")){ g.sh.style.transition = ""; g.sh.style.transform = ""; if(g.dm) g.dm.style.transition = ""; } }, 520);
+};
+document.addEventListener("touchend", figDragEnd);
+document.addEventListener("touchcancel", figDragEnd);
 /* passando da schermo largo a stretto (o viceversa) la sezione aperta passa da pannello a riquadro */
 window.matchMedia("(min-width:900px)").addEventListener("change", () => { if(FIG.open) render(); });
