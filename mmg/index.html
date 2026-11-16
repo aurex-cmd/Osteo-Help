@@ -466,8 +466,15 @@ main{padding-bottom:40px}
 .vsw{display:flex;gap:4px;background:var(--box);border-radius:11px;padding:3px;align-self:flex-start}
 .vsw a{padding:7px 12px;border-radius:9px;font-size:.84rem;font-weight:600;color:var(--muted)}
 .vsw a[aria-pressed="true"]{background:var(--bg);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.fhud-t b{display:block;font-size:1.45rem;letter-spacing:-.02em} .fhud-t small{color:var(--muted);font-size:.85rem}
-.fprog{display:flex;gap:4px;margin-top:-6px} .fprog i{flex:1;height:7px;border-radius:4px;background:#ECE9F5} .fprog i.ok{background:var(--teal)} .fprog i.warn{background:var(--amber)}
+/* nome del paziente: grande, con sesso, età e avanzamento in piccole etichette */
+.fhud{display:flex;flex-direction:column;gap:8px;margin:2px 0 4px}
+.fhud-n{margin:0;font-size:2rem;font-weight:800;letter-spacing:-.035em;line-height:1.05;color:var(--ink)}
+.fhud-n.anon{color:var(--muted);font-weight:700}
+.fhud-m{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.fhud-c{font-size:.8rem;font-weight:700;color:#3B2F6B;background:#ECE8F8;border-radius:999px;padding:4px 11px}
+.fhud-p{display:inline-flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;color:var(--muted);padding:4px 4px 4px 6px}
+.fhud-pb{display:inline-flex;gap:2px} .fhud-pb i{width:9px;height:6px;border-radius:3px;background:#E2DEF0} .fhud-pb i.ok{background:var(--teal)} .fhud-pb i.warn{background:var(--amber)}
+.fprog{display:none;gap:4px;margin-top:-6px} .fprog i{flex:1;height:7px;border-radius:4px;background:#ECE9F5} .fprog i.ok{background:var(--teal)} .fprog i.warn{background:var(--amber)}
 .fgrid{display:flex;flex-direction:column;gap:14px} .froad{display:none}
 .fcol-r{display:flex;flex-direction:column;gap:12px}
 .fstage{display:flex;justify-content:center;overflow:hidden;margin:0 -16px;padding-top:26px}

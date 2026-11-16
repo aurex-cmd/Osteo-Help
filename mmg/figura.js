@@ -242,8 +242,10 @@ function vFigura(p){
   const title = [hx(pzName(p)), F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
   const panel = !!FIG_SHEETS[FIG.open] && figWide();
   return { bar: pzName(p), html: viewSwitch(p, "figura") + `
-    <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} passi completati</small></div></div>
-    <div class="fprog">${all.map(x => `<i class="${x.st}" title="${x.t}"></i>`).join("")}</div>
+    <div class="fhud">
+      <h1 class="fhud-n${p.nome && p.nome.trim() ? "" : " anon"}">${hx(pzName(p))}</h1>
+      <div class="fhud-m">${p.sesso ? `<span class="fhud-c">${p.sesso === "donna" ? "Donna" : "Uomo"}</span>` : ""}${F.age !== null ? `<span class="fhud-c">${F.age} anni</span>` : ""}<span class="fhud-p" title="${done} di ${STEPS.length} passi completati"><span class="fhud-pb">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span>${done} di ${STEPS.length} passi</span></div>
+    </div>
     <div class="fgrid${panel ? " panel" : ""}"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>${figRoad(p, all)}
     <div class="fcol-r">${panel ? `<div class="fpanel" role="region" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, true)}</div>` : `
       ${figNext(p, F, S, spots)}
