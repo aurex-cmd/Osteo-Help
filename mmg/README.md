@@ -103,3 +103,9 @@ La home non mostra l'elenco dei pazienti (un MMG ne ha molti): ha due pulsanti, 
 ### Decisione terapeutica: prima l'indicazione, il resto a richiesta
 
 In alto il paziente in una riga (età, frattura, T-score, rischio %). Poi un solo riquadro nel colore della zona: l'indicazione, il farmaco consigliato con il livello di scelta della Nota 79 (e l'avviso sul rebound se è il denosumab), il rischio molto alto se c'è, e subito i pulsanti. Tutto il resto è in sezioni chiuse che si aprono con un tocco, con un numero che dice quante voci contengono: «Da completare per la Nota 79», «Dettagli del farmaco consigliato», «Altre opzioni» (o «Cosa potrà valutare lo specialista»), «Prima della prima dose» («3 da fare»). Ogni farmaco è una riga con icona ed etichetta (I scelta, II scelta, fuori Nota 79, controindicato) che si apre sui dettagli.
+
+### Niente più percorso a passi
+
+La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il vecchio «Percorso a passi» non c'è più: i suoi indirizzi (dati, anamnesi, esami, densitometria, DeFRA, controlli) aprono la stessa sezione sulla figura, così i link dalla decisione, dalla lista «Da fare» e dalle note portano al posto giusto. «Terapia» resta una pagina a sé, per registrare le dosi; le note libere sono in «Chi è».
+
+**DeFRA già inserito**: la scheda mostra solo la zona, nel suo colore, con il rischio % e la data; «Aggiorna il DeFRA» (cosa serve, link al calcolatore, modulo), lo storico e «Cosa significano le zone» si aprono a richiesta.

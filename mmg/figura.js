@@ -35,7 +35,7 @@ const figViso = p => { const f = figOf(p); return f ? `img/${f}-viso.jpg` : null
 /* stato della vista: quale riquadro è aperto */
 const FIG = { open:null, anim:false };
 const FIG_SHEETS = {
-  chi:   { t:"Chi è", ic:"👤", k:"dati", body: p => datiAnag(p) },
+  chi:   { t:"Chi è", ic:"👤", k:"dati", body: p => datiAnag(p) + `<p class="lbl">Note</p><textarea class="area" data-pf="note" rows="3" placeholder="Note libere">${hx(p.note)}</textarea>` },
   fx:    { t:"Le fratture", ic:"🦴", k:"dati", body: p => datiFx(p) },
   anam:  { t:"Malattie e farmaci", ic:"💊", k:"anamnesi", body: p => noHead(vPazAnamnesi(p).html) },
   esami: { t:"Esami del sangue", ic:"🧪", k:"esami", body: p => noHead(vPazEsami(p).html) },
@@ -261,7 +261,7 @@ function figRoad(p, all){
     if(x.k === "terapia" && !pzFacts(p).zona) return `<li class="${cls}"><button type="button" data-fsheet="defra" title="Per decidere la terapia serve prima la zona del DeFRA" aria-label="${hx(lab + " Serve prima la zona del DeFRA.")}">${inner}</button></li>`;
     return `<li class="${cls}">${ROAD_SHEET[x.k] ? `<button type="button" data-fsheet="${ROAD_SHEET[x.k]}" title="${hx(x.s)}" aria-label="${hx(lab)}">${inner}</button>` : `<a href="#paz-${p.id}-decidi" title="${hx(x.s)}" aria-label="${hx(lab)}">${inner}</a>`}</li>`; }).join("")}</ol></nav>`;
 }
-function viewSwitch(p, cur){
+function viewSwitch(p, cur){ return "";
   return `<div class="vsw" role="group" aria-label="Vista"><a href="#paz-${p.id}-figura" aria-pressed="${cur === "figura"}">Figura</a><a href="#paz-${p.id}-percorso" aria-pressed="${cur === "percorso"}">Percorso a passi</a></div>`;
 }
 

@@ -499,7 +499,7 @@ const AVATAR = {
 };
 const avatar = p => { const v = figViso(p); return v ? `<span class="pav img" aria-hidden="true"><img src="${v}" alt=""></span>` : `<span class="pav" aria-hidden="true"><svg viewBox="3 4 38 38">${AVATAR[p.sesso || ""] || AVATAR[""]}</svg></span>`; };
 /* vista del paziente preferita: figura (predefinita) o percorso a passi */
-let VISTA = "figura"; try{ if(localStorage.getItem("oh-mmg-vista") === "percorso") VISTA = "percorso"; }catch(e){}
+let VISTA = "figura";
 const setVista = v => { if(VISTA !== v){ VISTA = v; try{ localStorage.setItem("oh-mmg-vista", v); }catch(e){} } };
 const initials = p => { const w = pzName(p).replace(/[^\p{L}\s.]/gu, " ").split(/[\s.]+/).filter(Boolean); return w.length ? (w[0][0] + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase() : "?"; };
 /* scheda di un paziente nell'archivio */
@@ -810,14 +810,7 @@ function defraLive(p){
 function vPazDefra(p){
   const F = pzFacts(p), rc = riskCat(F.zona);
   const hist = F.defra.map(d => `<li class="rec"><span><b>${zchip(d.zona)}</b><small>${fmtD(d.data)}${num(d.rischio) !== null ? " · rischio a 10 anni " + fmtN(num(d.rischio), 0) + "%" : ""}${d.note ? " · " + hx(d.note) : ""}</small></span><button type="button" class="x" data-del="defra:${p.defra.indexOf(d)}" aria-label="Elimina">✕</button></li>`).join("");
-  return { bar: pzName(p), html: head("DeFRA e rischio di frattura", "Il DeFRA (SIOMMMS e SIR) stima il rischio di fratture maggiori a 10 anni, unendo DXA e fattori clinici, e lo colloca in una zona di colore.") + `
-    <p class="lbl">Cosa serve</p>
-    <div data-live="defra">${defraLive(p)}</div>
-    <div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>
-    <p class="lbl">Zona di rischio</p>
-    ${rc ? zoneAlert(rc, ` <a href="#paz-${p.id}-terapia">Indicazioni alla terapia</a>`) + `<p class="small">Inserita il ${fmtD(F.lastDefra.data)}.</p>` : ""}
-    ${hist ? `<ul class="list recs">${hist}</ul>` : ""}
-    <div class="addbox">
+  const form = `<div class="addbox">
       <div class="zpick" role="group" aria-label="Zona del DeFRA">${ZONE_ORDER.map(z => `<button type="button" class="zbtn z-${z}" data-zona="${z}" aria-pressed="false"><i></i><span><b>${ZONE[z].t}</b><small>${ZONE[z].r}</small></span></button>`).join("")}</div>
       <div class="grid2">
         <label class="fld">Data<input type="date" id="dfD" value="${todayISO()}"></label>
@@ -825,10 +818,23 @@ function vPazDefra(p){
         <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" id="dfN"></label>
       </div>
       <button type="button" class="btn" data-add="defra">Salva la zona del DeFRA</button>
-    </div>
-    <p class="lbl">Cosa significano le zone</p>
-    <ul class="list zleg">${ZONE_ORDER.map(z => `<li>${zchip(z)}<span><b>${ZONE[z].r[0].toUpperCase() + ZONE[z].r.slice(1)} → ${ZONE[z].chi}</b><small>${ZONE[z].azione}</small></span></li>`).join("")}</ul>
-    <p class="small">Le soglie delle zone dipendono dall'età (a parità di rischio percentuale, un paziente giovane cade in una zona più alta): per questo basta riportare la zona che indica il DeFRA. La rimborsabilità resta legata alle condizioni della Nota 79, nella pagina successiva.</p>` };
+    </div>`;
+  const serve = `<div data-live="defra">${defraLive(p)}</div><div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>`;
+  const zone = `<ul class="list zleg">${ZONE_ORDER.map(z => `<li>${zchip(z)}<span><b>${ZONE[z].r[0].toUpperCase() + ZONE[z].r.slice(1)} → ${ZONE[z].chi}</b><small>${ZONE[z].azione}</small></span></li>`).join("")}</ul>
+    <p class="small">Le soglie delle zone dipendono dall'età: per questo basta riportare la zona che indica il DeFRA. La rimborsabilità resta legata alle condizioni della Nota 79.</p>`;
+  const acc = (t, body, open) => `<details class="dsec"${open ? " open" : ""}><summary><span>${t}</span></summary><div class="dsec-b">${body}</div></details>`;
+  const head0 = head("DeFRA e rischio di frattura", "Il DeFRA (SIOMMMS e SIR) stima il rischio di fratture maggiori a 10 anni, unendo DXA e fattori clinici, e lo colloca in una zona di colore.");
+  if(rc){ const r = F.rischio;
+    return { bar: pzName(p), html: head("DeFRA e rischio di frattura") + `
+    <div class="dfz z-${F.zona}"><span class="dfz-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : ""}</span><span><small>Zona del DeFRA · ${fmtD(F.lastDefra.data)}</small><b>Zona ${rc.t.toLowerCase()}</b><span>${rc.r} → ${rc.chi}</span></span></div>
+    ${acc("Aggiorna il DeFRA", serve + form, false)}
+    ${F.defra.length > 1 ? acc("Tutti i DeFRA (" + F.defra.length + ")", `<ul class="list recs">${hist}</ul>`, false) : `<ul class="list recs">${hist}</ul>`}
+    ${acc("Cosa significano le zone", zone, false)}` };
+  }
+  return { bar: pzName(p), html: head0 + `
+    <p class="lbl">Cosa serve</p>${serve}
+    <p class="lbl">Zona di rischio</p>${form}
+    ${acc("Cosa significano le zone", zone, false)}` };
 }
 
 /* ---------- 5 · terapia ---------- */
@@ -1277,9 +1283,11 @@ function pzView(route){
   if(route.startsWith("farmaco-")) return vFarmaco(route.slice(8));
   const m = /^paz-([a-z0-9]+)(?:-([a-z]+))?$/.exec(route); if(!m) return null;
   const p = pzGet(m[1]); if(!p) return { redirect:"" };
-  if(!m[2]) return { redirect: "paz-" + p.id + "-" + VISTA };
-  if(m[2] === "figura"){ setVista("figura"); return vFigura(p); }
-  if(m[2] === "percorso"){ setVista("percorso"); const v = vPaz(p); v.html = viewSwitch(p, "percorso") + v.html; return v; }
+  if(!m[2] || m[2] === "percorso") return { redirect: "paz-" + p.id + "-figura" };
+  if(m[2] === "figura") return vFigura(p);
+  /* i passi del vecchio percorso: si apre la stessa sezione sulla figura */
+  const SH = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico" }[m[2]];
+  if(SH){ FIG.anim = FIG.open !== SH; FIG.open = SH; setTimeout(() => { FIG.anim = false; }); return { redirect: "paz-" + p.id + "-figura" }; }
   if(m[2] === "decidi") return vDecidi(p);
   const V = { "":vPaz, dati:vPazDati, anamnesi:vPazAnamnesi, esami:vPazEsami, dxa:vPazDxa, defra:vPazDefra, terapia:vPazTerapia, storico:vPazStorico, report:vPazReport, lettera:vPazLettera, foglio:vPazFoglio }[m[2] || ""];
   return V ? V(p) : { redirect:"paz-" + p.id };
@@ -1328,7 +1336,7 @@ document.addEventListener("click", e => {
   const sc = t.closest("[data-scroll]"); if(sc){ const el = $(sc.dataset.scroll); if(el){ el.scrollIntoView({ behavior:"smooth", block:"center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } return; }
   const pdel = t.closest("[data-pzdel]");
   if(pdel){ const q = PZ.find(x => String(x.id) === pdel.dataset.pzdel); if(q && confirm("Eliminare questo paziente senza nome e i dati inseriti?")){ PZ.splice(PZ.indexOf(q), 1); savePz(); render(); } return; }
-  if(t.closest("#pzNew")){ const p = pzBlank(); PZ.push(p); savePz(); go("paz-" + p.id + (VISTA === "figura" ? "-figura" : "-dati")); return; }
+  if(t.closest("#pzNew")){ const p = pzBlank(); PZ.push(p); savePz(); go("paz-" + p.id + "-figura"); return; }
   if(t.closest("#pzPrint")){ window.print(); return; }
   if(t.closest("#qReset")){ const { p } = pzRoute(); if(p){ p.quesito = ""; savePz(p); render(); } return; }
   const zb = t.closest(".zbtn"); if(zb){ document.querySelectorAll(".zbtn").forEach(x => x.setAttribute("aria-pressed", x === zb)); return; }
@@ -1457,7 +1465,7 @@ function render(){
   const changed = route !== current; current = route;
   /* sezioni del paziente: «Fatto» riporta alla scheda; nella scheda riporta all'elenco */
   const m = /^paz-([a-z0-9]+)(-[a-z]+)?$/.exec(route), back = m ? (m[2] && m[2] !== "-figura" && m[2] !== "-percorso" ? "paz-" + m[1] : "") : null;
-  const sk = m && m[2] ? m[2].slice(1) : null, isStep = sk && STEP_IX[sk] !== undefined, pp = m ? pzGet(m[1]) : null;
+  const sk = m && m[2] ? m[2].slice(1) : null, isStep = false, pp = m ? pzGet(m[1]) : null;
   const top = isStep && pp ? `<div class="stepper noprint" data-live="stepper">${stepperInner(pp, sk)}</div>` : "";
   const nav = isStep && pp ? stepNav(pp, sk) : "";
   const fsb = document.querySelector(".fsheet-b"), fsTop = fsb ? fsb.scrollTop : 0;
