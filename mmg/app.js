@@ -729,7 +729,7 @@ function secReport(p, S){
     (S.N.sosp.length ? `<p class="lbl">Sospetti da approfondire</p><div class="stack">${S.N.sosp.map(x => item(x, true)).join("")}</div>` : "");
 }
 /* «Anamnesi muta» come una voce: in cima, selezionabile; toglie le altre e, se la si deseleziona, le rimette */
-const anamMutaHTML = p => `<button type="button" class="ck amuta-ck" data-amuta aria-pressed="${!!(p.anamOk && p.anamMuta)}"><span class="cb">${TICK}</span><span><b>Anamnesi muta</b><small>Nessuna malattia, farmaco o controindicazione rilevante per l'osso</small></span></button>`;
+const anamMutaHTML = p => ckPz("data-amuta", "1", p.anamOk && p.anamMuta, "<b>Anamnesi muta</b> · nessuna malattia, farmaco o controindicazione rilevante per l'osso");
 const anamNovHTML = p => p.rival && !p.anamOk ? `<div class="amuta"><button type="button" class="btn sec" data-anov>Nessuna novità dalla valutazione precedente</button><small>Oppure aggiorna le voci qui sopra.</small></div>` : "";
 function vPazAnamnesi(p){
   const own = new Set(p.feats || []), vis = id => !FEATSEX[id] || !p.sesso || FEATSEX[id] === p.sesso;
@@ -741,23 +741,23 @@ function vPazAnamnesi(p){
   }).join("");
   return { bar: pzName(p), html: head("Anamnesi e farmaci", "Spunta malattie, farmaci e abitudini: le forme secondarie compaiono in fondo alla pagina. Se non c'è nulla, usa «Anamnesi muta».") + `
     ${p.sesso ? "" : `<p class="hint">Indica il sesso nei dati del paziente per nascondere le voci non pertinenti.</p>`}
-    <details class="acc gest"${(p.testoGest || "").trim() || (!(p.feats || []).length && !p.anamMuta) ? " open" : ""}><summary><span>Incolla dal gestionale<small>Copia il riassunto di patologie e farmaci: l'app propone le voci da spuntare</small></span>${CHEV}</summary><div class="accbody">
+    <div class="gestbox"><p class="gestbox-t">Incolla dal gestionale<small>Copia il riassunto di patologie e farmaci: l'app propone le voci da spuntare</small></p>
       <textarea class="area" data-pf="testoGest" id="gestIn" rows="6" placeholder="Incolla qui l'elenco dei problemi e la terapia in corso (anche con nomi commerciali e dosi)">${hx(p.testoGest)}</textarea>
       <div class="btns"><button type="button" class="btn" id="gestGo">Riconosci</button></div>
       <div id="gestRes">${gestResHTML(p)}</div>
       <p class="small">Riconosce principi attivi e nomi commerciali, sinonimi, abbreviazioni (BPCO, AR, DM2, TVP…) e parole scritte in modo un po' diverso. Il testo resta in questo browser. Controlla sempre le proposte prima di aggiungerle.</p>
-    </div></details>
+    </div>
     <div data-live="amuta">${anamMutaHTML(p)}</div>
     <div>${axes}</div>
     <p class="lbl">Altri dati per DeFRA e Nota 79</p>
     <div>
-      ${(p.feats || []).includes("glucocorticoidi") ? `<div class="fld gcdur"><span>Glucocorticoidi: prednisone ≥5 mg/die (o equivalenti)…</span><div class="seg wrap" role="group" aria-label="Dose e durata dei glucocorticoidi">${[["0", "meno di 3 mesi o dose minore"], ["3", "per più di 3 mesi"], ["12", "da più di 12 mesi"]].map(([v, t]) => `<button type="button" data-gcdur="${v}" aria-pressed="${gcDurOf(p) === v}">${t}</button>`).join("")}</div></div>` : ""}
+      ${(p.feats || []).includes("glucocorticoidi") ? [["3", "Glucocorticoidi: prednisone ≥5 mg/die (o equivalenti) per più di 3 mesi"], ["12", "Glucocorticoidi: prednisone ≥5 mg/die (o equivalenti) da più di 12 mesi"], ["0", "Glucocorticoidi per meno di 3 mesi o a dose minore"]].map(([v, t]) => ckPz("data-gcdur", v, gcDurOf(p) === v, t)).join("") : ""}
       ${ckPz("data-pbool", "disab", p.disab, "Grave disabilità motoria")}
     </div>
     <p class="lbl">Controindicazioni da conoscere prima della terapia</p>
     <div>
       ${Object.entries(CI_LBL).filter(([k]) => k !== "denti").map(([k, t]) => ckPz("data-pci", k, (p.ci || {})[k], t)).join("")}
-      <div class="fld gcdur"><span>Visita odontoiatrica (prima di bisfosfonati, denosumab o romosozumab)</span><div class="seg wrap" role="group" aria-label="Visita odontoiatrica">${[["ok", "fatta, bocca in ordine"], ["fare", "da fare per il nulla osta"], ["", "non so"]].map(([v, t]) => `<button type="button" data-dent="${v}" aria-pressed="${(p.dentista ? "ok" : (p.ci || {}).denti ? "fare" : "") === v}">${t}</button>`).join("")}</div></div>
+      ${[["fare", "Visita odontoiatrica da fare per il nulla osta (prima di bisfosfonati, denosumab o romosozumab)"], ["ok", "Visita odontoiatrica fatta, bocca in ordine"]].map(([v, t]) => ckPz("data-dent", v, (p.dentista ? "ok" : (p.ci || {}).denti ? "fare" : "") === v, t)).join("")}
     </div>
     <div data-live="anov">${anamNovHTML(p)}</div>
     <p class="lbl">Forme secondarie riconosciute</p>
@@ -1401,9 +1401,9 @@ document.addEventListener("click", e => {
     savePz(p); render(); toast(p.anamPrev ? "Anamnesi muta: le altre voci sono state tolte (deselezionala per riaverle)." : "Anamnesi muta."); return; }
   if(t.closest("[data-anov]")){ p.anamOk = true; savePz(p); render(); toast("Anamnesi confermata."); return; }
   const gd = t.closest("[data-gcdur]");
-  if(gd){ p.gcDur = gd.dataset.gcdur; p.gcMesi12 = p.gcDur === "12"; savePz(p); render(); return; }
+  if(gd){ p.gcDur = gcDurOf(p) === gd.dataset.gcdur ? "" : gd.dataset.gcdur; p.gcMesi12 = p.gcDur === "12"; savePz(p); render(); return; }
   const dn = t.closest("[data-dent]");
-  if(dn){ p.ci = p.ci || {}; p.dentista = dn.dataset.dent === "ok"; p.ci.denti = dn.dataset.dent === "fare"; savePz(p); render(); return; }
+  if(dn){ p.ci = p.ci || {}; const cur = p.dentista ? "ok" : p.ci.denti ? "fare" : "", v = cur === dn.dataset.dent ? "" : dn.dataset.dent; p.dentista = v === "ok"; p.ci.denti = v === "fare"; savePz(p); render(); return; }
   const dz = t.closest("[data-dose]");
   if(dz){ const th = p.terapie[+dz.dataset.dose], el = document.getElementById("dz" + dz.dataset.dose); if(th && el && el.value){ th.dosi = (th.dosi || []).concat(el.value).sort(); savePz(p); render(); toast("Dose registrata: prossima il " + fmtDt(nextDose(th)) + "."); } return; }
   const cp = t.closest("[data-copy]");
