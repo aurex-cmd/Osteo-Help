@@ -482,6 +482,7 @@ const stTag = st => `<span class="st ${st}">${ST_LBL[st]}</span>`;
 /* ---------- elenco pazienti ---------- */
 /* icone a tratto (24×24) della pagina iniziale */
 const MIC = {
+  users:'<circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M15.5 4.8a3.4 3.4 0 0 1 0 6.4M17.5 14.3c2.4.6 4 2.7 4 5.7"/>',
   add:'<circle cx="10" cy="8" r="3.6"/><path d="M3.5 20c0-3.8 2.9-6.3 6.5-6.3s6.5 2.5 6.5 6.3"/><path d="M18.5 7.5v6M15.5 10.5h6"/>',
   book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8.5 7.5h7M8.5 11h5"/>',
   down:'<path d="M12 3v12m-5-5 5 5 5-5"/><path d="M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17"/>',
@@ -500,8 +501,9 @@ const avatar = p => { const v = figViso(p); return v ? `<span class="pav img" ar
 let VISTA = "figura"; try{ if(localStorage.getItem("oh-mmg-vista") === "percorso") VISTA = "percorso"; }catch(e){}
 const setVista = v => { if(VISTA !== v){ VISTA = v; try{ localStorage.setItem("oh-mmg-vista", v); }catch(e){} } };
 const initials = p => { const w = pzName(p).replace(/[^\p{L}\s.]/gu, " ").split(/[\s.]+/).filter(Boolean); return w.length ? (w[0][0] + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase() : "?"; };
-function vPazienti(){
-  const cards = PZ.slice().sort((a, b) => pzName(a).localeCompare(pzName(b), "it", { sensitivity:"base" })).map(p => {
+/* scheda di un paziente nell'archivio */
+function pzCards(list){
+  return list.slice().sort((a, b) => pzName(a).localeCompare(pzName(b), "it", { sensitivity:"base" })).map(p => {
     const F = pzFacts(p), all = allSteps(p), nx = nextStep(all), pl = dxaPlan(F);
     const bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
     const where = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}${nx.s && /^Manca/.test(nx.s) ? " · " + nx.s.toLowerCase() : ""}` : pl.st !== "ok" ? pl.t : "Percorso completo";
@@ -511,13 +513,20 @@ function vPazienti(){
       <span class="pbody"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}${F.zona ? ` · <span class="zn z-${F.zona}"><i></i>zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</small>
         <span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small class="pwhere">${where}</small></span>${CHEV}</a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
   }).join("");
+}
+/* archivio: tutti i pazienti, con la ricerca */
+function vArchivio(){
+  return { bar:"Archivio pazienti", html: head("Archivio pazienti", PZ.length ? plural(PZ.length, "paziente", "pazienti") + " in questo browser, in ordine alfabetico." : "Nessun paziente ancora.") + (PZ.length ? `
+    <input class="search" id="pzQ" type="search" placeholder="Cerca per nome, iniziali o codice" autocomplete="off" aria-label="Cerca un paziente">
+    <div class="pcards" id="pzList">${pzCards(PZ)}</div><p class="pempty" id="pzNone" hidden>Nessun paziente con questo nome.</p>`
+    : `<div class="pempty">Nessun paziente in archivio.<br>Inizia con «Nuovo paziente» dalla home.</div>`) };
+}
+function vPazienti(){
   const todo = PZ.flatMap(p => pzTodo(p).map(x => Object.assign({ p }, x))).sort((a, b) => a.u - b.u);
   return { bar:"Pazienti", html: `<div class="mhome"><div class="mh-l">` + `<div class="mh-h">` + head("I miei pazienti", "Per ogni paziente con osteoporosi, un percorso guidato in 7 passi: dai dati alla terapia, fino ai controlli.") + `</div>
+    <div class="mh-btns">
     <button type="button" class="entry big violet mh-new" id="pzNew"><span class="ibox">${mic("add", "ic")}</span><div><b>Nuovo paziente</b><small>Inizia il percorso dal passo 1</small></div>${CHEV}</button>
-    <div class="mh-pl">
-    ${PZ.length ? `<p class="lbl">Pazienti · ${PZ.length}</p>` : ""}
-    ${PZ.length > 5 ? `<input class="search" id="pzQ" type="search" placeholder="Cerca un paziente" autocomplete="off">` : ""}
-    ${PZ.length ? `<div class="pcards" id="pzList">${cards}</div>` : `<div class="pempty">Nessun paziente in archivio.<br>Inizia con «Nuovo paziente».</div>`}
+    <a class="entry big teal mh-arc" href="#archivio"><span class="ibox">${mic("users", "ic")}</span><div><b>Archivio pazienti</b><small>${PZ.length ? plural(PZ.length, "paziente", "pazienti") + ", con la ricerca per nome" : "Ancora vuoto"}</small></div>${CHEV}</a>
     </div></div><div class="mh-r">
     ${pzStorageOk ? backupAlert() : `<div class="alert mh-bk"><b>Archivio non disponibile</b>Il browser non permette di salvare i dati (navigazione privata o dati del sito bloccati): i pazienti inseriti andranno persi alla chiusura.</div>`}
     <div class="mh-todo">${PZ.length ? `<p class="lbl">Da fare${todo.length ? " · " + todo.length : ""}</p>` + (todo.length ? `<div class="todo">${todo.slice(0, 15).map(x => todoItem(x, true)).join("")}</div>${todo.length > 15 ? `<p class="small">e altri ${todo.length - 15}: li trovi nella scheda di ciascun paziente.</p>` : ""}`
@@ -529,7 +538,7 @@ function vPazienti(){
       <a class="rowlink" href="#guida-nota96"><span class="ibox s">${mic("book")}</span><span>Vitamina D e Nota 96<small>Quando dosarla, quando è rimborsabile, come correggerla</small></span>${CHEV}</a>
       <a class="rowlink" href="#guida-dxa-lea"><span class="ibox s">${mic("book")}</span><span>A chi fare la densitometria in LEA<small>Fattori di rischio maggiori e minori, con il conteggio</small></span>${CHEV}</a>
     </div></div>
-    <div class="mh-cons mh-arch"><p class="lbl">Archivio</p>
+    <div class="mh-cons mh-arch"><p class="lbl">Backup e sicurezza</p>
     <div class="rows mrows">
       <button type="button" class="rowlink" id="pzExport"${PZ.length ? "" : " disabled"}><span class="ibox s">${mic("down")}</span><span>Salva backup<small>${LAST_BK ? "Ultimo il " + fmtD(LAST_BK) : "Un file con tutto l'archivio"}</small></span>${CHEV}</button>
       <label class="rowlink"><span class="ibox s">${mic("up")}</span><span>Ripristina backup<small>Anche per spostare l'archivio su un altro computer</small></span>${CHEV}<input type="file" id="pzImport" accept="application/json,.json" hidden></label>
@@ -1261,6 +1270,7 @@ function vFarmaco(id){
 function pzView(route){
   if(route === "") return vPazienti();
   if(route === "guida") return vGuida();
+  if(route === "archivio") return vArchivio();
   if(route.startsWith("guida-")) return vGuidaTopic(route.slice(6));
   if(route.startsWith("farmaco-")) return vFarmaco(route.slice(8));
   const m = /^paz-([a-z0-9]+)(?:-([a-z]+))?$/.exec(route); if(!m) return null;
@@ -1292,7 +1302,7 @@ document.addEventListener("input", e => {
   const ce = e.target.closest("[data-ce]"); if(ce){ const { p } = pzRoute(); if(p){ p[ce.dataset.ce] = ce.innerText.trim(); savePz(p); } return; }
   if(e.target.id === "medNome"){ try{ localStorage.setItem("oh-mmg-medico", e.target.value); }catch(err){} return; }
   const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(["egfr", "caTot", "albVal"].includes(el.dataset.pf)) applyAuto(p); savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
-  if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); document.querySelectorAll("#pzList .pitem").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); }); }
+  if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); let n = 0; document.querySelectorAll("#pzList .pitem").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); if(!a.hidden) n++; }); const nn = $("#pzNone"); if(nn) nn.hidden = n > 0; }
 });
 document.addEventListener("change", e => {
   if(e.target.closest("[data-pf]") || e.target.id === "vdIn"){ const { p } = pzRoute(); if(p) pzLive(p); return; }

@@ -25,7 +25,7 @@ Per ogni paziente un **percorso guidato in 7 passi**: in cima a ogni pagina una 
   - **Report** stampabile o da salvare in PDF.
 - **Guida per il MMG**: cos'è l'osteoporosi, cosa comporta, perché si cura, perché cercare le forme secondarie, esami di I livello, DeFRA e Nota 79, calcio, vitamina D e stile di vita, follow-up; una scheda per ognuno dei 10 farmaci.
 
-- **Pazienti senza nome**: nell'elenco hanno una ✕ rossa per eliminarli subito (dopo conferma), senza aprire la scheda.
+- **Pazienti senza nome**: nell'archivio hanno una ✕ rossa per eliminarli subito (dopo conferma), senza aprire la scheda.
 
 ## Vista a figura
 
@@ -93,6 +93,9 @@ Dove la Nota chiede un dato che manca, l'app non lo dà per scontato e lo chiede
 - **A chi fare la densitometria in LEA** (anche da «Consulta» in home e dal passo Densitometria): fattori di rischio maggiori (ne basta uno: fratture e osteoporosi documentate, terapie croniche, patologie a rischio per categoria, e nella donna in menopausa familiarità materna, menopausa prima dei 45 anni, BMI < 19) e minori (ne servono tre, separati per donna in menopausa e uomo oltre i 60 anni), da spuntare con il risultato in fondo. Fonte: DPCM 12 gennaio 2017, Allegato 4A.
 - **Vitamina D e Nota 96**: scenari senza dosaggio e con dosaggio (soglie 30, 50, 75 nmol/L), schema di correzione dell'Allegato 1, esclusioni. Fonte: Nota AIFA 96, aggiornamento del 10 febbraio 2023. Nel paziente che inizia un farmaco per l'osteoporosi la vitamina D si dosa: sotto 75 nmol/L è rimborsabile e va corretta prima.
 
-### Home: Consulta e Archivio
+### Home: due pulsanti, Consulta e Backup
 
-«Consulta» è in quest'ordine: Guida per il medico di medicina generale, Nota 79, Vitamina D e Nota 96, A chi fare la densitometria in LEA. Salvataggio, ripristino e blocco con codice sono in un gruppo a parte, «Archivio».
+La home non mostra l'elenco dei pazienti (un MMG ne ha molti): ha due pulsanti, come Osteo Help e Osteoclick, **Nuovo paziente** e **Archivio pazienti**. L'archivio è una pagina a parte con tutti i pazienti in ordine alfabetico e la ricerca per nome, iniziali o codice; i pazienti senza nome si eliminano da lì. In home restano il promemoria del backup, «Da fare» e «Consulta».
+
+
+«Consulta» è in quest'ordine: Guida per il medico di medicina generale, Nota 79, Vitamina D e Nota 96, A chi fare la densitometria in LEA. Salvataggio, ripristino e blocco con codice sono in un gruppo a parte, «Backup e sicurezza».
