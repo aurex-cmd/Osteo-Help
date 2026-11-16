@@ -179,13 +179,13 @@ function figNext(p, F, S, spots){
       : `<div class="fdrugbig none"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
     const quando = dt => { const g = daysTo(dt); return g < 0 ? `in ritardo di ${-g} giorni` : g === 0 ? "oggi" : g < 45 ? `tra ${g} giorni` : `tra ${Math.round(g / 30.4)} mesi`; };
-    const cal = (cls, lbl, top, big, bot, rel, note) => `<div class="fcal ${cls}"><small>${lbl}</small><div class="fcal-d"><span>${top}</span><b>${big}</b><span>${bot}</span></div><em>${rel}</em>${note ? `<i>${note}</i>` : ""}</div>`;
+    const cal = (cls, lbl, top, big, bot, rel, note, sh) => { const tg = sh ? "button" : "div"; return `<${tg}${sh ? ` type="button" data-fsheet="${sh}" title="Apri i controlli nel tempo"` : ""} class="fcal ${cls}"><small>${lbl}</small><div class="fcal-d"><span>${top}</span><b>${big}</b><span>${bot}</span></div><em>${rel}</em>${note ? `<i>${note}</i>` : ""}</${tg}>`; };
     const tiles = [];
     if(nd){ const late = daysTo(nd) < 0; tiles.push(cal(late ? "late" : "dose", "Prossima " + doseWord(th.farmaco), MESI[nd.getMonth()], nd.getDate(), nd.getFullYear(), quando(nd), late ? "farla al più presto" : th.farmaco === D_ ? "calcemia prima della dose" : "")); }
     if(F.lastDxa){ const ld = pDate(F.lastDxa.data), from = addMonths(ld, 18), to = addMonths(ld, 24), pl = dxaPlan(F);
       const okp = pl.st === "ok";
-      tiles.push(cal(pl.st === "miss" ? "late" : pl.st === "warn" ? "now" : "dxa", "Prossima densitometria", okp ? "da" : "entro", MESI[(okp ? from : to).getMonth()], (okp ? from : to).getFullYear(), pl.st === "miss" ? "da fare subito" : pl.st === "warn" ? "da programmare ora" : quando(from), okp ? "finestra fino a " + MESI[to.getMonth()] + " " + to.getFullYear() : "ultima " + fmtD(F.lastDxa.data))); }
-    else tiles.push(cal("late", "Prossima densitometria", "DXA", "?", "", "da richiedere", "nessuna registrata"));
+      tiles.push(cal(pl.st === "miss" ? "late" : pl.st === "warn" ? "now" : "dxa", "Prossima densitometria", okp ? "da" : "entro", MESI[(okp ? from : to).getMonth()], (okp ? from : to).getFullYear(), pl.st === "miss" ? "da fare subito" : pl.st === "warn" ? "da programmare ora" : quando(from), okp ? "finestra fino a " + MESI[to.getMonth()] + " " + to.getFullYear() : "ultima " + fmtD(F.lastDxa.data), "storico")); }
+    else tiles.push(cal("late", "Prossima densitometria", "DXA", "?", "", "da richiedere", "nessuna registrata", "dxa"));
     /* decisione presa ma con dati ancora mancanti: lo si dice, e si va dritti a completarli */
     const mancano = allSteps(p).filter(x => x.st === "miss" && STEP_IX[x.k] <= STEP_IX.defra), RS = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra" };
     const avviso = mancano.length ? `<button type="button" class="fmiss" data-fsheet="${RS[mancano[0].k]}"><b>Da completare:</b> ${mancano.map(x => x.t.toLowerCase() + " (" + x.s.replace(/^Mancano?:\s*/, "") + ")").join("; ")} ›</button>` : "";
@@ -194,15 +194,6 @@ function figNext(p, F, S, spots){
   if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
     return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo passo da completare</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
   return `<a class="fnext go" href="#paz-${p.id}-decidi"><small>${miss.length ? "Manca ancora: " + miss[0][2].toLowerCase() : "Dati completi"}</small><b>Decidi la terapia</b><span>La proposta tiene conto di zona, Nota 79 e controindicazioni</span><em>▶</em></a>`;
-}
-/* referti come una fila di caselle: icona, nome, valore */
-function figInv(p, F, S, done){
-  const ls = labStatus(p), e = stepStatus(p, "esami", F, S);
-  const it = (k, ic, t, v, st) => `<button type="button" class="finv-i ${st}" data-fsheet="${k}"><span class="fic">${ic}</span><b>${t}</b><small>${v}</small></button>`;
-  return `<div class="finv">
-    ${done ? "" : it("esami", "🧪", "Esami", e.st === "miss" ? ls.done + "/" + ls.tot : e.st === "warn" ? "da vedere" : "nella norma", e.st === "miss" ? "miss" : e.st === "warn" ? "al" : "ok")}
-    ${p.decisione ? it("storico", "📈", "Controlli", "DXA " + (dxaPlan(F).st === "ok" ? "in programma" : "da fare"), dxaPlan(F).st === "ok" ? "ok" : "al") : ""}
-  </div>`;
 }
 const figDocs = p => `<p class="fdocs"><button type="button" class="lnk" data-copy="riepilogo">Copia per la cartella</button><a href="#paz-${p.id}-lettera">Lettera allo specialista</a><a href="#paz-${p.id}-foglio">Foglio per il paziente</a><a href="#paz-${p.id}-report">Report</a></p>`;
 /* le sezioni in ordine: si naviga con Indietro / Avanti; quella aperta si accende sulla figura */
@@ -252,7 +243,6 @@ function vFigura(p){
     <div class="fcol-r">${panel ? `<div class="fpanel" role="region" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, true)}</div>` : `
       ${figNext(p, F, S, spots)}
       ${figDone(F, spots) ? "" : `<div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S, false) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>`}
-      ${p.decisione ? `<div class="fsec"><p class="flbl">Controlli</p>${figInv(p, F, S, true)}</div>` : ""}
       ${p.decisione ? `<div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>` : ""}
       <p class="fdel"><button type="button" class="lnk" id="pzDel">Elimina paziente</button></p>`}
     </div></div>` + figSheet(p, F, S, spots) };

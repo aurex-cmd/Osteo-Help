@@ -582,6 +582,7 @@ main{padding-bottom:40px}
 .fdrugbig.spec .fpill{background:#FCE9DC} .fdrugbig.none .fpill{background:#E6F3E4}
 .fdrug.no .fdn .dic{opacity:.5}
 .fcals{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:2px}
+button.fcal{border:0;font:inherit;color:inherit;cursor:pointer;width:100%;transition:transform .15s,box-shadow .15s} button.fcal:hover{box-shadow:0 4px 14px rgba(14,117,113,.18);transform:translateY(-1px)}
 .fcal{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border-radius:14px;padding:10px 8px 10px;text-align:center;box-shadow:0 2px 8px rgba(14,117,113,.1)}
 .fcal > small{min-height:2.5em;display:flex;align-items:center;justify-content:center;font-size:.6rem!important;font-weight:800!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:var(--muted)!important;opacity:1!important}
 .fcal-d{width:88px;border-radius:12px;overflow:hidden;border:1.5px solid var(--line);display:flex;flex-direction:column;align-items:center;background:#fff;opacity:1!important}
@@ -596,12 +597,6 @@ main{padding-bottom:40px}
 .fcal.late .fcal-d span:first-child{background:var(--coral)} .fcal.late em{color:var(--coral)}
 .fcal.late .fcal-d span:first-child:empty{display:none}
 .fnext-l{margin-top:6px;font-weight:700;font-size:.84rem;color:var(--teal);align-self:flex-start}
-.finv{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
-.finv-i{display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px dashed #CFC8E8;border-radius:12px;background:#fff;padding:8px 4px;font:inherit;color:var(--ink);cursor:pointer;min-width:0}
-.finv-i .fic{width:30px;height:30px;font-size:1rem;border-radius:9px}
-.finv-i b{font-size:.78rem} .finv-i small{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.finv-i.ok{border:1.5px solid var(--teal-box);background:#F6FBFA} .finv-i.ok .fic{background:var(--teal-box)}
-.finv-i.al{border:1.5px solid var(--coral-box);background:#FDF8F6} .finv-i.al .fic{background:var(--coral-box)} .finv-i.al small{color:var(--coral)}
 .fdocs{margin:0;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.86rem}
 .fdocs a,.fdocs .lnk{color:var(--pri);font-weight:600;text-decoration:none;font-size:.86rem}
 .fcol-r{gap:18px}

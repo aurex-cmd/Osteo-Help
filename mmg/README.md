@@ -117,3 +117,5 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 **Barra in alto** nella figura: solo la freccia indietro e «Fatto», senza il nome (è già in grande sotto).
 
 **Insufficienza renale cronica** riconosciuta incollando dal gestionale («insufficienza renale (cronica)», IRC, CKD, dialisi, emodialisi…): diventa una voce tra le controindicazioni da conoscere. Finché manca l'eGFR la figura mostra «Insufficienza renale · inserisci l'eGFR», bisfosfonati, denosumab e anabolici ricevono l'avviso di verificare le soglie, la CKD-MBD compare nell'osteoporosi secondaria e la lettera la riporta. Con l'eGFR inserito valgono le soglie già presenti (sotto 35 e sotto 30 mL/min).
+
+**Niente doppione sulla DXA** a caso completato: tolta la sezione «Controlli · DXA in programma», che ripeteva il calendario «Prossima densitometria». Il calendario ora è cliccabile e apre «Controlli nel tempo» (anche dal passo 7 Follow-up della strada su PC).
