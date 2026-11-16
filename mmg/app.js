@@ -1288,7 +1288,7 @@ function pzView(route){
   /* i passi del vecchio percorso: si apre la stessa sezione sulla figura */
   const SH = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico" }[m[2]];
   if(SH){ FIG.anim = FIG.open !== SH; FIG.open = SH; setTimeout(() => { FIG.anim = false; }); return { redirect: "paz-" + p.id + "-figura" }; }
-  if(m[2] === "decidi") return vDecidi(p);
+  if(m[2] === "decidi"){ if(figWide()){ FIG.anim = false; FIG.open = "decidi"; return { redirect: "paz-" + p.id + "-figura" }; } return vDecidi(p); }
   const V = { "":vPaz, dati:vPazDati, anamnesi:vPazAnamnesi, esami:vPazEsami, dxa:vPazDxa, defra:vPazDefra, terapia:vPazTerapia, storico:vPazStorico, report:vPazReport, lettera:vPazLettera, foglio:vPazFoglio }[m[2] || ""];
   return V ? V(p) : { redirect:"paz-" + p.id };
 }

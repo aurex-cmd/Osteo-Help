@@ -44,7 +44,9 @@ const FIG_SHEETS = {
   sec:   { t:"Osteoporosi secondaria", ic:"⚠️", k:"anamnesi", body: p => { const S = pzSecondary(p);
     return secReport(p, S) + (S.A.forms.length ? `<p class="lbl">Compatibili con gli esami</p><div class="stack">${S.A.forms.map(x => ohEntry("forma-" + x.cid, COND[x.cid], x.sub)).join("")}</div>` : "") +
       `<div class="btns"><button type="button" class="btn sec" data-fsheet="anam">Malattie e farmaci</button><button type="button" class="btn sec" data-fsheet="esami">Esami del sangue</button></div>`; } },
-  storico:{ t:"Controlli nel tempo", ic:"📈", k:"storico", body: p => noHead(vPazStorico(p).html) }
+  storico:{ t:"Controlli nel tempo", ic:"📈", k:"storico", body: p => noHead(vPazStorico(p).html) },
+  /* su PC la decisione si apre nel pannello di destra; sul telefono resta la sua pagina */
+  decidi:{ t:"Decidi la terapia", ic:"⚖️", k:"terapia", body: p => { const v = vDecidi(p, true); return v.redirect !== undefined ? `<div class="alert info"><b>Serve prima la zona del DeFRA</b>La proposta di terapia parte dalla zona di rischio: inseriscila nel passo DeFRA.</div><div class="btns"><button type="button" class="btn" data-fsheet="defra">Vai al DeFRA</button></div>` : v.html; } }
 };
 const noHead = h => h.replace(/^\s*<h1>[\s\S]*?<div class="rule"><\/div>/, "");
 
@@ -148,8 +150,8 @@ function figSummary(p, F, S){
 function figStage(p, fig, spots, F, S){
   const d = FIGURE[fig], lblFx = d.fxLbl;
   const pos = { chi:d.testa, fx:d.fx, anam:d.busto };
-  if(F && S && figDone(F, spots)) return `<div class="fstage done"${FIG.open ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>${figSummary(p, F, S)}</div>`;
-  return `<div class="fstage"${FIG.open ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">` +
+  if(F && S && figDone(F, spots)) return `<div class="fstage done"${FIG.open && FIG.open !== "decidi" ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>${figSummary(p, F, S)}</div>`;
+  return `<div class="fstage"${FIG.open && FIG.open !== "decidi" ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">` +
     Object.entries(spots).map(([k, s]) => { const [x, y] = pos[k], left = x > 52;
       const t = k === "fx" && s.st === "miss" && lblFx ? lblFx : s.t;
       return `<button type="button" class="fhs ${s.st}${left ? " l" : ""}" data-fsheet="${k}" style="left:${x}%;top:${y}%" aria-label="${hx(t)}: ${hx(s.s)}"><span class="fdot">${s.st === "ok" ? "✓" : s.st === "al" ? "!" : s.n}</span><span class="ftag"><b>${hx(t)}</b><small>${hx(s.s)}</small></span></button>`;
@@ -215,11 +217,11 @@ function figSecInner(p, F, S, spots, wide){
   const k = FIG.open, sh = FIG_SHEETS[k], i = FIG_SEQ.indexOf(k === "sec" ? "anam" : k);
   /* su PC le sezioni sono già nella strada dei 7 passi, in mezzo: le schede servono solo sul telefono */
   const tabs = i < 0 || wide ? "" : `<div class="fstabs" role="tablist">${FIG_SEQ.map((x, j) => `<button type="button" role="tab" class="fstab ${figSecSt(p, x, F, S, spots)}" aria-selected="${j === i}" data-fsheet="${x}"><i></i>${FIG_TAB[x]}</button>`).join("")}</div>`;
-  const prev = i > 0 ? `<button type="button" class="btn sec" data-fsheet="${FIG_SEQ[i - 1]}">‹ Indietro</button>` : `<span></span>`;
-  const next = i < 0 ? `<button type="button" class="btn" data-fclose>Fatto</button>`
+  const prev = i > 0 ? `<button type="button" class="btn sec" data-fsheet="${FIG_SEQ[i - 1]}">‹ Indietro</button>` : k === "decidi" ? `<button type="button" class="btn sec" data-fsheet="defra">‹ DeFRA</button>` : `<span></span>`;
+  const next = k === "decidi" ? "" : i < 0 ? `<button type="button" class="btn" data-fclose>Fatto</button>`
     : i < FIG_SEQ.length - 1 ? `<button type="button" class="btn" data-fsheet="${FIG_SEQ[i + 1]}">Avanti<small>${FIG_TAB[FIG_SEQ[i + 1]]}</small> ›</button>`
     : `<a class="btn" href="#paz-${p.id}-decidi">Decidi la terapia ›</a>`;
-  return `<div class="fsheet-h"><span class="fic">${sh.ic}</span><span class="fsh-t">${i >= 0 ? `<small>Passo ${[1, 1, 2, 3, 4, 5][i]} di ${STEPS.length}</small>` : ""}<b>${sh.t}</b></span><button type="button" class="btn sec mini" data-fclose aria-label="Chiudi">${wide ? "Riepilogo" : "Chiudi"}</button></div>
+  return `<div class="fsheet-h"><span class="fic">${sh.ic}</span><span class="fsh-t">${k === "decidi" ? `<small>Passo 6 di ${STEPS.length}</small>` : i >= 0 ? `<small>Passo ${[1, 1, 2, 3, 4, 5][i]} di ${STEPS.length}</small>` : ""}<b>${sh.t}</b></span><button type="button" class="btn sec mini" data-fclose aria-label="Chiudi">${wide ? "Riepilogo" : "Chiudi"}</button></div>
     ${tabs}<div class="fsheet-b">${sh.body(p)}</div><div class="fsheet-f">${prev}${next}</div>`;
 }
 function figSheet(p, F, S, spots){
@@ -254,7 +256,7 @@ function vFigura(p){
 /* su PC, tra la figura e il pannello: la strada numerata dei 7 passi, come nel percorso a tappe */
 const ROAD_SHEET = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico" };
 function figRoad(p, all){
-  const nx = nextStep(all), on = { chi:"dati", fx:"dati", anam:"anamnesi", sec:"anamnesi", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico" }[FIG.open];
+  const nx = nextStep(all), on = { chi:"dati", fx:"dati", anam:"anamnesi", sec:"anamnesi", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico", decidi:"terapia" }[FIG.open];
   return `<nav class="froad" aria-label="I 7 passi"><ol>${all.map(x => {
     const cls = [x.st, nx && x.i === nx.i ? "next" : "", on === x.k ? "on" : ""].filter(Boolean).join(" ");
     const inner = `<span class="pn">${MARK[x.st] || x.i + 1}</span><span class="frd-t"><b>${x.t}</b>${nx && x.i === nx.i ? `<small>prossimo</small>` : ""}</span>`;
@@ -284,7 +286,7 @@ function proposta(p, F, S, fl){
   const base = [A_, R_, D_, Z_], ord = base.filter(id => lev(id) < 9).concat(base.filter(id => lev(id) === 9)), best = ord.find(okd);
   return { tipo:"mmg", t: best ? "Terapia di prima linea: " + dnome(best) : "Prima linea non utilizzabile", s:ZONE.gialla.azione, opz: ord, best };
 }
-function vDecidi(p){
+function vDecidi(p, inPanel){
   const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), pr = proposta(p, F, S, fl), fig = figOf(p), vh = veryHigh(p, F);
   if(!pr) return { redirect: "paz-" + p.id + "-figura" };
   const n79of = id => n79.filter(c => c.s.some(l => l.includes(id)));
@@ -331,7 +333,7 @@ function vDecidi(p){
   const others = pr.tipo === "mmg" ? pr.opz.filter(id => id !== pr.best) : pr.tipo === "spec" ? pr.opz : [];
   const best = pr.tipo === "mmg" && pr.best ? pr.best : null;
   return { bar:"Decisione terapeutica", html: `
-    <div class="dhead"><span class="dav" style="background-image:url(img/${fig}-viso.jpg)"></span><span><b>${hx(pzName(p))}</b><small>${F.age !== null ? F.age + " anni · " : ""}${facts}</small></span></div>
+    ${inPanel ? "" : `<div class="dhead"><span class="dav" style="background-image:url(img/${fig}-viso.jpg)"></span><span><b>${hx(pzName(p))}</b><small>${F.age !== null ? F.age + " anni · " : ""}${facts}</small></span></div>`}
     ${cur === "spec" && !F.ther.length ? specBlk : ""}
     <div class="dverd z-${F.zona}">
       <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
@@ -350,6 +352,8 @@ function vDecidi(p){
     <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della <a href="#guida-nota79">Nota 79</a> e le schede tecniche.</p>` };
 }
 
+/* torna alla figura senza pannelli aperti (anche se si è già sulla figura) */
+function figBack(p){ const r = "paz-" + p.id + "-figura"; FIG.open = null; if(routeNow() === r) render(); else go(r); }
 /* ---------- interazioni ---------- */
 document.addEventListener("click", e => {
   const t = e.target;
@@ -360,14 +364,14 @@ document.addEventListener("click", e => {
   const fs = t.closest("[data-fspec]");
   if(fs){ const { p } = pzRoute(); if(!p) return; const id = fs.dataset.fspec;
     if(!(p.terapie || []).some(x => x.farmaco === id && !x.fine)) (p.terapie = p.terapie || []).push({ farmaco: id, inizio: todayISO(), fine:"", note:"indicato dallo specialista" });
-    savePz(p); toast(dnome(id) + " registrato da oggi, come indicato dallo specialista."); go("paz-" + p.id + "-figura"); return; }
+    savePz(p); toast(dnome(id) + " registrato da oggi, come indicato dallo specialista."); figBack(p); return; }
   const fd = t.closest("[data-fdec]");
   if(fd){ const { p } = pzRoute(); if(!p) return; const [tipo, farm] = fd.dataset.fdec.split(":");
     p.decisione = { tipo, data: todayISO() };
     if(farm && !(p.terapie || []).some(x => x.farmaco === farm && !x.fine)) (p.terapie = p.terapie || []).push({ farmaco: farm, inizio: todayISO(), fine:"", note:"" });
     savePz(p);
     if(tipo === "spec"){ toast("Invio allo specialista registrato: ecco la lettera."); go("paz-" + p.id + "-lettera"); }
-    else { toast(farm ? dnome(farm) + " registrato da oggi. Prossimo passo: il foglio per il paziente." : "Decisione registrata."); go("paz-" + p.id + "-figura"); }
+    else { toast(farm ? dnome(farm) + " registrato da oggi. Prossimo passo: il foglio per il paziente." : "Decisione registrata."); figBack(p); }
   }
 });
 document.addEventListener("keydown", e => { if(e.key === "Escape" && FIG.open) figClose(); });
