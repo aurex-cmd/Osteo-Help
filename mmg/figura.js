@@ -333,11 +333,11 @@ function vDecidi(p, inPanel){
       <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
       <b class="dtit">${pr.tipo === "mmg" && best ? "Prescrivi tu la terapia" : pr.t}</b>
       ${best ? `<div class="dbest">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span><em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em></div>${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
-      ${(() => { const r = vh.filter(x => !/zona rossa/i.test(x)); return r.length ? `<p class="dvh">Rischio molto alto: ${r.join("; ")}.</p>` : ""; })()}
       ${pr.tipo === "spec" ? `<p class="dnote">La lettera allo specialista è già compilata. Nell'attesa: calcio, vitamina D, prevenzione delle cadute.</p>` : pr.tipo === "nessuno" ? `<p class="dnote">${ZONE.verde.azione}</p>` : ""}
       <div class="dact">${actions}</div>
       ${cur ? `<p class="dcur">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
     </div>
+    ${(() => { const r = vh.filter(x => !/zona rossa/i.test(x)); return r.length ? `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}. Valuta l'invio allo specialista per un anabolico.</div>` : ""; })()}
     ${pend.length ? sec("Da completare per la Nota 79", pend.length, `<ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>`, false) : ""}
     ${best ? sec("Dettagli del farmaco consigliato", "", drug(best, true), false) : ""}
     ${others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : ""}

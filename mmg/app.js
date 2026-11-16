@@ -281,7 +281,6 @@ const ZONE_ORDER = ["verde", "gialla", "arancione", "rossa"];
 const zoneHigh = z => z === "arancione" || z === "rossa";
 const zchip = z => ZONE[z] ? `<span class="zn z-${z}"><i></i>${ZONE[z].t}</span>` : "—";
 function riskCat(z){ return z && ZONE[z] ? Object.assign({ k:z }, ZONE[z]) : null; }
-const zoneAlert = (rc, extra) => `<div class="alert zal z-${rc.k}"><b>Zona ${rc.t.toLowerCase()} · ${rc.r} → ${rc.chi}</b>${rc.azione}${extra || ""}</div>`;
 function veryHigh(p, F){
   const r = [];
   if(F.recent.length) r.push("frattura da fragilità negli ultimi 24 mesi (rischio imminente di rifrattura)");
@@ -750,8 +749,8 @@ function labReport(p, S){
   else {
     const tags = `<div class="tags">${A.sel.map(s => `<span class="tag ${s[1]}">${ftag(s)}</span>`).join("")}</div>`;
     out.push(`<p class="lbl">${A.kind === "inter" ? "Forme compatibili" + (A.forms.length > 1 ? " · dalla più frequente" : "") : A.kind === "multi" ? "Più cause possibili" : "Nessuna forma nota"}</p>` + tags +
-      (A.forms.length ? `<div class="stack">${A.forms.map(x => ohEntry("forma-" + x.cid, COND[x.cid], x.sub)).join("")}</div>` : `<p class="hint">Nessuna forma in elenco spiega questi reperti.</p>`) +
-      (A.byForm.length ? `<p class="lbl">Esami di II livello</p><p class="small">${L2_NOTE}</p><div>${l2ByFormHTML(A.byForm, cid => COND[cid])}</div>` : ""));
+      (A.forms.length ? (A.byForm.length ? `<p class="small">Tocca una forma per gli esami di II livello. ${L2_NOTE}</p>` : "") + `<div>${A.forms.map((x, i) => { const l2 = (A.byForm.find(b => b[0] === x.cid) || [, []])[1];
+        return `<details class="acc l2f"${i ? "" : " open"}><summary><span>${COND[x.cid]}<small>${[x.sub, l2.length ? plural(l2.length, "esame", "esami") + " di II livello" : ""].filter(Boolean).join(" · ")}</small></span>${CHEV}</summary><div class="accbody">${l2.length ? `<ul class="list">${l2.map((e, j) => `<li><i>${j + 1}</i>${e}</li>`).join("")}</ul>` : ""}<p class="small"><a target="_blank" rel="noopener" href="${OH}#forma-${x.cid}">Scheda in Osteo Help ↗</a></p></div></details>`; }).join("")}</div>` : `<p class="hint">Nessuna forma in elenco spiega questi reperti.</p>`));
   }
   return out.join("");
 }
@@ -828,7 +827,7 @@ function vPazDefra(p){
     return { bar: pzName(p), html: head("DeFRA e rischio di frattura") + `
     <div class="dfz z-${F.zona}"><span class="dfz-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : ""}</span><span><small>Zona del DeFRA · ${fmtD(F.lastDefra.data)}</small><b>Zona ${rc.t.toLowerCase()}</b><span>${rc.r} → ${rc.chi}</span></span></div>
     ${acc("Aggiorna il DeFRA", serve + form, false)}
-    ${F.defra.length > 1 ? acc("Tutti i DeFRA (" + F.defra.length + ")", `<ul class="list recs">${hist}</ul>`, false) : `<ul class="list recs">${hist}</ul>`}
+    ${F.defra.length > 1 ? acc("Tutti i DeFRA (" + F.defra.length + ")", `<ul class="list recs">${hist}</ul>`, false) : `<p class="small">Inserito per errore? <button type="button" class="lnk" data-del="defra:${p.defra.indexOf(F.lastDefra)}">Elimina questo DeFRA</button></p>`}
     ${acc("Cosa significano le zone", zone, false)}` };
   }
   return { bar: pzName(p), html: head0 + `
@@ -842,52 +841,32 @@ function choiceHTML(p, F, fl, ids){
   return ids.map(id => { const f = fl[id];
     return `<span class="dchip${f && f.ci.length ? " ci" : f && f.warn.length ? " warn" : ""}">${dlink(id)}${f && f.ci.length ? " <i>controindicato</i>" : f && f.warn.length ? " <i>cautela</i>" : ""}</span>`; }).join("");
 }
-function therapyLive(p){
-  const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), rc = riskCat(F.zona), vh = veryHigh(p, F), ls = labStatus(p);
-  const pre = [];
-  if(ls.done < ls.tot) pre.push(`Esami del sangue incompleti (${ls.done} di ${ls.tot}, <a href="#paz-${p.id}-esami">passo 3</a>): servono per escludere le forme secondarie.`);
-  if(S.N.sosp.length || S.N.note.length) pre.push(`${plural(S.N.note.length + S.N.sosp.length, "forma secondaria", "forme secondarie")} dall'anamnesi: <a href="#paz-${p.id}-anamnesi">vedi</a>. Alcune si curano rimuovendo la causa.`);
-  if(S.A.forms.length) pre.push(`Esami compatibili con: ${S.A.forms.map(x => COND[x.cid]).join(", ")}.`);
-  if(!F.zona) pre.push(`Manca la zona del DeFRA (<a href="#paz-${p.id}-defra">passo 5</a>).`);
-  if(!F.lastDxa) pre.push(`Manca la densitometria (<a href="#paz-${p.id}-dxa">passo 4</a>): senza T-score molte condizioni della Nota 79 non si possono valutare.`);
-  const tiers = ["I scelta", "II scelta", "III scelta"];
-  const n79html = n79.length ? n79.map(c => `<div class="n79${c.spec ? " spec" : ""}"><small>${c.sez}${c.spec ? " · specialista, piano terapeutico" : ""}</small><b>${c.cond}</b>${c.s.map((l, i) => l.length ? `<div class="tier"><span>${c.alt && c.s.length === 1 ? "Opzione" : tiers[i]}</span><div>${choiceHTML(p, F, fl, l)}</div></div>` : "").join("")}</div>`).join("")
-    : `<p class="hint">Con i dati inseriti il paziente non rientra in nessuna condizione della Nota 79${F.minT === null ? " (manca il T-score)" : ""}. Un farmaco resta possibile fuori Nota (a carico del paziente) se il rischio lo giustifica.</p>`;
-  const flagList = DRUG_ORDER.filter(id => fl[id] && (fl[id].ci.length || fl[id].warn.length)).map(id => `<li><span><b>${DRUGS[id].nome}</b><small>${[...fl[id].ci.map(x => "controindicato: " + x), ...fl[id].warn.map(x => "cautela: " + x)].join(" · ")}</small></span></li>`).join("");
-  return `
-    ${rc ? `<p class="lbl">Indicazione dalla zona del DeFRA</p>` + zoneAlert(rc) : ""}
-    ${pre.length ? `<div class="alert info"><b>Prima di scegliere</b>${pre.join("<br>")}</div>` : ""}
-    ${vh.length ? `<div class="alert"><b>Rischio molto alto</b>${vh.join("; ")}. ${zoneHigh(F.zona) ? "Conferma l'invio" : "Considera l'invio"} allo specialista per un anabolico (teriparatide, abaloparatide, romosozumab) seguito da un antiriassorbitivo.</div>` : ""}
-    <p class="lbl">Condizioni della Nota 79</p>${n79html}
-    ${flagList ? `<p class="lbl">Controindicazioni e cautele per questo paziente</p><ul class="list chk">${flagList}</ul>` : ""}
-    <p class="lbl">Per tutti</p>
-    <ul class="list"><li><i>1</i>Calcio con la dieta 1000–1200 mg al giorno (integratore solo se la dieta non basta)</li><li><i>2</i>Vitamina D: dosare la 25-OH-vitamina D e, se sotto 75 nmol/L (30 ng/mL), correggerla prima di iniziare il farmaco: in questo caso è rimborsabile (Nota 96)</li><li><i>3</i>Attività fisica, prevenzione delle cadute, stop al fumo, alcol con moderazione</li><li><i>4</i>${p.dentista ? "Visita odontoiatrica: eseguita ✓" : "Visita odontoiatrica prima di bisfosfonati, denosumab o romosozumab"}</li></ul>`;
-}
 function vPazTerapia(p){
   const F = pzFacts(p), notes = therapyNotes(F), n79 = nota79(p, F);
   const n79of = id => { const c = n79.filter(c => c.s.some(l => l.includes(id))); return c.length ? "Nota 79: " + c.map(x => x.cond).join(" / ") + (c.some(x => x.spec) && [T_, AB_, RO_].includes(id) ? " (prescrizione su piano terapeutico specialistico)" : "") : "Con i dati inseriti non rientra in una condizione della Nota 79: verifica i dati o prescrivi fuori Nota."; };
   const all = (p.terapie || []).slice().sort((a, b) => (b.inizio || "").localeCompare(a.inizio || ""));
   const rows = all.map(t => { const i = p.terapie.indexOf(t), nd = !t.fine && nextDose(t);
-    return `<li class="rec"><span><b>${DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome : hx(t.farmaco)}</b><small>dal ${fmtD(t.inizio)}${t.fine ? " al " + fmtD(t.fine) : " · in corso"}${t.note ? " · " + hx(t.note) : ""}</small>${nd ? `<small class="dose-i">Ultima dose ${fmtD(lastDose(t))} · <b>prossima ${fmtDt(nd)}</b>${(t.dosi || []).length ? " · " + plural(t.dosi.length + 1, "dose", "dosi") + " registrate" : ""}</small>
+    const nt = !t.fine && notes.find(n => n.id === t.farmaco);
+    return `<li class="rec"><span><b>${DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome : hx(t.farmaco)}</b><small>dal ${fmtD(t.inizio)}${t.fine ? " al " + fmtD(t.fine) : " · in corso"}${t.note ? " · " + hx(t.note) : ""}</small>${nt ? `<small class="tnote">${nt.s}</small><small class="n79l">${n79of(nt.id)}</small>` : ""}${nd ? `<small class="dose-i">Ultima dose ${fmtD(lastDose(t))} · <b>prossima ${fmtDt(nd)}</b>${(t.dosi || []).length ? " · " + plural(t.dosi.length + 1, "dose", "dosi") + " registrate" : ""}</small>
       <span class="dose"><input type="date" id="dz${i}" value="${todayISO()}" aria-label="Data della dose"><button type="button" class="btn sec mini" data-dose="${i}">Registra dose fatta</button></span>` : ""}</span>${t.fine ? "" : `<button type="button" class="btn sec mini" data-stop="${p.terapie.indexOf(t)}">Termina</button>`}<button type="button" class="x" data-del="terapie:${p.terapie.indexOf(t)}" aria-label="Elimina">✕</button></li>`; }).join("");
   const sug = F.zona ? DEC_ZONA[F.zona] : null, cur = p.decisione ? p.decisione.tipo : null;
-  return { bar: pzName(p), html: head("Terapia", "Leggi l'indicazione della zona del DeFRA e le condizioni della Nota 79 (determina AIFA dell'8 settembre 2025), poi registra la tua decisione in fondo.") + `
-    <div data-live="ter">${therapyLive(p)}</div>
-    <p class="lbl">La tua decisione</p>
-    <div class="decs">${Object.entries(DECISIONI).map(([k, d]) => `<button type="button" class="dec" data-dec="${k}" aria-pressed="${cur === k}"><span class="cb">${TICK}</span><span><b>${d.t}${sug === k ? ` <em>indicata dalla zona</em>` : ""}</b><small>${d.s}</small></span></button>`).join("")}</div>
-    ${cur ? `<p class="small">Registrata il ${fmtD(p.decisione.data)}.</p>` : ""}
-    ${cur === "spec" || (!cur && zoneHigh(F.zona)) ? `<div class="alert info"><b>Lettera allo specialista</b>Già compilata con fratture, DXA, zona del DeFRA, esami e terapie: aggiungi il quesito e stampala. <a href="#paz-${p.id}-lettera">Apri la lettera</a></div>` : ""}
-    <p class="lbl">Farmaci per l'osteoporosi</p>
-    ${notes.length ? notes.map(n => `<div class="alert info"><b>${n.nome} · ${n.durata ? "da " + n.durata : "in corso"}</b>${n.s}<span class="n79l">${n79of(n.id)}</span></div>`).join("") + `<p class="small"><a href="#paz-${p.id}-foglio">Foglio per il paziente</a>: come prendere la terapia e cosa fare a casa, da stampare.</p>` : ""}
+  return { bar: pzName(p), html: head("Terapia", "Il registro dei farmaci: inizio, dosi fatte, sospensione. La proposta, con Nota 79 e controindicazioni, è in «Decidi la terapia».") + `
+    <div class="btns"><a class="btn sec" href="#paz-${p.id}-decidi">Decidi la terapia</a></div>
     ${rows ? `<ul class="list recs">${rows}</ul>` : `<p class="hint">Nessuna terapia registrata.</p>`}
+    ${notes.length ? `<p class="small"><a href="#paz-${p.id}-foglio">Foglio per il paziente</a>: come prendere la terapia e cosa fare a casa, da stampare.</p>` : ""}
+    <p class="lbl">${rows ? "Aggiungi un farmaco" : "Registra un farmaco"}</p>
     <div class="addbox">
       <div class="grid2">
         <label class="fld">Farmaco<select id="thF">${DRUG_ORDER.map(id => `<option value="${id}">${DRUGS[id].nome}</option>`).join("")}</select></label>
         <label class="fld">Inizio<input type="date" id="thI" value="${todayISO()}"></label>
         <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" id="thN"></label>
       </div>
-      <button type="button" class="btn sec" data-add="terapie">Aggiungi terapia</button>
+      <button type="button" class="btn" data-add="terapie">Aggiungi terapia</button>
     </div>
+    <details class="dsec"${cur ? "" : " open"}><summary><span>${cur ? "Decisione: " + DECISIONI[cur].t.toLowerCase() + " · " + fmtD(p.decisione.data) : "La tua decisione"}</span></summary><div class="dsec-b">
+    <div class="decs">${Object.entries(DECISIONI).map(([k, d]) => `<button type="button" class="dec" data-dec="${k}" aria-pressed="${cur === k}"><span class="cb">${TICK}</span><span><b>${d.t}${sug === k ? ` <em>indicata dalla zona</em>` : ""}</b><small>${d.s}</small></span></button>`).join("")}</div>
+    ${cur === "spec" || (!cur && zoneHigh(F.zona)) ? `<p class="small"><a href="#paz-${p.id}-lettera">Lettera allo specialista</a>: già compilata, aggiungi il quesito e stampala.</p>` : ""}
+    </div></details>
     <p class="small">Ausilio alla decisione: verificare sempre il testo vigente della Nota 79 e le schede tecniche.</p>` };
 }
 
@@ -942,7 +921,7 @@ function vPazDxa(p){
   const dxaRows = F.dxa.map(d => {
     return `<li class="rec"><span><b>${fmtD(d.data)}</b><small>colonna ${fmtN(num(d.tL))} · femore totale ${fmtN(num(d.tFt))} · collo ${fmtN(num(d.tFn))}</small></span><button type="button" class="x" data-del="dxa:${p.dxa.indexOf(d)}" aria-label="Elimina">✕</button></li>`; }).join("");
   return { bar: pzName(p), html: head("Densitometria", "Riporta il T-score di colonna lombare e femore dal referto della DXA.") + `
-    ${F.lastDxa ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila (<a href="#guida-dxa-lea">a chi farla in LEA</a>) e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
+    ${F.lastDxa ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}${F.gc ? " Con glucocorticoidi ad alte dosi si può anticipare a 12 mesi." : ""}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila (<a href="#guida-dxa-lea">a chi farla in LEA</a>) e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
     <div class="addbox">
       <div class="grid2">
         <label class="fld">Data della DXA<input type="date" id="dxD" value="${todayISO()}"></label>
@@ -954,7 +933,7 @@ function vPazDxa(p){
       <button type="button" class="btn" data-add="dxa">Salva la densitometria</button>
     </div>
     ${dxaChartHTML(F)}
-    ${dxaRows ? `<ul class="list recs">${dxaRows}</ul>` : ""}
+    ${F.dxa.length > 1 ? `<p class="lbl">Tutte le densitometrie</p><ul class="list recs">${dxaRows}</ul>` : F.dxa.length ? `<p class="small">DXA del ${fmtD(F.dxa[0].data)} · <button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(F.dxa[0])}">elimina</button></p>` : ""}
     <p class="small">T-score uguale o inferiore a −2,5: osteoporosi; tra −1 e −2,5: osteopenia.</p>` };
 }
 function vPazStorico(p){
@@ -964,18 +943,16 @@ function vPazStorico(p){
     return `<div class="ztl-i z-${d.zona}"><i></i><b>${ZONE[d.zona].t}</b><small>${fmtM(pDate(d.data))}${dir > 0 ? " · peggiorata" : dir < 0 ? " · migliorata" : ""}</small></div>`; }).join("")}</div>` : "";
   const imm = F.recent.length ? `<div class="alert"><b>Rischio imminente di rifrattura</b>${plural(F.recent.length, "frattura", "fratture")} negli ultimi 24 mesi (l'ultima il ${fmtD(F.recent[0].data)}). Dopo una frattura il rischio di una nuova frattura è massimo nei primi 1–2 anni: la terapia va iniziata o rivista subito, insieme alla prevenzione delle cadute.</div>`
     : F.fx.length ? `<div class="alert info"><b>Rischio di rifrattura</b>Una frattura da fragilità all'incirca raddoppia il rischio di altre fratture, anche dopo anni. Ultima frattura: ${fmtD(F.fx[0].data)}.</div>` : "";
-  return { bar: pzName(p), html: head("Follow-up", "Cosa controllare nel tempo. A ogni controllo: nuova DXA al passo 4, nuova zona al passo 5, nuove fratture al passo 1.") + `
-    <div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}${F.gc ? " Con glucocorticoidi ad alte dosi si può anticipare a 12 mesi." : ""} <a href="#paz-${p.id}-dxa">Densitometria</a></div>
+  return { bar: pzName(p), html: head("Follow-up", "Come va nel tempo. A ogni controllo: nuova DXA al passo 4, nuova zona al passo 5, nuove fratture al passo 1.") + `
     ${imm}
-    ${d ? `<div class="alert info"><b>Decisione: ${d.t}</b>${fmtD(p.decisione.data)}. <a href="#paz-${p.id}-terapia">Terapia</a></div>` : ""}
-    ${notes.map(n => `<div class="alert info"><b>${n.nome} · ${n.durata ? "da " + n.durata : "in corso"}</b>${n.s}</div>`).join("")}
+    ${notes.length ? notes.map((n, i) => `<div class="alert info"><b>${n.nome} · ${n.durata ? "da " + n.durata : "in corso"}</b>${n.s}${i === 0 ? ` <a href="#paz-${p.id}-terapia">Dosi e sospensione</a>` : ""}</div>`).join("")
+      : d ? `<div class="alert info"><b>Decisione: ${d.t}</b>${fmtD(p.decisione.data)}. <a href="#paz-${p.id}-decidi">Rivedi</a></div>` : ""}
     <p class="lbl">T-score nel tempo</p>
     ${dxaChartHTML(F) || `<p class="hint">Nessuna DXA registrata.</p>`}
     <p class="lbl">Zona del DeFRA nel tempo</p>
     ${dfChart || `<p class="hint">Nessuna zona registrata.</p>`}
     <p class="lbl">Fratture</p>
-    ${F.fx.length ? `<ul class="list recs">${F.fx.map(f => `<li class="rec"><span><b>${FX_SEDI[f.sede]}${f.grado ? " · " + f.grado : ""}</b><small>${fmtD(f.data)}</small></span></li>`).join("")}</ul>` : `<p class="hint">${p.nessunaFx ? "Nessuna frattura da fragilità." : "Nessuna frattura registrata."}</p>`}
-    <div class="btns"><a class="btn sec" href="#paz-${p.id}-report">Report da stampare</a></div>` };
+    ${F.fx.length ? `<ul class="list recs">${F.fx.map(f => `<li class="rec"><span><b>${FX_SEDI[f.sede]}${f.grado ? " · " + f.grado : ""}</b><small>${fmtD(f.data)}</small></span></li>`).join("")}</ul>` : `<p class="hint">${p.nessunaFx ? "Nessuna frattura da fragilità." : "Nessuna frattura registrata."}</p>`}` };
 }
 
 /* ---------- report ---------- */
@@ -1298,7 +1275,7 @@ const pzParent = r => /^paz-[a-z0-9]+-(figura|percorso)$/.test(r) ? "" : /^paz-[
 const PZ_LIVE = {
   stepper: p => { const m = /-([a-z]+)$/.exec(routeNow()); return m && STEP_IX[m[1]] !== undefined ? stepperInner(p, m[1]) : ""; },
   cacorr: caLine,
-  sec: p => secReport(p, pzSecondary(p)), lab: p => labReport(p, pzSecondary(p)), defra: defraLive, ter: therapyLive,
+  sec: p => secReport(p, pzSecondary(p)), lab: p => labReport(p, pzSecondary(p)), defra: defraLive,
   bmi: p => bmiTxt(pzFacts(p))
 };
 function pzLive(p){

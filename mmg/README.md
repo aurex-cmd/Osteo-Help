@@ -121,3 +121,12 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 **Niente doppione sulla DXA** a caso completato: tolta la sezione «Controlli · DXA in programma», che ripeteva il calendario «Prossima densitometria». Il calendario ora è cliccabile e apre «Controlli nel tempo» (anche dal passo 7 Follow-up della strada su PC).
 
 **Pulsanti «Salva» visibili su PC**: nel pannello di destra «Salva la frattura», «Salva la densitometria» e «Salva la zona del DeFRA» erano bianchi su bianco (la regola `.addbox .btn` sovrascriveva lo sfondo). Ora hanno il colore normale.
+
+**Meno doppioni, grafica più semplice**:
+- **Terapia** è ora solo il registro dei farmaci (inizio, dosi, sospensione), con il consiglio di follow-up e la condizione della Nota 79 dentro la riga del farmaco. Indicazione della zona, forme secondarie, rischio molto alto e tabelle della Nota 79 restano solo in «Decidi la terapia». La decisione si cambia in un pannello richiudibile in fondo.
+- **Prossima densitometria** solo nel calendario del riquadro finale e in Densitometria (tolta da Controlli nel tempo; la nota sui glucocorticoidi è passata in Densitometria).
+- **Densitometria e DeFRA con un solo dato**: niente riga ripetuta sotto il riepilogo; resta un piccolo «elimina». L'elenco compare dalla seconda DXA o dal secondo DeFRA.
+- **Esami**: eGFR, vitamina D, calcio corretto e albumina scritti in alto non ricompaiono come righe dell'elenco. Le forme compatibili e gli esami di II livello sono un solo elenco: ogni forma si apre sui suoi esami e sulla scheda di Osteo Help.
+- **Controlli nel tempo**: un solo riquadro per farmaco e decisione; tolto «Report da stampare» (è già in Documenti).
+- **Decidi la terapia**: «Rischio molto alto» è un avviso a parte sotto la scheda della zona, non più una riga rossa dentro la scheda gialla.
+- **Su PC** l'avanzamento «N di 7 passi» in alto è nascosto: lo mostra già la strada numerata. Su iPhone resta.

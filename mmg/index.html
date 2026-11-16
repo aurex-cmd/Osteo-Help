@@ -472,6 +472,8 @@ main{padding-bottom:40px}
 .fhud-n.anon{color:var(--muted);font-weight:700}
 .fhud-m{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .fhud-c{font-size:.8rem;font-weight:700;color:#3B2F6B;background:#ECE8F8;border-radius:999px;padding:4px 11px}
+@media (min-width:900px){.fhud-p{display:none!important}}
+#pzGrid .row:has(.rowr > .auto){display:none} #pzGrid .lgrp:not(:has(.rowr > :not(.auto))){display:none}
 .fhud-p{display:inline-flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;color:var(--muted);padding:4px 4px 4px 6px}
 .fhud-pb{display:inline-flex;gap:2px} .fhud-pb i{width:9px;height:6px;border-radius:3px;background:#E2DEF0} .fhud-pb i.ok{background:var(--teal)} .fhud-pb i.warn{background:var(--amber)}
 .fprog{display:none;gap:4px;margin-top:-6px} .fprog i{flex:1;height:7px;border-radius:4px;background:#ECE9F5} .fprog i.ok{background:var(--teal)} .fprog i.warn{background:var(--amber)}
@@ -645,7 +647,8 @@ button.fcal{border:0;font:inherit;color:inherit;cursor:pointer;width:100%;transi
 .dtag{font-style:normal;font-size:.66rem;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap;flex:0 0 auto}
 .dtag.l1{background:var(--teal-box);color:var(--teal)} .dtag.l2{background:#FBF1DD;color:#7A5300} .dtag.out{background:var(--box);color:var(--muted)} .dtag.no{background:var(--coral-box);color:var(--coral)}
 .dreb{margin:0;font-size:.8rem;color:#6B4A00}
-.dvh{margin:0;font-size:.84rem;color:var(--coral);line-height:1.4}
+.rec .tnote{display:block;margin-top:4px;color:var(--ink);line-height:1.45} .rec .n79l{display:block;margin-top:2px}
+.dvh-a{margin:10px 0 4px;padding:10px 14px;border-radius:12px;background:var(--coral-box,#F7E6E1);color:var(--ink);font-size:.86rem;line-height:1.45} .dvh-a b{display:block;color:var(--coral);margin-bottom:2px}
 .dnote{margin:0;font-size:.86rem;line-height:1.45;color:var(--ink);opacity:.85}
 .dact{display:flex;flex-direction:column;gap:8px;margin-top:4px} .dact .btn{width:100%;text-align:center;justify-content:center}
 .dcur{margin:0;font-size:.78rem;color:var(--muted)}
