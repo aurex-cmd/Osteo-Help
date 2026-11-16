@@ -111,3 +111,5 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 **DeFRA già inserito**: la scheda mostra solo la zona, nel suo colore, con il rischio % e la data; «Aggiorna il DeFRA» (cosa serve, link al calcolatore, modulo), lo storico e «Cosa significano le zone» si aprono a richiesta.
 
 **Decidi la terapia su PC** si apre nel pannello di destra, come le altre sezioni (passo 6 della strada evidenziato, figura sempre visibile, «‹ DeFRA» per tornare indietro). Dopo «Prescrivo…» o la scelta del farmaco dello specialista il pannello si chiude e la figura mostra il farmaco e le date. Sul telefono resta una pagina a sé.
+
+**Intestazione del paziente**: il nome in grande, sotto due etichette (sesso ed età) e l'avanzamento con sette trattini colorati e «N di 7 passi». Al posto di «Nome, età» su una riga e delle barrette.
