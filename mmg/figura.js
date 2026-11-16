@@ -238,7 +238,7 @@ function vFigura(p){
   return { bar: pzName(p), html: viewSwitch(p, "figura") + `
     <div class="fhud"><div class="fhud-t"><b>${title}</b><small>${done} di ${STEPS.length} indizi raccolti</small></div></div>
     <div class="fprog">${all.map(x => `<i class="${x.st}" title="${x.t}"></i>`).join("")}</div>
-    <div class="fgrid${panel ? " panel" : ""}"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>
+    <div class="fgrid${panel ? " panel" : ""}"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>${figRoad(p, all)}
     <div class="fcol-r">${panel ? `<div class="fpanel" role="region" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, true)}</div>` : `
       ${figNext(p, F, S, spots)}
       ${figDone(F, spots) ? "" : `<div class="fsec"><p class="flbl">In evidenza</p>${figChips(p, F, S, false) || `<p class="small">Ancora nulla: compaiono qui i dati che contano per la decisione.</p>`}</div>`}
@@ -246,6 +246,17 @@ function vFigura(p){
       ${p.decisione ? `<div class="fsec"><p class="flbl">Documenti</p>${figDocs(p)}</div>` : ""}
       <p class="fdel"><button type="button" class="lnk" id="pzDel">Elimina paziente</button></p>`}
     </div></div>` + figSheet(p, F, S, spots) };
+}
+/* su PC, tra la figura e il pannello: la strada numerata dei 7 passi, come nel percorso a tappe */
+const ROAD_SHEET = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico" };
+function figRoad(p, all){
+  const nx = nextStep(all), on = { chi:"dati", fx:"dati", anam:"anamnesi", sec:"anamnesi", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico" }[FIG.open];
+  return `<nav class="froad" aria-label="I 7 passi"><ol>${all.map(x => {
+    const cls = [x.st, nx && x.i === nx.i ? "next" : "", on === x.k ? "on" : ""].filter(Boolean).join(" ");
+    const inner = `<span class="pn">${MARK[x.st] || x.i + 1}</span><span class="frd-t"><b>${x.t}</b>${nx && x.i === nx.i ? `<small>prossimo</small>` : ""}</span>`;
+    const lab = `Passo ${x.i + 1}: ${x.t}. ${x.s}`;
+    if(x.k === "terapia" && !pzFacts(p).zona) return `<li class="${cls}"><button type="button" data-fsheet="defra" title="Per decidere la terapia serve prima la zona del DeFRA" aria-label="${hx(lab + " Serve prima la zona del DeFRA.")}">${inner}</button></li>`;
+    return `<li class="${cls}">${ROAD_SHEET[x.k] ? `<button type="button" data-fsheet="${ROAD_SHEET[x.k]}" title="${hx(x.s)}" aria-label="${hx(lab)}">${inner}</button>` : `<a href="#paz-${p.id}-decidi" title="${hx(x.s)}" aria-label="${hx(lab)}">${inner}</a>`}</li>`; }).join("")}</ol></nav>`;
 }
 function viewSwitch(p, cur){
   return `<div class="vsw" role="group" aria-label="Vista"><a href="#paz-${p.id}-figura" aria-pressed="${cur === "figura"}">Figura</a><a href="#paz-${p.id}-percorso" aria-pressed="${cur === "percorso"}">Percorso a passi</a></div>`;

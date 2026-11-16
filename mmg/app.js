@@ -1303,6 +1303,7 @@ function render(){
   $("#main").innerHTML = `<div class="screen">${top}${v.html}${nav}</div>`;
   if(!changed){ const nb = document.querySelector(".fsheet-b"); if(nb) nb.scrollTop = fsTop; }
   document.body.classList.toggle("fopen", !!document.querySelector(".fsheet"));
+  document.body.classList.toggle("figv", !!document.querySelector(".fgrid"));
   doneTo = back; $("#act").hidden = back === null;
   const home = !route;
   $(".bar").classList.toggle("home", home);

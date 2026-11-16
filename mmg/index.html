@@ -468,7 +468,7 @@ main{padding-bottom:40px}
 .vsw a[aria-pressed="true"]{background:var(--bg);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .fhud-t b{display:block;font-size:1.45rem;letter-spacing:-.02em} .fhud-t small{color:var(--muted);font-size:.85rem}
 .fprog{display:flex;gap:4px;margin-top:-6px} .fprog i{flex:1;height:7px;border-radius:4px;background:#ECE9F5} .fprog i.ok{background:var(--teal)} .fprog i.warn{background:var(--amber)}
-.fgrid{display:flex;flex-direction:column;gap:14px}
+.fgrid{display:flex;flex-direction:column;gap:14px} .froad{display:none}
 .fcol-r{display:flex;flex-direction:column;gap:12px}
 .fstage{display:flex;justify-content:center;overflow:hidden;margin:0 -16px;padding-top:26px}
 .fimg{position:relative;height:470px;aspect-ratio:1200/1310;flex:0 0 auto}
@@ -666,6 +666,23 @@ body.fopen{overflow:hidden}
   .fimg{height:560px}
   .fcol-r{position:sticky;top:70px}
   .fgrid.panel .fcol-r{position:static} .fgrid.panel .fcol-l{position:sticky;top:70px}
+  /* vista a figura: pagina più larga e la strada dei 7 passi in mezzo */
+  body.figv main{max-width:1180px} body.figv .bar-in{max-width:1180px}
+  body.figv .fprog{display:none}
+  .fgrid{grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);gap:22px}
+  .froad{display:block;position:sticky;top:70px;padding-top:20px}
+  .froad ol{list-style:none;margin:0;padding:0}
+  .froad li > *{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:9px 6px;border-radius:12px;font:inherit;color:var(--ink);text-align:left;cursor:pointer;position:relative;text-decoration:none}
+  .froad li:not(:last-child) > *::after{content:"";position:absolute;left:21px;top:42px;bottom:-9px;width:2px;background:var(--line)}
+  .froad li.ok:not(:last-child) > *::after{background:var(--teal)}
+  .froad li > *:hover{background:var(--box)}
+  .froad .frd-t{min-width:0} .froad .frd-t b{display:block;font-size:.8rem;line-height:1.2;font-weight:700}
+  .froad .frd-t small{display:block;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pri)}
+  .froad li.ok .pn{background:var(--teal);border-color:var(--teal);color:#fff}
+  .froad li.warn .pn{background:#F8EEDC;border-color:var(--amber);color:var(--amber)}
+  .froad li.next .pn{border-color:var(--pri);color:var(--pri)}
+  .froad li.miss .frd-t b{color:var(--muted)} .froad li.next .frd-t b{color:var(--ink)}
+  .froad li.on > *{background:var(--home-p)} .froad li.on .pn{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--pri)} .froad li.on .frd-t b{color:var(--ink)}
   .fpanel .fstabs{display:grid;grid-template-columns:repeat(6,auto);gap:3px} .fpanel .fstab{padding:6px 5px;font-size:.66rem;min-width:0;gap:3px} .fpanel .fstab i{width:6px;height:6px}
 }
 .fstage{position:relative} .fbads{gap:4px;bottom:1.5%} .fbads .fbd{padding-right:8px;gap:4px} .fbads .fbd-c{width:34px;height:34px;font-size:.8rem} .fbads .fbd-t b{font-size:.7rem} .fbads .fbd-t small{display:none}
