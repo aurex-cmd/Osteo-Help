@@ -241,7 +241,7 @@ function vFigura(p){
   const F = pzFacts(p), S = pzSecondary(p), all = allSteps(p), done = all.filter(x => x.st !== "miss").length, spots = figSpots(p, F, S);
   const title = [hx(pzName(p)), F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
   const panel = !!FIG_SHEETS[FIG.open] && figWide();
-  return { bar: pzName(p), html: viewSwitch(p, "figura") + `
+  return { bar: "", html: viewSwitch(p, "figura") + `
     <div class="fhud">
       <h1 class="fhud-n${p.nome && p.nome.trim() ? "" : " anon"}">${hx(pzName(p))}</h1>
       <div class="fhud-m">${p.sesso ? `<span class="fhud-c">${p.sesso === "donna" ? "Donna" : "Uomo"}</span>` : ""}${F.age !== null ? `<span class="fhud-c">${F.age} anni</span>` : ""}<span class="fhud-p" title="${done} di ${STEPS.length} passi completati"><span class="fhud-pb">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span>${done} di ${STEPS.length} passi</span></div>
