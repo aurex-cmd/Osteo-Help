@@ -630,6 +630,40 @@ main{padding-bottom:40px}
 .leag{display:flex;flex-direction:column;background:var(--bg);border-radius:10px;padding:2px 12px;margin-bottom:6px}
 .leag .ck small{display:block;color:var(--muted);font-size:.8rem;font-weight:400;margin-top:2px}
 #leaSx{margin:2px 0 8px}
+/* decisione terapeutica: l'indicazione in alto, il resto in sezioni che si aprono */
+.dhead{display:flex;align-items:center;gap:10px;margin:2px 0 12px}
+.dav{width:40px;height:40px;border-radius:50%;background:var(--home-p) center/cover no-repeat;flex:0 0 auto}
+.dhead b{display:block;font-size:1rem} .dhead small{display:block;font-size:.8rem;color:var(--muted)}
+.dverd{border-radius:18px;padding:14px 16px 16px;background:var(--zb);border-top:6px solid var(--zc);display:flex;flex-direction:column;gap:8px}
+.dzone{display:flex;align-items:center;gap:6px;font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);opacity:.8} .dzone i{width:9px;height:9px;border-radius:50%;background:var(--zc)}
+.dtit{font-size:1.25rem;line-height:1.25;letter-spacing:-.01em}
+.dbest{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:10px 12px}
+.dbest .dic{width:34px;height:34px;flex:0 0 auto;background:#FCEAF1;border-radius:9px;padding:3px;overflow:visible}
+.dbest span{flex:1;min-width:0} .dbest b{display:block;font-size:1.05rem} .dbest small{display:block;font-size:.78rem;color:var(--muted);line-height:1.35}
+.dtag{font-style:normal;font-size:.66rem;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap;flex:0 0 auto}
+.dtag.l1{background:var(--teal-box);color:var(--teal)} .dtag.l2{background:#FBF1DD;color:#7A5300} .dtag.out{background:var(--box);color:var(--muted)} .dtag.no{background:var(--coral-box);color:var(--coral)}
+.dreb{margin:0;font-size:.8rem;color:#6B4A00}
+.dvh{margin:0;font-size:.84rem;color:var(--coral);line-height:1.4}
+.dnote{margin:0;font-size:.86rem;line-height:1.45;color:var(--ink);opacity:.85}
+.dact{display:flex;flex-direction:column;gap:8px;margin-top:4px} .dact .btn{width:100%;text-align:center;justify-content:center}
+.dcur{margin:0;font-size:.78rem;color:var(--muted)}
+.dsec{border-bottom:1px solid var(--line)} .dsec:first-of-type{margin-top:6px}
+.dsec > summary{list-style:none;display:flex;align-items:center;gap:8px;padding:14px 2px;cursor:pointer;font-weight:700;font-size:.95rem}
+.dsec > summary::-webkit-details-marker{display:none}
+.dsec > summary span{flex:1}
+.dsec > summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:-4px 4px 0 2px;transition:transform .2s}
+.dsec[open] > summary::after{transform:rotate(-135deg);margin-top:4px}
+.dbadge{font-style:normal;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--box);color:var(--muted)}
+.dsec-b{padding:0 0 14px;display:flex;flex-direction:column;gap:8px}
+.dpend{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:.88rem;line-height:1.4} .dpend a{color:var(--ink)}
+.dd{border:1px solid var(--line);border-radius:12px;background:#fff}
+.dd > summary{list-style:none;display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.dd > summary::-webkit-details-marker{display:none}
+.dd > summary .dic{width:30px;height:30px;flex:0 0 auto;background:#FCEAF1;border-radius:8px;padding:2px;overflow:visible}
+.dd-n{flex:1;min-width:0} .dd-n b{display:block;font-size:.95rem} .dd-n small{display:block;font-size:.74rem;color:var(--muted)}
+.dd.no > summary{opacity:.6}
+.dd-b{padding:0 12px 12px;display:flex;flex-direction:column;gap:6px} .dd-b > small{color:var(--muted);font-size:.8rem}
+@media (min-width:900px){ .dact{flex-direction:row} .dact .btn{width:auto;flex:1} }
 .fgrab{width:36px;height:5px;border-radius:3px;background:#D5D3DC;margin:7px auto -4px;flex:0 0 auto}
 @media (prefers-reduced-motion:reduce){.fsheet.in,.fdim.in{animation-duration:.01s}.fsheet.out,.fdim.out{transition-duration:.01s}}
 .fsheet-h{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;border-bottom:1px solid var(--line)}

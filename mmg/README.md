@@ -99,3 +99,7 @@ La home non mostra l'elenco dei pazienti (un MMG ne ha molti): ha due pulsanti, 
 
 
 «Consulta» è in quest'ordine: Guida per il medico di medicina generale, Nota 79, Vitamina D e Nota 96, A chi fare la densitometria in LEA. Salvataggio, ripristino e blocco con codice sono in un gruppo a parte, «Backup e sicurezza».
+
+### Decisione terapeutica: prima l'indicazione, il resto a richiesta
+
+In alto il paziente in una riga (età, frattura, T-score, rischio %). Poi un solo riquadro nel colore della zona: l'indicazione, il farmaco consigliato con il livello di scelta della Nota 79 (e l'avviso sul rebound se è il denosumab), il rischio molto alto se c'è, e subito i pulsanti. Tutto il resto è in sezioni chiuse che si aprono con un tocco, con un numero che dice quante voci contengono: «Da completare per la Nota 79», «Dettagli del farmaco consigliato», «Altre opzioni» (o «Cosa potrà valutare lo specialista»), «Prima della prima dose» («3 da fare»). Ogni farmaco è una riga con icona ed etichetta (I scelta, II scelta, fuori Nota 79, controindicato) che si apre sui dettagli.
