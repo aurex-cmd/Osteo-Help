@@ -130,3 +130,5 @@ La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il v
 - **Controlli nel tempo**: un solo riquadro per farmaco e decisione; tolto «Report da stampare» (è già in Documenti).
 - **Decidi la terapia**: «Rischio molto alto» è un avviso a parte sotto la scheda della zona, non più una riga rossa dentro la scheda gialla.
 - **Su PC** l'avanzamento «N di 7 passi» in alto è nascosto: lo mostra già la strada numerata. Su iPhone resta.
+
+**Home su PC**: a sinistra Nuovo paziente, Archivio, la riga del backup e sotto «Da fare»; a destra sempre «Consulta» in alto, poi Backup e sicurezza. Su iPhone l'ordine non cambia.

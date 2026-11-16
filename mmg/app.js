@@ -529,9 +529,9 @@ function vPazienti(){
     <a class="entry big arc mh-arc" href="#archivio"><span class="ibox">${mic("users", "ic")}</span><div><b>Archivio pazienti</b><small>${PZ.length ? plural(PZ.length, "paziente", "pazienti") + ", con la ricerca per nome" : "Ancora vuoto"}</small></div>${CHEV}</a>
     </div>
     ${pzStorageOk ? backupAlert() : `<div class="alert mh-bk"><b>Archivio non disponibile</b>Il browser non permette di salvare i dati (navigazione privata o dati del sito bloccati): i pazienti inseriti andranno persi alla chiusura.</div>`}
-    </div><div class="mh-r">
     <div class="mh-todo">${PZ.length ? `<p class="lbl">Da fare${todo.length ? " · " + todo.length : ""}</p>` + (todo.length ? `<div class="todo">${todo.slice(0, 15).map(x => todoItem(x, true)).join("")}</div>${todo.length > 15 ? `<p class="small">e altri ${todo.length - 15}: li trovi nella scheda di ciascun paziente.</p>` : ""}`
       : `<p class="hint">Nessuna scadenza: qui compaiono DXA da ripetere, dosi di denosumab e zoledronato, fine degli anabolici, rivalutazioni dopo 5 anni e fratture recenti senza terapia.</p>`) : ""}</div>
+    </div><div class="mh-r">
     <div class="mh-cons"><p class="lbl">Consulta</p>
     <div class="rows mrows">
       <a class="rowlink" href="#guida"><span class="ibox s">${mic("book")}</span><span>Guida per il medico di medicina generale<small>Cos'è l'osteoporosi, perché si cura, i farmaci</small></span>${CHEV}</a>
