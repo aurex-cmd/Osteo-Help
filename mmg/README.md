@@ -109,3 +109,5 @@ In alto il paziente in una riga (età, frattura, T-score, rischio %). Poi un sol
 La scheda del paziente è solo la figura (con la strada dei 7 passi su PC). Il vecchio «Percorso a passi» non c'è più: i suoi indirizzi (dati, anamnesi, esami, densitometria, DeFRA, controlli) aprono la stessa sezione sulla figura, così i link dalla decisione, dalla lista «Da fare» e dalle note portano al posto giusto. «Terapia» resta una pagina a sé, per registrare le dosi; le note libere sono in «Chi è».
 
 **DeFRA già inserito**: la scheda mostra solo la zona, nel suo colore, con il rischio % e la data; «Aggiorna il DeFRA» (cosa serve, link al calcolatore, modulo), lo storico e «Cosa significano le zone» si aprono a richiesta.
+
+**Decidi la terapia su PC** si apre nel pannello di destra, come le altre sezioni (passo 6 della strada evidenziato, figura sempre visibile, «‹ DeFRA» per tornare indietro). Dopo «Prescrivo…» o la scelta del farmaco dello specialista il pannello si chiude e la figura mostra il farmaco e le date. Sul telefono resta una pagina a sé.
