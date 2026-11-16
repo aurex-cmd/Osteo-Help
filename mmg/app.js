@@ -415,7 +415,8 @@ function backupAlert(){
   if(LAST_BK && LAST_BK >= lastAgg) return "";
   const g = LAST_BK ? Math.round((new Date() - pDate(LAST_BK)) / 864e5) : null;
   if(g !== null && g < 14) return "";
-  return `<div class="alert warn bk"><b>${LAST_BK ? `Ultimo backup ${g} giorni fa` : "L'archivio non ha ancora un backup"}</b>I pazienti sono salvati solo in questo browser: se si cancellano i dati di navigazione o si cambia computer vanno persi. <button type="button" class="lnk" id="pzExport2">Salva backup ora</button></div>`;
+  /* promemoria discreto: una riga sola, non un riquadro */
+  return `<p class="bk bkline" title="I pazienti sono salvati solo in questo browser: se si cancellano i dati di navigazione o si cambia computer vanno persi."><i aria-hidden="true"></i>${LAST_BK ? `Ultimo backup ${g} giorni fa` : "Nessun backup dell'archivio"} · <button type="button" class="lnk" id="pzExport2">Salva backup</button></p>`;
 }
 function doExport(){
   const blob = new Blob([JSON.stringify({ app:"Osteo Help", versione:1, salvato: new Date().toISOString(), pazienti: PZ }, null, 1)], { type:"application/json" });
@@ -526,9 +527,10 @@ function vPazienti(){
   return { bar:"Pazienti", html: `<div class="mhome"><div class="mh-l">` + `<div class="mh-h">` + head("I miei pazienti", "Per ogni paziente con osteoporosi, un percorso guidato in 7 passi: dai dati alla terapia, fino ai controlli.") + `</div>
     <div class="mh-btns">
     <button type="button" class="entry big violet mh-new" id="pzNew"><span class="ibox">${mic("add", "ic")}</span><div><b>Nuovo paziente</b><small>Inizia il percorso dal passo 1</small></div>${CHEV}</button>
-    <a class="entry big teal mh-arc" href="#archivio"><span class="ibox">${mic("users", "ic")}</span><div><b>Archivio pazienti</b><small>${PZ.length ? plural(PZ.length, "paziente", "pazienti") + ", con la ricerca per nome" : "Ancora vuoto"}</small></div>${CHEV}</a>
-    </div></div><div class="mh-r">
+    <a class="entry big arc mh-arc" href="#archivio"><span class="ibox">${mic("users", "ic")}</span><div><b>Archivio pazienti</b><small>${PZ.length ? plural(PZ.length, "paziente", "pazienti") + ", con la ricerca per nome" : "Ancora vuoto"}</small></div>${CHEV}</a>
+    </div>
     ${pzStorageOk ? backupAlert() : `<div class="alert mh-bk"><b>Archivio non disponibile</b>Il browser non permette di salvare i dati (navigazione privata o dati del sito bloccati): i pazienti inseriti andranno persi alla chiusura.</div>`}
+    </div><div class="mh-r">
     <div class="mh-todo">${PZ.length ? `<p class="lbl">Da fare${todo.length ? " · " + todo.length : ""}</p>` + (todo.length ? `<div class="todo">${todo.slice(0, 15).map(x => todoItem(x, true)).join("")}</div>${todo.length > 15 ? `<p class="small">e altri ${todo.length - 15}: li trovi nella scheda di ciascun paziente.</p>` : ""}`
       : `<p class="hint">Nessuna scadenza: qui compaiono DXA da ripetere, dosi di denosumab e zoledronato, fine degli anabolici, rivalutazioni dopo 5 anni e fratture recenti senza terapia.</p>`) : ""}</div>
     <div class="mh-cons"><p class="lbl">Consulta</p>
