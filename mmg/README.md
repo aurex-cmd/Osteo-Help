@@ -95,7 +95,7 @@ Dove la Nota chiede un dato che manca, l'app non lo dà per scontato e lo chiede
 
 ### Home: due pulsanti, Consulta e Backup
 
-La home non mostra l'elenco dei pazienti (un MMG ne ha molti): ha due pulsanti, come Osteo Help e Osteoclick, **Nuovo paziente** e **Archivio pazienti**. L'archivio è una pagina a parte con tutti i pazienti in ordine alfabetico e la ricerca per nome, iniziali o codice; i pazienti senza nome si eliminano da lì. In home restano il promemoria del backup, «Da fare» e «Consulta».
+La home non mostra l'elenco dei pazienti (un MMG ne ha molti): ha due pulsanti, come Osteo Help e Osteoclick, **Nuovo paziente** e **Archivio pazienti**. L'archivio è una pagina a parte con tutti i pazienti in ordine alfabetico e la ricerca per nome, iniziali o codice; i pazienti senza nome si eliminano da lì. L'archivio ha un viola più tenue del nuovo paziente. Sotto i due pulsanti, il promemoria del backup è una sola riga discreta («Nessun backup dell'archivio · Salva backup»), con la spiegazione al passaggio del mouse. In home restano poi «Da fare» e «Consulta».
 
 
 «Consulta» è in quest'ordine: Guida per il medico di medicina generale, Nota 79, Vitamina D e Nota 96, A chi fare la densitometria in LEA. Salvataggio, ripristino e blocco con codice sono in un gruppo a parte, «Backup e sicurezza».
