@@ -89,6 +89,7 @@ const RIC_DIZ = [
   /* ---------- controindicazioni da conoscere ---------- */
   ["c", "esofago", ["acalasia", "stenosi esofagea", "esofago di barrett", "barrett", "varici esofagee", "esofagite", "diverticolo esofageo"]],
   ["c", "reflusso", ["reflusso gastroesofageo", "reflusso gastro esofageo", "malattia da reflusso", "reflusso", "mrge", "gerd", "ernia iatale"]],
+  ["c", "irc", ["insufficienza renale cronica", "insufficienza renale", "malattia renale cronica", "nefropatia cronica", "irc", "ckd", "dialisi", "emodialisi", "dialisi peritoneale", "dializzat*", "uremia"], { n:"Inserisci l'eGFR negli esami: decide tra bisfosfonati e denosumab." }],
   ["c", "tev", ["trombosi venosa profonda", "tvp", "embolia polmonare", "tromboembolia polmonare", "tromboembolismo venoso", "tromboembolismo", "tep", "trombosi venosa"]],
   ["c", "cv", ["infarto miocardico", "infarto del miocardio", "pregresso infarto", "ima", "imaa", "nstemi", "stemi", "cardiopatia ischemica", "angina", "bypass aortocoronarico", "by pass aortocoronarico", "stent coronarico", "ptca", "sindrome coronarica", "ictus", "arteriopatia obliterante", "vasculopatia periferica"]],
   ["c", "rt", ["metastasi ossee", "metastasi osse*", "radioterapia", "secondarismi ossei"], { v:1, n:"Conta la radioterapia sullo scheletro e i tumori o metastasi ossee." }]
