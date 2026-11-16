@@ -524,9 +524,13 @@ function vPazienti(){
       : `<p class="hint">Nessuna scadenza: qui compaiono DXA da ripetere, dosi di denosumab e zoledronato, fine degli anabolici, rivalutazioni dopo 5 anni e fratture recenti senza terapia.</p>`) : ""}</div>
     <div class="mh-cons"><p class="lbl">Consulta</p>
     <div class="rows mrows">
+      <a class="rowlink" href="#guida-nota79"><span class="ibox s">${mic("book")}</span><span>Nota 79<small>Quando i farmaci sono a carico del SSN: I, II e III scelta</small></span>${CHEV}</a>
       <a class="rowlink" href="#guida-dxa-lea"><span class="ibox s">${mic("book")}</span><span>A chi fare la densitometria in LEA<small>Fattori di rischio maggiori e minori, con il conteggio</small></span>${CHEV}</a>
-      <a class="rowlink" href="#guida-nota79"><span class="ibox s">${mic("book")}</span><span>Nota 79<small>Condizioni di rimborsabilità, I, II e III scelta</small></span>${CHEV}</a>
+      <a class="rowlink" href="#guida-nota96"><span class="ibox s">${mic("book")}</span><span>Vitamina D e Nota 96<small>Quando dosarla, quando è rimborsabile, come correggerla</small></span>${CHEV}</a>
       <a class="rowlink" href="#guida"><span class="ibox s">${mic("book")}</span><span>Guida per il medico di medicina generale<small>Cos'è l'osteoporosi, perché si cura, i farmaci</small></span>${CHEV}</a>
+    </div></div>
+    <div class="mh-cons mh-arch"><p class="lbl">Archivio</p>
+    <div class="rows mrows">
       <button type="button" class="rowlink" id="pzExport"${PZ.length ? "" : " disabled"}><span class="ibox s">${mic("down")}</span><span>Salva backup<small>${LAST_BK ? "Ultimo il " + fmtD(LAST_BK) : "Un file con tutto l'archivio"}</small></span>${CHEV}</button>
       <label class="rowlink"><span class="ibox s">${mic("up")}</span><span>Ripristina backup<small>Anche per spostare l'archivio su un altro computer</small></span>${CHEV}<input type="file" id="pzImport" accept="application/json,.json" hidden></label>
       ${PIN ? `<button type="button" class="rowlink" id="pzLockNow"><span class="ibox s">${mic("lock")}</span><span>Blocca ora<small>Blocco automatico dopo ${LOCK_MIN} minuti senza attività</small></span>${CHEV}</button>

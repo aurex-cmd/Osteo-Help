@@ -92,3 +92,7 @@ Dove la Nota chiede un dato che manca, l'app non lo dà per scontato e lo chiede
 
 - **A chi fare la densitometria in LEA** (anche da «Consulta» in home e dal passo Densitometria): fattori di rischio maggiori (ne basta uno: fratture e osteoporosi documentate, terapie croniche, patologie a rischio per categoria, e nella donna in menopausa familiarità materna, menopausa prima dei 45 anni, BMI < 19) e minori (ne servono tre, separati per donna in menopausa e uomo oltre i 60 anni), da spuntare con il risultato in fondo. Fonte: DPCM 12 gennaio 2017, Allegato 4A.
 - **Vitamina D e Nota 96**: scenari senza dosaggio e con dosaggio (soglie 30, 50, 75 nmol/L), schema di correzione dell'Allegato 1, esclusioni. Fonte: Nota AIFA 96, aggiornamento del 10 febbraio 2023. Nel paziente che inizia un farmaco per l'osteoporosi la vitamina D si dosa: sotto 75 nmol/L è rimborsabile e va corretta prima.
+
+### Home: Consulta e Archivio
+
+«Consulta» è in ordine di priorità: Nota 79, A chi fare la densitometria in LEA, Vitamina D e Nota 96, Guida per il medico di medicina generale. Salvataggio, ripristino e blocco con codice sono in un gruppo a parte, «Archivio».
