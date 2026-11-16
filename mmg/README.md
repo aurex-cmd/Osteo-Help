@@ -86,7 +86,9 @@ Testo di riferimento: determina AIFA dell'8 settembre 2025. Per ogni farmaco la 
 
 Dove la Nota chiede un dato che manca, l'app non lo dà per scontato e lo chiede in «Da completare per la Nota 79»: postmenopausa (prevenzione primaria e abaloparatide), dose e durata dei glucocorticoidi (≥5 mg/die da più di 3 mesi per la prevenzione primaria, da più di 12 mesi per il teriparatide), gravità delle fratture vertebrali secondo Genant (abaloparatide e romosozumab), rischio a 10 anni in % (romosozumab: ≥20%; la sola zona del DeFRA non basta). Dal testo del gestionale, «Prednisone 5 mg/die da 2 anni» imposta da solo la durata.
 
-### Guida: densitometria in LEA e Nota 96
+### Guida: densitometria in LEA, Nota 79 e Nota 96
+
+- **Nota 79** (anche da «Consulta» e da «Decidi la terapia»): tutte le condizioni della determina AIFA dell'8 settembre 2025, divise in prevenzione secondaria (fratture vertebrali o di femore; non vertebrali e non femorali) e primaria, con I, II e III scelta per ciascuna e le note a–h (passaggio di scelta, Genant, DXA, zoledronato in ospedale, denosumab prescrivibile dal MMG, piani terapeutici di romosozumab, teriparatide e abaloparatide).
 
 - **A chi fare la densitometria in LEA** (anche da «Consulta» in home e dal passo Densitometria): fattori di rischio maggiori (ne basta uno: fratture e osteoporosi documentate, terapie croniche, patologie a rischio per categoria, e nella donna in menopausa familiarità materna, menopausa prima dei 45 anni, BMI < 19) e minori (ne servono tre, separati per donna in menopausa e uomo oltre i 60 anni), da spuntare con il risultato in fondo. Fonte: DPCM 12 gennaio 2017, Allegato 4A.
 - **Vitamina D e Nota 96**: scenari senza dosaggio e con dosaggio (soglie 30, 50, 75 nmol/L), schema di correzione dell'Allegato 1, esclusioni. Fonte: Nota AIFA 96, aggiornamento del 10 febbraio 2023. Nel paziente che inizia un farmaco per l'osteoporosi la vitamina D si dosa: sotto 75 nmol/L è rimborsabile e va corretta prima.
