@@ -656,8 +656,19 @@ button.fcal{border:0;font:inherit;color:inherit;cursor:pointer;width:100%;transi
 .amuta.on{background:var(--teal-box);border-radius:12px;padding:12px 14px;justify-content:space-between} .amuta.on b{color:var(--teal)}
 .amuta-ck{border:1.5px solid var(--line)!important;border-radius:12px;padding:10px 12px!important;margin:8px 0 10px;background:#fff} .amuta-ck[aria-pressed="true"]{border-color:var(--teal)!important;background:var(--teal-box)} .amuta-ck small{display:block;color:var(--muted);font-size:.8rem;font-weight:500}
 .gestbox{border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;background:var(--blue-box);display:flex;flex-direction:column;gap:10px;margin-bottom:6px} .gestbox-t{margin:0;font-weight:700} .gestbox-t small{display:block;font-weight:500;color:var(--muted);font-size:.82rem;margin-top:2px} .gestbox .area{background:var(--bg)} .gestbox .small{margin:0}
-.frival{margin-top:6px;border-top:1px solid rgba(14,117,113,.18);padding-top:8px} .frival > summary{cursor:pointer;font-weight:700;color:var(--pri);list-style:none;font-size:.9rem} .frival > summary::-webkit-details-marker{display:none} .frival > summary::before{content:"↻ "} .frival p{font-size:.84rem;color:var(--muted);margin:8px 0;line-height:1.45} .frival .btn{width:auto}
+.frival{margin-top:10px} .frival > summary{cursor:pointer;font-weight:700;color:var(--pri);list-style:none;font-size:.95rem;background:#fff;border:1.5px solid var(--home-p);border-radius:12px;padding:10px 14px;text-align:center} .frival > summary small{display:block;font-weight:500;font-size:.74rem;color:var(--muted);margin-top:1px} .frival[open] > summary{border-color:var(--pri)} .frival > summary:hover{border-color:var(--pri)} .frival > summary::-webkit-details-marker{display:none}  .frival p{font-size:.84rem;color:var(--muted);margin:8px 0;line-height:1.45} .frival .btn{width:auto}
 .fhud-c.riv{background:#FBF3D6;color:#7A5A0E}
+/* pill a destra: pallino a destra, allineate al bordo */
+.fsum-c.r .fbd{flex-direction:row-reverse;text-align:right;padding:3px 3px 3px 9px} .fsum-c.r .fbd-o{display:none}
+/* controindicazioni: una pill, si apre sui farmaci da evitare */
+.fbd.k-ci .fbd-c{background:var(--coral);color:#fff} .fbd.k-ci .fbd-o{color:var(--coral)} .fbd.k-ci[aria-expanded="true"]{box-shadow:0 0 0 2px var(--coral),0 4px 14px rgba(30,20,70,.2)}
+.fsum.ciop{z-index:7} .fsum .fbd.fsub{margin:-3px 0 0 18px;padding:5px 11px;border-radius:12px;position:relative;max-width:calc(100% - 18px);box-shadow:0 4px 16px rgba(30,20,70,.28);border-left:3px solid var(--coral)} .fsum .fbd.fsub .fbd-t b{font-size:.68rem} .fsum .fbd.fsub .fbd-t small{font-size:.58rem}
+.fsum .fbd.fsub .fbd-t{max-width:150px} .fsum .fbd.fsub .fbd-t b{-webkit-line-clamp:3}
+/* riquadro finale: le due date della stessa altezza, rebound nella scheda del farmaco */
+.fcals{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));align-items:stretch} .fcals > .fcal{height:100%;margin:0!important;justify-content:flex-start} .fcals > .fcal > small{min-height:3.1em} .fcal > em{margin-top:auto}
+.frival > summary small{text-transform:none!important;letter-spacing:0!important;font-size:.76rem!important;opacity:1!important}
+.freb-in{display:block;margin-top:6px!important;padding:6px 9px;border-radius:8px;background:#FBF1DD;color:#6B4A00!important;font-size:.76rem!important;line-height:1.4} .freb-in b{display:inline!important;font-size:inherit!important;color:#6B4A00!important;letter-spacing:0!important}
+.fdrugbig.go{text-decoration:none;color:inherit} .fdrugbig.go > span:nth-child(2){flex:1;min-width:0} .fdrugbig.go .chev{flex:0 0 auto;width:18px;height:18px;color:var(--muted)}
 .dvh-a{margin:10px 0 4px;padding:10px 14px;border-radius:12px;background:var(--coral-box,#F7E6E1);color:var(--ink);font-size:.86rem;line-height:1.45} .dvh-a b{display:block;color:var(--coral);margin-bottom:2px}
 .dnote{margin:0;font-size:.86rem;line-height:1.45;color:var(--ink);opacity:.85}
 .dact{display:flex;flex-direction:column;gap:8px;margin-top:4px} .dact .btn{width:100%;text-align:center;justify-content:center}

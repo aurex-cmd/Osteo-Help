@@ -124,15 +124,18 @@ function figSummary(p, F, S){
   else if(F.fx.length > 1){ const rec = F.recent.length, sedi = [...new Set(F.fx.map(f => (FX_SEDI[f.sede] || f.sede).split(" / ")[0]))];
     sx.push(`<button type="button" class="fbd ${rec ? "k-r" : "k-a"} fsec-b" data-fsheet="fx" aria-label="${hx(F.fx.length + " fratture: " + F.fx.map(f => fxNome(f) + " " + fmtD(f.data)).join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${F.fx.length}</span><span class="fbd-t"><b>Fratture multiple</b><small>${hx((rec ? "1 recente · " : "") + sedi.join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`); }
   else pill(sx, "fx", "k-ok", "0", "Nessuna frattura", "da fragilità");
-  const cis = [];
-  if(S.hpp) cis.push(["esami", "No bisfosfonati", "fosfatasi alcalina bassa"]);
-  else if(ci.esofago) cis.push(["anam", "No bisfosfonati orali", "esofago"]);
-  if(ci.irc && eg === null) cis.push(["esami", "Insufficienza renale", "inserisci l'eGFR"]);
-  if(eg !== null && eg < 35) cis.push(["esami", "eGFR " + fmtN(eg, 0), eg < 30 ? "no bisfosfonati, cautela" : "no alendronato, zoledronato"]);
-  if(ci.cv || F.feats.has("ictus_emiplegia")) cis.push(["anam", "No romosozumab", "infarto o ictus"]);
-  if(ci.tev) cis.push(["anam", "No raloxifene", "tromboembolismo"]);
-  if(ci.denti) cis.push(["anam", "Visita odontoiatrica", "nulla osta alla terapia"]);
-  cis.slice(0, 2).forEach((x, i) => pill(sx, x[0], /^(Visita|Insufficienza)/.test(x[1]) ? "k-a" : "k-r", /^(Visita|Insufficienza)/.test(x[1]) ? "!" : "✕", x[1], i === 1 && cis.length > 2 ? "e altre " + (cis.length - 2) : x[2]));
+  /* controindicazioni: una sola pill con i motivi; toccandola si aprono sotto i farmaci da evitare e perché */
+  const cig = [];
+  if(S.hpp) cig.push(["esami", "fosfatasi alcalina bassa", "No bisfosfonati"]);
+  else if(ci.esofago) cig.push(["anam", "esofago", "No bisfosfonati orali"]);
+  if(ci.irc && eg === null) cig.push(["esami", "insufficienza renale", "Inserisci l'eGFR per le soglie dei farmaci"]);
+  if(eg !== null && eg < 35) cig.push(["esami", "eGFR " + fmtN(eg, 0), eg < 30 ? "No bisfosfonati, teriparatide, abaloparatide" : "No alendronato e zoledronato"]);
+  if(ci.cv || F.feats.has("ictus_emiplegia")) cig.push(["anam", "infarto o ictus", "No romosozumab"]);
+  if(ci.tev) cig.push(["anam", "tromboembolismo", "No raloxifene e bazedoxifene"]);
+  if(cig.length){ const op = !!FIG.ciOpen;
+    sx.push(`<button type="button" class="fbd k-ci fsec-b" data-ciopen aria-expanded="${op}" aria-label="${hx(plural(cig.length, "controindicazione", "controindicazioni") + ": " + cig.map(x => x[1]).join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${cig.length}</span><span class="fbd-t"><b>Controindicazioni</b><small>${hx(cig.map(x => x[1]).join(" · "))}</small></span><span class="fbd-o">${op ? "‹" : "›"}</span></button>`);
+    if(op) cig.forEach(x => sx.push(`<button type="button" class="fbd fsub" data-fsheet="${x[0]}"><span class="fbd-t"><b>${hx(x[2])}</b><small>${hx(/^eGFR/.test(x[1]) ? x[1] + " mL/min" : x[1])}</small></span></button>`)); }
+  if(ci.denti) pill(sx, "anam", "k-a", "!", "Visita odontoiatrica", "nulla osta alla terapia");
   /* destra: gli esami */
   const d = F.lastDxa, sites = [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]);
   if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(dx, "dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
@@ -147,7 +150,7 @@ function figSummary(p, F, S){
   /* il DeFRA, in grande */
   const z = F.zona, r = F.rischio;
   const big = `<button type="button" class="fdefra z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio di frattura a 10 anni " + fmtN(r, 0) + "%" : ""}"><span class="fdefra-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "—"}</span><span class="fdefra-t"><small>DeFRA · rischio a 10 anni</small><b>Zona ${ZONE[z].t.toLowerCase()}</b><span>${ZONE[z].r}</span></span></button>`;
-  return `<div class="fsum"><div class="fsum-c">${sx.join("")}</div><div class="fsum-c r">${dx.join("")}</div></div>${big}`;
+  return `<div class="fsum${FIG.ciOpen && cig.length ? " ciop" : ""}"><div class="fsum-c">${sx.join("")}</div><div class="fsum-c r">${dx.join("")}</div></div>${big}`;
 }
 function figStage(p, fig, spots, F, S){
   const d = FIGURE[fig], lblFx = d.fxLbl;
@@ -174,9 +177,11 @@ function figNext(p, F, S, spots){
   if(dec){
     /* decisione presa: in primo piano il farmaco, poi due date grandi: prossima dose e prossima densitometria */
     const th = F.ther.find(t => nextDose(t)) || F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco], multi = F.ther.length > 1;
-    const drug = th ? `<div class="fdrugbig"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${F.ther.map(t => dnome(t.farmaco).replace(/ \(.*\)$/, "")).join(" + ")}</b><small>${multi ? "in associazione" : d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}</small></span></div>${F.ther.some(t => t.farmaco === D_) ? `<p class="freb"><b>Rebound:</b> non sospendere né ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}`
+    const rivedi = `#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}`;
+    const drug = th ? `<a class="fdrugbig go" href="${rivedi}" title="Rivedi la decisione e la terapia"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${F.ther.map(t => dnome(t.farmaco).replace(/ \(.*\)$/, "")).join(" + ")}</b><small>${multi ? "in associazione" : d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${p.decisione.tipo === "spec" ? " · indicato dallo specialista" : ""}</small>${F.ther.some(t => t.farmaco === D_) ? `<small class="freb-in"><b>Rebound:</b> non sospendere né ritardare le dosi; se si interrompe serve un bisfosfonato.</small>` : ""}</span>${CHEV}</a>`
       : p.decisione.tipo === "spec" ? `<a class="fdrugbig spec go" href="#paz-${p.id}-decidi"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>Tocca per registrare la terapia indicata dallo specialista</small></span>${CHEV}</a>`
-      : `<div class="fdrugbig none"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>Nessun farmaco per l'osteoporosi</b><small>calcio con la dieta, vitamina D, movimento</small></span></div>`;
+      : p.decisione.tipo === "mmg" ? `<a class="fdrugbig go" href="#paz-${p.id}-terapia"><span class="fpill">💊</span><span><b>Farmaco da registrare</b><small>Tocca per indicare il farmaco e la data di inizio</small></span>${CHEV}</a>`
+      : `<a class="fdrugbig none go" href="${rivedi}" title="Rivedi la decisione"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>${p.decisione.tipo === "attesa" ? "Decisione rimandata" : "Nessun farmaco per l'osteoporosi"}</b><small>${p.decisione.tipo === "attesa" ? "in attesa di esami o accertamenti" : "calcio con la dieta, vitamina D, movimento"}</small></span>${CHEV}</a>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
     const quando = dt => { const g = daysTo(dt); return g < 0 ? `in ritardo di ${-g} giorni` : g === 0 ? "oggi" : g < 45 ? `tra ${g} giorni` : `tra ${Math.round(g / 30.4)} mesi`; };
     const cal = (cls, lbl, top, big, bot, rel, note, sh) => { const tg = sh ? "button" : "div"; return `<${tg}${sh ? ` type="button" data-fsheet="${sh}" title="Apri i controlli nel tempo"` : ""} class="fcal ${cls}"><small>${lbl}</small><div class="fcal-d"><span>${top}</span><b>${big}</b><span>${bot}</span></div><em>${rel}</em>${note ? `<i>${note}</i>` : ""}</${tg}>`; };
@@ -189,8 +194,8 @@ function figNext(p, F, S, spots){
     /* decisione presa ma con dati ancora mancanti: lo si dice, e si va dritti a completarli */
     const mancano = allSteps(p).filter(x => x.st === "miss" && STEP_IX[x.k] <= STEP_IX.defra), RS = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra" };
     const avviso = mancano.length ? `<button type="button" class="fmiss" data-fsheet="${RS[mancano[0].k]}"><b>Da completare:</b> ${mancano.map(x => x.t.toLowerCase() + " (" + x.s.replace(/^Mancano?:\s*/, "") + ")").join("; ")} ›</button>` : "";
-    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div><a class="fnext-l" href="#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}">${p.decisione.tipo === "spec" && th ? "Lo specialista ha cambiato terapia?" : th || p.decisione.tipo !== "mmg" ? "Rivedi la decisione" : "Registra il farmaco"}</a>
-      <details class="frival"><summary>Rivaluta il paziente</summary><p>Per il controllo periodico. Restano fratture, densitometrie, DeFRA e terapie in corso; si rifanno la conferma delle nuove fratture, l'anamnesi, gli esami del sangue, il DeFRA e la decisione. La valutazione di oggi resta nei Controlli nel tempo.</p><button type="button" class="btn" data-rival>Inizia la rivalutazione</button></details></div>`;
+    return `<div class="fnext done"><small>${mancano.length ? "Decisione presa" : "Caso completato"} · ${dec.t.toLowerCase()} · ${fmtD(p.decisione.data)}</small>${avviso}${drug}<div class="fcals">${tiles.join("")}</div>
+      <details class="frival"><summary>↻ Rivaluta il paziente<small>controllo periodico: nuova valutazione</small></summary><p>Per il controllo periodico. Restano fratture, densitometrie, DeFRA e terapie in corso; si rifanno la conferma delle nuove fratture, l'anamnesi, gli esami del sangue, il DeFRA e la decisione. La valutazione di oggi resta nei Controlli nel tempo.</p><button type="button" class="btn" data-rival>Inizia la rivalutazione</button></details></div>`;
   }
   if(miss.length && !F.zona || miss.length > 1) { const m = miss[0];
     return `<button type="button" class="fnext" data-fsheet="${m[0]}"><small>Prossimo passo da completare</small><b>${m[2]}</b><span>${m[3]}</span><em>Apri →</em></button>`; }
@@ -363,6 +368,7 @@ function figBack(p){ const r = "paz-" + p.id + "-figura"; FIG.open = null; if(ro
 /* ---------- interazioni ---------- */
 document.addEventListener("click", e => {
   const t = e.target;
+  if(t.closest("[data-ciopen]")){ FIG.ciOpen = !FIG.ciOpen; FIG.anim = false; render(); return; }
   const op = t.closest("[data-fsheet]");
   if(op){ e.preventDefault(); if(FIG.open){ const { p } = pzRoute(); commitPending(p); } FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
     const pn = document.querySelector(".fpanel"); if(pn && pn.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + pn.getBoundingClientRect().top - 70 }); return; }
