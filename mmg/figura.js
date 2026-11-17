@@ -287,7 +287,9 @@ function proposta(p, F, S, fl){
   /* anabolico di I scelta nella Nota 79 (es. 3 o più fratture vertebrali o di femore: teriparatide): è la terapia consigliata,
      ma la prescrive lo specialista con piano terapeutico, quindi l'unica azione è l'invio */
   const n79a = nota79(p, F), anaI = [T_, ...(F.donna ? [AB_] : [])].filter(id => okd(id) && n79a.some(c => n79Lev(c, id) === "I"));
-  if(anaI.length) return { tipo:"spec", ana:true, t:"Terapia consigliata: " + dnome(anaI[0]), s:ZONE[F.zona].azione,
+  /* se un'altra condizione della Nota dà di I scelta un farmaco che il MMG può prescrivere, l'anabolico resta un'alternativa (avviso sotto), non la proposta */
+  const mmgI = [A_, R_, Z_, D_].some(id => okd(id) && n79a.some(c => n79Lev(c, id) === "I"));
+  if(anaI.length && !mmgI) return { tipo:"spec", ana:true, t:"Terapia consigliata: " + dnome(anaI[0]), s:ZONE[F.zona].azione,
     opz:[T_, ...(F.donna ? [AB_, RO_] : [])].filter(id => id !== anaI[0] && n79a.some(c => c.s.some(l => l.includes(id)))), best: anaI[0] };
   if(F.zona === "verde") return { tipo:"nessuno", t:"Nessun farmaco per l'osteoporosi", s:ZONE.verde.azione, opz:[] };
   if(zoneHigh(F.zona)){
