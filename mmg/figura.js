@@ -95,42 +95,52 @@ function figSpots(p, F, S){
 }
 /* caso completo: tutti gli indizi raccolti (dati, fratture, anamnesi, DXA, DeFRA) */
 const figDone = (F, spots) => !Object.values(spots).some(x => x.st === "miss") && !!F.zona && !!F.lastDxa;
-/* a caso completo restano sulla figura solo i dati che contano, tutti nello stesso modo */
+/* sulla figura, sempre le stesse pill nello stesso posto: si riempiono man mano. Quelle che mancano sono tratteggiate
+   con il numero del passo; quella del prossimo passo è viola e pulsa. Controindicazioni e dentista compaiono solo se ci sono. */
 function figSummary(p, F, S){
-  /* lati fissi: a sinistra la fragilità, a destra cause, esami e controindicazioni; in basso, più grande di tutti, il DeFRA.
-     Colore = gravità: rosso serio, ambra attenzione, verde rassicurante, viola neutro. */
+  /* sinistra: il paziente e la sua fragilità (età e BMI basso, familiarità, fratture, T-score);
+     destra: ciò che la spiega o va sistemato prima (forme secondarie, esami) e ciò che limita la terapia (controindicazioni, dentista);
+     in basso, più grande di tutti, il DeFRA. Colore = gravità: rosso serio, ambra attenzione, verde rassicurante, viola neutro. */
   const sx = [], dx = [], pill = (arr, k, cls, c, b, sm, aria) => arr.push(`<button type="button" class="fbd ${cls}" data-fsheet="${k}" aria-label="${hx(aria || b + ": " + sm)}"><span class="fbd-c">${c}</span><span class="fbd-t"><b>${hx(b)}</b><small>${hx(sm)}</small></span></button>`);
-  const ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd);
-  /* si legge dall'alto a sinistra in giù, poi dall'alto a destra in giù:
-     sinistra = la fragilità (T-score, fratture, familiarità, BMI basso);
-     destra = ciò che la spiega o va sistemato prima (forme secondarie, esami del sangue) e ciò che limita la terapia (controindicazioni, dentista) */
-  const d = F.lastDxa, sites = [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]);
-  if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(sx, "dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
-  /* una frattura: sede e data; più fratture: «Fratture multiple», le sedi su una riga, si apre l'elenco con le date */
+  const ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), all = allSteps(p), nx = nextStep(all), st = k => all[STEP_IX[k]].st;
+  /* da fare: tratteggiata con il numero del passo; se è il prossimo, viola */
+  const todo = (arr, k, sh, b, sm) => { const n = STEP_IX[k] + 1, isNx = nx && nx.k === k;
+    pill(arr, sh, isNx ? "k-n nx" : "miss", n, b, sm, "Passo " + n + ": " + b + ", " + sm); };
+  /* 1 · chi è: l'età (con il BMI se è basso), poi la familiarità */
+  if(st("dati") === "miss") todo(sx, "dati", "chi", "Chi è", "età, peso, familiarità");
+  else { const low = F.bmi && F.bmi < 20;
+    pill(sx, "chi", low ? "k-a" : "k-n", F.age, "anni", low ? "BMI " + fmtN(F.bmi) + ", basso" : "BMI " + fmtN(F.bmi), F.age + " anni, BMI " + fmtN(F.bmi) + (low ? ", basso" : "")); }
+  if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
+  else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
+  /* 2 · fratture: una frattura: sede e data; più fratture: «Fratture multiple», le sedi su una riga, si apre l'elenco con le date */
   const fxNome = f => (FX_SEDI[f.sede] || "Frattura") + (f.grado ? " " + f.grado : "");
-  if(F.fx.length === 1){ const f = F.fx[0], rec = F.recent.length;
+  if(st("fratture") === "miss" && !F.fx.length) todo(sx, "fratture", "fx", "Fratture", "da indicare");
+  else if(F.fx.length === 1){ const f = F.fx[0], rec = F.recent.length;
     pill(sx, "fx", rec ? "k-r" : "k-a", "1", fxNome(f), (rec ? "recente · " : "") + fmtD(f.data), "Frattura: " + fxNome(f) + ", " + fmtD(f.data)); }
   else if(F.fx.length > 1){ const rec = F.recent.length, sedi = [...new Set(F.fx.map(f => (FX_SEDI[f.sede] || f.sede).split(" / ")[0]))];
     sx.push(`<button type="button" class="fbd ${rec ? "k-r" : "k-a"} fsec-b" data-fsheet="fx" aria-label="${hx(F.fx.length + " fratture: " + F.fx.map(f => fxNome(f) + " " + fmtD(f.data)).join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${F.fx.length}</span><span class="fbd-t"><b>Fratture multiple</b><small>${hx((rec ? "1 recente · " : "") + sedi.join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`); }
   else pill(sx, "fx", "k-ok", "0", "Nessuna frattura", "da fragilità");
-  if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
-  else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
-  /* età e sesso sono già sotto il nome: sulla figura resta solo il BMI se è basso */
-  if(F.bmi && F.bmi < 20) pill(sx, "chi", "k-a", fmtN(F.bmi), "BMI basso", "sotto 20 kg/m²", "BMI " + fmtN(F.bmi) + ", basso");
+  /* 5 · T-score peggiore */
+  const d = F.lastDxa, sites = d ? [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]) : [];
+  if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(sx, "dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
+  else todo(sx, "dxa", "dxa", "Densitometria", "T-score da inserire");
+  /* 3 · forme secondarie: un solo bollino con il numero e i nomi; toccandolo si aprono sotto le singole forme */
   const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid]), ...(ci.irc ? [COND.irc] : [])])];
   const short = n => { const t = n.replace(/^Osteoporosi (indotta )?da /i, ""); return t.charAt(0).toUpperCase() + t.slice(1); };
-  /* osteoporosi secondaria: un solo bollino con il numero e i nomi; toccandolo si aprono sotto le singole forme, ognuna porta alla sezione da modificare */
   const nm2 = n => /^Farmaci \(/.test(n) ? "Farmaci " + n.replace(/^Farmaci \((.*)\)$/, "$1") : short(n).replace(/\s*\(.*\)$/, "").replace(/ \/ .*$/, "");
   const G = secGroups(p, S);
   if(sec.length){ const op = !!FIG.secOpen, top = G.length ? G[0][0] : 3;
     dx.push(`<button type="button" class="fbd k-${SEC_LEV[top].k} fsec-b" data-secopen aria-expanded="${op}" aria-label="${hx(plural(sec.length, "condizione", "condizioni") + " di osteoporosi secondaria: " + sec.join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${sec.length}</span><span class="fbd-t"><b>Osteoporosi secondaria</b><small>${hx(G.length ? G[0][1].length + " " + SEC_LEV[top].t.toLowerCase() + (G.length > 1 ? " · altre " + (sec.length - G[0][1].length) : "") : "")}</small></span></button>`);
     if(op) G.forEach(([l, xs]) => { const src = [...new Set(xs.map(x => x.src))], k = src.length === 1 ? src[0] : "sec";
       dx.push(`<button type="button" class="fbd fsub sec sl${l}" data-fsheet="${k}" aria-label="${hx(SEC_LEV[l].t + ": " + xs.map(x => x.nome).join(", ") + ". Apri")}"><span class="fbd-t"><b>${SEC_LEV[l].t}</b><small>${hx(xs.map(x => nm2(x.nome)).join(", "))}</small></span></button>`); }); }
+  else if(st("anamnesi") === "miss") todo(dx, "anamnesi", "anam", "Malattie e farmaci", "incolla dal gestionale");
+  else pill(dx, "anam", "k-ok", "✓", "Forme secondarie", "nessuna dall'anamnesi");
+  /* 4 · esami del sangue */
   const es = stepStatus(p, "esami", F, S), ls = labStatus(p);
-  if(es.st === "miss") pill(dx, "esami", "miss", "?", "Esami del sangue", ls.done + " di " + ls.tot + " inseriti");
+  if(es.st === "miss") todo(dx, "esami", "esami", "Esami del sangue", ls.done + " di " + ls.tot + " inseriti");
   else if(vdLow(vd) || es.st === "warn") pill(dx, "esami", "k-a", "!", "Esami del sangue", vdLow(vd) ? "vitamina D " + vdTxt(vd) : "da rivedere");
   else pill(dx, "esami", "k-ok", "✓", "Esami del sangue", "nella norma");
-  /* controindicazioni: una sola pill con i motivi; toccandola si aprono sotto i farmaci da evitare e perché */
+  /* controindicazioni: solo se ci sono; una pill con i motivi, toccandola si aprono i farmaci da evitare e perché */
   const cig = [];
   if(S.hpp) cig.push(["esami", "fosfatasi alcalina bassa", "No bisfosfonati"]);
   else if(ci.esofago) cig.push(["anam", "esofago", "No bisfosfonati orali"]);
@@ -142,48 +152,16 @@ function figSummary(p, F, S){
     dx.push(`<button type="button" class="fbd k-ci fsec-b" data-ciopen aria-expanded="${op}" aria-label="${hx(plural(cig.length, "controindicazione", "controindicazioni") + ": " + cig.map(x => x[1]).join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${cig.length}</span><span class="fbd-t"><b>Controindicazioni</b><small>${hx(cig.map(x => x[1]).join(" · "))}</small></span></button>`);
     if(op) cig.forEach(x => dx.push(`<button type="button" class="fbd fsub ci" data-fsheet="${x[0]}"><span class="fbd-t"><b>${hx(x[2])}</b><small>${hx(/^eGFR/.test(x[1]) ? x[1] + " mL/min" : x[1])}</small></span></button>`)); }
   if(ci.denti) pill(dx, "anam", "k-a", "!", "Visita odontoiatrica", "nulla osta alla terapia");
-  /* il DeFRA, in grande */
-  const z = F.zona, r = F.rischio;
-  const big = `<button type="button" class="fdefra z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio di frattura a 10 anni " + fmtN(r, 0) + "%" : ""}"><span class="fdefra-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "—"}</span><span class="fdefra-t"><small>DeFRA · rischio a 10 anni</small><b>Zona ${ZONE[z].t.toLowerCase()}</b><span>${ZONE[z].r}</span></span></button>`;
+  /* 6 · il DeFRA, in grande; finché manca, tratteggiato con il numero del passo */
+  const z = F.zona, r = F.rischio, dn = STEP_IX.defra + 1, dNx = nx && nx.k === "defra";
+  const big = z ? `<button type="button" class="fdefra z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio di frattura a 10 anni " + fmtN(r, 0) + "%" : ""}"><span class="fdefra-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "—"}</span><span class="fdefra-t"><small>DeFRA · rischio a 10 anni</small><b>Zona ${ZONE[z].t.toLowerCase()}</b><span>${ZONE[z].r}</span></span></button>`
+    : `<button type="button" class="fter${dNx ? " nx" : ""}" data-fsheet="defra" aria-label="Passo ${dn}: DeFRA, zona da inserire"><span class="fter-c">${dn}</span><span class="fter-t"><small>Passo ${dn} · DeFRA</small><b>Rischio a 10 anni</b><span>zona da inserire</span></span></button>`;
   return `<div class="fsum${(FIG.ciOpen && cig.length) || (FIG.secOpen && sec.length) ? " ciop" : ""}"><div class="fsum-c">${sx.join("")}</div><div class="fsum-c r">${dx.join("")}</div></div>${big}`;
 }
-const FIG_TREE = true;
 function figStage(p, fig, spots, F, S){
-  const d = FIGURE[fig], lblFx = d.fxLbl;
-  const pos = { chi:d.testa, fx:d.fx, anam:d.busto };
-  if(F && S && figDone(F, spots)) return `<div class="fstage done"${FIG.open && FIG.open !== "decidi" ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>${figSummary(p, F, S)}</div>`;
-  /* caso in corso: i 7 passi sulla figura, in ordine. A sinistra il paziente (1 chi è, 2 fratture, 3 anamnesi),
-     a destra gli esami (4 esami, 5 densitometria, 6 DeFRA), in basso, grande, 7 terapia: si legge come la strada */
-  const on = FIG.open && FIG.open !== "decidi" ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : "";
-  if(!F) return `<div class="fstage"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div></div>`;
-  const all = allSteps(p), nx = nextStep(all), ls = labStatus(p), es = stepStatus(p, "esami", F, S);
-  const dxS = figSecSt(p, "dxa", F, S, spots), dfS = figSecSt(p, "defra", F, S, spots), esS = es.st === "miss" ? "miss" : es.st === "warn" ? "al" : "ok";
-  const ms = F.lastDxa ? Math.min(...[F.lastDxa.tL, F.lastDxa.tFt, F.lastDxa.tFn].map(num).filter(v => v !== null)) : null;
-  const ST = [
-    ["dati", "chi", spots.chi.st, "Chi è", spots.chi.s],  /* età e sesso sono già sotto il nome */
-    ["fratture", "fx", spots.fx.st, spots.fx.t, spots.fx.s],
-    ["anamnesi", "anam", spots.anam.st, spots.anam.t, spots.anam.s],
-    ["esami", "esami", esS, "Esami del sangue", es.st === "miss" ? ls.done + " di " + ls.tot + " inseriti" : es.st === "warn" ? "da rivedere" : "nella norma"],
-    ["dxa", "dxa", dxS, "Densitometria", F.lastDxa && isFinite(ms) ? "T-score " + fmtN(ms) + " · " + tsCat(ms)[1].toLowerCase() : "T-score da inserire"],
-    ["defra", "defra", dfS, "DeFRA", F.zona ? "zona " + ZONE[F.zona].t.toLowerCase() + (F.rischio !== null ? " · " + fmtN(F.rischio, 0) + "%" : "") : "zona da inserire"]
-  ];
-  const pillS = ([k, sh, st, t, sm], i) => { const isNx = nx && nx.k === k, cls = st === "ok" ? "k-ok" : st === "al" ? "k-a" : isNx ? "k-n nx" : "miss";
-    return `<button type="button" class="fbd fstep ${cls}" data-fsheet="${sh}" aria-label="${hx("Passo " + (i + 1) + ": " + t + ", " + sm)}"><span class="fbd-c">${st === "ok" ? "✓" : st === "al" ? "!" : i + 1}</span><span class="fbd-t"><b>${hx(t)}</b><small>${hx(sm)}</small></span></button>`; };
-  const ready = !all.slice(0, 6).some(x => x.st === "miss"), t7 = all[6];
-  const terIn = `<span class="fter-c">${t7.st === "ok" ? "✓" : "7"}</span><span class="fter-t"><small>Passo 7 · terapia</small><b>${ready ? "Decidi la terapia" : "Terapia"}</b><span>${ready ? "zona e Nota 79 pronte" : "dopo i passi da 1 a 6"}</span></span>`;
-  const ter = ready ? `<a class="fter on" href="#paz-${p.id}-decidi" aria-label="Passo 7: decidi la terapia">${terIn}</a>`
-    : `<button type="button" class="fter" data-fsheet="${ST.find(x => x[2] === "miss")[1]}" aria-label="Passo 7: terapia, dopo i passi da 1 a 6">${terIn}</button>`;
-  /* albero di Natale: i 6 punti sulla figura come all'inizio (pallino + etichetta), non collegati, dalla testa in giù
-     a zig zag, sempre più aperti: 1 al centro sulla testa, poi sinistra e destra alternate. Ogni etichetta guarda verso il centro.
-     (FIG_TREE = false: le due colonne di pill) */
-  if(FIG_TREE){
-    const POS = [[50, 12], [38, 24], [62, 36], [30, 48], [70, 60], [22, 72]];
-    const dot = ([k, sh, st, t, sm], i) => { const [x, y] = POS[i], isNx = nx && nx.k === k, c = st === "ok" ? "ok" : st === "al" ? "al" : isNx ? "miss" : "later";
-      return `<button type="button" class="fhs ${c}${x > 52 ? " l" : ""}" data-fsheet="${sh}" style="left:${x}%;top:${y}%" aria-label="${hx("Passo " + (i + 1) + ": " + t + ", " + sm)}"><span class="fdot">${st === "ok" ? "✓" : st === "al" ? "!" : i + 1}</span><span class="ftag"><b>${hx(t)}</b><small>${hx(sm)}</small></span></button>`; };
-    return `<div class="fstage steps"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">${ST.map(dot).join("")}</div>${ter}</div>`;
-  }
-  return `<div class="fstage steps"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>
-    <div class="fsum"><div class="fsum-c">${ST.slice(0, 3).map(pillS).join("")}</div><div class="fsum-c r">${ST.slice(3).map((x, i) => pillS(x, i + 3)).join("")}</div></div>${ter}</div>`;
+  const d = FIGURE[fig], on = FIG.open && FIG.open !== "decidi" ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : "";
+  if(!F || !S) return `<div class="fstage"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div></div>`;
+  return `<div class="fstage${figDone(F, spots) ? " done" : " steps"}"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>${figSummary(p, F, S)}</div>`;
 }
 /* la prossima mossa: una sola cosa da fare, la più utile adesso */
 function figNext(p, F, S, spots){
