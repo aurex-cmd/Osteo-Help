@@ -109,16 +109,15 @@ function figBadges(p, F){
 const figDone = (F, spots) => !Object.values(spots).some(x => x.st === "miss") && !!F.zona && !!F.lastDxa;
 /* a caso completo restano sulla figura solo i dati che contano, tutti nello stesso modo */
 function figSummary(p, F, S){
-  /* lati fissi: a sinistra il paziente (età, familiarità, fratture, controindicazioni), a destra gli esami
-     (T-score peggiore, cause secondarie, esami del sangue); in basso, più grande di tutti, il DeFRA.
+  /* lati fissi: a sinistra la fragilità, a destra cause, esami e controindicazioni; in basso, più grande di tutti, il DeFRA.
      Colore = gravità: rosso serio, ambra attenzione, verde rassicurante, viola neutro. */
   const sx = [], dx = [], pill = (arr, k, cls, c, b, sm, aria) => arr.push(`<button type="button" class="fbd ${cls}" data-fsheet="${k}" aria-label="${hx(aria || b + ": " + sm)}"><span class="fbd-c">${c}</span><span class="fbd-t"><b>${hx(b)}</b><small>${hx(sm)}</small></span></button>`);
   const ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd);
-  /* sinistra: il paziente */
-  /* età e sesso sono già sotto il nome: sulla figura resta solo il BMI se è basso */
-  if(F.bmi && F.bmi < 20) pill(sx, "chi", "k-a", fmtN(F.bmi), "BMI basso", "sotto 20 kg/m²", "BMI " + fmtN(F.bmi) + ", basso");
-  if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
-  else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
+  /* si legge dall'alto a sinistra in giù, poi dall'alto a destra in giù:
+     sinistra = la fragilità (T-score, fratture, familiarità, BMI basso);
+     destra = ciò che la spiega o va sistemato prima (forme secondarie, esami del sangue) e ciò che limita la terapia (controindicazioni, dentista) */
+  const d = F.lastDxa, sites = [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]);
+  if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(sx, "dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
   /* una frattura: sede e data; più fratture: «Fratture multiple», le sedi su una riga, si apre l'elenco con le date */
   const fxNome = f => (FX_SEDI[f.sede] || "Frattura") + (f.grado ? " " + f.grado : "");
   if(F.fx.length === 1){ const f = F.fx[0], rec = F.recent.length;
@@ -126,24 +125,12 @@ function figSummary(p, F, S){
   else if(F.fx.length > 1){ const rec = F.recent.length, sedi = [...new Set(F.fx.map(f => (FX_SEDI[f.sede] || f.sede).split(" / ")[0]))];
     sx.push(`<button type="button" class="fbd ${rec ? "k-r" : "k-a"} fsec-b" data-fsheet="fx" aria-label="${hx(F.fx.length + " fratture: " + F.fx.map(f => fxNome(f) + " " + fmtD(f.data)).join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${F.fx.length}</span><span class="fbd-t"><b>Fratture multiple</b><small>${hx((rec ? "1 recente · " : "") + sedi.join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`); }
   else pill(sx, "fx", "k-ok", "0", "Nessuna frattura", "da fragilità");
-  /* controindicazioni: una sola pill con i motivi; toccandola si aprono sotto i farmaci da evitare e perché */
-  const cig = [];
-  if(S.hpp) cig.push(["esami", "fosfatasi alcalina bassa", "No bisfosfonati"]);
-  else if(ci.esofago) cig.push(["anam", "esofago", "No bisfosfonati orali"]);
-  if(ci.irc && eg === null) cig.push(["esami", "insufficienza renale", "Inserisci l'eGFR per le soglie dei farmaci"]);
-  if(eg !== null && eg < 35) cig.push(["esami", "eGFR " + fmtN(eg, 0), eg < 30 ? "No bisfosfonati, teriparatide, abaloparatide" : "No alendronato e zoledronato"]);
-  if(ci.cv || F.feats.has("ictus_emiplegia")) cig.push(["anam", "infarto o ictus", "No romosozumab"]);
-  if(ci.tev) cig.push(["anam", "tromboembolismo", "No raloxifene e bazedoxifene"]);
-  if(cig.length){ const op = !!FIG.ciOpen;
-    sx.push(`<button type="button" class="fbd k-ci fsec-b" data-ciopen aria-expanded="${op}" aria-label="${hx(plural(cig.length, "controindicazione", "controindicazioni") + ": " + cig.map(x => x[1]).join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${cig.length}</span><span class="fbd-t"><b>Controindicazioni</b><small>${hx(cig.map(x => x[1]).join(" · "))}</small></span></button>`);
-    if(op) cig.forEach(x => sx.push(`<button type="button" class="fbd fsub" data-fsheet="${x[0]}"><span class="fbd-t"><b>${hx(x[2])}</b><small>${hx(/^eGFR/.test(x[1]) ? x[1] + " mL/min" : x[1])}</small></span></button>`)); }
-  if(ci.denti) pill(sx, "anam", "k-a", "!", "Visita odontoiatrica", "nulla osta alla terapia");
-  /* destra: gli esami */
-  const d = F.lastDxa, sites = [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]);
-  if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(dx, "dxa", "t-" + c[0], fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
+  if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
+  else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
+  /* età e sesso sono già sotto il nome: sulla figura resta solo il BMI se è basso */
+  if(F.bmi && F.bmi < 20) pill(sx, "chi", "k-a", fmtN(F.bmi), "BMI basso", "sotto 20 kg/m²", "BMI " + fmtN(F.bmi) + ", basso");
   const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid]), ...(ci.irc ? [COND.irc] : [])])];
   const short = n => { const t = n.replace(/^Osteoporosi (indotta )?da /i, ""); return t.charAt(0).toUpperCase() + t.slice(1); };
-  /* osteoporosi secondaria: un solo bollino, il numero di condizioni e i nomi su una riga; si apre */
   /* osteoporosi secondaria: un solo bollino con il numero e i nomi; toccandolo si aprono sotto le singole forme, ognuna porta alla sezione da modificare */
   const nm2 = n => /^Farmaci \(/.test(n) ? "Farmaci " + n.replace(/^Farmaci \((.*)\)$/, "$1") : short(n).replace(/\s*\(.*\)$/, "").replace(/ \/ .*$/, "");
   const G = secGroups(p, S);
@@ -155,6 +142,18 @@ function figSummary(p, F, S){
   if(es.st === "miss") pill(dx, "esami", "miss", "?", "Esami del sangue", ls.done + " di " + ls.tot + " inseriti");
   else if(vdLow(vd) || es.st === "warn") pill(dx, "esami", "k-a", "!", "Esami del sangue", vdLow(vd) ? "vitamina D " + vdTxt(vd) : "da rivedere");
   else pill(dx, "esami", "k-ok", "✓", "Esami del sangue", "nella norma");
+  /* controindicazioni: una sola pill con i motivi; toccandola si aprono sotto i farmaci da evitare e perché */
+  const cig = [];
+  if(S.hpp) cig.push(["esami", "fosfatasi alcalina bassa", "No bisfosfonati"]);
+  else if(ci.esofago) cig.push(["anam", "esofago", "No bisfosfonati orali"]);
+  if(ci.irc && eg === null) cig.push(["esami", "insufficienza renale", "Inserisci l'eGFR per le soglie dei farmaci"]);
+  if(eg !== null && eg < 35) cig.push(["esami", "eGFR " + fmtN(eg, 0), eg < 30 ? "No bisfosfonati, teriparatide, abaloparatide" : "No alendronato e zoledronato"]);
+  if(ci.cv || F.feats.has("ictus_emiplegia")) cig.push(["anam", "infarto o ictus", "No romosozumab"]);
+  if(ci.tev) cig.push(["anam", "tromboembolismo", "No raloxifene e bazedoxifene"]);
+  if(cig.length){ const op = !!FIG.ciOpen;
+    dx.push(`<button type="button" class="fbd k-ci fsec-b" data-ciopen aria-expanded="${op}" aria-label="${hx(plural(cig.length, "controindicazione", "controindicazioni") + ": " + cig.map(x => x[1]).join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${cig.length}</span><span class="fbd-t"><b>Controindicazioni</b><small>${hx(cig.map(x => x[1]).join(" · "))}</small></span></button>`);
+    if(op) cig.forEach(x => dx.push(`<button type="button" class="fbd fsub ci" data-fsheet="${x[0]}"><span class="fbd-t"><b>${hx(x[2])}</b><small>${hx(/^eGFR/.test(x[1]) ? x[1] + " mL/min" : x[1])}</small></span></button>`)); }
+  if(ci.denti) pill(dx, "anam", "k-a", "!", "Visita odontoiatrica", "nulla osta alla terapia");
   /* il DeFRA, in grande */
   const z = F.zona, r = F.rischio;
   const big = `<button type="button" class="fdefra z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio di frattura a 10 anni " + fmtN(r, 0) + "%" : ""}"><span class="fdefra-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "—"}</span><span class="fdefra-t"><small>DeFRA · rischio a 10 anni</small><b>Zona ${ZONE[z].t.toLowerCase()}</b><span>${ZONE[z].r}</span></span></button>`;
@@ -188,7 +187,7 @@ function figNext(p, F, S, spots){
     const rivedi = `#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}`;
     const drug = th ? `<a class="fdrugbig go" href="${rivedi}" title="Rivedi la decisione e la terapia"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${F.ther.map(t => dnome(t.farmaco).replace(/ \(.*\)$/, "")).join(" + ")}</b><small>${multi ? "in associazione" : d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${p.decisione.tipo === "spec" ? " · indicato dallo specialista" : ""}</small>${F.ther.some(t => t.farmaco === D_) ? `<small class="freb-in"><b>Rebound:</b> non sospendere né ritardare le dosi; se si interrompe serve un bisfosfonato.</small>` : ""}</span>${CHEV}</a>`
       : p.decisione.tipo === "spec" ? `<a class="fdrugbig spec go" href="#paz-${p.id}-decidi"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>Tocca per registrare la terapia indicata dallo specialista</small></span>${CHEV}</a>`
-      : p.decisione.tipo === "mmg" ? `<a class="fdrugbig go" href="#paz-${p.id}-terapia"><span class="fpill">💊</span><span><b>Farmaco da registrare</b><small>Tocca per indicare il farmaco e la data di inizio</small></span>${CHEV}</a>`
+      : p.decisione.tipo === "mmg" ? `<a class="fdrugbig reg go" href="#paz-${p.id}-terapia"><span class="fpill">💊</span><span><b>Farmaco da registrare</b><small>Tocca per indicare il farmaco e la data di inizio</small></span>${CHEV}</a>`
       : `<a class="fdrugbig none go" href="${rivedi}" title="Rivedi la decisione"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>${p.decisione.tipo === "attesa" ? "Decisione rimandata" : "Nessun farmaco per l'osteoporosi"}</b><small>${p.decisione.tipo === "attesa" ? "in attesa di esami o accertamenti" : "calcio con la dieta, vitamina D, movimento"}</small></span>${CHEV}</a>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
     const quando = dt => { const g = daysTo(dt); return g < 0 ? `in ritardo di ${-g} giorni` : g === 0 ? "oggi" : g < 45 ? `tra ${g} giorni` : `tra ${Math.round(g / 30.4)} mesi`; };
