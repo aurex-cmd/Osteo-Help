@@ -115,7 +115,8 @@ function figSummary(p, F, S){
   const sx = [], dx = [], pill = (arr, k, cls, c, b, sm, aria) => arr.push(`<button type="button" class="fbd ${cls}" data-fsheet="${k}" aria-label="${hx(aria || b + ": " + sm)}"><span class="fbd-c">${c}</span><span class="fbd-t"><b>${hx(b)}</b><small>${hx(sm)}</small></span></button>`);
   const ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd);
   /* sinistra: il paziente */
-  if(F.age !== null) pill(sx, "chi", "k-n", F.age, "anni", (p.sesso === "uomo" ? "uomo" : "donna") + (F.bmi && F.bmi < 20 ? " · BMI " + fmtN(F.bmi) + " basso" : ""), F.age + " anni");
+  /* età e sesso sono già sotto il nome: sulla figura resta solo il BMI se è basso */
+  if(F.bmi && F.bmi < 20) pill(sx, "chi", "k-a", fmtN(F.bmi), "BMI basso", "sotto 20 kg/m²", "BMI " + fmtN(F.bmi) + ", basso");
   if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
   else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
   /* una frattura: sede e data; più fratture: «Fratture multiple», le sedi su una riga, si apre l'elenco con le date */
