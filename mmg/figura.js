@@ -97,9 +97,19 @@ function figSpots(p, F, S){
 const figDone = (F, spots) => !Object.values(spots).some(x => x.st === "miss") && !!F.zona && !!F.lastDxa;
 /* sulla figura, sempre le stesse pill nello stesso posto: si riempiono man mano. Quelle che mancano sono tratteggiate
    con il numero del passo; quella del prossimo passo è viola e pulsa. Controindicazioni e dentista compaiono solo se ci sono. */
-const FIG_PREV = {};  /* per paziente: quali pill erano ancora «da fare» all'ultimo disegno, per animare quelle appena completate */
+const FIG_PREV = {};
+/* età sotto il nome: quando compare per la prima volta (dati appena inseriti) entra con la stessa animazione delle pill;
+   sul telefono aspetta che la scheda si chiuda */
+const FIG_HUD = {};
+function figHudPop(p, k, none){
+  const m = FIG_HUD[p.id] = FIG_HUD[p.id] || {}, hidden = !!FIG_SHEETS[FIG.open] && !figWide(), now = Date.now();
+  if(none){ m[k] = "t"; return ""; }
+  if(hidden){ if(m[k] !== "t") m[k] = "ok"; return ""; }
+  const at = m[k] === "t" ? now : typeof m[k] === "number" ? m[k] : 0;
+  m[k] = at && now - at < 400 ? at : "ok"; return at && now - at < 400 ? " fpop" : "";
+}  /* per paziente: quali pill erano ancora «da fare» all'ultimo disegno, per animare quelle appena completate */
 function figSummary(p, F, S){
-  /* sinistra: l'età e la fragilità, dalla più pesante (età con BMI, T-score, fratture, familiarità);
+  /* sinistra: la fragilità, dalla più pesante (T-score, fratture, familiarità, BMI se basso); l'età è sotto il nome;
      destra: ciò che la spiega o va sistemato prima (forme secondarie, esami del sangue) e ciò che limita la terapia (controindicazioni, dentista);
      in basso, più grande di tutti, il DeFRA. Colore = gravità: rosso serio, ambra attenzione, verde rassicurante, viola neutro. */
   const sx = [], dx = [], pill = (arr, k, cls, c, b, sm, aria) => arr.push(`<button type="button" class="fbd ${cls}" data-fsheet="${k}" aria-label="${hx(aria || b + ": " + sm)}"><span class="fbd-c">${c}</span><span class="fbd-t"><b>${hx(b)}</b><small>${hx(sm)}</small></span></button>`);
@@ -118,10 +128,10 @@ function figSummary(p, F, S){
   const openK = FIG.open === "sec" ? "anam" : FIG.open;
   const todo = (arr, k, sh, b, sm) => { const n = STEP_IX[k] + 1, isNx = nx && nx.k === k; cur[sh] = "t"; if(!isNx && openK !== sh) return;
     pill(arr, sh, "fhsl" + (isNx ? " nx" : ""), n, b, sm, (isNx ? "Prossimo passo, " : "Passo ") + n + ": " + b + ", " + sm); };
-  /* 1 · chi è: l'età (con il BMI), in testa */
+  /* 1 · chi è: l'età compare sotto il nome (con la sua animazione); sulla figura resta solo il BMI se è basso.
+     Finché mancano i dati, qui in testa c'è il punto «1 · Chi è» */
   if(st("dati") === "miss") todo(sx, "dati", "chi", "Chi è", "età, peso, familiarità");
-  else { const low = F.bmi && F.bmi < 20;
-    pill(sx, "chi", (low ? "k-a" : "k-n") + pop("chi"), F.age, "anni", low ? "BMI " + fmtN(F.bmi) + ", basso" : "BMI " + fmtN(F.bmi), F.age + " anni, BMI " + fmtN(F.bmi) + (low ? ", basso" : "")); }
+  const chiPop = st("dati") !== "miss" ? pop("chi") : "";  /* familiarità e BMI basso entrano insieme, quando «Chi è» è completo */
   /* 5 · T-score peggiore */
   const d = F.lastDxa, sites = d ? [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]) : [];
   if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(sx, "dxa", "t-" + c[0] + pop("dxa"), fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
@@ -135,8 +145,9 @@ function figSummary(p, F, S){
     sx.push(`<button type="button" class="fbd ${rec ? "k-r" : "k-a"}${pop("fx")} fsec-b" data-fsheet="fx" aria-label="${hx(F.fx.length + " fratture: " + F.fx.map(f => fxNome(f) + " " + fmtD(f.data)).join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${F.fx.length}</span><span class="fbd-t"><b>Fratture multiple</b><small>${hx((rec ? "1 recente · " : "") + sedi.join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`); }
   else pill(sx, "fx", "k-ok" + pop("fx"), "0", "Nessuna frattura", "da fragilità");
   /* familiarità */
-  if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
-  else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
+  if(p.fam) pill(sx, "chi", "k-a" + chiPop, "Sì", "Familiarità", "fratture nei genitori");
+  else if(p.fam === false) pill(sx, "chi", "k-ok" + chiPop, "No", "Familiarità", "nessuna nei genitori");
+  if(st("dati") !== "miss" && F.bmi && F.bmi < 20) pill(sx, "chi", "k-a" + chiPop, fmtN(F.bmi), "BMI basso", "sotto 20 kg/m²", "BMI " + fmtN(F.bmi) + ", basso");
   /* 3 · forme secondarie: un solo bollino con il numero e i nomi; toccandolo si aprono sotto le singole forme */
   const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid]), ...(ci.irc ? [COND.irc] : [])])];
   const short = n => { const t = n.replace(/^Osteoporosi (indotta )?da /i, ""); return t.charAt(0).toUpperCase() + t.slice(1); };
@@ -259,7 +270,7 @@ function vFigura(p){
   return { bar: "", html: viewSwitch(p, "figura") + `
     <div class="fhud">
       <h1 class="fhud-n${p.nome && p.nome.trim() ? "" : " anon"}">${hx(pzName(p))}</h1>
-      <div class="fhud-m">${p.rival && !p.decisione ? `<span class="fhud-c riv">Rivalutazione dal ${fmtD(p.rival.dal)}</span>` : ""}${p.sesso ? `<span class="fhud-c">${p.sesso === "donna" ? "Donna" : "Uomo"}</span>` : ""}${F.age !== null ? `<span class="fhud-c">${F.age} anni</span>` : ""}<span class="fhud-p" title="${done} di ${STEPS.length} passi completati" aria-label="${done} di ${STEPS.length} passi completati"><span class="proad" aria-hidden="true">${all.map(x => `<i class="${x.st}${nextStep(all) && x.i === nextStep(all).i ? " next" : ""}">${MARK[x.st] || x.i + 1}</i>`).join("")}</span></span></div>
+      <div class="fhud-m">${p.rival && !p.decisione ? `<span class="fhud-c riv">Rivalutazione dal ${fmtD(p.rival.dal)}</span>` : ""}${p.sesso ? `<span class="fhud-c">${p.sesso === "donna" ? "Donna" : "Uomo"}</span>` : ""}${F.age !== null ? `<span class="fhud-c${figHudPop(p, "age")}">${F.age} anni</span>` : (figHudPop(p, "age", true), "")}<span class="fhud-p" title="${done} di ${STEPS.length} passi completati" aria-label="${done} di ${STEPS.length} passi completati"><span class="proad" aria-hidden="true">${all.map(x => `<i class="${x.st}${nextStep(all) && x.i === nextStep(all).i ? " next" : ""}">${MARK[x.st] || x.i + 1}</i>`).join("")}</span></span></div>
     </div>
     <div class="fgrid${panel ? " panel" : ""}"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>${figRoad(p, all)}
     <div class="fcol-r">${panel ? `<div class="fpanel" role="region" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, true)}</div>` : `
