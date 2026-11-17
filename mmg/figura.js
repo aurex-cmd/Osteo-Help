@@ -377,7 +377,7 @@ function vDecidi(p, inPanel){
     ${cur === "spec" ? specBlk : ""}
     <div class="dverd z-${F.zona}">
       <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
-      <b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : pr.tipo === "mmg" && best ? "Terapia di prima linea" : pr.t}</b>
+      <b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : pr.tipo === "mmg" && best ? "Terapia consigliata" : pr.t}</b>
       ${best ? `<div class="dbest${pr.paget ? "" : " wn"}"><div class="dbest-r">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span>${pr.paget ? `<em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em>` : ""}</div>${!pr.paget ? whyBest(best) : ""}</div>${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
       ${pr.paget ? `<p class="dnote">${pr.s}</p>` : ""}
       ${pr.tipo === "spec" ? `<p class="dnote">La lettera allo specialista è già compilata. Nell'attesa: calcio, vitamina D, prevenzione delle cadute.</p>` : pr.tipo === "nessuno" ? `<p class="dnote">${ZONE.verde.azione}</p>` : ""}
