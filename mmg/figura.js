@@ -147,6 +147,7 @@ function figSummary(p, F, S){
   const big = `<button type="button" class="fdefra z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio di frattura a 10 anni " + fmtN(r, 0) + "%" : ""}"><span class="fdefra-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "—"}</span><span class="fdefra-t"><small>DeFRA · rischio a 10 anni</small><b>Zona ${ZONE[z].t.toLowerCase()}</b><span>${ZONE[z].r}</span></span></button>`;
   return `<div class="fsum${(FIG.ciOpen && cig.length) || (FIG.secOpen && sec.length) ? " ciop" : ""}"><div class="fsum-c">${sx.join("")}</div><div class="fsum-c r">${dx.join("")}</div></div>${big}`;
 }
+const FIG_TREE = true;
 function figStage(p, fig, spots, F, S){
   const d = FIGURE[fig], lblFx = d.fxLbl;
   const pos = { chi:d.testa, fx:d.fx, anam:d.busto };
@@ -172,6 +173,15 @@ function figStage(p, fig, spots, F, S){
   const terIn = `<span class="fter-c">${t7.st === "ok" ? "✓" : "7"}</span><span class="fter-t"><small>Passo 7 · terapia</small><b>${ready ? "Decidi la terapia" : "Terapia"}</b><span>${ready ? "zona e Nota 79 pronte" : "dopo i passi da 1 a 6"}</span></span>`;
   const ter = ready ? `<a class="fter on" href="#paz-${p.id}-decidi" aria-label="Passo 7: decidi la terapia">${terIn}</a>`
     : `<button type="button" class="fter" data-fsheet="${ST.find(x => x[2] === "miss")[1]}" aria-label="Passo 7: terapia, dopo i passi da 1 a 6">${terIn}</button>`;
+  /* albero di Natale: i 6 punti sulla figura come all'inizio (pallino + etichetta), non collegati, dalla testa in giù
+     a zig zag, sempre più aperti: 1 al centro sulla testa, poi sinistra e destra alternate. Ogni etichetta guarda verso il centro.
+     (FIG_TREE = false: le due colonne di pill) */
+  if(FIG_TREE){
+    const POS = [[50, 12], [38, 24], [62, 36], [30, 48], [70, 60], [22, 72]];
+    const dot = ([k, sh, st, t, sm], i) => { const [x, y] = POS[i], isNx = nx && nx.k === k, c = st === "ok" ? "ok" : st === "al" ? "al" : isNx ? "miss" : "later";
+      return `<button type="button" class="fhs ${c}${x > 52 ? " l" : ""}" data-fsheet="${sh}" style="left:${x}%;top:${y}%" aria-label="${hx("Passo " + (i + 1) + ": " + t + ", " + sm)}"><span class="fdot">${st === "ok" ? "✓" : st === "al" ? "!" : i + 1}</span><span class="ftag"><b>${hx(t)}</b><small>${hx(sm)}</small></span></button>`; };
+    return `<div class="fstage steps"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">${ST.map(dot).join("")}</div>${ter}</div>`;
+  }
   return `<div class="fstage steps"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>
     <div class="fsum"><div class="fsum-c">${ST.slice(0, 3).map(pillS).join("")}</div><div class="fsum-c r">${ST.slice(3).map((x, i) => pillS(x, i + 3)).join("")}</div></div>${ter}</div>`;
 }
