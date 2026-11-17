@@ -889,7 +889,7 @@ body.locked .bar{visibility:hidden}
 .frival > summary{border:2px solid var(--pri);color:var(--pri);box-shadow:0 4px 14px rgba(30,20,70,.1)}
 /* archivio: schede ordinate in tre fasce (chi è · terapia · percorso), colori pieni come la figura */
 .pcards{gap:12px}
-.pcard{flex-direction:column;align-items:stretch;gap:0;padding:0;background:#fff;border:1px solid var(--line);box-shadow:0 4px 14px rgba(30,20,70,.08);overflow:hidden;color:inherit;text-decoration:none}
+.pcard{flex-direction:column;align-items:stretch;gap:0;padding:0;background:var(--box);overflow:hidden;color:inherit;text-decoration:none}
 .pcard > .chev{display:none}
 .ptop{display:flex;align-items:center;gap:12px;padding:14px 14px 10px}
 .pid{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px} .pid b{font-size:1.05rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)} .pid small{font-size:.82rem;color:var(--muted)}
@@ -904,6 +904,8 @@ body.locked .bar{visibility:hidden}
 .pst .pprog{margin:0;max-width:none} .pst small{font-size:.76rem;color:var(--muted);line-height:1.35} .pst small b{color:var(--ink);font-weight:700}
 .pst.ok small b{color:var(--teal)}
 .pitem.anon .pcard{padding-right:0} .pitem.anon .ptop{padding-right:52px} .pitem .pdel{top:20px;transform:none}
+.pti.sup,.fdrugbig.sup .fpill{background:#E3B21A!important} .pti.sup .dic [stroke],.fdrugbig.sup .fpill .dic [stroke]{stroke:#3D2F00} .pti.sup .dic [fill]:not([fill="none"]),.fdrugbig.sup .fpill .dic [fill]:not([fill="none"]){fill:rgba(255,255,255,.55)}
+.supbox select{width:100%}
 </style>
 </head>
 <body>

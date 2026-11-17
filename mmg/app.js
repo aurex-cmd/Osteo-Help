@@ -432,6 +432,7 @@ function pzText(p){
   if(n79.length) L.push("Nota 79: " + n79.map(c => c.cond).join("; "));
   if(p.decisione && DECISIONI[p.decisione.tipo]) L.push("Decisione: " + DECISIONI[p.decisione.tipo].t + " (" + fmtD(p.decisione.data) + ")");
   if(F.ther.length) L.push("Terapia in corso: " + F.ther.map(t => dnome(t.farmaco) + " dal " + fmtD(t.inizio) + (nextDose(t) ? ", prossima " + doseWord(t.farmaco) + " " + fmtDt(nextDose(t)) : "")).join("; "));
+  if(supList(p).length) L.push("Vitamina D e calcio: " + supTxt(p) + (p.supDal ? " dal " + fmtD(p.supDal) : "") + (p.supNota ? " (" + p.supNota + ")" : ""));
   L.push(pl.t);
   const td = pzTodo(p, F); if(td.length) L.push("Da fare: " + td.map(x => x.t).join("; "));
   return L.join("\n").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
@@ -551,7 +552,7 @@ function pzCards(list){
     const ter = F.ther.length ? [ic("on", drugIcon(F.ther[0].farmaco)), F.ther.map(t => dn(t.farmaco)).join(" + "), "dal " + fmtD(F.ther[0].inizio)]
       : dec === "spec" ? [ic("spec", "🩺"), "Inviato allo specialista", "terapia da registrare"]
       : dec === "mmg" ? [ic("reg", "💊"), "Farmaco da registrare", "terapia decisa"]
-      : dec === "nessuno" ? [ic("none", "—"), "Nessun farmaco", "calcio, vitamina D, movimento"]
+      : dec === "nessuno" ? (supList(p).length ? [ic("sup", `<svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.sole}</svg>`), "Solo vitamina D e calcio", supTxt(p)] : [ic("none", "—"), "Nessun farmaco", "vitamina D e calcio da registrare"])
       : dec === "attesa" ? [ic("none", "⏳"), "Decisione rimandata", "in attesa di esami"]
       : [ic("miss", ""), "Terapia da decidere", ""];
     const q = [pzName(p), ...F.ther.map(t => dn(t.farmaco))].join(" ").toLowerCase();
@@ -559,7 +560,7 @@ function pzCards(list){
     const miss = nx && nx.s && /^Manca/.test(nx.s) ? nx.s : "";
     return `<div class="pitem${anon ? " anon" : ""}" data-q="${hx(q)}"><a class="pcard" href="#paz-${p.id}">
       <span class="ptop">${avatar(p)}<span class="pid"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}</small></span>${F.zona ? `<span class="pzone z-${F.zona}">Zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</span>
-      <span class="pter${F.ther.length || dec === "spec" || dec === "mmg" ? "" : " no"}">${ter[0]}<span><b>${hx(ter[1])}</b>${ter[2] ? `<small>${hx(ter[2])}</small>` : ""}</span>${CHEV}</span>
+      <span class="pter${F.ther.length || dec === "spec" || dec === "mmg" || (dec === "nessuno" && supList(p).length) ? "" : " no"}">${ter[0]}<span><b>${hx(ter[1])}</b>${ter[2] ? `<small>${hx(ter[2])}</small>` : ""}</span>${CHEV}</span>
       <span class="pst${done && pl.st === "ok" ? " ok" : ""}"><span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small><b>${hx(stTxt)}</b>${miss ? `<br>${hx(miss.charAt(0).toUpperCase() + miss.slice(1))}` : ""}</small></span></a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
   }).join("");
 }
@@ -617,6 +618,12 @@ const DECISIONI = {
   attesa:{ t:"Decisione rimandata", s:"In attesa di esami o accertamenti." }
 };
 const DEC_ZONA = { verde:"nessuno", gialla:"mmg", arancione:"spec", rossa:"spec" };
+/* vitamina D e calcio: si registrano a parte, per tutti (anche per chi non fa un farmaco per l'osteoporosi) */
+const SUP_VD = ["Colecalciferolo 1.000 UI al giorno", "Colecalciferolo 2.000 UI al giorno", "Colecalciferolo 10.000 UI alla settimana", "Colecalciferolo 25.000 UI ogni 2 settimane", "Colecalciferolo 25.000 UI al mese", "Colecalciferolo 50.000 UI al mese", "Calcifediolo 0,266 mg ogni 2 settimane", "Calcifediolo 0,266 mg al mese"];
+const SUP_CA = ["Calcio 500 mg al giorno", "Calcio 1000 mg al giorno", "Colecalciferolo con calcio (associazione)"];
+const supList = p => [p.supVD, p.supCa].filter(Boolean);
+const supTxt = p => supList(p).map((x, i) => i ? x.charAt(0).toLowerCase() + x.slice(1) : x).join(" · ");
+const supSel = (p, k, opts, none) => `<select data-pf="${k}"><option value="">${none}</option>${opts.map(o => `<option value="${hx(o)}"${p[k] === o ? " selected" : ""}>${hx(o)}</option>`).join("")}</select>`;
 function stepStatus(p, k, F, S){
   F = F || pzFacts(p);
   if(k === "dati"){
@@ -911,6 +918,16 @@ function vPazTerapia(p){
     <div class="btns"><a class="btn sec" href="#paz-${p.id}-decidi">Decidi la terapia</a></div>
     ${rows ? `<ul class="list recs">${rows}</ul>` : `<p class="hint">Nessuna terapia registrata.</p>`}
     ${notes.length ? `<p class="small"><a href="#paz-${p.id}-foglio">Foglio per il paziente</a>: come prendere la terapia e cosa fare a casa, da stampare.</p>` : ""}
+    <p class="lbl">Vitamina D e calcio</p>
+    <div class="addbox supbox">
+      <div class="grid2">
+        <label class="fld" style="grid-column:1/-1">Vitamina D${supSel(p, "supVD", SUP_VD, "Nessuna")}</label>
+        <label class="fld" style="grid-column:1/-1">Calcio${supSel(p, "supCa", SUP_CA, "Basta la dieta")}</label>
+        <label class="fld">Dal<input type="date" data-pf="supDal" value="${hx(p.supDal || "")}"></label>
+        <label class="fld">Nota (facoltativa)<input type="text" data-pf="supNota" value="${hx(p.supNota || "")}" placeholder="es. nome commerciale"></label>
+      </div>
+      <p class="small">Si salva da solo. Dosi e rimborsabilità: <a href="#guida-nota96">Vitamina D e Nota 96</a>.</p>
+    </div>
     <p class="lbl">${rows ? "Aggiungi un farmaco" : "Registra un farmaco"}</p>
     <div class="addbox">
       <div class="grid2">
