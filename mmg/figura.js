@@ -104,7 +104,7 @@ function figSummary(p, F, S){
      in basso, più grande di tutti, il DeFRA. Colore = gravità: rosso serio, ambra attenzione, verde rassicurante, viola neutro. */
   const sx = [], dx = [], pill = (arr, k, cls, c, b, sm, aria) => arr.push(`<button type="button" class="fbd ${cls}" data-fsheet="${k}" aria-label="${hx(aria || b + ": " + sm)}"><span class="fbd-c">${c}</span><span class="fbd-t"><b>${hx(b)}</b><small>${hx(sm)}</small></span></button>`);
   const ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), all = allSteps(p), nx = nextStep(all), st = k => all[STEP_IX[k]].st;
-  /* da fare: come i punti di una volta (pallino viola con l'alone e l'etichetta bianca accanto), con il numero del passo.
+  /* il prossimo passo: come i punti di una volta (pallino viola con l'alone e l'etichetta bianca accanto), con il numero del passo.
      Quando il dato arriva diventa una pill, con un'animazione (fpop) la prima volta che la si vede completa */
   const prev = FIG_PREV[p.id] || {}, cur = FIG_PREV[p.id] = {};
   /* sul telefono, con la scheda aperta sopra la figura, l'animazione aspetta che la scheda si chiuda */
@@ -113,8 +113,9 @@ function figSummary(p, F, S){
   const pop = k => { if(hidden){ cur[k] = prev[k] === "t" ? "t" : "ok"; return ""; }
     const now = Date.now(), at = prev[k] === "t" ? now : typeof prev[k] === "number" ? prev[k] : 0;
     cur[k] = at && now - at < 400 ? at : "ok"; return at && now - at < 400 ? " fpop" : ""; };
-  const todo = (arr, k, sh, b, sm) => { const n = STEP_IX[k] + 1, isNx = nx && nx.k === k; cur[sh] = "t";
-    pill(arr, sh, "fhsl" + (isNx ? " nx" : ""), n, b, sm, "Passo " + n + ": " + b + ", " + sm); };
+  /* dei dati mancanti si mostra solo il prossimo passo, nel posto dove comparirà la sua pill: gli altri spazi restano vuoti */
+  const todo = (arr, k, sh, b, sm) => { const n = STEP_IX[k] + 1; cur[sh] = "t"; if(!(nx && nx.k === k)) return;
+    pill(arr, sh, "fhsl nx", n, b, sm, "Prossimo passo, " + n + ": " + b + ", " + sm); };
   /* 1 · chi è: l'età (con il BMI se è basso), poi la familiarità */
   if(st("dati") === "miss") todo(sx, "dati", "chi", "Chi è", "età, peso, familiarità");
   else { const low = F.bmi && F.bmi < 20;
@@ -165,7 +166,7 @@ function figSummary(p, F, S){
   const z = F.zona, r = F.rischio, dn = STEP_IX.defra + 1, dNx = nx && nx.k === "defra";
   const popD = z ? pop("defra") : (cur.defra = "t", "");
   const big = z ? `<button type="button" class="fdefra z-${z}${popD}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio di frattura a 10 anni " + fmtN(r, 0) + "%" : ""}"><span class="fdefra-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "—"}</span><span class="fdefra-t"><small>DeFRA · rischio a 10 anni</small><b>Zona ${ZONE[z].t.toLowerCase()}</b><span>${ZONE[z].r}</span></span></button>`
-    : `<button type="button" class="fter fhsl${dNx ? " nx" : ""}" data-fsheet="defra" aria-label="Passo ${dn}: DeFRA, zona da inserire"><span class="fter-c">${dn}</span><span class="fter-t"><small>Passo ${dn} · DeFRA</small><b>Rischio a 10 anni</b><span>zona da inserire</span></span></button>`;
+    : !dNx ? "" : `<button type="button" class="fter fhsl nx" data-fsheet="defra" aria-label="Passo ${dn}: DeFRA, zona da inserire"><span class="fter-c">${dn}</span><span class="fter-t"><small>Passo ${dn} · DeFRA</small><b>Rischio a 10 anni</b><span>zona da inserire</span></span></button>`;
   return `<div class="fsum${(FIG.ciOpen && cig.length) || (FIG.secOpen && sec.length) ? " ciop" : ""}"><div class="fsum-c">${sx.join("")}</div><div class="fsum-c r">${dx.join("")}</div></div>${big}`;
 }
 function figStage(p, fig, spots, F, S){
