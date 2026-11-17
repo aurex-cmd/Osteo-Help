@@ -61,7 +61,7 @@ const FIRST_LEVEL = new Set(["Fosforo","Calciuria 24h","25-OH-vit D","25-OH-vita
    così la causa più probabile viene per prima (es. ipocalciuria isolata → ridotto introito di calcio) */
 const FREQ = {
   ridIntroito:1, deficitD:1.1, iperpara:1, farmaciCa:1, ipertiroid:1, irc:1, ipercalciuriaId:1, flogosi:1, talassemia:1, immobiliz:1,
-  malassorb:2, mgus:2, epatopatia:2, colestasi:2, ipotiroid:2, connettiv:2, farmaciD:2, ipomagne:2, malnutriz:2, neoplasia:2, mieloma:2, nefrosica:2, paget:2,
+  malassorb:2, mgus:2, epatopatia:2, colestasi:2, ipotiroid:2, connettiv:2, farmaciD:2, ipomagne:2, malnutriz:1, neoplasia:2, mieloma:2, nefrosica:2, paget:2,
   fhh:3, sarcoidosi:3, intoxD:3, osteomalIpoP:3, fanconi:3, acidosiTub:3, ipopara:3, ipofosfatasia:3, ipercalcemiaMaligna:3
 };
 const byFreq = (a, b) => (FREQ[a.cid] || 2) - (FREQ[b.cid] || 2);
@@ -219,7 +219,7 @@ const FORMS = [
  {cid:"ipopara",f:[["Ca","d"],["P","u"],["PTH","d"]],k:{Ca:["d",0],PTH:["d",1]}},
  {cid:"deficitD",f:[["Ca","d"],["P","d"],["ALP","u"],["CaU","d"],["D","d"],["PTH","u"]],k:{D:["d",0],Ca:["d",1]}},
  {cid:"irc",f:[["Ca","d"],["P","u"],["eGFR","d"],["D","d"],["PTH","u"]],k:{eGFR:["d",0]}},
- {cid:"malassorb",f:[["Hb","d"],["Alb","d"],["Ca","d"],["P","d"],["CaU","d"],["D","d"],["PTH","u"]],k:{Ca:["d",1]}},
+ {cid:"malassorb",f:[["Hb","d"],["Alb","d"],["Ca","d"],["P","d"],["CaU","d"],["D","d"],["PTH","u"]],k:{Ca:["d",1]},need:[["Ca","d"],["P","d"],["CaU","d"],["D","d"],["PTH","u"]]},
  {cid:"ipomagne",f:[["Ca","d"]],k:{}},
  {cid:"paget",f:[["ALP","u"]],k:{ALP:["u",0]}},
  {cid:"colestasi",f:[["ALP","u"]],k:{ALP:["u",0]}},
@@ -230,7 +230,7 @@ const FORMS = [
  {cid:"fanconi",f:[["P","d"]],k:{P:["d",0]}},
  {cid:"mgus",f:[["VES","u"],["MSpike","u"]],k:{MSpike:["u",1]}},
  {cid:"talassemia",f:[["Hb","d"],["MCV","d"]],k:{MCV:["d",0],Hb:["d",1]}},
- {cid:"flogosi",f:[["VES","u"],["Hb","d"]],k:{VES:["u",0]}},
+ {cid:"flogosi",f:[["VES","u"],["Hb","d"],["Alb","d"]],k:{VES:["u",0]}},
  {cid:"connettiv",f:[["VES","u"]],k:{VES:["u",0]}},
  {cid:"ipercalciuriaId",f:[["CaU","u"]],k:{CaU:["u",0],Ca:["n",0]}},
  {cid:"acidosiTub",f:[["CaU","u"]],k:{CaU:["u",0]}},
@@ -750,7 +750,8 @@ function multiCauseF(elig, sel){
 function computeA(){
   const sel = selFindings();
   if(!sel.length) return { sel, kind:"none", forms:[], leftover:[], panel:[], excluded:[] };
-  const elig = FORMS.filter(f => !normEx(f) && !contradicted(f, sel));
+  const needOk = f => !f.need || sel.some(s => f.need.some(n => n[0] === s[0] && n[1] === s[1]));
+  const elig = FORMS.filter(f => !normEx(f) && !contradicted(f, sel) && needOk(f));
   const inter = elig.filter(f => sel.every(s => covers(f, s)));
   let kind, forms = [], leftover = [];
   if(inter.length){ kind = "inter"; forms = inter.map(f => ({ cid: f.cid })).sort(byFreq); }
