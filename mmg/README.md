@@ -194,3 +194,6 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 ### Ordine delle pill sulla figura e scheda del farmaco
 - Le pill si leggono dall'alto a sinistra in giù, poi a destra: a sinistra la fragilità (T-score peggiore, fratture, familiarità, BMI basso); a destra le cause e ciò che va sistemato (osteoporosi secondaria, esami del sangue), poi ciò che limita la terapia (controindicazioni con le sotto-pill, visita odontoiatrica).
 - Il riquadro del caso completo usa gli stessi colori pieni delle pill: fondo verde acqua più acceso (#BFE6E2), icona del farmaco bianca su cerchio pieno (verde terapia, viola specialista, giallo da registrare, grigio nessun farmaco), avviso rebound con barra gialla, «Rivaluta» con bordo viola pieno.
+
+### Schede dell'archivio pazienti
+- Ogni scheda è divisa in tre fasce: chi è (avatar, nome, sesso ed età, zona DeFRA come etichetta colorata a destra), la terapia (icona su cerchio pieno: verde farmaco in corso, viola specialista, giallo da registrare, grigio nessun farmaco, tratteggiata da decidere) e, su fondo grigio, la barra del percorso con il passo e cosa manca.

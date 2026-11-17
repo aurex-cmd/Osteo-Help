@@ -544,18 +544,23 @@ function pzCards(list){
   return list.slice().sort((a, b) => pzName(a).localeCompare(pzName(b), "it", { sensitivity:"base" })).map(p => {
     const F = pzFacts(p), all = allSteps(p), nx = nextStep(all), pl = dxaPlan(F);
     const bits = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : ""].filter(Boolean).join(", ");
-    const where = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}${nx.s && /^Manca/.test(nx.s) ? " · " + nx.s.toLowerCase() : ""}` : pl.st !== "ok" ? pl.t : "Percorso completo";
     const anon = !(p.nome && p.nome.trim()), dn = id => dnome(id).replace(/ \(.*\)$/, "");
     const dec = p.decisione && p.decisione.tipo;
-    const ter = F.ther.length ? `<span class="pdrug">${drugIcon(F.ther[0].farmaco)}<span>${F.ther.map(t => dn(t.farmaco)).join(" + ")}<em> · dal ${fmtD(F.ther[0].inizio)}</em></span></span>`
-      : dec === "spec" ? `<span class="pdrug none">🩺<span>Inviato allo specialista</span></span>`
-      : dec === "nessuno" ? `<span class="pdrug none">—<span>Nessun farmaco per l'osteoporosi</span></span>`
-      : dec === "attesa" ? `<span class="pdrug none">⏳<span>Decisione rimandata</span></span>` : "";
+    /* scheda ordinata in tre fasce: chi è (nome, sesso ed età, zona DeFRA a destra), la terapia, a che punto è il percorso */
+    const ic = (cls, inner) => `<span class="pti ${cls}">${inner}</span>`;
+    const ter = F.ther.length ? [ic("on", drugIcon(F.ther[0].farmaco)), F.ther.map(t => dn(t.farmaco)).join(" + "), "dal " + fmtD(F.ther[0].inizio)]
+      : dec === "spec" ? [ic("spec", "🩺"), "Inviato allo specialista", "terapia da registrare"]
+      : dec === "mmg" ? [ic("reg", "💊"), "Farmaco da registrare", "terapia decisa"]
+      : dec === "nessuno" ? [ic("none", "—"), "Nessun farmaco", "calcio, vitamina D, movimento"]
+      : dec === "attesa" ? [ic("none", "⏳"), "Decisione rimandata", "in attesa di esami"]
+      : [ic("miss", ""), "Terapia da decidere", ""];
     const q = [pzName(p), ...F.ther.map(t => dn(t.farmaco))].join(" ").toLowerCase();
+    const done = !nx, stTxt = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}` : pl.st !== "ok" ? pl.t : "Percorso completo";
+    const miss = nx && nx.s && /^Manca/.test(nx.s) ? nx.s : "";
     return `<div class="pitem${anon ? " anon" : ""}" data-q="${hx(q)}"><a class="pcard" href="#paz-${p.id}">
-      ${avatar(p)}
-      <span class="pbody"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}${F.zona ? ` · <span class="zn z-${F.zona}"><i></i>zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</small>
-        ${ter}<span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small class="pwhere">${where}</small></span>${CHEV}</a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
+      <span class="ptop">${avatar(p)}<span class="pid"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}</small></span>${F.zona ? `<span class="pzone z-${F.zona}">Zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</span>
+      <span class="pter${F.ther.length || dec === "spec" || dec === "mmg" ? "" : " no"}">${ter[0]}<span><b>${hx(ter[1])}</b>${ter[2] ? `<small>${hx(ter[2])}</small>` : ""}</span>${CHEV}</span>
+      <span class="pst${done && pl.st === "ok" ? " ok" : ""}"><span class="pprog">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span><small><b>${hx(stTxt)}</b>${miss ? `<br>${hx(miss.charAt(0).toUpperCase() + miss.slice(1))}` : ""}</small></span></a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
   }).join("");
 }
 /* archivio: tutti i pazienti, con la ricerca */
