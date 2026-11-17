@@ -1416,7 +1416,7 @@ function vRisultato(){
   else if(r.kind === "multi") h = head("Più cause") + tags + `<p class="sub" style="margin:0">Nessuna forma da sola spiega tutti i reperti: il quadro è compatibile con più cause insieme.</p>`;
   else h = head("Nessuna forma nota") + tags + `<p class="sub" style="margin:0">Nessuna forma in elenco spiega questi reperti. Valuta reperti isolati o cause non in elenco.</p>`;
   if(r.sel.length === 1 && r.sel[0][0] === "Alb" && r.sel[0][1] === "d") h += `<p class="lbl">Albumina bassa isolata</p><p class="note">Nell'anziano è frequente e poco specifica: malnutrizione proteica, infiammazione cronica, malattie epatiche o renali. Da sola non basta a sospettare un malassorbimento: lo fanno pensare calcio, fosforo o vitamina D bassi, PTH alto, calciuria bassa, insieme ai sintomi intestinali.</p>`;
-  if(r.forms.length){ h += `<div id="rForms">` + [1, 2].map(l => { const xs = r.forms.filter(x => levForma(x.cid) === l); return xs.length ? `<p class="lbl lv${l}">${LEV[l].t}</p><p class="small levs">${LEV[l].s}</p><div class="stack lvs${l}">${xs.map(x => entry("forma-" + x.cid, COND[x.cid], x.sub, "teal")).join("")}</div>` : ""; }).join("") + `</div><p class="small" style="margin-top:14px"><a href="#livelli">Cosa significano i tre livelli</a></p>`; }
+  if(r.forms.length){ h += `<div id="rForms">` + [1, 2].map(l => { const xs = r.forms.filter(x => levForma(x.cid) === l); return xs.length ? `<p class="lbl lv${l}">${LEV[l].t}</p><p class="small levs">${LEV[l].s}</p><div class="stack lvs${l}">${xs.map(x => entry("forma-" + x.cid, COND[x.cid], x.cid === "irc" ? [x.sub, "considera l'eGFR: sotto 35 mL/min alcuni farmaci non si possono usare"].filter(Boolean).join(" · ") : x.sub, "teal")).join("")}</div>` : ""; }).join("") + `</div><p class="small" style="margin-top:14px"><a href="#livelli">Cosa significano i tre livelli</a></p>`; }
   if(r.leftover.length) h += `<p class="hint">Non spiegati: ${r.leftover.map(ftag).join(", ")}.</p>`;
   if(r.byForm.length) h += `<p class="lbl">Esami di II livello</p><p class="small">${L2_NOTE}</p><div id="aPanel">${l2ByFormHTML(r.byForm, cid => COND[cid])}</div>`;
   if(r.excluded.length) h += `<p class="lbl">Escluse da un esame normale</p><ul class="list mute">${r.excluded.map(x => `<li>${COND[x[0]]}<em>${x[1]} normale</em></li>`).join("")}</ul>`;
@@ -1432,7 +1432,7 @@ function vForma(cid){
     return `<span class="tag ${a.dir==="up"?"u":"d"}${on?"":" off"}">${a.tag}</span>`;
   }).join("");
   const l2 = (LAB2[cid]||[]).filter(x => !FIRST_LEVEL.has(x));
-  return { bar:"Scheda", html: head(COND[cid], "", COND_CAT[cid]) + levLine(levForma(cid)) + `
+  return { bar:"Scheda", html: head(COND[cid], "", COND_CAT[cid]) + levLine(levForma(cid)) + (cid === "irc" ? `<p class="lbl">eGFR e farmaci</p><p class="note">${IRC_EGFR}</p>` : "") + `
     <p class="lbl">Reperti tipici</p><div class="tags">${reps}</div>
     ${l2.length ? `<p class="lbl">Esami di II livello</p><p class="small">Solo su sospetto clinico.</p><ul class="list">${l2.map((x,i) => `<li><i>${i+1}</i>${x}</li>`).join("")}</ul>` : ""}
     ${NOTES[cid] ? `<p class="lbl">Effetti sull'osso</p><p class="note">${NOTES[cid]}</p>` : ""}
@@ -1481,15 +1481,16 @@ function dockN(){
 
 /* ---------- esami normali: risultato ---------- */
 /* gerarchia delle forme secondarie, per quello che cambiano nella cura (la stessa di Osteo Help MMG) */
-const LEV_L1 = new Set(["tiroxina", "ipogonadismo", "gen_ipofosfatasia",
-  "deficitD", "osteomalIpoP", "fanconi", "ipofosfatasia", "iperpara", "ipertiroid", "ipercalcemiaMaligna", "mieloma", "neoplasia", "intoxD", "farmaciCa", "ipopara", "ipomagne", "paget", "irc"]);
+const LEV_L1 = new Set(["tiroxina", "gen_ipofosfatasia",
+  "ipofosfatasia", "deficitD", "osteomalIpoP", "fanconi", "ipopara", "ipomagne"]);
 const LEV_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
 const LEV = [null,
-  { t:"Prima di trattare", s:"Da correggere o escludere prima del farmaco, oppure cambiano la scelta del farmaco." },
-  { t:"Da approfondire", s:"Si tratta l'osteoporosi mentre si indaga: il sospetto va confermato o escluso." },
+  { t:"Prima di trattare", s:"Da correggere prima del farmaco: senza correzione il farmaco non funziona o fa danno." },
+  { t:"Da approfondire", s:"Si indaga, anche con urgenza, ma intanto l'osteoporosi si tratta: il paziente non resta scoperto." },
   { t:"Fattori noti", s:"Spiegano il rischio ma non cambiano la decisione: si tratta comunque." }];
 const levCausa = f => LEV_L1.has(f.id) ? 1 : f.kind === "sospetto" ? 2 : 3;
 const levForma = cid => LEV_L1.has(cid) ? 1 : 2;
+const IRC_EGFR = "Considera l'eGFR: sotto 35 mL/min alendronato e zoledronato non sono indicati; sotto 30 mL/min nessun bisfosfonato, né teriparatide e abaloparatide. Il denosumab resta possibile, ma con rischio di ipocalcemia grave: calcemia e vitamina D prima di ogni dose e, con eGFR sotto 30, decisione con il nefrologo (CKD-MBD, osso adinamico).";
 const levLine = (l, riv) => `<p class="levline lv${l}"><b>${LEV[l].t}</b> · ${LEV[l].s}${riv ? " Il fattore è da rivedere se possibile." : ""} <a href="#livelli">I tre livelli</a></p>`;
 function badgeOf(x, isSosp){ return isSosp ? (x.hasForte ? "sospetto forte" : "da considerare") : (x.hasForte ? "causa riconosciuta" : "associazione possibile"); }
 function vConsiderare(){
@@ -1730,8 +1731,8 @@ function vLivelli(){
   const ex = (l, t) => `<div class="lvbox lv${l}"><p class="lvbox-t">${LEV[l].t}</p><p class="small">${LEV[l].s}</p><p class="note">${t}</p></div>`;
   return { bar:"I tre livelli", html: head("Forme secondarie: cosa cambiano nella cura") + `
     <p class="note">Cercare le forme secondarie non serve a decidere <i>se</i> trattare l'osteoporosi, ma <i>come</i>. Una causa nota spiega perché l'osso è fragile; non per questo la frattura diventa meno probabile. Per questo le forme sono divise in tre livelli, secondo quello che cambiano nella cura.</p>
-    ${ex(1, "Correggere prima, altrimenti il farmaco funziona meno o può fare danno, oppure la scelta del farmaco cambia. Esempi: <b>carenza di vitamina D e osteomalacia</b> (correggere prima di un antiriassorbitivo); <b>ipofosfatasia</b> (bisfosfonati controindicati); <b>iperparatiroidismo primario</b> (valutazione chirurgica); <b>levotiroxina a dose TSH-soppressiva</b> (ridurre la dose); <b>ipertiroidismo</b>; <b>ipocalcemia, ipomagnesiemia</b>; <b>mieloma, neoplasie, ipercalcemia</b> (inquadramento urgente); <b>malattia di Paget</b>; <b>malattia renale cronica con CKD-MBD</b> (soglie di eGFR e scelta del farmaco con il nefrologo); <b>ipogonadismo maschile</b>.")}
-    ${ex(2, "Il sospetto va confermato o escluso con gli esami indicati nella scheda, ma intanto, se il rischio di frattura lo richiede, l'osteoporosi si tratta. Esempi: <b>ipercortisolismo endogeno (Cushing)</b>, che si indaga e si cura mentre si protegge l'osso; <b>malassorbimento e celiachia non diagnosticata</b>, che vanno indagati e corretti ma, specie nel paziente molto anziano, non devono far rimandare la terapia (il farmaco può rendere meno finché il malassorbimento non è corretto); <b>MGUS</b>, mastocitosi, acromegalia, iperprolattinemia, malattie del collagene.")}
+    ${ex(1, "Sono poche, e bloccano davvero: iniziato prima di correggerle, il farmaco non funziona o fa danno. <b>Levotiroxina a dose TSH-soppressiva</b> (ridurre la dose); <b>ipofosfatasia</b>, anche solo sospettata per una fosfatasi alcalina bassa (bisfosfonati controindicati, antiriassorbitivi da evitare); <b>carenza di vitamina D e osteomalacia</b>, anche ipofosfatemica (l'antiriassorbitivo non cura l'osteomalacia e, con denosumab o zoledronato, espone a ipocalcemia grave); <b>ipocalcemia</b> da ipoparatiroidismo o ipomagnesiemia (va corretta prima di denosumab e zoledronato).")}
+    ${ex(2, "Vanno confermate o escluse, alcune con urgenza, ma un antiriassorbitivo non è controindicato: intanto, se il rischio di frattura lo richiede, l'osteoporosi si tratta. Esempi: <b>iperparatiroidismo primario</b> (valutazione chirurgica); <b>ipertiroidismo</b>; <b>mieloma, neoplasie, ipercalcemie</b> (inquadramento urgente; anabolici controindicati); <b>malattia di Paget</b>; <b>insufficienza renale cronica</b> (l'eGFR decide quali farmaci si possono usare: sotto 35 mL/min non alendronato e zoledronato, sotto 30 nessun bisfosfonato né anabolico); <b>ipogonadismo maschile</b> (testosterone); <b>Cushing</b>; <b>malassorbimento e celiachia</b>, da indagare e correggere ma che, specie nel paziente molto anziano, non devono far rimandare la terapia (il farmaco può rendere meno finché il malassorbimento non è corretto); MGUS, mastocitosi, acromegalia, iperprolattinemia, malattie del collagene.")}
     ${ex(3, "Malattie e terapie già note che aumentano il rischio: spiegano l'osteoporosi ma non la rendono meno da trattare. Esempi: <b>diabete</b>, artrite reumatoide, BPCO, ictus, Parkinson, glucocorticoidi, inibitori dell'aromatasi, deprivazione androgenica. Alcuni fattori sono <b>da rivedere se possibile</b> (inibitori di pompa protonica, SSRI, diuretici dell'ansa, glitazoni, SGLT2-inibitori, oppioidi, medrossiprogesterone, tenofovir, fumo, alcol, basso peso), senza che questo ritardi la terapia.")}
     <p class="small">Il livello indica la priorità nella cura, non la gravità della malattia né la probabilità che sia presente.</p>` };
 }

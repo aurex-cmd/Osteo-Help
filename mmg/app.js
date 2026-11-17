@@ -260,17 +260,17 @@ function pzSecondary(p){
 /* gerarchia delle forme secondarie, per quello che cambiano nella cura:
    1 prima di trattare (correggere o escludere prima del farmaco, o cambia il farmaco), 2 da approfondire (si tratta intanto),
    3 fattori noti: si tratta comunque (alcuni da rivedere se possibile) */
-const SEC_L1 = new Set(["tiroxina", "ipogonadismo", "gen_ipofosfatasia",
-  "deficitD", "osteomalIpoP", "fanconi", "ipofosfatasia", "iperpara", "ipertiroid", "ipercalcemiaMaligna", "mieloma", "neoplasia", "intoxD", "farmaciCa", "ipopara", "ipomagne", "paget"]);
+const SEC_L1 = new Set(["tiroxina", "gen_ipofosfatasia",
+  "ipofosfatasia", "deficitD", "osteomalIpoP", "fanconi", "ipopara", "ipomagne"]);
 const SEC_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
 const SEC_LEV = [null,
-  { t:"Prima di trattare", s:"da correggere o escludere prima del farmaco, o cambiano la scelta del farmaco", k:"r" },
-  { t:"Da approfondire", s:"si tratta l'osteoporosi mentre si indaga", k:"a" },
+  { t:"Prima di trattare", s:"da correggere prima del farmaco: senza correzione non funziona o fa danno", k:"r" },
+  { t:"Da approfondire", s:"si indaga, anche con urgenza, ma intanto si tratta", k:"a" },
   { t:"Fattori noti", s:"spiegano il rischio, si tratta comunque", k:"g" }];
 function secLevels(p, S){
   S = S || pzSecondary(p); const eg = num(p.egfr), out = [], seen = new Set();
   const add = (nome, lev, src, href, riv) => { if(seen.has(nome)) return; seen.add(nome); out.push({ nome, lev, src, href, riv: !!riv }); };
-  const ircLev = eg === null || eg < 30 ? 1 : 2;
+  const ircLev = 2;   /* le soglie di eGFR per i farmaci sono nelle controindicazioni */
   S.N.note.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 3, "anam", OH + "#causa-" + x.f.id, SEC_RIVEDI.has(x.f.id)));
   S.N.sosp.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 2, "anam", OH + "#causa-" + x.f.id));
   S.A.forms.forEach(x => add(COND[x.cid], x.cid === "irc" ? ircLev : SEC_L1.has(x.cid) ? 1 : 2, "esami", OH + "#forma-" + x.cid));
