@@ -167,6 +167,13 @@ body.is-home .rows .rowlink > .ic{width:40px;height:40px;padding:9px;border-radi
 .list li .mk{width:16px;flex:0 0 auto;color:var(--teal);font-weight:800;font-size:.85rem}
 .note{font-size:.93rem;line-height:1.65;margin:0;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
 .badge{font-weight:700;letter-spacing:.02em}
+/* tre livelli: rosso prima di trattare, ambra da approfondire, grigio fattori noti */
+a[href="#livelli"]{color:var(--focus);font-weight:600;text-decoration:none} .lbl.lv1{color:var(--coral)} .lbl.lv2{color:var(--amber)} .small.levs{margin:10px 0 -4px}
+.lvs1 .entry::before{background:var(--coral)} .lvs2 .entry::before{background:#E3B21A} .lvs3 .entry::before{background:var(--faint)}
+.levline{font-size:.82rem;line-height:1.5;color:var(--muted);margin:2px 0 0;padding:8px 12px;border-radius:8px;background:var(--box);border-left:3px solid var(--faint)} .levline b{color:var(--ink)}
+.levline.lv1{border-left-color:var(--coral)} .levline.lv1 b{color:var(--coral)} .levline.lv2{border-left-color:#E3B21A} .levline.lv2 b{color:var(--amber)}
+.lvbox{background:var(--box);border-radius:10px;padding:12px 14px;border-left:3px solid var(--faint);display:flex;flex-direction:column;gap:6px} .lvbox-t{margin:0;font-weight:800}
+.lvbox.lv1{border-left-color:var(--coral)} .lvbox.lv1 .lvbox-t{color:var(--coral)} .lvbox.lv2{border-left-color:#E3B21A} .lvbox.lv2 .lvbox-t{color:var(--amber)}
 .badge.forte{color:var(--teal)} .badge.lieve{color:var(--amber)}
 
 /* accordion */
@@ -1359,6 +1366,7 @@ function vHome(){
       <a class="rowlink" href="#catalogo">${ic("grid")}<span>Catalogo delle forme di osteoporosi secondaria<small>Quando considerarle e come confermarle</small></span>${CHEV}</a>
       <a class="rowlink" href="#pattern">${ic("link")}<span>Pattern da riconoscere<small>Combinazioni classiche di reperti</small></span>${CHEV}</a>
       <a class="rowlink" href="#esami">${ic("rows")}<span>Esame per esame<small>Alterazioni, indizi clinici, forme da sospettare</small></span>${CHEV}</a>
+      <a class="rowlink" href="#livelli">${ic("rows")}<span>Forme secondarie: cosa cambiano nella cura<small>Prima di trattare, da approfondire, fattori noti</small></span>${CHEV}</a>
       <a class="rowlink" href="#calcio">${ic("calc")}<span>Calcio corretto<small>Per l'albumina</small></span>${CHEV}</a>
       <a class="rowlink" href="#bibliografia">${ic("book")}<span>Bibliografia</span>${CHEV}</a>
     </div>
@@ -1408,7 +1416,7 @@ function vRisultato(){
   else if(r.kind === "multi") h = head("Più cause") + tags + `<p class="sub" style="margin:0">Nessuna forma da sola spiega tutti i reperti: il quadro è compatibile con più cause insieme.</p>`;
   else h = head("Nessuna forma nota") + tags + `<p class="sub" style="margin:0">Nessuna forma in elenco spiega questi reperti. Valuta reperti isolati o cause non in elenco.</p>`;
   if(r.sel.length === 1 && r.sel[0][0] === "Alb" && r.sel[0][1] === "d") h += `<p class="lbl">Albumina bassa isolata</p><p class="note">Nell'anziano è frequente e poco specifica: malnutrizione proteica, infiammazione cronica, malattie epatiche o renali. Da sola non basta a sospettare un malassorbimento: lo fanno pensare calcio, fosforo o vitamina D bassi, PTH alto, calciuria bassa, insieme ai sintomi intestinali.</p>`;
-  if(r.forms.length) h += `<div class="stack" id="rForms">${r.forms.map(x => entry("forma-" + x.cid, COND[x.cid], x.sub, "teal")).join("")}</div>`;
+  if(r.forms.length){ h += `<div id="rForms">` + [1, 2].map(l => { const xs = r.forms.filter(x => levForma(x.cid) === l); return xs.length ? `<p class="lbl lv${l}">${LEV[l].t}</p><p class="small levs">${LEV[l].s}</p><div class="stack lvs${l}">${xs.map(x => entry("forma-" + x.cid, COND[x.cid], x.sub, "teal")).join("")}</div>` : ""; }).join("") + `</div><p class="small" style="margin-top:14px"><a href="#livelli">Cosa significano i tre livelli</a></p>`; }
   if(r.leftover.length) h += `<p class="hint">Non spiegati: ${r.leftover.map(ftag).join(", ")}.</p>`;
   if(r.byForm.length) h += `<p class="lbl">Esami di II livello</p><p class="small">${L2_NOTE}</p><div id="aPanel">${l2ByFormHTML(r.byForm, cid => COND[cid])}</div>`;
   if(r.excluded.length) h += `<p class="lbl">Escluse da un esame normale</p><ul class="list mute">${r.excluded.map(x => `<li>${COND[x[0]]}<em>${x[1]} normale</em></li>`).join("")}</ul>`;
@@ -1424,7 +1432,7 @@ function vForma(cid){
     return `<span class="tag ${a.dir==="up"?"u":"d"}${on?"":" off"}">${a.tag}</span>`;
   }).join("");
   const l2 = (LAB2[cid]||[]).filter(x => !FIRST_LEVEL.has(x));
-  return { bar:"Scheda", html: head(COND[cid], "", COND_CAT[cid]) + `
+  return { bar:"Scheda", html: head(COND[cid], "", COND_CAT[cid]) + levLine(levForma(cid)) + `
     <p class="lbl">Reperti tipici</p><div class="tags">${reps}</div>
     ${l2.length ? `<p class="lbl">Esami di II livello</p><p class="small">Solo su sospetto clinico.</p><ul class="list">${l2.map((x,i) => `<li><i>${i+1}</i>${x}</li>`).join("")}</ul>` : ""}
     ${NOTES[cid] ? `<p class="lbl">Effetti sull'osso</p><p class="note">${NOTES[cid]}</p>` : ""}
@@ -1472,15 +1480,28 @@ function dockN(){
 }
 
 /* ---------- esami normali: risultato ---------- */
+/* gerarchia delle forme secondarie, per quello che cambiano nella cura (la stessa di Osteo Help MMG) */
+const LEV_L1 = new Set(["tiroxina", "ipogonadismo", "gen_ipofosfatasia",
+  "deficitD", "osteomalIpoP", "fanconi", "ipofosfatasia", "iperpara", "ipertiroid", "ipercalcemiaMaligna", "mieloma", "neoplasia", "intoxD", "farmaciCa", "ipopara", "ipomagne", "paget", "irc"]);
+const LEV_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
+const LEV = [null,
+  { t:"Prima di trattare", s:"Da correggere o escludere prima del farmaco, oppure cambiano la scelta del farmaco." },
+  { t:"Da approfondire", s:"Si tratta l'osteoporosi mentre si indaga: il sospetto va confermato o escluso." },
+  { t:"Fattori noti", s:"Spiegano il rischio ma non cambiano la decisione: si tratta comunque." }];
+const levCausa = f => LEV_L1.has(f.id) ? 1 : f.kind === "sospetto" ? 2 : 3;
+const levForma = cid => LEV_L1.has(cid) ? 1 : 2;
+const levLine = (l, riv) => `<p class="levline lv${l}"><b>${LEV[l].t}</b> · ${LEV[l].s}${riv ? " Il fattore è da rivedere se possibile." : ""} <a href="#livelli">I tre livelli</a></p>`;
 function badgeOf(x, isSosp){ return isSosp ? (x.hasForte ? "sospetto forte" : "da considerare") : (x.hasForte ? "causa riconosciuta" : "associazione possibile"); }
 function vConsiderare(){
   if(!selected.size) return { redirect:"normali" };
   const r = computeN();
-  const item = (x, isSosp) => `<a class="entry ${x.hasForte?"teal":""}" href="#causa-${x.f.id}"><div><b>${x.f.nome}</b><small>${FORMA_CAT[x.f.cat]||x.f.cat} · <span class="badge ${x.hasForte?"forte":"lieve"}">${badgeOf(x,isSosp)}</span></small></div>${CHEV}</a>`;
+  const item = (x, isSosp) => `<a class="entry ${x.hasForte?"teal":""}" href="#causa-${x.f.id}"><div><b>${x.f.nome}</b><small>${FORMA_CAT[x.f.cat]||x.f.cat} · <span class="badge ${x.hasForte?"forte":"lieve"}">${badgeOf(x,isSosp)}</span>${LEV_RIVEDI.has(x.f.id) ? " · da rivedere se possibile" : ""}</small></div>${CHEV}</a>`;
   let h = head("Da considerare");
   if(!r.note.length && !r.sosp.length) h += `<p class="sub" style="margin:0">Nessuna forma secondaria associata agli elementi spuntati.</p>`;
-  if(r.note.length) h += `<p class="lbl">Cause note presenti</p><div class="stack" id="nNote">${r.note.map(x => item(x,false)).join("")}</div>`;
-  if(r.sosp.length) h += `<p class="lbl">Sospetti da approfondire</p><div class="stack" id="nSosp">${r.sosp.map(x => item(x,true)).join("")}</div>`;
+  const all = [...r.note.map(x => [x, false]), ...r.sosp.map(x => [x, true])];
+  [1, 2, 3].forEach(l => { const xs = all.filter(([x]) => levCausa(x.f) === l); if(!xs.length) return;
+    h += `<p class="lbl lv${l}">${LEV[l].t}</p><p class="small levs">${LEV[l].s}</p><div class="stack lvs${l}">${xs.map(([x, s]) => item(x, s)).join("")}</div>`; });
+  if(all.length) h += `<p class="small" style="margin-top:14px"><a href="#livelli">Cosa significano i tre livelli</a></p>`;
   return { bar:"Risultato", act:["Modifica", goBack], html: h };
 }
 
@@ -1531,7 +1552,7 @@ function vCausa(id){
   const f = FORMA[id]; if(!f) return { redirect:"" };
   const trig = f.trigger.filter(t => t[2] !== "supp").sort((a, b) => (a[1] === "forte" ? 0 : 1) - (b[1] === "forte" ? 0 : 1));
   const row = t => { const on = active().has(t[0]); return `<li class="${t[1]==="forte"?"forte":""}${on?" on":""}"><span class="mk">${on?"✓":""}</span>${phrase(t[0])}<em class="${t[1]}">${t[1]}</em></li>`; };
-  return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + causaBody(id) + fontiHTML(SRC[id]) };
+  return { bar:"Scheda", html: head(f.nome, f.sesso ? "Solo " + (f.sesso === "uomo" ? "uomo" : "donna") : "", FORMA_CAT[f.cat]||f.cat) + levLine(levCausa(f), LEV_RIVEDI.has(f.id)) + causaBody(id) + fontiHTML(SRC[id]) };
 }
 function causaBody(id){
   const f = FORMA[id];
@@ -1705,6 +1726,15 @@ function catHTML(q){
 function vCatalogo(){
   return { bar:"Catalogo", html: `<div class="cat-top">` + head("Catalogo delle forme di osteoporosi secondaria") + `<input class="search" id="catQ" type="search" placeholder="Cerca una condizione" autocomplete="off" aria-label="Cerca" value="${catQ.replace(/"/g,"&quot;")}"><p class="small cat-key"><span class="dot"></span>si evidenzia agli esami di primo livello</p></div><div id="catList" class="cat">${catHTML(catQ)}</div>` };
 }
+function vLivelli(){
+  const ex = (l, t) => `<div class="lvbox lv${l}"><p class="lvbox-t">${LEV[l].t}</p><p class="small">${LEV[l].s}</p><p class="note">${t}</p></div>`;
+  return { bar:"I tre livelli", html: head("Forme secondarie: cosa cambiano nella cura") + `
+    <p class="note">Cercare le forme secondarie non serve a decidere <i>se</i> trattare l'osteoporosi, ma <i>come</i>. Una causa nota spiega perché l'osso è fragile; non per questo la frattura diventa meno probabile. Per questo le forme sono divise in tre livelli, secondo quello che cambiano nella cura.</p>
+    ${ex(1, "Correggere prima, altrimenti il farmaco funziona meno o può fare danno, oppure la scelta del farmaco cambia. Esempi: <b>carenza di vitamina D e osteomalacia</b> (correggere prima di un antiriassorbitivo); <b>ipofosfatasia</b> (bisfosfonati controindicati); <b>iperparatiroidismo primario</b> (valutazione chirurgica); <b>levotiroxina a dose TSH-soppressiva</b> (ridurre la dose); <b>ipertiroidismo</b>; <b>ipocalcemia, ipomagnesiemia</b>; <b>mieloma, neoplasie, ipercalcemia</b> (inquadramento urgente); <b>malattia di Paget</b>; <b>malattia renale cronica con CKD-MBD</b> (soglie di eGFR e scelta del farmaco con il nefrologo); <b>ipogonadismo maschile</b>.")}
+    ${ex(2, "Il sospetto va confermato o escluso con gli esami indicati nella scheda, ma intanto, se il rischio di frattura lo richiede, l'osteoporosi si tratta. Esempi: <b>ipercortisolismo endogeno (Cushing)</b>, che si indaga e si cura mentre si protegge l'osso; <b>malassorbimento e celiachia non diagnosticata</b>, che vanno indagati e corretti ma, specie nel paziente molto anziano, non devono far rimandare la terapia (il farmaco può rendere meno finché il malassorbimento non è corretto); <b>MGUS</b>, mastocitosi, acromegalia, iperprolattinemia, malattie del collagene.")}
+    ${ex(3, "Malattie e terapie già note che aumentano il rischio: spiegano l'osteoporosi ma non la rendono meno da trattare. Esempi: <b>diabete</b>, artrite reumatoide, BPCO, ictus, Parkinson, glucocorticoidi, inibitori dell'aromatasi, deprivazione androgenica. Alcuni fattori sono <b>da rivedere se possibile</b> (inibitori di pompa protonica, SSRI, diuretici dell'ansa, glitazoni, SGLT2-inibitori, oppioidi, medrossiprogesterone, tenofovir, fumo, alcol, basso peso), senza che questo ritardi la terapia.")}
+    <p class="small">Il livello indica la priorità nella cura, non la gravità della malattia né la probabilità che sia presente.</p>` };
+}
 function vCalcio(){
   return { bar:"Calcio corretto", html: head("Calcio corretto") + `
     <div class="calc">
@@ -1874,7 +1904,7 @@ $("#vidEl").addEventListener("error", () => { if(!$("#vid").hidden){ vidClose();
 document.addEventListener("keydown", e => { if(e.key === "Escape" && !$("#vid").hidden) vidClose(); });
 
 /* ---------- navigazione ---------- */
-const ROUTES = { "":vHome, alterati:vAlterati, risultato:vRisultato, normali:vNormali, considerare:vConsiderare, pattern:vPattern, esami:vEsami, catalogo:vCatalogo, calcio:vCalcio, bibliografia:vBiblio };
+const ROUTES = { "":vHome, alterati:vAlterati, risultato:vRisultato, normali:vNormali, considerare:vConsiderare, pattern:vPattern, esami:vEsami, catalogo:vCatalogo, calcio:vCalcio, bibliografia:vBiblio, livelli:vLivelli };
 const PARENT = r => r === "risultato" || r.startsWith("forma-") ? "alterati" : r === "considerare" || r.startsWith("causa-") ? "normali" : r.startsWith("esame-") ? "esami" : r.startsWith("gruppo-") ? "catalogo" : "";
 const stack = [];
 let current = null, dockCfg = null, actFn = null;
@@ -1891,7 +1921,7 @@ const WIDE = matchMedia("(min-width:1000px)");
 /* da quale elenco si arriva a ogni tipo di scheda; senza un elenco aperto si usa il primo che ha senso */
 const LIST_OF = { forma:["risultato","esami","catalogo"], causa:["considerare","catalogo"], gruppo:["catalogo"], esame:["esami"] };
 const LIVE = { alterati:"risultato", normali:"considerare", pattern:"risultato" };
-const SINGLE = new Set(["", "calcio", "bibliografia"]);
+const SINGLE = new Set(["", "calcio", "bibliografia", "livelli"]);
 let leftRoute = null, patSel = null;
 function panes(route){
   if(SINGLE.has(route) || !ROUTES[route] && !/^(forma|causa|gruppo|esame)-/.test(route)) return null;
