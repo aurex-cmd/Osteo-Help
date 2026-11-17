@@ -375,9 +375,9 @@ function vDecidi(p, inPanel){
       /* l'invio per un anabolico si propone solo se il paziente rientra nella Nota 79, e si dice per quale farmaco */
       const A = n79Ana(p, F, fl, n79), nm = id => dnome(id).replace(/ \(.*\)$/, "");
       const okL = A.ok.map(x => `<li><b>${nm(x.id)}</b>${x.id === RO_ ? " (solo se non si possono seguire altri trattamenti efficaci)" : ""}<small>${hx(x.cond.join("; ").replace(/: solo se non è possibile seguire altri trattamenti efficaci.*$/, ""))}</small></li>`).join("");
-      const noL = A.no.map(x => `<li class="ci"><b>${nm(x.id)}</b>: in Nota 79 ma controindicato<small>${hx(x.ci.join("; "))}</small></li>`).join("");
+      const noL = A.no.map(x => `<li class="ci"><b>${nm(x.id)}</b>: in Nota 79 ma controindicato<small>${hx(x.ci.join("; "))}</small></li>`).join(""); /* senza un anabolico in Nota non si parla di anabolici: resta solo il rischio */
       return A.ok.length ? `<div class="dvh-a ana"><b>Rischio molto alto</b>${r.join("; ")}.<p>Rientra nella Nota 79 per ${A.ok.map(x => nm(x.id)).join(" e ")}: valuta l'invio allo specialista per la prescrizione con piano terapeutico.</p><ul>${okL}${noL}</ul></div>`
-        : `<div class="dvh-a ana no"><b>Rischio molto alto</b>${r.join("; ")}.<p>${A.no.length ? "In Nota 79, ma controindicato per questo paziente: resta la terapia di prima linea, o l'invio allo specialista per decidere." : "Con i dati inseriti non rientra nella Nota 79 per un anabolico (teriparatide, abaloparatide) né per il romosozumab" + (pend.length ? ": completa i dati qui sotto, possono cambiare la risposta." : "; resta la terapia di prima linea.")}</p>${noL ? `<ul>${noL}</ul>` : ""}</div>`; })()}
+        : `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}: inizia la terapia senza ritardi.</div>`; })()}
     ${pend.length ? sec("Da completare per la Nota 79", pend.length, `<ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>`, false) : ""}
     ${best ? sec("Dettagli del farmaco consigliato", "", drug(best, true), false) : ""}
     ${others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : ""}
