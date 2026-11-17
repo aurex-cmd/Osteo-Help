@@ -550,10 +550,10 @@ function pzCards(list){
     /* scheda ordinata in tre fasce: chi è (nome, sesso ed età, zona DeFRA a destra), la terapia, a che punto è il percorso */
     const ic = (cls, inner) => `<span class="pti ${cls}">${inner}</span>`;
     const ter = F.ther.length ? [ic("on", drugIcon(F.ther[0].farmaco)), F.ther.map(t => dn(t.farmaco)).join(" + "), "dal " + fmtD(F.ther[0].inizio)]
-      : dec === "spec" ? [ic("spec", "🩺"), "Inviato allo specialista", "terapia da registrare"]
-      : dec === "mmg" ? [ic("reg", "💊"), "Farmaco da registrare", "terapia decisa"]
+      : dec === "spec" ? [ic("spec", secIcon("spec")), "Inviato allo specialista", "terapia da registrare"]
+      : dec === "mmg" ? [ic("reg", secIcon("reg")), "Farmaco da registrare", "terapia decisa"]
       : dec === "nessuno" ? (supList(p).length ? [ic("sup", `<svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.sole}</svg>`), "Solo vitamina D e calcio", supTxt(p)] : [ic("none", "—"), "Nessun farmaco", "vitamina D e calcio da registrare"])
-      : dec === "attesa" ? [ic("none", "⏳"), "Decisione rimandata", "in attesa di esami"]
+      : dec === "attesa" ? [ic("none", secIcon("attesa")), "Decisione rimandata", "in attesa di esami"]
       : [ic("miss", ""), "Terapia da decidere", ""];
     const q = [pzName(p), ...F.ther.map(t => dn(t.farmaco))].join(" ").toLowerCase();
     const done = !nx, stTxt = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}` : pl.st !== "ok" ? pl.t : "Percorso completo";

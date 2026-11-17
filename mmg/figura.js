@@ -5,6 +5,9 @@
    alla fine «Decidi la terapia» propone la scelta, con gli avvisi.
    Usa gli stessi dati e gli stessi motori della scheda a passi (app.js).
    ============================================================ */
+/* icone delle sezioni: a tratto (24×24), lo stesso stile delle icone della pagina iniziale */
+const SEC_SVG = {"chi": "<circle cx=\"12\" cy=\"8\" r=\"3.6\"/><path d=\"M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5\"/>", "fx": "<g transform=\"rotate(-35 12 12)\"><path d=\"M7.5 10.2h9a2.4 2.4 0 1 1 2.2 1.8 2.4 2.4 0 1 1-2.2 1.8h-9a2.4 2.4 0 1 1-2.2-1.8 2.4 2.4 0 1 1 2.2-1.8z\"/><path d=\"M11.4 10.2l1.4 1.7-1.4.9\"/></g>", "anam": "<rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16.5\" rx=\"2\"/><path d=\"M9.5 3h5v3h-5z\"/><path d=\"M9 11h6M9 14.5h6M9 18h3.5\"/>", "esami": "<g transform=\"rotate(30 12 12)\"><path d=\"M10 3.5v14a2 2 0 0 0 4 0v-14\"/><path d=\"M8.5 3.5h7M10 11h4\"/></g>", "dxa": "<rect x=\"7.5\" y=\"3\" width=\"9\" height=\"4\" rx=\"1.5\"/><rect x=\"7.5\" y=\"10\" width=\"9\" height=\"4\" rx=\"1.5\"/><rect x=\"7.5\" y=\"17\" width=\"9\" height=\"4\" rx=\"1.5\"/><path d=\"M3 12h2.5M18.5 12H21\"/>", "defra": "<path d=\"M4 17a8 8 0 0 1 16 0\"/><path d=\"M12 17l4-4.5\"/><path d=\"M6.3 11.3l1.2 1.2M12 9v1.6M17.7 11.3l-1.2 1.2\"/><path d=\"M3.5 20.5h17\"/>", "sec": "<path d=\"M12 4l9 16H3z\"/><path d=\"M12 10v4.5M12 17.2v.1\"/>", "storico": "<path d=\"M4 4v16h16\"/><path d=\"M7.5 15l3.5-4 3 2 5-6\"/>", "decidi": "<path d=\"M12 4v16M8 20h8M5 7h14\"/><path d=\"M5 7l-2.7 6M5 7l2.7 6M19 7l-2.7 6M19 7l2.7 6\"/><path d=\"M2 13h6a3 3 0 0 1-6 0zM16 13h6a3 3 0 0 1-6 0z\"/>", "spec": "<path d=\"M6 3.5v4.5a4 4 0 0 0 8 0V3.5\"/><path d=\"M10 12v2.5a4.5 4.5 0 0 0 9 0V13\"/><circle cx=\"19\" cy=\"11\" r=\"2\"/>", "attesa": "<path d=\"M6.5 3.5h11M6.5 20.5h11\"/><path d=\"M8 3.5c0 4.5 4 5.5 4 8.5s-4 4-4 8.5M16 3.5c0 4.5-4 5.5-4 8.5s4 4 4 8.5\"/>", "reg": "<g transform=\"rotate(-45 12 12)\"><rect x=\"4\" y=\"8.5\" width=\"16\" height=\"7\" rx=\"3.5\"/><path d=\"M12 8.5v7\"/></g>"};
+const secIcon = n => `<svg class="sic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SEC_SVG[n]}</svg>`;
 
 /* figure: immagine, viso per l'elenco, punti (in % dell'immagine) */
 const FIGURE = {
@@ -35,20 +38,20 @@ const figViso = p => { const f = figOf(p); return f ? `img/${f}-viso.jpg` : null
 /* stato della vista: quale riquadro è aperto */
 const FIG = { open:null, anim:false };
 const FIG_SHEETS = {
-  chi:   { t:"Chi è", ic:"👤", k:"dati", body: p => datiAnag(p) + `<p class="lbl">Note</p><textarea class="area" data-pf="note" rows="3" placeholder="Note libere">${hx(p.note)}</textarea>` },
-  fx:    { t:"Fratture", ic:"🦴", k:"fratture", body: p => datiFx(p) },
-  anam:  { t:"Anamnesi e farmaci", ic:"💊", k:"anamnesi", body: p => noHead(vPazAnamnesi(p).html) },
-  esami: { t:"Esami del sangue", ic:"🧪", k:"esami", body: p => noHead(vPazEsami(p).html) },
-  dxa:   { t:"Densitometria (DEXA)", ic:"🩻", k:"dxa", body: p => noHead(vPazDxa(p).html) },
-  defra: { t:"DeFRA", ic:"🎯", k:"defra", body: p => noHead(vPazDefra(p).html) },
-  sec:   { t:"Osteoporosi secondaria", ic:"⚠️", k:"anamnesi", body: p => { const S = pzSecondary(p), G = secGroups(p, S);
+  chi:   { t:"Chi è", ic:secIcon("chi"), k:"dati", body: p => datiAnag(p) + `<p class="lbl">Note</p><textarea class="area" data-pf="note" rows="3" placeholder="Note libere">${hx(p.note)}</textarea>` },
+  fx:    { t:"Fratture", ic:secIcon("fx"), k:"fratture", body: p => datiFx(p) },
+  anam:  { t:"Anamnesi e farmaci", ic:secIcon("anam"), k:"anamnesi", body: p => noHead(vPazAnamnesi(p).html) },
+  esami: { t:"Esami del sangue", ic:secIcon("esami"), k:"esami", body: p => noHead(vPazEsami(p).html) },
+  dxa:   { t:"Densitometria (DEXA)", ic:secIcon("dxa"), k:"dxa", body: p => noHead(vPazDxa(p).html) },
+  defra: { t:"DeFRA", ic:secIcon("defra"), k:"defra", body: p => noHead(vPazDefra(p).html) },
+  sec:   { t:"Osteoporosi secondaria", ic:secIcon("sec"), k:"anamnesi", body: p => { const S = pzSecondary(p), G = secGroups(p, S);
     const SRC = { anam:"da malattie e farmaci", esami:"compatibile con gli esami" };
     return (G.length ? G.map(([l, xs]) => `<div class="seclev sl${l}"><p class="lbl">${SEC_LEV[l].t}</p><p class="small">${SEC_LEV[l].s[0].toUpperCase() + SEC_LEV[l].s.slice(1)}.</p><div class="stack">${xs.map(x => `<a class="entry" href="${x.href}" target="_blank" rel="noopener"><div><b>${x.nome}</b><small>${SRC[x.src]}${x.riv ? " · da rivedere se possibile" : ""}</small></div>${CHEV}</a>`).join("")}</div></div>`).join("")
       : `<p class="hint">Nessuna forma secondaria.</p>`) +
       `<div class="btns"><button type="button" class="btn sec" data-fsheet="anam">Anamnesi e farmaci</button><button type="button" class="btn sec" data-fsheet="esami">Esami del sangue</button></div>`; } },
-  storico:{ t:"Controlli nel tempo", ic:"📈", k:"storico", body: p => noHead(vPazStorico(p).html) },
+  storico:{ t:"Controlli nel tempo", ic:secIcon("storico"), k:"storico", body: p => noHead(vPazStorico(p).html) },
   /* su PC la decisione si apre nel pannello di destra; sul telefono resta la sua pagina */
-  decidi:{ t:"Decidi la terapia", ic:"⚖️", k:"terapia", body: p => { const v = vDecidi(p, true); return v.redirect !== undefined ? `<div class="alert info"><b>Serve prima la zona del DeFRA</b>La proposta di terapia parte dalla zona di rischio: inseriscila nel passo DeFRA.</div><div class="btns"><button type="button" class="btn" data-fsheet="defra">Vai al DeFRA</button></div>` : v.html; } }
+  decidi:{ t:"Decidi la terapia", ic:secIcon("decidi"), k:"terapia", body: p => { const v = vDecidi(p, true); return v.redirect !== undefined ? `<div class="alert info"><b>Serve prima la zona del DeFRA</b>La proposta di terapia parte dalla zona di rischio: inseriscila nel passo DeFRA.</div><div class="btns"><button type="button" class="btn" data-fsheet="defra">Vai al DeFRA</button></div>` : v.html; } }
 };
 const noHead = h => h.replace(/^\s*<h1>[\s\S]*?<div class="rule"><\/div>/, "");
 
@@ -205,8 +208,8 @@ function figNext(p, F, S, spots){
     const th = F.ther.find(t => nextDose(t)) || F.ther[0], nd = th && nextDose(th), d = th && DRUGS[th.farmaco], multi = F.ther.length > 1;
     const rivedi = `#paz-${p.id}-${th || p.decisione.tipo !== "mmg" ? "decidi" : "terapia"}`;
     const drug = th ? `<a class="fdrugbig go" href="${rivedi}" title="Rivedi la decisione e la terapia"><span class="fpill">${drugIcon(th.farmaco)}</span><span><b>${F.ther.map(t => dnome(t.farmaco).replace(/ \(.*\)$/, "")).join(" + ")}</b><small>${multi ? "in associazione" : d ? d.via.replace(/\.$/, "") : ""} · dal ${fmtD(th.inizio)}${p.decisione.tipo === "spec" ? " · indicato dallo specialista" : ""}</small>${supList(p).length ? `<small>con ${hx(supTxt(p).charAt(0).toLowerCase() + supTxt(p).slice(1))}</small>` : ""}${F.ther.some(t => t.farmaco === D_) ? `<small class="freb-in"><b>Rebound:</b> non sospendere né ritardare le dosi; se si interrompe serve un bisfosfonato.</small>` : ""}</span>${CHEV}</a>`
-      : p.decisione.tipo === "spec" ? `<a class="fdrugbig spec go" href="#paz-${p.id}-decidi"><span class="fpill">🩺</span><span><b>Inviato allo specialista</b><small>Tocca per registrare la terapia indicata dallo specialista</small></span>${CHEV}</a>`
-      : p.decisione.tipo === "mmg" ? `<a class="fdrugbig reg go" href="#paz-${p.id}-terapia"><span class="fpill">💊</span><span><b>Farmaco da registrare</b><small>Tocca per indicare il farmaco e la data di inizio</small></span>${CHEV}</a>`
+      : p.decisione.tipo === "spec" ? `<a class="fdrugbig spec go" href="#paz-${p.id}-decidi"><span class="fpill">${secIcon("spec")}</span><span><b>Inviato allo specialista</b><small>Tocca per registrare la terapia indicata dallo specialista</small></span>${CHEV}</a>`
+      : p.decisione.tipo === "mmg" ? `<a class="fdrugbig reg go" href="#paz-${p.id}-terapia"><span class="fpill">${secIcon("reg")}</span><span><b>Farmaco da registrare</b><small>Tocca per indicare il farmaco e la data di inizio</small></span>${CHEV}</a>`
       : p.decisione.tipo === "nessuno" ? `<a class="fdrugbig none${supList(p).length ? " sup" : ""} go" href="#paz-${p.id}-terapia" title="Vitamina D e calcio"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG[supList(p).length ? "sole" : "latte"]}</svg></span><span><b>${supList(p).length ? "Solo vitamina D e calcio" : "Nessun farmaco per l'osteoporosi"}</b><small>${supList(p).length ? hx(supTxt(p)) + (p.supDal ? " · dal " + fmtD(p.supDal) : "") : "Tocca per registrare vitamina D e calcio"}</small></span>${CHEV}</a>`
       : `<a class="fdrugbig none go" href="${rivedi}" title="Rivedi la decisione"><span class="fpill"><svg class="dic" viewBox="0 0 48 48" aria-hidden="true">${DRUG_SVG.latte}</svg></span><span><b>Decisione rimandata</b><small>in attesa di esami o accertamenti</small></span>${CHEV}</a>`;
     const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];

@@ -258,3 +258,5 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   - un solo nome per passo: «Anamnesi e farmaci», «Densitometria (DEXA)», «Fratture», anche nelle schede e sul pulsante Avanti; sul telefono le schede vanno a capo;
   - anamnesi: tutti i gruppi chiusi e apribili, con il numero di voci spuntate (`pzGroup`); «Altri dati per DeFRA e Nota 79», «Controindicazioni» e «Odontoiatria» (separata) come gli altri gruppi.
 - Zona gialla: tolto «La terapia la imposta il medico di medicina generale»; resta «Terapia antiriassorbitiva (bisfosfonati orali o denosumab) senza necessità di intervento specialistico, sempre con vitamina D.»
+
+- **Icone vettoriali al posto delle emoji**: le sezioni (Chi è, Fratture, Anamnesi e farmaci, Esami del sangue, Densitometria, DeFRA, Forme secondarie, Controlli, Decidi la terapia) e le decisioni nell'archivio e nel riepilogo (specialista, farmaco da registrare, decisione rimandata) usano icone a tratto 24×24 (`SEC_SVG`, `secIcon` in `figura.js`), lo stesso stile della pagina iniziale; nel titolo della scheda stanno in un riquadro grigio come le icone della home.
