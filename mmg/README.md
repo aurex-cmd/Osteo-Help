@@ -211,3 +211,8 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Pagina e script si chiedono sempre prima alla rete, così gli aggiornamenti arrivano subito; la copia salvata serve solo offline (l'app si apre anche senza connessione).
 - Se si sostituiscono le immagini, aumentare `VER` in `sw.js`: le copie vecchie vengono cancellate e riscaricate.
 - Anche nella scheda del paziente (telefono e tablet stretto), sotto sesso ed età, le barrette sono sostituite dalla stessa strada a pallini dell'archivio; su PC resta la strada verticale a sinistra.
+
+### Densitometria: una scheda per ogni DXA
+- In cima c'è la scheda dell'ultima densitometria: la data in testa con il giudizio peggiore (osteoporosi / osteopenia / normale), sotto i tre siti con il T-score in un cerchio colorato e, se c'è una DXA precedente, la variazione (▲ ▼ o = stabile, soglia 0,2).
+- Sotto: quando ripeterla. Il modulo per una nuova DXA è aperto solo se non ce n'è nessuna; altrimenti è un riquadro chiuso «+ Aggiungi una nuova densitometria» (di solito dopo 18–24 mesi), che si apre al tocco.
+- Poi il grafico del T-score nel tempo e, chiuse, le densitometrie precedenti, ognuna con la sua scheda.

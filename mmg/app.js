@@ -990,13 +990,22 @@ function tsSummary(asc){
     return `<div class="ts-r"><i style="background:${col}"></i><span class="ts-n">${nome}</span><b class="ts-v">${fmtN(v)}</b><span class="ts-c ${c[0]}">${c[1]}</span>${tr}</div>`;
   }).join("") + (asc.length > 1 ? `<p class="small">Variazioni rispetto alla DXA precedente; sotto ${fmtN(TS_LSC)} si considerano stabili (entro l'errore di misura).</p>` : "");
 }
+/* una densitometria = una scheda: la data in testa, sotto i tre siti con il loro T-score e il confronto con la DXA precedente */
+function dxaCard(p, d, prev, big){
+  const sites = SERIES.map(([k, nome]) => [k, nome, num(d[k])]).filter(x => x[2] !== null);
+  const worst = sites.length ? Math.min(...sites.map(x => x[2])) : null, wc = worst !== null ? tsCat(worst) : null;
+  const rows = sites.map(([k, nome, v]) => { const c = tsCat(v), pv = prev ? num(prev[k]) : null;
+    let tr = ""; if(pv !== null){ const dl = Math.round((v - pv) * 10) / 10;
+      tr = Math.abs(dl) < TS_LSC ? `<em class="st">= stabile</em>` : dl > 0 ? `<em class="up">▲ ${fmtN(dl)}</em>` : `<em class="dn">▼ ${fmtN(-dl)}</em>`; }
+    return `<li class="t-${c[0]}"><span class="dxv">${fmtN(v)}</span><span class="dxn"><b>${nome}</b><small>${c[1].toLowerCase()}</small></span>${tr}</li>`; }).join("");
+  return `<div class="dxcard${big ? " big" : ""}">
+    <div class="dxh"><span><small>Densitometria</small><b>${fmtD(d.data)}</b></span>${wc ? `<span class="dxw t-${wc[0]}">${wc[1]}</span>` : ""}</div>
+    <ul class="dxs">${rows || `<li class="none">Nessun T-score inserito</li>`}</ul>
+    <div class="dxf">${prev ? `<small>Confronto con la DXA del ${fmtD(prev.data)}; sotto ${fmtN(TS_LSC)} è stabile.</small>` : "<small></small>"}<button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(d)}">Elimina</button></div></div>`;
+}
 function vPazDxa(p){
-  const F = pzFacts(p), pl = dxaPlan(F);
-  const dxaRows = F.dxa.map(d => {
-    return `<li class="rec"><span><b>${fmtD(d.data)}</b><small>colonna ${fmtN(num(d.tL))} · femore totale ${fmtN(num(d.tFt))} · collo ${fmtN(num(d.tFn))}</small></span><button type="button" class="x" data-del="dxa:${p.dxa.indexOf(d)}" aria-label="Elimina">✕</button></li>`; }).join("");
-  return { bar: pzName(p), html: head("Densitometria", "Riporta il T-score di colonna lombare e femore dal referto della DXA.") + `
-    ${F.lastDxa ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}${F.gc ? " Con glucocorticoidi ad alte dosi si può anticipare a 12 mesi." : ""}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila (<a href="#guida-dxa-lea">a chi farla in LEA</a>) e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
-    <div class="addbox">
+  const F = pzFacts(p), pl = dxaPlan(F), L = F.dxa;
+  const form = `<div class="addbox">
       <div class="grid2">
         <label class="fld">Data della DXA<input type="date" id="dxD" value="${todayISO()}"></label>
         <div class="fld">T-score colonna (L1–L4)<div class="tsrow"><button type="button" class="sgn" data-sgn="dxL" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxL" aria-label="T-score colonna (L1–L4)"></div></div>
@@ -1005,9 +1014,16 @@ function vPazDxa(p){
       </div>
       <p class="small">Il segno meno è già inserito: per −2,7 scrivi solo 2,7. Tocca «−» per cambiarlo in «+» se il T-score è positivo.</p>
       <button type="button" class="btn" data-add="dxa">Salva la densitometria</button>
-    </div>
-    ${dxaChartHTML(F)}
-    ${F.dxa.length > 1 ? `<p class="lbl">Tutte le densitometrie</p><ul class="list recs">${dxaRows}</ul>` : F.dxa.length ? `<p class="small">DXA del ${fmtD(F.dxa[0].data)} · <button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(F.dxa[0])}">elimina</button></p>` : ""}
+    </div>`;
+  const asc = L.slice().reverse().filter(d => pDate(d.data) && [d.tL, d.tFt, d.tFn].some(v => num(v) !== null));
+  const chart = asc.length > 1 ? lineChart(asc.map(d => ({ x: pDate(d.data), tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES,
+    { label:"Andamento del T-score", bands:[[-99, -2.5, "b-op", "Osteoporosi"], [-2.5, -1, "b-on", "Osteopenia", 1], [-1, 99, "b-ok", "Normale", 1]] }) : "";
+  return { bar: pzName(p), html: head("Densitometria", L.length ? "Ogni scheda è una densitometria: la data e i T-score di quel referto." : "Riporta il T-score di colonna lombare e femore dal referto della DXA.") + `
+    ${L.length ? dxaCard(p, L[0], L[1], true) : ""}
+    ${L.length ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}${F.gc ? " Con glucocorticoidi ad alte dosi si può anticipare a 12 mesi." : ""}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila (<a href="#guida-dxa-lea">a chi farla in LEA</a>) e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
+    ${L.length ? `<details class="dxadd"><summary><span class="dxplus">+</span><span><b>Aggiungi una nuova densitometria</b><small>di solito dopo 18–24 mesi dalla precedente</small></span></summary>${form}</details>` : form}
+    ${chart ? `<p class="lbl">T-score nel tempo</p>${chart}` : ""}
+    ${L.length > 1 ? `<details class="dxprev"><summary>${plural(L.length - 1, "densitometria precedente", "densitometrie precedenti")}</summary>${L.slice(1).map((d, i) => dxaCard(p, d, L[i + 2], false)).join("")}</details>` : ""}
     <p class="small">T-score uguale o inferiore a −2,5: osteoporosi; tra −1 e −2,5: osteopenia.</p>` };
 }
 function vPazStorico(p){

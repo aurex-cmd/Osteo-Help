@@ -922,6 +922,27 @@ body.locked .bar{visibility:hidden}
 .proad i.next{border-color:var(--pri);color:var(--pri);border-width:2px}
 /* scheda del paziente (telefono): la stessa strada a pallini dell'archivio, su una riga sua sotto sesso ed età */
 .fhud-p{flex-basis:100%;padding:6px 0 0}
+/* densitometria: una scheda per ogni DXA (data in testa, tre siti), la nuova si aggiunge da un riquadro chiuso */
+.dxcard{background:var(--box);border-radius:16px;padding:12px 14px 10px;margin:4px 0 12px}
+.dxcard.big{background:#fff;border:1.5px solid var(--line);box-shadow:0 4px 14px rgba(30,20,70,.08)}
+.dxh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.dxh small{display:block;font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--pri)} .dxh b{font-size:1.2rem;letter-spacing:-.01em}
+.dxw{font-size:.74rem;font-weight:800;padding:4px 10px;border-radius:999px;color:#fff;background:var(--teal)} .dxw.t-op{background:var(--coral)} .dxw.t-on{background:#E3B21A;color:#3D2F00}
+.dxs{list-style:none;margin:0;padding:4px 0 0}
+.dxs li{display:flex;align-items:center;gap:12px;padding:5px 0}
+.dxs li.none{color:var(--muted);font-size:.85rem}
+.dxv{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;font-weight:800;font-size:.95rem;letter-spacing:-.02em;color:#fff;background:var(--teal)}
+.dxs li.t-op .dxv{background:var(--coral)} .dxs li.t-on .dxv{background:#E3B21A;color:#3D2F00}
+.dxn{flex:1;min-width:0} .dxn b{display:block;font-size:.92rem} .dxn small{font-size:.78rem;color:var(--muted)} .dxs li.t-op .dxn small{color:var(--coral);font-weight:700}
+.dxs em{font-style:normal;font-size:.78rem;font-weight:700;white-space:nowrap} .dxs em.up{color:var(--teal)} .dxs em.dn{color:var(--coral)} .dxs em.st{color:var(--muted)}
+.dxcard:not(.big) .dxv{width:36px;height:36px;font-size:.8rem} .dxcard:not(.big) .dxh b{font-size:1rem}
+.dxf{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:6px} .dxf small{font-size:.72rem;color:var(--muted)} .dxf .lnk{color:var(--coral);font-size:.8rem;flex:0 0 auto}
+.dxadd{margin:4px 0 14px;border:1.5px dashed #C9C2E6;border-radius:14px;background:#fff}
+.dxadd > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px} .dxadd > summary::-webkit-details-marker{display:none}
+.dxadd > summary b{display:block;color:var(--pri);font-size:.95rem} .dxadd > summary small{display:block;font-size:.76rem;color:var(--muted)}
+.dxplus{width:32px;height:32px;border-radius:50%;background:var(--pri);color:#fff;display:grid;place-items:center;font-weight:800;font-size:1.2rem;flex:0 0 auto}
+.dxadd[open]{border-style:solid;border-color:var(--pri)} .dxadd[open] .dxplus{transform:rotate(45deg)} .dxadd .addbox{margin:0 10px 10px}
+.dxprev{margin:6px 0 10px} .dxprev > summary{cursor:pointer;font-weight:700;color:var(--pri);padding:8px 0;font-size:.92rem}
 </style>
 </head>
 <body>
