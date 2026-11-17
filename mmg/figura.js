@@ -133,7 +133,7 @@ function figSummary(p, F, S){
   if(ci.cv || F.feats.has("ictus_emiplegia")) cig.push(["anam", "infarto o ictus", "No romosozumab"]);
   if(ci.tev) cig.push(["anam", "tromboembolismo", "No raloxifene e bazedoxifene"]);
   if(cig.length){ const op = !!FIG.ciOpen;
-    sx.push(`<button type="button" class="fbd k-ci fsec-b" data-ciopen aria-expanded="${op}" aria-label="${hx(plural(cig.length, "controindicazione", "controindicazioni") + ": " + cig.map(x => x[1]).join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${cig.length}</span><span class="fbd-t"><b>Controindicazioni</b><small>${hx(cig.map(x => x[1]).join(" · "))}</small></span><span class="fbd-o">${op ? "‹" : "›"}</span></button>`);
+    sx.push(`<button type="button" class="fbd k-ci fsec-b" data-ciopen aria-expanded="${op}" aria-label="${hx(plural(cig.length, "controindicazione", "controindicazioni") + ": " + cig.map(x => x[1]).join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${cig.length}</span><span class="fbd-t"><b>Controindicazioni</b><small>${hx(cig.map(x => x[1]).join(" · "))}</small></span></button>`);
     if(op) cig.forEach(x => sx.push(`<button type="button" class="fbd fsub" data-fsheet="${x[0]}"><span class="fbd-t"><b>${hx(x[2])}</b><small>${hx(/^eGFR/.test(x[1]) ? x[1] + " mL/min" : x[1])}</small></span></button>`)); }
   if(ci.denti) pill(sx, "anam", "k-a", "!", "Visita odontoiatrica", "nulla osta alla terapia");
   /* destra: gli esami */
@@ -142,7 +142,15 @@ function figSummary(p, F, S){
   const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid]), ...(ci.irc ? [COND.irc] : [])])];
   const short = n => { const t = n.replace(/^Osteoporosi (indotta )?da /i, ""); return t.charAt(0).toUpperCase() + t.slice(1); };
   /* osteoporosi secondaria: un solo bollino, il numero di condizioni e i nomi su una riga; si apre */
-  if(sec.length) dx.push(`<button type="button" class="fbd k-a fsec-b" data-fsheet="sec" aria-label="${hx(plural(sec.length, "condizione", "condizioni") + " di osteoporosi secondaria: " + sec.join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${sec.length}</span><span class="fbd-t"><b>Osteoporosi secondaria</b><small>${hx(sec.map(short).join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`);
+  /* osteoporosi secondaria: un solo bollino con il numero e i nomi; toccandolo si aprono sotto le singole forme, ognuna porta alla sezione da modificare */
+  const nm2 = n => /^Farmaci \(/.test(n) ? "Farmaci " + n.replace(/^Farmaci \((.*)\)$/, "$1") : short(n).replace(/\s*\(.*\)$/, "").replace(/ \/ .*$/, "");
+  const secA = [...new Set([...S.N.note, ...S.N.sosp].map(x => nm2(x.f.nome)).concat(ci.irc ? ["Insufficienza renale cronica"] : []))];
+  const secE = [...new Set(S.A.forms.map(x => nm2(COND[x.cid])))];
+  if(sec.length){ const op = !!FIG.secOpen;
+    dx.push(`<button type="button" class="fbd k-a fsec-b" data-secopen aria-expanded="${op}" aria-label="${hx(plural(sec.length, "condizione", "condizioni") + " di osteoporosi secondaria: " + sec.join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${sec.length}</span><span class="fbd-t"><b>Osteoporosi secondaria</b><small>${hx(sec.map(short).join(" · "))}</small></span></button>`);
+    if(op){ const sub = (k, t, l) => dx.push(`<button type="button" class="fbd fsub sec" data-fsheet="${k}" aria-label="${hx(t + ": " + l.join(", ") + ". Apri")}"><span class="fbd-t"><b>${t}</b><small>${hx(l.join(", "))}</small></span></button>`);
+      if(secA.length) sub("anam", "Da malattie e farmaci", secA);
+      if(secE.length) sub("esami", "Compatibili con gli esami", secE); } }
   const es = stepStatus(p, "esami", F, S), ls = labStatus(p);
   if(es.st === "miss") pill(dx, "esami", "miss", "?", "Esami del sangue", ls.done + " di " + ls.tot + " inseriti");
   else if(vdLow(vd) || es.st === "warn") pill(dx, "esami", "k-a", "!", "Esami del sangue", vdLow(vd) ? "vitamina D " + vdTxt(vd) : "da rivedere");
@@ -150,7 +158,7 @@ function figSummary(p, F, S){
   /* il DeFRA, in grande */
   const z = F.zona, r = F.rischio;
   const big = `<button type="button" class="fdefra z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio di frattura a 10 anni " + fmtN(r, 0) + "%" : ""}"><span class="fdefra-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "—"}</span><span class="fdefra-t"><small>DeFRA · rischio a 10 anni</small><b>Zona ${ZONE[z].t.toLowerCase()}</b><span>${ZONE[z].r}</span></span></button>`;
-  return `<div class="fsum${FIG.ciOpen && cig.length ? " ciop" : ""}"><div class="fsum-c">${sx.join("")}</div><div class="fsum-c r">${dx.join("")}</div></div>${big}`;
+  return `<div class="fsum${(FIG.ciOpen && cig.length) || (FIG.secOpen && sec.length) ? " ciop" : ""}"><div class="fsum-c">${sx.join("")}</div><div class="fsum-c r">${dx.join("")}</div></div>${big}`;
 }
 function figStage(p, fig, spots, F, S){
   const d = FIGURE[fig], lblFx = d.fxLbl;
@@ -368,7 +376,8 @@ function figBack(p){ const r = "paz-" + p.id + "-figura"; FIG.open = null; if(ro
 /* ---------- interazioni ---------- */
 document.addEventListener("click", e => {
   const t = e.target;
-  if(t.closest("[data-ciopen]")){ FIG.ciOpen = !FIG.ciOpen; FIG.anim = false; render(); return; }
+  if(t.closest("[data-ciopen]")){ FIG.ciOpen = !FIG.ciOpen; if(FIG.ciOpen) FIG.secOpen = false; FIG.anim = false; render(); return; }
+  if(t.closest("[data-secopen]")){ FIG.secOpen = !FIG.secOpen; if(FIG.secOpen) FIG.ciOpen = false; FIG.anim = false; render(); return; }
   const op = t.closest("[data-fsheet]");
   if(op){ e.preventDefault(); if(FIG.open){ const { p } = pzRoute(); commitPending(p); } FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
     const pn = document.querySelector(".fpanel"); if(pn && pn.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + pn.getBoundingClientRect().top - 70 }); return; }
