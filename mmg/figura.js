@@ -99,8 +99,8 @@ const figDone = (F, spots) => !Object.values(spots).some(x => x.st === "miss") &
    con il numero del passo; quella del prossimo passo è viola e pulsa. Controindicazioni e dentista compaiono solo se ci sono. */
 const FIG_PREV = {};  /* per paziente: quali pill erano ancora «da fare» all'ultimo disegno, per animare quelle appena completate */
 function figSummary(p, F, S){
-  /* sinistra: il paziente (età e BMI, familiarità, fratture);
-     destra: gli esami (in alto la densitometria, poi forme secondarie ed esami del sangue) e ciò che limita la terapia (controindicazioni, dentista);
+  /* sinistra: l'età e la fragilità, dalla più pesante (età con BMI, T-score, fratture, familiarità);
+     destra: ciò che la spiega o va sistemato prima (forme secondarie, esami del sangue) e ciò che limita la terapia (controindicazioni, dentista);
      in basso, più grande di tutti, il DeFRA. Colore = gravità: rosso serio, ambra attenzione, verde rassicurante, viola neutro. */
   const sx = [], dx = [], pill = (arr, k, cls, c, b, sm, aria) => arr.push(`<button type="button" class="fbd ${cls}" data-fsheet="${k}" aria-label="${hx(aria || b + ": " + sm)}"><span class="fbd-c">${c}</span><span class="fbd-t"><b>${hx(b)}</b><small>${hx(sm)}</small></span></button>`);
   const ci = p.ci || {}, eg = num(p.egfr), vd = num(p.vitd), all = allSteps(p), nx = nextStep(all), st = k => all[STEP_IX[k]].st;
@@ -118,12 +118,14 @@ function figSummary(p, F, S){
   const openK = FIG.open === "sec" ? "anam" : FIG.open;
   const todo = (arr, k, sh, b, sm) => { const n = STEP_IX[k] + 1, isNx = nx && nx.k === k; cur[sh] = "t"; if(!isNx && openK !== sh) return;
     pill(arr, sh, "fhsl" + (isNx ? " nx" : ""), n, b, sm, (isNx ? "Prossimo passo, " : "Passo ") + n + ": " + b + ", " + sm); };
-  /* 1 · chi è: l'età (con il BMI se è basso), poi la familiarità */
+  /* 1 · chi è: l'età (con il BMI), in testa */
   if(st("dati") === "miss") todo(sx, "dati", "chi", "Chi è", "età, peso, familiarità");
   else { const low = F.bmi && F.bmi < 20;
     pill(sx, "chi", (low ? "k-a" : "k-n") + pop("chi"), F.age, "anni", low ? "BMI " + fmtN(F.bmi) + ", basso" : "BMI " + fmtN(F.bmi), F.age + " anni, BMI " + fmtN(F.bmi) + (low ? ", basso" : "")); }
-  if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
-  else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
+  /* 5 · T-score peggiore */
+  const d = F.lastDxa, sites = d ? [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]) : [];
+  if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(sx, "dxa", "t-" + c[0] + pop("dxa"), fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
+  else todo(sx, "dxa", "dxa", "Densitometria", "T-score da inserire");
   /* 2 · fratture: una frattura: sede e data; più fratture: «Fratture multiple», le sedi su una riga, si apre l'elenco con le date */
   const fxNome = f => (FX_SEDI[f.sede] || "Frattura") + (f.grado ? " " + f.grado : "");
   if(st("fratture") === "miss" && !F.fx.length) todo(sx, "fratture", "fx", "Fratture", "da indicare");
@@ -132,10 +134,9 @@ function figSummary(p, F, S){
   else if(F.fx.length > 1){ const rec = F.recent.length, sedi = [...new Set(F.fx.map(f => (FX_SEDI[f.sede] || f.sede).split(" / ")[0]))];
     sx.push(`<button type="button" class="fbd ${rec ? "k-r" : "k-a"}${pop("fx")} fsec-b" data-fsheet="fx" aria-label="${hx(F.fx.length + " fratture: " + F.fx.map(f => fxNome(f) + " " + fmtD(f.data)).join(", ") + ". Apri l'elenco")}"><span class="fbd-c">${F.fx.length}</span><span class="fbd-t"><b>Fratture multiple</b><small>${hx((rec ? "1 recente · " : "") + sedi.join(" · "))}</small></span><span class="fbd-o" aria-hidden="true">›</span></button>`); }
   else pill(sx, "fx", "k-ok" + pop("fx"), "0", "Nessuna frattura", "da fragilità");
-  /* 5 · T-score peggiore: in alto a destra */
-  const d = F.lastDxa, sites = d ? [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]) : [];
-  if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(dx, "dxa", "t-" + c[0] + pop("dxa"), fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
-  else todo(dx, "dxa", "dxa", "Densitometria", "T-score da inserire");
+  /* familiarità */
+  if(p.fam) pill(sx, "chi", "k-a", "Sì", "Familiarità", "fratture nei genitori");
+  else if(p.fam === false) pill(sx, "chi", "k-ok", "No", "Familiarità", "nessuna nei genitori");
   /* 3 · forme secondarie: un solo bollino con il numero e i nomi; toccandolo si aprono sotto le singole forme */
   const sec = [...new Set([...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome), ...S.A.forms.map(x => COND[x.cid]), ...(ci.irc ? [COND.irc] : [])])];
   const short = n => { const t = n.replace(/^Osteoporosi (indotta )?da /i, ""); return t.charAt(0).toUpperCase() + t.slice(1); };
