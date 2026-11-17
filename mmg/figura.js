@@ -41,9 +41,10 @@ const FIG_SHEETS = {
   esami: { t:"Esami del sangue", ic:"🧪", k:"esami", body: p => noHead(vPazEsami(p).html) },
   dxa:   { t:"Densitometria", ic:"🩻", k:"dxa", body: p => noHead(vPazDxa(p).html) },
   defra: { t:"DeFRA", ic:"🎯", k:"defra", body: p => noHead(vPazDefra(p).html) },
-  sec:   { t:"Osteoporosi secondaria", ic:"⚠️", k:"anamnesi", body: p => { const S = pzSecondary(p);
-    const irc = (p.ci || {}).irc && !S.A.forms.some(x => x.cid === "irc");
-    return (irc ? `<p class="lbl">Dall'anamnesi</p><div class="stack">${ohEntry("forma-irc", COND.irc, "inserisci l'eGFR negli esami: decide quali farmaci si possono usare")}</div>` : "") + secReport(p, S) + (S.A.forms.length ? `<p class="lbl">Compatibili con gli esami</p><div class="stack">${S.A.forms.map(x => ohEntry("forma-" + x.cid, COND[x.cid], x.sub)).join("")}</div>` : "") +
+  sec:   { t:"Osteoporosi secondaria", ic:"⚠️", k:"anamnesi", body: p => { const S = pzSecondary(p), G = secGroups(p, S);
+    const SRC = { anam:"da malattie e farmaci", esami:"compatibile con gli esami" };
+    return (G.length ? G.map(([l, xs]) => `<div class="seclev sl${l}"><p class="lbl">${SEC_LEV[l].t}</p><p class="small">${SEC_LEV[l].s[0].toUpperCase() + SEC_LEV[l].s.slice(1)}.</p><div class="stack">${xs.map(x => `<a class="entry" href="${x.href}" target="_blank" rel="noopener"><div><b>${x.nome}</b><small>${SRC[x.src]}${x.riv ? " · da rivedere se possibile" : ""}</small></div>${CHEV}</a>`).join("")}</div></div>`).join("")
+      : `<p class="hint">Nessuna forma secondaria.</p>`) +
       `<div class="btns"><button type="button" class="btn sec" data-fsheet="anam">Malattie e farmaci</button><button type="button" class="btn sec" data-fsheet="esami">Esami del sangue</button></div>`; } },
   storico:{ t:"Controlli nel tempo", ic:"📈", k:"storico", body: p => noHead(vPazStorico(p).html) },
   /* su PC la decisione si apre nel pannello di destra; sul telefono resta la sua pagina */
@@ -144,13 +145,11 @@ function figSummary(p, F, S){
   /* osteoporosi secondaria: un solo bollino, il numero di condizioni e i nomi su una riga; si apre */
   /* osteoporosi secondaria: un solo bollino con il numero e i nomi; toccandolo si aprono sotto le singole forme, ognuna porta alla sezione da modificare */
   const nm2 = n => /^Farmaci \(/.test(n) ? "Farmaci " + n.replace(/^Farmaci \((.*)\)$/, "$1") : short(n).replace(/\s*\(.*\)$/, "").replace(/ \/ .*$/, "");
-  const secA = [...new Set([...S.N.note, ...S.N.sosp].map(x => nm2(x.f.nome)).concat(ci.irc ? ["Insufficienza renale cronica"] : []))];
-  const secE = [...new Set(S.A.forms.map(x => nm2(COND[x.cid])))];
-  if(sec.length){ const op = !!FIG.secOpen;
-    dx.push(`<button type="button" class="fbd k-a fsec-b" data-secopen aria-expanded="${op}" aria-label="${hx(plural(sec.length, "condizione", "condizioni") + " di osteoporosi secondaria: " + sec.join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${sec.length}</span><span class="fbd-t"><b>Osteoporosi secondaria</b><small>${hx(sec.map(short).join(" · "))}</small></span></button>`);
-    if(op){ const sub = (k, t, l) => dx.push(`<button type="button" class="fbd fsub sec" data-fsheet="${k}" aria-label="${hx(t + ": " + l.join(", ") + ". Apri")}"><span class="fbd-t"><b>${t}</b><small>${hx(l.join(", "))}</small></span></button>`);
-      if(secA.length) sub("anam", "Da malattie e farmaci", secA);
-      if(secE.length) sub("esami", "Compatibili con gli esami", secE); } }
+  const G = secGroups(p, S);
+  if(sec.length){ const op = !!FIG.secOpen, top = G.length ? G[0][0] : 3;
+    dx.push(`<button type="button" class="fbd k-${SEC_LEV[top].k} fsec-b" data-secopen aria-expanded="${op}" aria-label="${hx(plural(sec.length, "condizione", "condizioni") + " di osteoporosi secondaria: " + sec.join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${sec.length}</span><span class="fbd-t"><b>Osteoporosi secondaria</b><small>${hx(G.length ? G[0][1].length + " " + SEC_LEV[top].t.toLowerCase() + (G.length > 1 ? " · altre " + (sec.length - G[0][1].length) : "") : "")}</small></span></button>`);
+    if(op) G.forEach(([l, xs]) => { const src = [...new Set(xs.map(x => x.src))], k = src.length === 1 ? src[0] : "sec";
+      dx.push(`<button type="button" class="fbd fsub sec sl${l}" data-fsheet="${k}" aria-label="${hx(SEC_LEV[l].t + ": " + xs.map(x => x.nome).join(", ") + ". Apri")}"><span class="fbd-t"><b>${SEC_LEV[l].t}</b><small>${hx(xs.map(x => nm2(x.nome)).join(", "))}</small></span></button>`); }); }
   const es = stepStatus(p, "esami", F, S), ls = labStatus(p);
   if(es.st === "miss") pill(dx, "esami", "miss", "?", "Esami del sangue", ls.done + " di " + ls.tot + " inseriti");
   else if(vdLow(vd) || es.st === "warn") pill(dx, "esami", "k-a", "!", "Esami del sangue", vdLow(vd) ? "vitamina D " + vdTxt(vd) : "da rivedere");
@@ -315,9 +314,11 @@ function vDecidi(p, inPanel){
   const pend = nota79Pend(p, F), PSTEP = { chi:"dati", fx:"dati", anam:"anamnesi", defra:"defra", dxa:"dxa" };
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
   const chk = []; let nDo = 0;
-  const c = (st, t, s) => { if(st !== "ok") nDo++; chk.push(`<div class="td ${st}"><i>${st === "ok" ? "✓" : "!"}</i><span>${t}<small>${s}</small></span></div>`); };
+  const c = (st, t, s) => { if(st === "w") nDo++; chk.push(`<div class="td ${st}"><i>${st === "ok" ? "✓" : st === "i" ? "i" : "!"}</i><span>${t}<small>${s}</small></span></div>`); };
   if(ls.done < ls.tot) c("w", "Completa gli esami di I livello", `${ls.done} di ${ls.tot}: servono a escludere le forme secondarie`);
-  if(S.N.note.length + S.N.sosp.length + S.A.forms.length) c("w", "Forme secondarie da considerare", [...S.N.note, ...S.N.sosp].map(x => x.f.nome).concat(S.A.forms.map(x => COND[x.cid])).slice(0, 3).join(", "));
+  { const G = secGroups(p, S), g = l => (G.find(x => x[0] === l) || [, []])[1];
+    if(g(1).length) c("w", "Prima di trattare", g(1).map(x => x.nome).join(", "));
+    if(g(2).length) c("i", "Da approfondire, intanto si può trattare", g(2).map(x => x.nome).join(", ")); }
   if(S.hpp) c("w", "Escludi l'ipofosfatasia", "fosfatasi alcalina bassa: bisfosfonati controindicati");
   if(vd === null && lab.D !== "norm") c("w", "Dosa la 25-OH-vitamina D", "sotto 75 nmol/L è rimborsabile (Nota 96) e va corretta prima di iniziare il farmaco");
   else if(vdLow(vd) || lab.D === "basso") c("w", "Correggi la vitamina D", (vd !== null ? vdTxt(vd) + ": " : "") + "sotto 75 nmol/L, il valore da raggiungere (Nota 96)");

@@ -257,6 +257,29 @@ function pzSecondary(p){
   const hpp = (p.lab || {}).ALP === "basso" || ids.has("gen_ipofosfatasia");
   return { N, A, hpp };
 }
+/* gerarchia delle forme secondarie, per quello che cambiano nella cura:
+   1 prima di trattare (correggere o escludere prima del farmaco, o cambia il farmaco), 2 da approfondire (si tratta intanto),
+   3 fattori noti: si tratta comunque (alcuni da rivedere se possibile) */
+const SEC_L1 = new Set(["tiroxina", "cushing", "ipogonadismo", "gen_ipofosfatasia",
+  "deficitD", "osteomalIpoP", "fanconi", "ipofosfatasia", "iperpara", "ipertiroid", "ipercalcemiaMaligna", "mieloma", "neoplasia", "intoxD", "farmaciCa", "ipopara", "ipomagne", "paget"]);
+const SEC_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
+const SEC_LEV = [null,
+  { t:"Prima di trattare", s:"da correggere o escludere prima del farmaco, o cambiano la scelta del farmaco", k:"r" },
+  { t:"Da approfondire", s:"si tratta l'osteoporosi mentre si indaga", k:"a" },
+  { t:"Fattori noti", s:"spiegano il rischio, si tratta comunque", k:"g" }];
+function secLevels(p, S){
+  S = S || pzSecondary(p); const eg = num(p.egfr), out = [], seen = new Set();
+  const add = (nome, lev, src, href, riv) => { if(seen.has(nome)) return; seen.add(nome); out.push({ nome, lev, src, href, riv: !!riv }); };
+  const ircLev = eg === null || eg < 30 ? 1 : 2;
+  S.N.note.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 3, "anam", OH + "#causa-" + x.f.id, SEC_RIVEDI.has(x.f.id)));
+  S.N.sosp.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 2, "anam", OH + "#causa-" + x.f.id));
+  S.A.forms.forEach(x => add(COND[x.cid], x.cid === "irc" ? ircLev : SEC_L1.has(x.cid) ? 1 : 2, "esami", OH + "#forma-" + x.cid));
+  if((p.ci || {}).irc) add(COND.irc, ircLev, "anam", OH + "#forma-irc");
+  return out.sort((a, b) => a.lev - b.lev);
+}
+/* le forme secondarie in una riga, per livello */
+const secGroups = (p, S) => { const it = secLevels(p, S); return [1, 2, 3].map(l => [l, it.filter(x => x.lev === l)]).filter(g => g[1].length); };
+const secText = (p, S) => secGroups(p, S).map(([l, xs]) => SEC_LEV[l].t + ": " + xs.map(x => x.nome + (x.riv ? " (da rivedere se possibile)" : "")).join(", ")).join("; ");
 function drugFlags(p, F, S){
   const lab = p.lab || {}, eg = num(p.egfr), vd = num(p.vitd), ci = p.ci || {}, fl = {};
   const add = (ids, kind, why) => ids.forEach(id => { (fl[id] = fl[id] || { ci:[], warn:[] })[kind].push(why); });
@@ -402,9 +425,8 @@ function pzText(p){
   L.push("Fratture da fragilità: " + (F.fx.length ? F.fx.map(fxTxt).join("; ") : p.nessunaFx ? "nessuna" : "non registrate"));
   if(F.lastDxa) L.push("DXA del " + fmtD(F.lastDxa.data) + ": T-score " + tsTxt(F.lastDxa));
   if(F.zona) L.push("DeFRA del " + fmtD(F.lastDefra.data) + ": " + defraTxt(F.lastDefra, F));
-  const sec = [...S.N.note, ...S.N.sosp].map(x => x.f.nome); if(sec.length) L.push("Forme secondarie dall'anamnesi: " + sec.join(", "));
+  const sec = secText(p, S); if(sec) L.push("Forme secondarie. " + sec);
   const ll = labLine(p); if(ll) L.push("Esami" + (p.labData ? " del " + fmtD(p.labData) : "") + ": " + ll);
-  if(S.A.forms.length) L.push("Esami compatibili con: " + S.A.forms.map(x => COND[x.cid]).join(", "));
   if(S.hpp) L.push("Fosfatasi alcalina bassa: escludere l'ipofosfatasia (bisfosfonati controindicati)");
   if(n79.length) L.push("Nota 79: " + n79.map(c => c.cond).join("; "));
   if(p.decisione && DECISIONI[p.decisione.tipo]) L.push("Decisione: " + DECISIONI[p.decisione.tipo].t + " (" + fmtD(p.decisione.data) + ")");
@@ -994,9 +1016,9 @@ function vPazReport(p){
   const ll = labLine(p), td = pzTodo(p, F), dec = p.decisione && DECISIONI[p.decisione.tipo];
   const body = sec("Fratture da fragilità", F.fx.length ? F.fx.map(fxTxt) : p.nessunaFx ? ["Nessuna"] : [], "fratture")
     + sec("Anamnesi e terapie", anam, anamDone(p) ? "" : "anamnesi")
-    + sec("Forme secondarie dall'anamnesi", [...S.N.note.map(x => x.f.nome + " — " + badgeOf(x, false)), ...S.N.sosp.map(x => x.f.nome + " — " + badgeOf(x, true))], "")
+    + sec("Forme secondarie", secGroups(p, S).map(([l, xs]) => SEC_LEV[l].t + " (" + SEC_LEV[l].s + "): " + xs.map(x => x.nome + (x.riv ? " — da rivedere se possibile" : "")).join("; ")), "")
     + sec("Esami di I livello" + (p.labData ? " (" + fmtD(p.labData) + ")" : ""), ll ? [ll] : [], "esami")
-    + (S.A.forms.length ? `<p class="note"><b>Forme compatibili con gli esami:</b> ${S.A.forms.map(x => COND[x.cid]).join(", ")}.${S.A.byForm.length ? " Esami di II livello, solo su sospetto clinico, partendo da " + COND[S.A.byForm[0][0]].toLowerCase() + ": " + S.A.byForm[0][1].join("; ") + "." : ""}</p>` : "")
+    + (S.A.byForm.length ? `<p class="note">${S.A.byForm.length ? "Esami di II livello, solo su sospetto clinico, partendo da " + COND[S.A.byForm[0][0]].toLowerCase() + ": " + S.A.byForm[0][1].join("; ") + "." : ""}</p>` : "")
     + (S.hpp ? `<p class="note"><b>Fosfatasi alcalina bassa:</b> escludere l'ipofosfatasia; bisfosfonati controindicati.</p>` : "")
     + sec("Densitometria (T-score)", F.dxa.map(d => fmtD(d.data) + " — " + tsTxt(d)), "densitometria")
     + (F.lastDxa ? `<p class="note">${pl.t}.</p>` : "")
@@ -1022,8 +1044,8 @@ function letterReasons(p, F, S){
   if(F.recent.length) r.push("frattura da fragilità recente, con rischio imminente di rifrattura");
   if(F.fxInTerapia) r.push("nuova frattura nonostante la terapia in corso");
   if(S.hpp) r.push("fosfatasi alcalina bassa, sospetta ipofosfatasia");
-  const sec = [...S.A.forms.map(x => COND[x.cid]), ...S.N.note.map(x => x.f.nome), ...S.N.sosp.map(x => x.f.nome)];
-  if(sec.length) r.push("inquadramento di una possibile forma secondaria (" + [...new Set(sec)].slice(0, 4).join(", ") + ")");
+  const sec = secLevels(p, S).filter(x => x.lev < 3).map(x => x.nome);
+  if(sec.length) r.push("inquadramento di una possibile forma secondaria (" + sec.slice(0, 4).join(", ") + ")");
   if(!r.length) r.push("valutazione specialistica dell'osteoporosi e indicazione alla terapia");
   return r;
 }
@@ -1036,8 +1058,8 @@ function letterData(p){
     ["Densitometria (T-score)", F.dxa.length ? F.dxa.slice(0, 3).map(d => fmtD(d.data) + ": " + tsTxt(d)).join("; ") : "non disponibile"],
     ["DeFRA", F.zona ? fmtD(F.lastDefra.data) + ": " + defraTxt(F.lastDefra, F) : "non calcolato"],
     ["Anamnesi e fattori di rischio", anam.length ? anam.join(", ") : "nulla di rilevante"],
-    ["Forme secondarie considerate", [...S.N.note, ...S.N.sosp].map(x => x.f.nome).join(", ") || "nessuna dall'anamnesi"],
-    ["Esami" + (p.labData ? " del " + fmtD(p.labData) : ""), (ll || "non disponibili") + (S.A.forms.length ? ". Compatibili con: " + S.A.forms.map(x => COND[x.cid]).join(", ") : "")],
+    ["Forme secondarie considerate", secText(p, S) || "nessuna"],
+    ["Esami" + (p.labData ? " del " + fmtD(p.labData) : ""), (ll || "non disponibili")],
     ["Terapie per l'osteoporosi", (p.terapie || []).length ? p.terapie.map(t => dnome(t.farmaco) + " dal " + fmtD(t.inizio) + (t.fine ? " al " + fmtD(t.fine) : " (in corso)")).join("; ") : "nessuna"],
     ["Da tenere presente per la terapia", ciTxt.length ? ciTxt.join(", ") : "nessuna controindicazione nota"],
     ["Nota 79", n79.length ? n79.map(c => c.cond).join("; ") : "nessuna condizione con i dati disponibili"]
