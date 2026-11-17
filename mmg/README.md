@@ -196,4 +196,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Il riquadro del caso completo usa gli stessi colori pieni delle pill: fondo verde acqua più acceso (#BFE6E2), icona del farmaco bianca su cerchio pieno (verde terapia, viola specialista, giallo da registrare, grigio nessun farmaco), avviso rebound con barra gialla, «Rivaluta» con bordo viola pieno.
 
 ### Schede dell'archivio pazienti
-- Ogni scheda è divisa in tre fasce: chi è (avatar, nome, sesso ed età, zona DeFRA come etichetta colorata a destra), la terapia (icona su cerchio pieno: verde farmaco in corso, viola specialista, giallo da registrare, grigio nessun farmaco, tratteggiata da decidere) e, su fondo grigio, la barra del percorso con il passo e cosa manca.
+- Ogni scheda è divisa in tre fasce: chi è (avatar, nome, sesso ed età, zona DeFRA come etichetta colorata a destra), la terapia (icona su cerchio pieno: verde farmaco in corso, viola specialista, giallo da registrare, grigio nessun farmaco, tratteggiata da decidere) e la barra del percorso con il passo e cosa manca; la scheda ha un unico sfondo bianco, senza separatori, così si legge come un solo paziente.
