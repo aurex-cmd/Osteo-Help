@@ -86,24 +86,26 @@ function figSpots(p, F, S){
   return {
     chi: { n:1, st: anagMiss ? "miss" : "ok", t: anagMiss ? "Chi è" : (F.age + " anni"),
       s: anagMiss ? "età, peso, familiarità" : ["BMI " + fmtN(F.bmi), p.fam ? "familiarità" : ""].filter(Boolean).join(" · ") },
-    fx: { n:2, st: p.rival && F.fx.length && !p.fxRiv ? "miss" : F.fx.length ? (F.recent.length ? "al" : "ok") : p.nessunaFx ? "ok" : "miss",
+    fx: { n:1, st: p.rival && F.fx.length && !p.fxRiv ? "miss" : F.fx.length ? (F.recent.length ? "al" : "ok") : p.nessunaFx ? "ok" : "miss",
       t: F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura") + (F.fx[0].grado ? " " + F.fx[0].grado : "") + (F.fx.length > 1 ? " +" + (F.fx.length - 1) : "") : p.nessunaFx ? "Nessuna frattura" : "Le fratture",
       s: p.rival && F.fx.length && !p.fxRiv ? "nuove fratture?" : F.fx.length ? (F.recent.length ? "recente · " + fmtD(F.fx[0].data) : fmtD(F.fx[0].data)) : p.nessunaFx ? "da fragilità" : "quando, dove, come" },
-    anam: { n:3, st: an.st === "miss" ? "miss" : (sec.length || ciOn ? "al" : "ok"), t: an.st === "miss" ? "Malattie e farmaci" : sec.length ? plural(sec.length, "causa secondaria", "cause secondarie") : ciOn ? "Controindicazioni" : (p.anamMuta && !anamHas(p) ? "Anamnesi muta" : "Anamnesi completa"),
+    anam: { n:2, st: an.st === "miss" ? "miss" : (sec.length || ciOn ? "al" : "ok"), t: an.st === "miss" ? "Malattie e farmaci" : sec.length ? plural(sec.length, "causa secondaria", "cause secondarie") : ciOn ? "Controindicazioni" : (p.anamMuta && !anamHas(p) ? "Anamnesi muta" : "Anamnesi completa"),
       s: an.st === "miss" ? "incolla dal gestionale" : sec.length ? sec[0] : ciOn ? "da conoscere per la terapia" : "nessuna forma secondaria" }
   };
 }
 /* sulla figura: zona e rischio DeFRA, T-score di colonna e femore */
 function figBadges(p, F){
   const dx = F.lastDxa, tF = dx ? [num(dx.tFt), num(dx.tFn)].filter(v => v !== null) : [];
-  const ts = (lbl, v) => { if(v === null) return `<button type="button" class="fbd miss" data-fsheet="dxa"><span class="fbd-c">?</span><span class="fbd-t"><b>${lbl}</b><small>DXA da inserire</small></span></button>`;
+  const ts = (lbl, v) => { if(v === null) return `<button type="button" class="fbd miss" data-fsheet="dxa"><span class="fbd-c">4</span><span class="fbd-t"><b>${lbl}</b><small>DXA da inserire</small></span></button>`;
     const c = tsCat(v); return `<button type="button" class="fbd t-${c[0]}" data-fsheet="dxa" aria-label="T-score ${lbl.toLowerCase()} ${fmtN(v)}, ${c[1].toLowerCase()}"><span class="fbd-c">${fmtN(v)}</span><span class="fbd-t"><b>${lbl}</b><small>${c[1].toLowerCase()}${F.dxaAge > 24 ? " · " + dx.data.slice(0, 4) : ""}</small></span></button>`; };
   const z = F.zona, r = F.rischio;
   const df = z ? `<button type="button" class="fbd zf z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio " + fmtN(r, 0) + "%" : ""}"><span class="fbd-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "!"}</span><span class="fbd-t"><b>DeFRA</b><small>zona ${ZONE[z].t.toLowerCase()}</small></span></button>`
-    : `<button type="button" class="fbd miss" data-fsheet="defra"><span class="fbd-c">?</span><span class="fbd-t"><b>DeFRA</b><small>da calcolare</small></span></button>`;
+    : `<button type="button" class="fbd miss" data-fsheet="defra"><span class="fbd-c">5</span><span class="fbd-t"><b>DeFRA</b><small>da calcolare</small></span></button>`;
   const es = stepStatus(p, "esami", F, pzSecondary(p)), ls = labStatus(p);
-  const ex = `<button type="button" class="fbd ${es.st === "miss" ? "miss" : es.st === "warn" ? "k-a" : "k-ok"}" data-fsheet="esami"><span class="fbd-c">${es.st === "miss" ? "?" : es.st === "warn" ? "!" : "✓"}</span><span class="fbd-t"><b>Esami</b><small>${es.st === "miss" ? ls.done + " di " + ls.tot : es.st === "warn" ? "da rivedere" : "nella norma"}</small></span></button>`;
-  return `<div class="fbads">${df}${ts("Colonna", dx ? num(dx.tL) : null)}${ts("Femore", tF.length ? Math.min(...tF) : null)}${ex}</div>`;
+  const ex = `<button type="button" class="fbd ${es.st === "miss" ? "miss" : es.st === "warn" ? "k-a" : "k-ok"}" data-fsheet="esami"><span class="fbd-c">${es.st === "miss" ? "3" : es.st === "warn" ? "!" : "✓"}</span><span class="fbd-t"><b>Esami</b><small>${es.st === "miss" ? ls.done + " di " + ls.tot : es.st === "warn" ? "da rivedere" : "nella norma"}</small></span></button>`;
+  /* nell'ordine dei passi: 3 esami, 4 densitometria, 5 DeFRA; senza DXA un solo bollino «Densitometria» */
+  const dxb = dx ? ts("Colonna", num(dx.tL)) + ts("Femore", tF.length ? Math.min(...tF) : null) : `<button type="button" class="fbd miss" data-fsheet="dxa"><span class="fbd-c">4</span><span class="fbd-t"><b>DXA</b><small>da inserire</small></span></button>`;
+  return `<div class="fbads">${ex}${dxb}${df}</div>`;
 }
 /* caso completo: tutti gli indizi raccolti (dati, fratture, anamnesi, DXA, DeFRA) */
 const figDone = (F, spots) => !Object.values(spots).some(x => x.st === "miss") && !!F.zona && !!F.lastDxa;
