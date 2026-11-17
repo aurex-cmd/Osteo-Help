@@ -87,7 +87,7 @@ const exams = [
       dx:["mieloma","mgus"] },
     { id:"spep_down", dir:"down", tag:"Albumina ▼", name:"Ipoalbuminemia",
       clues:"Edemi, calo ponderale, segni di malassorbimento",
-      dx:["malassorb","malnutriz","epatopatia","nefrosica"] } ] },
+      dx:["malnutriz","flogosi","epatopatia","nefrosica","malassorb"] } ] },
 
   { name:"Calcemia (corretta)", chip:"Ca²⁺", screens:"Equilibrio del calcio",
     note:"Correggere sempre la <b>calcemia per l'albumina</b>: Ca corretto (mg/dL) = Ca misurato + 0,8 × (4 − Albumina g/dL).<div class=\"cc-calc\"><label>Calcio misurato <span>(mg/dL)</span><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" class=\"cc-in\" data-k=\"ca\" placeholder=\"es. 8.5\"></label><label>Albumina <span>(g/dL)</span><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" class=\"cc-in\" data-k=\"alb\" placeholder=\"es. 3.0\"></label><div class=\"cc-out\">Calcio corretto: <b class=\"cc-res\">—</b> mg/dL</div></div>", alts:[

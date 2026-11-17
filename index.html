@@ -559,7 +559,7 @@ const FIRST_LEVEL = new Set(["Fosforo","Calciuria 24h","25-OH-vit D","25-OH-vita
    così la causa più probabile viene per prima (es. ipocalciuria isolata → ridotto introito di calcio) */
 const FREQ = {
   ridIntroito:1, deficitD:1.1, iperpara:1, farmaciCa:1, ipertiroid:1, irc:1, ipercalciuriaId:1, flogosi:1, talassemia:1, immobiliz:1,
-  malassorb:2, mgus:2, epatopatia:2, colestasi:2, ipotiroid:2, connettiv:2, farmaciD:2, ipomagne:2, malnutriz:2, neoplasia:2, mieloma:2, nefrosica:2, paget:2,
+  malassorb:2, mgus:2, epatopatia:2, colestasi:2, ipotiroid:2, connettiv:2, farmaciD:2, ipomagne:2, malnutriz:1, neoplasia:2, mieloma:2, nefrosica:2, paget:2,
   fhh:3, sarcoidosi:3, intoxD:3, osteomalIpoP:3, fanconi:3, acidosiTub:3, ipopara:3, ipofosfatasia:3, ipercalcemiaMaligna:3
 };
 const byFreq = (a, b) => (FREQ[a.cid] || 2) - (FREQ[b.cid] || 2);
@@ -585,7 +585,7 @@ const exams = [
       dx:["mieloma","mgus"] },
     { id:"spep_down", dir:"down", tag:"Albumina ▼", name:"Ipoalbuminemia",
       clues:"Edemi, calo ponderale, segni di malassorbimento",
-      dx:["malassorb","malnutriz","epatopatia","nefrosica"] } ] },
+      dx:["malnutriz","flogosi","epatopatia","nefrosica","malassorb"] } ] },
 
   { name:"Calcemia (corretta)", chip:"Ca²⁺", screens:"Equilibrio del calcio",
     note:"Correggere sempre la <b>calcemia per l'albumina</b>: Ca corretto (mg/dL) = Ca misurato + 0,8 × (4 − Albumina g/dL).<div class=\"cc-calc\"><label>Calcio misurato <span>(mg/dL)</span><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" class=\"cc-in\" data-k=\"ca\" placeholder=\"es. 8.5\"></label><label>Albumina <span>(g/dL)</span><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" class=\"cc-in\" data-k=\"alb\" placeholder=\"es. 3.0\"></label><div class=\"cc-out\">Calcio corretto: <b class=\"cc-res\">—</b> mg/dL</div></div>", alts:[
@@ -717,7 +717,7 @@ const FORMS = [
  {cid:"ipopara",f:[["Ca","d"],["P","u"],["PTH","d"]],k:{Ca:["d",0],PTH:["d",1]}},
  {cid:"deficitD",f:[["Ca","d"],["P","d"],["ALP","u"],["CaU","d"],["D","d"],["PTH","u"]],k:{D:["d",0],Ca:["d",1]}},
  {cid:"irc",f:[["Ca","d"],["P","u"],["eGFR","d"],["D","d"],["PTH","u"]],k:{eGFR:["d",0]}},
- {cid:"malassorb",f:[["Hb","d"],["Alb","d"],["Ca","d"],["P","d"],["CaU","d"],["D","d"],["PTH","u"]],k:{Ca:["d",1]}},
+ {cid:"malassorb",f:[["Hb","d"],["Alb","d"],["Ca","d"],["P","d"],["CaU","d"],["D","d"],["PTH","u"]],k:{Ca:["d",1]},need:[["Ca","d"],["P","d"],["CaU","d"],["D","d"],["PTH","u"]]},
  {cid:"ipomagne",f:[["Ca","d"]],k:{}},
  {cid:"paget",f:[["ALP","u"]],k:{ALP:["u",0]}},
  {cid:"colestasi",f:[["ALP","u"]],k:{ALP:["u",0]}},
@@ -728,7 +728,7 @@ const FORMS = [
  {cid:"fanconi",f:[["P","d"]],k:{P:["d",0]}},
  {cid:"mgus",f:[["VES","u"],["MSpike","u"]],k:{MSpike:["u",1]}},
  {cid:"talassemia",f:[["Hb","d"],["MCV","d"]],k:{MCV:["d",0],Hb:["d",1]}},
- {cid:"flogosi",f:[["VES","u"],["Hb","d"]],k:{VES:["u",0]}},
+ {cid:"flogosi",f:[["VES","u"],["Hb","d"],["Alb","d"]],k:{VES:["u",0]}},
  {cid:"connettiv",f:[["VES","u"]],k:{VES:["u",0]}},
  {cid:"ipercalciuriaId",f:[["CaU","u"]],k:{CaU:["u",0],Ca:["n",0]}},
  {cid:"acidosiTub",f:[["CaU","u"]],k:{CaU:["u",0]}},
@@ -1248,7 +1248,9 @@ function multiCauseF(elig, sel){
 function computeA(){
   const sel = selFindings();
   if(!sel.length) return { sel, kind:"none", forms:[], leftover:[], panel:[], excluded:[] };
-  const elig = FORMS.filter(f => !normEx(f) && !contradicted(f, sel));
+  /* alcune forme richiedono almeno uno di certi reperti (es. il malassorbimento un segno del metabolismo minerale: non bastano albumina o emoglobina basse) */
+  const needOk = f => !f.need || sel.some(s => f.need.some(n => n[0] === s[0] && n[1] === s[1]));
+  const elig = FORMS.filter(f => !normEx(f) && !contradicted(f, sel) && needOk(f));
   const inter = elig.filter(f => sel.every(s => covers(f, s)));
   let kind, forms = [], leftover = [];
   if(inter.length){ kind = "inter"; forms = inter.map(f => ({ cid: f.cid })).sort(byFreq); }
@@ -1405,6 +1407,7 @@ function vRisultato(){
   if(r.kind === "inter") h = head(r.forms.length === 1 ? "Forma compatibile" : r.forms.length + " forme compatibili") + tags + (r.forms.length > 1 ? `<p class="sub" style="margin:0">Dalla più frequente alla più rara.</p>` : "");
   else if(r.kind === "multi") h = head("Più cause") + tags + `<p class="sub" style="margin:0">Nessuna forma da sola spiega tutti i reperti: il quadro è compatibile con più cause insieme.</p>`;
   else h = head("Nessuna forma nota") + tags + `<p class="sub" style="margin:0">Nessuna forma in elenco spiega questi reperti. Valuta reperti isolati o cause non in elenco.</p>`;
+  if(r.sel.length === 1 && r.sel[0][0] === "Alb" && r.sel[0][1] === "d") h += `<p class="lbl">Albumina bassa isolata</p><p class="note">Nell'anziano è frequente e poco specifica: malnutrizione proteica, infiammazione cronica, malattie epatiche o renali. Da sola non basta a sospettare un malassorbimento: lo fanno pensare calcio, fosforo o vitamina D bassi, PTH alto, calciuria bassa, insieme ai sintomi intestinali.</p>`;
   if(r.forms.length) h += `<div class="stack" id="rForms">${r.forms.map(x => entry("forma-" + x.cid, COND[x.cid], x.sub, "teal")).join("")}</div>`;
   if(r.leftover.length) h += `<p class="hint">Non spiegati: ${r.leftover.map(ftag).join(", ")}.</p>`;
   if(r.byForm.length) h += `<p class="lbl">Esami di II livello</p><p class="small">${L2_NOTE}</p><div id="aPanel">${l2ByFormHTML(r.byForm, cid => COND[cid])}</div>`;
