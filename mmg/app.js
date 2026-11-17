@@ -2,7 +2,7 @@
    OSTEO HELP MMG — scheda del paziente con osteoporosi (app separata da Osteo Help)
    Anamnesi e terapie → forme secondarie (stesso motore di «Esami normali»),
    esami di I livello → forme compatibili (stesso motore di «Esami alterati»),
-   cosa serve per il DeFRA, rischio di frattura, Nota 79, storico DXA/DeFRA/fratture, report.
+   rischio di frattura, Nota 79, storico DXA/DeFRA/fratture, report.
    I dati restano solo nel browser di questo dispositivo (localStorage).
    ============================================================ */
 const PZ_KEY = "oh-pazienti-v1";
@@ -504,27 +504,10 @@ async function removePin(){
   PIN = null; try{ localStorage.removeItem(PIN_KEY); }catch(e){} toast("Codice tolto."); render();
 }
 
-/* ---------- cosa serve per il DeFRA ---------- */
-function defraChecklist(p, F){
-  const it = [];
-  const push = (st, t, s) => it.push({ st, t, s });
-  push(F.age === null ? "miss" : F.age < 50 ? "warn" : "ok", "Età", F.age === null ? "Inserisci la data di nascita." : F.age < 50 ? `${F.age} anni: il DeFRA si usa dai 50 anni.` : `${F.age} anni`);
-  push(p.sesso ? "ok" : "miss", "Sesso", p.sesso ? (p.sesso === "donna" ? "Donna" + (p.postmeno === true ? ", in postmenopausa" : p.postmeno === false ? ", non in menopausa" : "") : "Uomo") : "Da indicare.");
-  push(F.bmi ? "ok" : "miss", "Peso e altezza", F.bmi ? `${fmtN(num(p.peso), 0)} kg, ${fmtN(num(p.altezza), 0)} cm (BMI ${fmtN(F.bmi)})` : "Servono per il calcolo.");
-  push(F.fx.length || p.nessunaFx ? "ok" : "miss", "Fratture da fragilità", F.fx.length ? `${F.vert.length} vertebrali, ${F.fem.length} di femore, ${F.oth.length} in altre sedi` : p.nessunaFx ? "Nessuna frattura pregressa" : "Registra le fratture pregresse o conferma che non ce ne sono. Pensa alle vertebrali silenti: una radiografia del rachide dorso-lombare se calo di statura o dorsalgia.");
-  push(p.fam === null ? "miss" : "ok", "Familiarità", p.fam === null ? "Frattura di femore o vertebrale nei genitori: da chiedere." : p.fam ? "Sì, fratture di femore o vertebre nei genitori" : "No");
-  push(anamDone(p) ? "ok" : "miss", "Glucocorticoidi, fumo, alcol, malattie", anamDone(p) ? [F.gc ? "glucocorticoidi" : "", F.feats.has("fumo") ? "fumo" : "", F.feats.has("alcol") ? "alcol ≥ 3 unità/die" : "", ...F.comorb].filter(Boolean).join(", ") || "Nessuno dei fattori del DeFRA" : "Compila anamnesi e terapie e confermale.");
-  push(anamDone(p) ? "ok" : "miss", "Terapia ormonale adiuvante", anamDone(p) ? (F.adj ? "Sì (" + [F.feats.has("aromatasi") ? "inibitori dell'aromatasi" : "", F.feats.has("adt") ? "deprivazione androgenica" : ""].filter(Boolean).join(", ") + ")" : "No") : "Inibitori dell'aromatasi o deprivazione androgenica: dall'anamnesi.");
-  const hasT = F.lastDxa && (num(F.lastDxa.tL) !== null || num(F.lastDxa.tFt) !== null || num(F.lastDxa.tFn) !== null);
-  push(!hasT ? "miss" : F.dxaAge > 24 ? "warn" : "ok", "Densitometria (DXA) lombare e femorale", !hasT ? "Serve una DXA con il T-score di colonna e femore." : `T-score del ${fmtD(F.lastDxa.data)}: colonna ${fmtN(num(F.lastDxa.tL))}, femore totale ${fmtN(num(F.lastDxa.tFt))}, collo ${fmtN(num(F.lastDxa.tFn))}` + (F.dxaAge > 24 ? " — più vecchia di 24 mesi" : ""));
-  return it;
-}
 function labStatus(p){
   const lab = p.lab || {}, done = PZ_EXAMS.filter(e => lab[e.id]).length;
   return { done, tot: PZ_EXAMS.length };
 }
-const ST_LBL = { ok:"ok", miss:"manca", warn:"attenzione" };
-const stTag = st => `<span class="st ${st}">${ST_LBL[st]}</span>`;
 
 /* ---------- elenco pazienti ---------- */
 /* icone a tratto (24×24) della pagina iniziale */
@@ -858,29 +841,6 @@ function vPazEsami(p){
 }
 
 /* ---------- 4 · DeFRA ---------- */
-function defraSummary(p, F){
-  const r = [];
-  r.push(["Sesso", p.sesso ? (p.sesso === "donna" ? "donna" : "uomo") : "—"]);
-  r.push(["Età", F.age !== null ? F.age + " anni" : "—"]);
-  r.push(["Peso", p.peso ? hx(p.peso) + " kg" : "—"]);
-  r.push(["Altezza", p.altezza ? hx(p.altezza) + " cm" : "—"]);
-  r.push(["Fratture vertebrali", F.vert.length ? F.vert.length + " (" + F.vert.map(f => f.grado || "gravità non nota").join(", ") + ")" : "nessuna"]);
-  r.push(["Fratture di femore", F.fem.length || "nessuna"]);
-  r.push(["Altre fratture", F.oth.length ? F.oth.map(f => FX_SEDI[f.sede]).join(", ") : "nessuna"]);
-  r.push(["Familiarità femore/vertebre", p.fam === null ? "—" : p.fam ? "sì" : "no"]);
-  r.push(["Fumo / alcol", (F.feats.has("fumo") ? "fumatore" : "non fumatore") + " / " + (F.feats.has("alcol") ? "≥ 3 unità al giorno" : "no")]);
-  r.push(["Glucocorticoidi", F.gc ? "sì" + ({ "12":", prednisone ≥5 mg/die da oltre 12 mesi", "3":", prednisone ≥5 mg/die da oltre 3 mesi", "0":", meno di 3 mesi o dose minore" }[gcDurOf(p)] || "") : "no"]);
-  r.push(["Malattie", F.comorb.length ? F.comorb.join(", ") : "nessuna delle malattie del DeFRA"]);
-  r.push(["Terapia adiuvante", F.adj ? "sì" : "no"]);
-  if(F.lastDxa){ r.push(["T-score colonna lombare", fmtN(num(F.lastDxa.tL))]); r.push(["T-score femore totale", fmtN(num(F.lastDxa.tFt))]); r.push(["T-score collo femorale", fmtN(num(F.lastDxa.tFn))]); r.push(["Data della DXA", fmtD(F.lastDxa.data)]); }
-  return `<ul class="list kv">${r.map(x => `<li><span>${x[0]}</span><em>${x[1]}</em></li>`).join("")}</ul>`;
-}
-function defraLive(p){
-  const F = pzFacts(p), chk = defraChecklist(p, F), miss = chk.filter(x => x.st === "miss").length;
-  return `<ul class="list chk">${chk.map(x => `<li>${stTag(x.st)}<span><b>${x.t}</b><small>${x.s}</small></span></li>`).join("")}</ul>
-    ${miss ? `<div class="alert info"><b>${plural(miss, "dato manca", "dati mancano")}</b>Completa prima i dati, poi apri il DeFRA.</div>` : `<div class="alert ok"><b>Dati pronti per il DeFRA</b>Riportali nel calcolatore e torna qui a inserire il rischio.</div>`}
-    <p class="lbl">Da riportare nel DeFRA</p>${defraSummary(p, F)}`;
-}
 function vPazDefra(p){
   const F = pzFacts(p), rc = riskCat(F.zona);
   const hist = F.defra.map(d => `<li class="rec"><span><b>${zchip(d.zona)}</b><small>${fmtD(d.data)}${num(d.rischio) !== null ? " · rischio a 10 anni " + fmtN(num(d.rischio), 0) + "%" : ""}${d.note ? " · " + hx(d.note) : ""}</small></span><button type="button" class="x" data-del="defra:${p.defra.indexOf(d)}" aria-label="Elimina">✕</button></li>`).join("");
@@ -893,7 +853,7 @@ function vPazDefra(p){
       </div>
       <button type="button" class="btn" data-add="defra">Salva la zona del DeFRA</button>
     </div>`;
-  const serve = `<div data-live="defra">${defraLive(p)}</div><div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>`;
+  const serve = `<div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>`;
   const zone = `<ul class="list zleg">${ZONE_ORDER.map(z => `<li>${zchip(z)}<span><b>${ZONE[z].r[0].toUpperCase() + ZONE[z].r.slice(1)} → ${ZONE[z].chi}</b><small>${ZONE[z].azione}</small></span></li>`).join("")}</ul>
     <p class="small">Le soglie delle zone dipendono dall'età: per questo basta riportare la zona che indica il DeFRA. La rimborsabilità resta legata alle condizioni della Nota 79.</p>`;
   const acc = (t, body, open) => `<details class="dsec"${open ? " open" : ""}><summary><span>${t}</span></summary><div class="dsec-b">${body}</div></details>`;
@@ -906,7 +866,7 @@ function vPazDefra(p){
     ${acc("Cosa significano le zone", zone, false)}` };
   }
   return { bar: pzName(p), html: head0 + `
-    <p class="lbl">Cosa serve</p>${serve}
+    ${serve}
     <p class="lbl">Zona di rischio</p>${form}
     ${acc("Cosa significano le zone", zone, false)}` };
 }
@@ -1377,7 +1337,7 @@ const pzParent = r => /^paz-[a-z0-9]+-(figura|percorso)$/.test(r) ? "" : /^paz-[
 const PZ_LIVE = {
   stepper: p => { const m = /-([a-z]+)$/.exec(routeNow()); return m && STEP_IX[m[1]] !== undefined ? stepperInner(p, m[1]) : ""; },
   cacorr: caLine,
-  sec: p => secReport(p, pzSecondary(p)), amuta: anamMutaHTML, anov: anamNovHTML, lab: p => labReport(p, pzSecondary(p)), defra: defraLive,
+  sec: p => secReport(p, pzSecondary(p)), amuta: anamMutaHTML, anov: anamNovHTML, lab: p => labReport(p, pzSecondary(p)),
   bmi: p => bmiTxt(pzFacts(p))
 };
 function pzLive(p){
