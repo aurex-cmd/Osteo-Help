@@ -216,3 +216,7 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - In cima c'è la scheda dell'ultima densitometria: la data in testa con il giudizio peggiore (osteoporosi / osteopenia / normale), sotto i tre siti con il T-score in un cerchio colorato e, se c'è una DXA precedente, la variazione (▲ ▼ o = stabile, soglia 0,2).
 - Sotto: quando ripeterla. Il modulo per una nuova DXA è aperto solo se non ce n'è nessuna; altrimenti è un riquadro chiuso «+ Aggiungi una nuova densitometria» (di solito dopo 18–24 mesi), che si apre al tocco.
 - Poi il grafico del T-score nel tempo e, chiuse, le densitometrie precedenti, ognuna con la sua scheda.
+
+### Invio per un anabolico solo se in Nota 79
+- Nell'avviso «Rischio molto alto» di «Decidi la terapia» l'app controlla la Nota 79 (`n79Ana` in app.js): se il paziente rientra per teriparatide, abaloparatide o romosozumab, dice per quale farmaco e con quale condizione, e propone l'invio allo specialista.
+- Se un anabolico è in Nota ma controindicato (es. eGFR sotto 30), lo dice con il motivo. Se non rientra per nessuno, dice che con i dati inseriti non c'è Nota 79 per un anabolico e che resta la prima linea; se mancano dati che possono cambiare la Nota, invita a completarli.

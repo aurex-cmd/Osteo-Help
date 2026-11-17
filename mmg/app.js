@@ -330,6 +330,14 @@ function veryHigh(p, F){
   return r;
 }
 
+/* anabolici (teriparatide, abaloparatide) e romosozumab: quali rientrano davvero nella Nota 79 con i dati del paziente, e perché */
+function n79Ana(p, F, fl, n79){
+  const ok = [], no = [];
+  [T_, AB_, RO_].forEach(id => { const cs = n79.filter(c => c.s.some(l => l.includes(id))); if(!cs.length) return;
+    const ci = fl[id] && fl[id].ci.length ? fl[id].ci : null;
+    (ci ? no : ok).push({ id, cond: cs.map(c => c.cond), ci }); });
+  return { ok, no };
+}
 /* ---------- prossima DXA e promemoria delle terapie ---------- */
 function dxaPlan(F){
   if(!F.lastDxa) return { st:"miss", t:"Nessuna densitometria registrata", s:"Richiedi una DXA lombare e femorale: serve al DeFRA e alla Nota 79." };

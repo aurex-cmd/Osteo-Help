@@ -371,7 +371,13 @@ function vDecidi(p, inPanel){
       <div class="dact">${actions}</div>
       ${cur ? `<p class="dcur">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
     </div>
-    ${(() => { const r = pr.paget ? [] : vh.filter(x => !/zona rossa/i.test(x)); return r.length ? `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}. Valuta l'invio allo specialista per un anabolico.</div>` : ""; })()}
+    ${(() => { const r = pr.paget ? [] : vh.filter(x => !/zona rossa/i.test(x)); if(!r.length) return "";
+      /* l'invio per un anabolico si propone solo se il paziente rientra nella Nota 79, e si dice per quale farmaco */
+      const A = n79Ana(p, F, fl, n79), nm = id => dnome(id).replace(/ \(.*\)$/, "");
+      const okL = A.ok.map(x => `<li><b>${nm(x.id)}</b>${x.id === RO_ ? " (solo se non si possono seguire altri trattamenti efficaci)" : ""}<small>${hx(x.cond.join("; ").replace(/: solo se non è possibile seguire altri trattamenti efficaci.*$/, ""))}</small></li>`).join("");
+      const noL = A.no.map(x => `<li class="ci"><b>${nm(x.id)}</b>: in Nota 79 ma controindicato<small>${hx(x.ci.join("; "))}</small></li>`).join("");
+      return A.ok.length ? `<div class="dvh-a ana"><b>Rischio molto alto</b>${r.join("; ")}.<p>Rientra nella Nota 79 per ${A.ok.map(x => nm(x.id)).join(" e ")}: valuta l'invio allo specialista per la prescrizione con piano terapeutico.</p><ul>${okL}${noL}</ul></div>`
+        : `<div class="dvh-a ana no"><b>Rischio molto alto</b>${r.join("; ")}.<p>${A.no.length ? "In Nota 79, ma controindicato per questo paziente: resta la terapia di prima linea, o l'invio allo specialista per decidere." : "Con i dati inseriti non rientra nella Nota 79 per un anabolico (teriparatide, abaloparatide) né per il romosozumab" + (pend.length ? ": completa i dati qui sotto, possono cambiare la risposta." : "; resta la terapia di prima linea.")}</p>${noL ? `<ul>${noL}</ul>` : ""}</div>`; })()}
     ${pend.length ? sec("Da completare per la Nota 79", pend.length, `<ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>`, false) : ""}
     ${best ? sec("Dettagli del farmaco consigliato", "", drug(best, true), false) : ""}
     ${others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : ""}
