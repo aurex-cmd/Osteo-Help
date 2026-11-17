@@ -939,5 +939,7 @@ body.locked .bar{visibility:hidden}
 <script src="riconosci.js"></script>
 <script src="figura.js"></script>
 <script src="app.js"></script>
+<script>/* immagini scaricate una volta sola: dalla seconda apertura sono già sul dispositivo (vedi sw.js) */
+if("serviceWorker" in navigator && location.protocol !== "file:") window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));</script>
 </body>
 </html>
