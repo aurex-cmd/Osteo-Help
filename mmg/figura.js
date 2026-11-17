@@ -114,8 +114,10 @@ function figSummary(p, F, S){
     const now = Date.now(), at = prev[k] === "t" ? now : typeof prev[k] === "number" ? prev[k] : 0;
     cur[k] = at && now - at < 400 ? at : "ok"; return at && now - at < 400 ? " fpop" : ""; };
   /* dei dati mancanti si mostra solo il prossimo passo, nel posto dove comparirà la sua pill: gli altri spazi restano vuoti */
-  const todo = (arr, k, sh, b, sm) => { const n = STEP_IX[k] + 1; cur[sh] = "t"; if(!(nx && nx.k === k)) return;
-    pill(arr, sh, "fhsl nx", n, b, sm, "Prossimo passo, " + n + ": " + b + ", " + sm); };
+  /* ...più il punto della sezione aperta (su PC dalla strada a destra), così si vede dove comparirà il dato che si sta inserendo */
+  const openK = FIG.open === "sec" ? "anam" : FIG.open;
+  const todo = (arr, k, sh, b, sm) => { const n = STEP_IX[k] + 1, isNx = nx && nx.k === k; cur[sh] = "t"; if(!isNx && openK !== sh) return;
+    pill(arr, sh, "fhsl" + (isNx ? " nx" : ""), n, b, sm, (isNx ? "Prossimo passo, " : "Passo ") + n + ": " + b + ", " + sm); };
   /* 1 · chi è: l'età (con il BMI se è basso), poi la familiarità */
   if(st("dati") === "miss") todo(sx, "dati", "chi", "Chi è", "età, peso, familiarità");
   else { const low = F.bmi && F.bmi < 20;
@@ -166,7 +168,7 @@ function figSummary(p, F, S){
   const z = F.zona, r = F.rischio, dn = STEP_IX.defra + 1, dNx = nx && nx.k === "defra";
   const popD = z ? pop("defra") : (cur.defra = "t", "");
   const big = z ? `<button type="button" class="fdefra z-${z}${popD}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio di frattura a 10 anni " + fmtN(r, 0) + "%" : ""}"><span class="fdefra-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "—"}</span><span class="fdefra-t"><small>DeFRA · rischio a 10 anni</small><b>Zona ${ZONE[z].t.toLowerCase()}</b><span>${ZONE[z].r}</span></span></button>`
-    : !dNx ? "" : `<button type="button" class="fter fhsl nx" data-fsheet="defra" aria-label="Passo ${dn}: DeFRA, zona da inserire"><span class="fter-c">${dn}</span><span class="fter-t"><small>Passo ${dn} · DeFRA</small><b>Rischio a 10 anni</b><span>zona da inserire</span></span></button>`;
+    : !dNx && openK !== "defra" ? "" : `<button type="button" class="fter fhsl${dNx ? " nx" : ""}" data-fsheet="defra" aria-label="Passo ${dn}: DeFRA, zona da inserire"><span class="fter-c">${dn}</span><span class="fter-t"><small>Passo ${dn} · DeFRA</small><b>Rischio a 10 anni</b><span>zona da inserire</span></span></button>`;
   return `<div class="fsum${(FIG.ciOpen && cig.length) || (FIG.secOpen && sec.length) ? " ciop" : ""}"><div class="fsum-c">${sx.join("")}</div><div class="fsum-c r">${dx.join("")}</div></div>${big}`;
 }
 function figStage(p, fig, spots, F, S){
