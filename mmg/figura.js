@@ -280,6 +280,9 @@ const REBOUND = `<div class="fwarn a reb"><b>Effetto rebound</b>: non interrompe
 function proposta(p, F, S, fl){
   const okd = id => !(fl[id] && fl[id].ci.length);
   if(!F.zona) return null;
+  /* sospetto morbo di Paget: l'unica terapia indicata è lo zoledronato endovena, qualunque sia la zona */
+  if(S.A.forms.some(x => x.cid === "paget")) return { tipo:"mmg", paget:true, t: okd(Z_) ? "Sospetto morbo di Paget: zoledronato endovena" : "Sospetto morbo di Paget: zoledronato non utilizzabile",
+    s:"Nel Paget l'unica terapia indicata è lo zoledronato endovena; gli altri farmaci per l'osteoporosi non lo sono e gli anabolici sono controindicati. Conferma il sospetto (fosfatasi alcalina ossea, scintigrafia, radiografie) e prescrivi lo zoledronato in struttura ospedaliera.", opz:[Z_], best: okd(Z_) ? Z_ : null };
   if(F.zona === "verde") return { tipo:"nessuno", t:"Nessun farmaco per l'osteoporosi", s:ZONE.verde.azione, opz:[] };
   if(zoneHigh(F.zona)){
     const spec = [T_, ...(F.donna ? [AB_, RO_] : [])];
@@ -317,6 +320,7 @@ function vDecidi(p, inPanel){
   const c = (st, t, s) => { if(st === "w") nDo++; chk.push(`<div class="td ${st}"><i>${st === "ok" ? "✓" : st === "i" ? "i" : "!"}</i><span>${t}<small>${s}</small></span></div>`); };
   if(ls.done < ls.tot) c("w", "Completa gli esami di I livello", `${ls.done} di ${ls.tot}: servono a escludere le forme secondarie`);
   { const G = secGroups(p, S), g = l => (G.find(x => x[0] === l) || [, []])[1];
+    if(g(0).length) c("w", "Urgenza medica", g(0).map(x => x.nome).join(", ") + ": invio urgente in ospedale");
     if(g(1).length) c("w", "Prima di trattare", g(1).map(x => x.nome).join(", "));
     if(g(2).length) c("i", "Da approfondire, intanto si può trattare", g(2).map(x => x.nome).join(", ")); }
   if(S.hpp) c("w", "Escludi l'ipofosfatasia", "fosfatasi alcalina bassa: bisfosfonati controindicati");
@@ -355,16 +359,18 @@ function vDecidi(p, inPanel){
   const best = pr.tipo === "mmg" && pr.best ? pr.best : null;
   return { bar:"Decisione terapeutica", html: `
     ${inPanel ? "" : `<div class="dhead"><span class="dav" style="background-image:url(img/${fig}-viso.jpg)"></span><span><b>${hx(pzName(p))}</b><small>${F.age !== null ? F.age + " anni · " : ""}${facts}</small></span></div>`}
+    ${secLevels(p, S).some(x => x.lev === 0) ? `<div class="dvh-a urg"><b>Urgenza medica se il calcio è molto alto</b>Con calcio oltre 14 mg/dL o sintomi (confusione, poliuria, disidratazione) sospetta un'ipercalcemia maligna: invio urgente in ospedale per idratazione e bisfosfonato endovena (denosumab se la funzione renale è ridotta). La terapia dell'osteoporosi viene dopo.</div>` : ""}
     ${cur === "spec" ? specBlk : ""}
     <div class="dverd z-${F.zona}">
       <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
-      <b class="dtit">${pr.tipo === "mmg" && best ? "Prescrivi tu la terapia" : pr.t}</b>
+      <b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : pr.tipo === "mmg" && best ? "Prescrivi tu la terapia" : pr.t}</b>
       ${best ? `<div class="dbest">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span><em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em></div>${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
+      ${pr.paget ? `<p class="dnote">${pr.s}</p>` : ""}
       ${pr.tipo === "spec" ? `<p class="dnote">La lettera allo specialista è già compilata. Nell'attesa: calcio, vitamina D, prevenzione delle cadute.</p>` : pr.tipo === "nessuno" ? `<p class="dnote">${ZONE.verde.azione}</p>` : ""}
       <div class="dact">${actions}</div>
       ${cur ? `<p class="dcur">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
     </div>
-    ${(() => { const r = vh.filter(x => !/zona rossa/i.test(x)); return r.length ? `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}. Valuta l'invio allo specialista per un anabolico.</div>` : ""; })()}
+    ${(() => { const r = pr.paget ? [] : vh.filter(x => !/zona rossa/i.test(x)); return r.length ? `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}. Valuta l'invio allo specialista per un anabolico.</div>` : ""; })()}
     ${pend.length ? sec("Da completare per la Nota 79", pend.length, `<ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>`, false) : ""}
     ${best ? sec("Dettagli del farmaco consigliato", "", drug(best, true), false) : ""}
     ${others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : ""}

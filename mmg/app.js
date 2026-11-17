@@ -263,7 +263,7 @@ function pzSecondary(p){
 const SEC_L1 = new Set(["tiroxina", "gen_ipofosfatasia",
   "ipofosfatasia", "deficitD", "osteomalIpoP", "fanconi", "ipopara", "ipomagne"]);
 const SEC_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
-const SEC_LEV = [null,
+const SEC_LEV = [{ t:"Urgenza medica", s:"se il calcio è molto alto (oltre 14 mg/dL) o ci sono sintomi: subito in ospedale, idratazione e bisfosfonato endovena", k:"r" },
   { t:"Prima di trattare", s:"da correggere prima del farmaco: senza correzione non funziona o fa danno", k:"r" },
   { t:"Da approfondire", s:"si indaga, anche con urgenza, ma intanto si tratta", k:"a" },
   { t:"Fattori noti", s:"spiegano il rischio, si tratta comunque", k:"g" }];
@@ -273,12 +273,12 @@ function secLevels(p, S){
   const ircLev = 2;   /* le soglie di eGFR per i farmaci sono nelle controindicazioni */
   S.N.note.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 3, "anam", OH + "#causa-" + x.f.id, SEC_RIVEDI.has(x.f.id)));
   S.N.sosp.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 2, "anam", OH + "#causa-" + x.f.id));
-  S.A.forms.forEach(x => add(COND[x.cid], x.cid === "irc" ? ircLev : SEC_L1.has(x.cid) ? 1 : 2, "esami", OH + "#forma-" + x.cid));
+  S.A.forms.forEach(x => add(COND[x.cid], x.cid === "ipercalcemiaMaligna" ? 0 : x.cid === "irc" ? ircLev : SEC_L1.has(x.cid) ? 1 : 2, "esami", OH + "#forma-" + x.cid));
   if((p.ci || {}).irc) add(COND.irc, ircLev, "anam", OH + "#forma-irc");
   return out.sort((a, b) => a.lev - b.lev);
 }
 /* le forme secondarie in una riga, per livello */
-const secGroups = (p, S) => { const it = secLevels(p, S); return [1, 2, 3].map(l => [l, it.filter(x => x.lev === l)]).filter(g => g[1].length); };
+const secGroups = (p, S) => { const it = secLevels(p, S); return [0, 1, 2, 3].map(l => [l, it.filter(x => x.lev === l)]).filter(g => g[1].length); };
 const secText = (p, S) => secGroups(p, S).map(([l, xs]) => SEC_LEV[l].t + ": " + xs.map(x => x.nome + (x.riv ? " (da rivedere se possibile)" : "")).join(", ")).join("; ");
 function drugFlags(p, F, S){
   const lab = p.lab || {}, eg = num(p.egfr), vd = num(p.vitd), ci = p.ci || {}, fl = {};
@@ -291,7 +291,8 @@ function drugFlags(p, F, S){
   if(lab.Ca === "basso") add(ANTIRIASS, "ci", "ipocalcemia da correggere prima di iniziare");
   if(lab.Ca === "alto") add(ANABOL, "ci", "ipercalcemia");
   if(lab.PTH === "alto" && lab.Ca === "alto") add(ANABOL, "ci", "sospetto iperparatiroidismo");
-  if(lab.ALP === "alto") add(ANABOL, "warn", "fosfatasi alcalina elevata da spiegare (Paget?)");
+  if(S.A.forms.some(x => x.cid === "paget")){ add([T_, AB_], "ci", "sospetto morbo di Paget"); add([A_, R_, I_, D_, RX_, BZ_, RO_], "warn", "sospetto morbo di Paget: l'unica terapia indicata è lo zoledronato endovena"); }
+  else if(lab.ALP === "alto") add(ANABOL, "warn", "fosfatasi alcalina elevata da spiegare (Paget?)");
   if(vdLow(vd) || lab.D === "basso") add([...ANTIRIASS, ...ANABOL], "warn", "correggere prima la carenza di vitamina D" + (vd !== null ? ` (${vdTxt(vd)})` : ""));
   if(ci.esofago) add(ORALI, "ci", "disturbi esofagei o impossibilità a restare in piedi/seduti");
   if(ci.reflusso && !ci.esofago) add(ORALI, "warn", "reflusso gastroesofageo: assunzione corretta (a digiuno, con un bicchiere d'acqua, in piedi o seduti per 30 minuti); se sintomatico valutare un farmaco non orale");
