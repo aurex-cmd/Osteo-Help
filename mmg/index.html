@@ -474,7 +474,7 @@ main{padding-bottom:40px}
 .fhud-m{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .fhud-c{font-size:.8rem;font-weight:700;color:#3B2F6B;background:#ECE8F8;border-radius:999px;padding:4px 11px}
 @media (min-width:744px) and (min-height:560px){.fhud-p{display:none!important}}
-#pzGrid .row:has(.rowr > .auto){display:none} #pzGrid .lgrp:not(:has(.rowr > :not(.auto))){display:none}
+/* gli esami con il valore scritto sopra restano nella griglia, con lo stato calcolato e il valore */
 .fhud-p{display:inline-flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;color:var(--muted);padding:4px 4px 4px 6px}
 .fhud-pb{display:inline-flex;gap:2px} .fhud-pb i{width:9px;height:6px;border-radius:3px;background:#E2DEF0} .fhud-pb i.ok{background:var(--teal)} .fhud-pb i.warn{background:var(--amber)}
 .fprog{display:none;gap:4px;margin-top:-6px} .fprog i{flex:1;height:7px;border-radius:4px;background:#ECE9F5} .fprog i.ok{background:var(--teal)} .fprog i.warn{background:var(--amber)}
@@ -987,6 +987,9 @@ body.locked .bar{visibility:hidden}
 @keyframes fchipIn{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1)}}
 .fhud-c.fpop{animation:fchipIn .55s cubic-bezier(.2,.9,.3,1.3) both;display:inline-block}
 @media (prefers-reduced-motion:reduce){.fhud-c.fpop{animation:none}}
+/* schede dei passi sul telefono: i nomi interi vanno a capo invece di essere tagliati */
+.fsheet .fstab{white-space:normal;text-align:center;line-height:1.15;min-width:0;padding:6px 8px}
+.fsheet .fstab i{flex:none}
 </style>
 </head>
 <body>

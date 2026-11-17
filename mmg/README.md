@@ -249,3 +249,11 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   - testi delle zone DeFRA in italiano piano: niente «prima linea» né «II o III livello» (si confondevano con le scelte della Nota 79);
   - anamnesi: «Vampate al volto (flushing)», «Storia delle fratture» al posto di «pattern fratturativo»;
   - decisione suggerita: etichetta «consigliata».
+
+- **Semplificazioni concordate**:
+  - zone DeFRA: gialla «terapia antiriassorbitiva senza necessità di intervento specialistico»; arancione e rossa «terapia anabolica o con romosozumab, prescrivibili dallo specialista su piano terapeutico»; ripristinati «Flushing» e «Anamnesi e pattern fratturativo»;
+  - Nota 79 in breve: le condizioni dicono i dati del paziente che lo fanno rientrare («Donna in postmenopausa oltre i 65 anni, T-score −3,1, 1 frattura vertebrale moderata»), non il testo intero della nota (`fxBreve`); la limitazione del romosozumab è a parte (`nb`, `RO_NB`);
+  - lettera allo specialista: alla voce Nota 79 solo i farmaci dello specialista in cui il paziente rientra, ognuno con livello di scelta e motivo (`n79Lettera`);
+  - esami: gli esami con il valore scritto (vitamina D, eGFR, calcio corretto, albumina) restano nella griglia con lo stato calcolato e il valore, invece di sparire;
+  - un solo nome per passo: «Anamnesi e farmaci», «Densitometria (DEXA)», «Fratture», anche nelle schede e sul pulsante Avanti; sul telefono le schede vanno a capo;
+  - anamnesi: tutti i gruppi chiusi e apribili, con il numero di voci spuntate (`pzGroup`); «Altri dati per DeFRA e Nota 79», «Controindicazioni» e «Odontoiatria» (separata) come gli altri gruppi.

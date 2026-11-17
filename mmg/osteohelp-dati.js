@@ -316,7 +316,7 @@ const AXES = [
   ]},
   { label:"Sintomi e segni", groups:[
     { sub:"Cute e reazioni allergiche", feats:[
-      ["flushing","Vampate al volto (flushing)"],
+      ["flushing","Flushing"],
       ["orticaria_pigmentosa","Orticaria pigmentosa"],
       ["prurito","Prurito"],
       ["strie_rubre","Strie rubre"],
@@ -368,7 +368,7 @@ const AXES = [
       ["habitus_marfanoide","Habitus marfanoide (alta statura, arti lunghi, aracnodattilia)"]
     ]}
   ]},
-  { label:"Storia delle fratture", groups:[
+  { label:"Anamnesi e pattern fratturativo", groups:[
     { sub:"Pattern fratturativo", feats:[
       ["frattura_inspiegata","Osteoporosi o fratture inspiegate in età giovane"],
       ["vertebrali_giovane","Fratture vertebrali in soggetto giovane"],

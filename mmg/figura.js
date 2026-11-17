@@ -36,16 +36,16 @@ const figViso = p => { const f = figOf(p); return f ? `img/${f}-viso.jpg` : null
 const FIG = { open:null, anim:false };
 const FIG_SHEETS = {
   chi:   { t:"Chi è", ic:"👤", k:"dati", body: p => datiAnag(p) + `<p class="lbl">Note</p><textarea class="area" data-pf="note" rows="3" placeholder="Note libere">${hx(p.note)}</textarea>` },
-  fx:    { t:"Le fratture", ic:"🦴", k:"fratture", body: p => datiFx(p) },
-  anam:  { t:"Malattie e farmaci", ic:"💊", k:"anamnesi", body: p => noHead(vPazAnamnesi(p).html) },
+  fx:    { t:"Fratture", ic:"🦴", k:"fratture", body: p => datiFx(p) },
+  anam:  { t:"Anamnesi e farmaci", ic:"💊", k:"anamnesi", body: p => noHead(vPazAnamnesi(p).html) },
   esami: { t:"Esami del sangue", ic:"🧪", k:"esami", body: p => noHead(vPazEsami(p).html) },
-  dxa:   { t:"Densitometria", ic:"🩻", k:"dxa", body: p => noHead(vPazDxa(p).html) },
+  dxa:   { t:"Densitometria (DEXA)", ic:"🩻", k:"dxa", body: p => noHead(vPazDxa(p).html) },
   defra: { t:"DeFRA", ic:"🎯", k:"defra", body: p => noHead(vPazDefra(p).html) },
   sec:   { t:"Osteoporosi secondaria", ic:"⚠️", k:"anamnesi", body: p => { const S = pzSecondary(p), G = secGroups(p, S);
     const SRC = { anam:"da malattie e farmaci", esami:"compatibile con gli esami" };
     return (G.length ? G.map(([l, xs]) => `<div class="seclev sl${l}"><p class="lbl">${SEC_LEV[l].t}</p><p class="small">${SEC_LEV[l].s[0].toUpperCase() + SEC_LEV[l].s.slice(1)}.</p><div class="stack">${xs.map(x => `<a class="entry" href="${x.href}" target="_blank" rel="noopener"><div><b>${x.nome}</b><small>${SRC[x.src]}${x.riv ? " · da rivedere se possibile" : ""}</small></div>${CHEV}</a>`).join("")}</div></div>`).join("")
       : `<p class="hint">Nessuna forma secondaria.</p>`) +
-      `<div class="btns"><button type="button" class="btn sec" data-fsheet="anam">Malattie e farmaci</button><button type="button" class="btn sec" data-fsheet="esami">Esami del sangue</button></div>`; } },
+      `<div class="btns"><button type="button" class="btn sec" data-fsheet="anam">Anamnesi e farmaci</button><button type="button" class="btn sec" data-fsheet="esami">Esami del sangue</button></div>`; } },
   storico:{ t:"Controlli nel tempo", ic:"📈", k:"storico", body: p => noHead(vPazStorico(p).html) },
   /* su PC la decisione si apre nel pannello di destra; sul telefono resta la sua pagina */
   decidi:{ t:"Decidi la terapia", ic:"⚖️", k:"terapia", body: p => { const v = vDecidi(p, true); return v.redirect !== undefined ? `<div class="alert info"><b>Serve prima la zona del DeFRA</b>La proposta di terapia parte dalla zona di rischio: inseriscila nel passo DeFRA.</div><div class="btns"><button type="button" class="btn" data-fsheet="defra">Vai al DeFRA</button></div>` : v.html; } }
@@ -87,9 +87,9 @@ function figSpots(p, F, S){
     chi: { n:1, st: anagMiss ? "miss" : "ok", t: anagMiss ? "Chi è" : (F.age + " anni"),
       s: anagMiss ? "età, peso, familiarità" : ["BMI " + fmtN(F.bmi), p.fam ? "familiarità" : ""].filter(Boolean).join(" · ") },
     fx: { n:2, st: p.rival && F.fx.length && !p.fxRiv ? "miss" : F.fx.length ? (F.recent.length ? "al" : "ok") : p.nessunaFx ? "ok" : "miss",
-      t: F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura") + (F.fx[0].grado ? " " + F.fx[0].grado : "") + (F.fx.length > 1 ? " +" + (F.fx.length - 1) : "") : p.nessunaFx ? "Nessuna frattura" : "Le fratture",
+      t: F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura") + (F.fx[0].grado ? " " + F.fx[0].grado : "") + (F.fx.length > 1 ? " +" + (F.fx.length - 1) : "") : p.nessunaFx ? "Nessuna frattura" : "Fratture",
       s: p.rival && F.fx.length && !p.fxRiv ? "nuove fratture?" : F.fx.length ? (F.recent.length ? "recente · " + fmtD(F.fx[0].data) : fmtD(F.fx[0].data)) : p.nessunaFx ? "da fragilità" : "quando, dove, come" },
-    anam: { n:3, st: an.st === "miss" ? "miss" : (sec.length || ciOn ? "al" : "ok"), t: an.st === "miss" ? "Malattie e farmaci" : sec.length ? plural(sec.length, "causa secondaria", "cause secondarie") : ciOn ? "Controindicazioni" : (p.anamMuta && !anamHas(p) ? "Anamnesi muta" : "Anamnesi completa"),
+    anam: { n:3, st: an.st === "miss" ? "miss" : (sec.length || ciOn ? "al" : "ok"), t: an.st === "miss" ? "Anamnesi e farmaci" : sec.length ? plural(sec.length, "causa secondaria", "cause secondarie") : ciOn ? "Controindicazioni" : (p.anamMuta && !anamHas(p) ? "Anamnesi muta" : "Anamnesi completa"),
       s: an.st === "miss" ? "incolla dal gestionale" : sec.length ? sec[0] : ciOn ? "da conoscere per la terapia" : "nessuna forma secondaria" }
   };
 }
@@ -135,7 +135,7 @@ function figSummary(p, F, S){
   /* 5 · T-score peggiore */
   const d = F.lastDxa, sites = d ? [["colonna", d.tL], ["femore", d.tFt], ["collo femore", d.tFn]].map(([n, v]) => [n, num(v)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]) : [];
   if(sites.length){ const [n, v] = sites[0], c = tsCat(v); pill(sx, "dxa", "t-" + c[0] + pop("dxa"), fmtN(v), "T-score " + n, c[1].toLowerCase() + (F.dxaAge > 24 ? " · " + d.data.slice(0, 4) : ""), "T-score peggiore " + n + " " + fmtN(v) + ", " + c[1].toLowerCase()); }
-  else todo(sx, "dxa", "dxa", "Densitometria", "T-score da inserire");
+  else todo(sx, "dxa", "dxa", "Densitometria (DEXA)", "T-score da inserire");
   /* 2 · fratture: una frattura: sede e data; più fratture: «Fratture multiple», le sedi su una riga, si apre l'elenco con le date */
   const fxNome = f => (FX_SEDI[f.sede] || "Frattura") + (f.grado ? " " + f.grado : "");
   if(st("fratture") === "miss" && !F.fx.length) todo(sx, "fratture", "fx", "Fratture", "da indicare");
@@ -157,7 +157,7 @@ function figSummary(p, F, S){
     dx.push(`<button type="button" class="fbd k-${SEC_LEV[top].k}${pop("anam")} fsec-b" data-secopen aria-expanded="${op}" aria-label="${hx(plural(sec.length, "condizione", "condizioni") + " di osteoporosi secondaria: " + sec.join(", ") + (op ? ". Chiudi" : ". Apri"))}"><span class="fbd-c">${sec.length}</span><span class="fbd-t"><b>Osteoporosi secondaria</b><small>${hx(G.length ? G[0][1].length + " " + SEC_LEV[top].t.toLowerCase() + (G.length > 1 ? " · altre " + (sec.length - G[0][1].length) : "") : "")}</small></span></button>`);
     if(op) G.forEach(([l, xs]) => { const src = [...new Set(xs.map(x => x.src))], k = src.length === 1 ? src[0] : "sec";
       dx.push(`<button type="button" class="fbd fsub sec sl${l}" data-fsheet="${k}" aria-label="${hx(SEC_LEV[l].t + ": " + xs.map(x => x.nome).join(", ") + ". Apri")}"><span class="fbd-t"><b>${SEC_LEV[l].t}</b><small>${hx(xs.map(x => nm2(x.nome)).join(", "))}</small></span></button>`); }); }
-  else if(st("anamnesi") === "miss") todo(dx, "anamnesi", "anam", "Malattie e farmaci", "incolla dal gestionale");
+  else if(st("anamnesi") === "miss") todo(dx, "anamnesi", "anam", "Anamnesi e farmaci", "incolla dal gestionale");
   else pill(dx, "anam", "k-ok" + pop("anam"), "✓", "Forme secondarie", "nessuna dall'anamnesi");
   /* 4 · esami del sangue */
   const es = stepStatus(p, "esami", F, S), ls = labStatus(p);
@@ -194,10 +194,10 @@ function figNext(p, F, S, spots){
   if(urg) return `<a class="fnext urg" href="${urg.href}"><small>Urgente</small><b>${urg.t}</b><span>${urg.s}</span></a>`;
   const ls = labStatus(p), clues = [
     ["chi", spots.chi.st === "miss", "Chi è", "età, peso e altezza, familiarità"],
-    ["fx", spots.fx.st === "miss", "Le fratture", "sede e data delle fratture da fragilità"],
-    ["anam", spots.anam.st === "miss", "Malattie e farmaci", "incolla il riassunto dal gestionale"],
+    ["fx", spots.fx.st === "miss", "Fratture", "sede e data delle fratture da fragilità"],
+    ["anam", spots.anam.st === "miss", "Anamnesi e farmaci", "incolla il riassunto dal gestionale"],
     ["esami", ls.done < ls.tot, "Esami del sangue", `${ls.done} di ${ls.tot} esami di I livello`],
-    ["dxa", !F.lastDxa, "Densitometria", "T-score di colonna e femore"],
+    ["dxa", !F.lastDxa, "Densitometria (DEXA)", "T-score di colonna e femore"],
     ["defra", !F.zona, "DeFRA", "calcola il rischio e riporta la zona"]
   ], miss = clues.filter(c => c[1]), dec = p.decisione && DECISIONI[p.decisione.tipo];
   if(dec){
@@ -231,7 +231,7 @@ function figNext(p, F, S, spots){
 const figDocs = p => `<p class="fdocs"><button type="button" class="lnk" data-copy="riepilogo">Copia per la cartella</button><a href="#paz-${p.id}-lettera">Lettera allo specialista</a><a href="#paz-${p.id}-foglio">Foglio per il paziente</a><a href="#paz-${p.id}-report">Report</a></p>`;
 /* le sezioni in ordine: si naviga con Indietro / Avanti; quella aperta si accende sulla figura */
 const FIG_SEQ = ["chi", "fx", "anam", "esami", "dxa", "defra"];
-const FIG_TAB = { chi:"Chi è", fx:"Fratture", anam:"Anamnesi", esami:"Esami", dxa:"DXA", defra:"DeFRA" };
+const FIG_TAB = { chi:"Chi è", fx:"Fratture", anam:"Anamnesi e farmaci", esami:"Esami del sangue", dxa:"Densitometria (DEXA)", defra:"DeFRA" };
 const figWide = () => window.matchMedia("(min-width:744px) and (min-height:560px)").matches;
 function figSecSt(p, k, F, S, spots){
   if(spots[k]) return spots[k].st === "miss" ? "miss" : spots[k].st === "al" ? "al" : "ok";
@@ -330,7 +330,7 @@ function vDecidi(p, inPanel){
   /* per ogni farmaco: la condizione della Nota in cui rientra e se è di I, II o III scelta */
   const n79txt = id => { const c = n79of(id); if(!c.length) return "Con i dati inseriti è fuori dalle condizioni della Nota 79.";
     const lv = c.map(x => N79_LEV.indexOf(n79Lev(x, id))), m = Math.min(...lv), cc = c.filter((x, i) => lv[i] === m), L = N79_LEV[m];
-    return `<b>Nota 79 · ${L} scelta</b>: ${cc.map(x => x.cond).join(" / ")}` + (m > 0 ? `. <em>Solo dopo intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni ai farmaci di ${N79_LEV[m - 1]} scelta${[T_, AB_].some(x => cc.some(y => y.s[0].includes(x))) ? " (o alla fine del periodo massimo di teriparatide o abaloparatide)" : ""}.</em>` : "")
+    return `<b>Nota 79 · ${L} scelta</b>: ${cc.map(x => x.cond).join(" / ")}` + (cc.some(x => x.nb) ? ", " + cc.find(x => x.nb).nb : "") + (m > 0 ? `. <em>Solo dopo intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni ai farmaci di ${N79_LEV[m - 1]} scelta${[T_, AB_].some(x => cc.some(y => y.s[0].includes(x))) ? " (o alla fine del periodo massimo di teriparatide o abaloparatide)" : ""}.</em>` : "")
       + (cc.some(x => x.spec) && [T_, AB_, RO_].includes(id) ? (m > 0 ? " " : ". ") + "Piano terapeutico specialistico." : "") + (id === Z_ ? " Solo in struttura ospedaliera pubblica o convenzionata." : ""); };
   /* livello di scelta in breve, per l'etichetta del farmaco */
   const levTag = id => { const f = fl[id] || { ci:[] }; if(f.ci.length) return ["no", "controindicato"]; const c = n79of(id); if(!c.length) return ["out", "fuori Nota 79"];
@@ -354,6 +354,7 @@ function vDecidi(p, inPanel){
       if(si.includes(Z_)) why += " Lo zoledronato, anch'esso di I scelta, si fa solo in struttura ospedaliera: lo trovi tra le altre opzioni.";
       else if(si.length) why += ` Di I scelta restano ${andL(si.map(nmL))}: li trovi tra le altre opzioni.`; }
     if([T_, AB_, RO_].includes(id)) why += " La prescrive lo specialista con piano terapeutico: dal medico di medicina generale serve l'invio.";
+    const nb = cc.find(x => x.nb); if(nb) why = " Solo " + nb.nb.replace(/^solo /, "") + "." + why;
     return `<p class="dwhy"><em>Nota 79 AIFA · ${N79_LEV[m]} scelta</em>${hx(cc.map(x => x.cond).join(" / "))}.${why}</p>`; };
   const pend = nota79Pend(p, F), PSTEP = { chi:"dati", fx:"fratture", anam:"anamnesi", defra:"defra", dxa:"dxa" };
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
@@ -416,7 +417,7 @@ function vDecidi(p, inPanel){
       /* l'invio per un anabolico si propone solo se il paziente rientra nella Nota 79, e si dice per quale farmaco */
       if(pr.ana) return `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}.</div>`;
       const A = n79Ana(p, F, fl, n79), nm = id => dnome(id).replace(/ \(.*\)$/, "");
-      const okL = A.ok.map(x => `<li><b>${nm(x.id)}</b>${x.id === RO_ ? " (solo se non si possono seguire altri trattamenti efficaci)" : ""}<small>${hx(x.cond.join("; ").replace(/: solo se non è possibile seguire altri trattamenti efficaci.*$/, ""))}</small></li>`).join("");
+      const okL = A.ok.map(x => `<li><b>${nm(x.id)}</b>${x.id === RO_ ? " (solo se non si possono seguire altri trattamenti efficaci)" : ""}<small>${hx(x.cond.join("; "))}</small></li>`).join("");
       const noL = A.no.map(x => `<li class="ci"><b>${nm(x.id)}</b>: in Nota 79 ma controindicato<small>${hx(x.ci.join("; "))}</small></li>`).join(""); /* senza un anabolico in Nota non si parla di anabolici: resta solo il rischio */
       return A.ok.length ? `<div class="dvh-a ana"><b>Rischio molto alto</b>${r.join("; ")}.<p>Rientra nella Nota 79 per ${A.ok.map(x => nm(x.id)).join(" e ")}: valuta l'invio allo specialista per la prescrizione con piano terapeutico.</p><ul>${okL}${noL}</ul></div>`
         : `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}: inizia la terapia senza ritardi.</div>`; })()}
