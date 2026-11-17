@@ -251,7 +251,7 @@ function vFigura(p){
   return { bar: "", html: viewSwitch(p, "figura") + `
     <div class="fhud">
       <h1 class="fhud-n${p.nome && p.nome.trim() ? "" : " anon"}">${hx(pzName(p))}</h1>
-      <div class="fhud-m">${p.rival && !p.decisione ? `<span class="fhud-c riv">Rivalutazione dal ${fmtD(p.rival.dal)}</span>` : ""}${p.sesso ? `<span class="fhud-c">${p.sesso === "donna" ? "Donna" : "Uomo"}</span>` : ""}${F.age !== null ? `<span class="fhud-c">${F.age} anni</span>` : ""}<span class="fhud-p" title="${done} di ${STEPS.length} passi completati"><span class="fhud-pb">${all.map(x => `<i class="${x.st}"></i>`).join("")}</span>${done} di ${STEPS.length} passi</span></div>
+      <div class="fhud-m">${p.rival && !p.decisione ? `<span class="fhud-c riv">Rivalutazione dal ${fmtD(p.rival.dal)}</span>` : ""}${p.sesso ? `<span class="fhud-c">${p.sesso === "donna" ? "Donna" : "Uomo"}</span>` : ""}${F.age !== null ? `<span class="fhud-c">${F.age} anni</span>` : ""}<span class="fhud-p" title="${done} di ${STEPS.length} passi completati" aria-label="${done} di ${STEPS.length} passi completati"><span class="proad" aria-hidden="true">${all.map(x => `<i class="${x.st}${nextStep(all) && x.i === nextStep(all).i ? " next" : ""}">${MARK[x.st] || x.i + 1}</i>`).join("")}</span></span></div>
     </div>
     <div class="fgrid${panel ? " panel" : ""}"><div class="fcol-l">${figStage(p, fig, spots, F, S)}</div>${figRoad(p, all)}
     <div class="fcol-r">${panel ? `<div class="fpanel" role="region" aria-label="${FIG_SHEETS[FIG.open].t}">${figSecInner(p, F, S, spots, true)}</div>` : `

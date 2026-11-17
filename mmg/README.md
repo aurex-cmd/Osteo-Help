@@ -210,3 +210,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - `sw.js` alla prima apertura scarica tutte le immagini dei pazienti (figure e visi) e le icone; dalla seconda volta le legge dal telefono o dal PC, senza rete, e compaiono subito.
 - Pagina e script si chiedono sempre prima alla rete, così gli aggiornamenti arrivano subito; la copia salvata serve solo offline (l'app si apre anche senza connessione).
 - Se si sostituiscono le immagini, aumentare `VER` in `sw.js`: le copie vecchie vengono cancellate e riscaricate.
+- Anche nella scheda del paziente (telefono e tablet stretto), sotto sesso ed età, le barrette sono sostituite dalla stessa strada a pallini dell'archivio; su PC resta la strada verticale a sinistra.
