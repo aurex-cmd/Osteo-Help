@@ -295,7 +295,7 @@ function proposta(p, F, S, fl){
   /* scelta del medico: dopo gli orali il denosumab, che il MMG prescrive da sé, poi lo zoledronato (solo in ospedale).
      Il livello di scelta della Nota (I, II) resta scritto su ogni farmaco */
   const base = [A_, R_, D_, Z_], ord = base.filter(id => lev(id) < 9).concat(base.filter(id => lev(id) === 9)), best = ord.find(okd);
-  return { tipo:"mmg", t: best ? "Terapia di prima linea: " + dnome(best) : "Prima linea non utilizzabile", s:ZONE.gialla.azione, opz: ord, best };
+  return { tipo:"mmg", t: best ? "Terapia consigliata: " + dnome(best) : "Nessun farmaco utilizzabile dal medico di medicina generale", s:ZONE.gialla.azione, opz: ord, best };
 }
 function vDecidi(p, inPanel){
   const F = pzFacts(p), S = pzSecondary(p), fl = drugFlags(p, F, S), n79 = nota79(p, F), pr = proposta(p, F, S, fl), fig = figOf(p), vh = veryHigh(p, F);
