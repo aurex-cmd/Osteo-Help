@@ -970,6 +970,20 @@ body.locked .bar{visibility:hidden}
 .fhs.later .ftag b{color:var(--muted)}
 .fter.nx{border-color:var(--pri)} .fter.nx .fter-c{border:0;background:var(--pri);color:#fff;position:relative} .fter.nx .fter-c::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(79,67,145,.45);animation:fpulse 1.8s infinite}
 .fsum .fbd.k-n .fbd-c{background:var(--pri);color:#fff}
+/* pill ancora da fare: come i punti di una volta, pallino viola con l'alone che pulsa ed etichetta bianca staccata */
+.fsum .fbd.fhsl,.fsum-c.r .fbd.fhsl{background:none;box-shadow:none;padding:0 0 0 6px;gap:10px;border:0} .fsum-c.r .fbd.fhsl{padding:0 6px 0 0}
+.fsum .fbd.fhsl .fbd-c{width:34px;height:34px;background:var(--pri);color:#fff;font-size:.9rem;position:relative;box-shadow:0 0 0 5px rgba(79,67,145,.2),0 4px 12px rgba(30,20,70,.25);border:0}
+.fsum .fbd.fhsl .fbd-c::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(79,67,145,.45);animation:fpulse 1.8s infinite}
+.fsum .fbd.fhsl .fbd-t{background:rgba(255,255,255,.96);border-radius:10px;padding:5px 9px;box-shadow:0 3px 12px rgba(30,20,70,.16);max-width:150px}
+.fsum .fbd.fhsl .fbd-t b{color:var(--ink)} .fsum .fbd.fhsl.nx{box-shadow:none}
+.fsum .fbd.fhsl.nx .fbd-c{box-shadow:0 0 0 5px rgba(79,67,145,.3),0 4px 12px rgba(30,20,70,.3);transform:scale(1.08)}
+.fter.fhsl{background:rgba(255,255,255,.96);border:0} .fter.fhsl .fter-c{background:var(--pri);color:#fff;border:0;position:relative;box-shadow:0 0 0 5px rgba(79,67,145,.2)} .fter.fhsl .fter-c::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(79,67,145,.45);animation:fpulse 1.8s infinite}
+/* appena completata: il punto si allarga e diventa pill */
+@keyframes fpopIn{0%{transform:scale(.7);opacity:.3;box-shadow:0 0 0 0 rgba(79,67,145,.5)}55%{transform:scale(1.08);opacity:1;box-shadow:0 0 0 10px rgba(79,67,145,0)}100%{transform:scale(1)}}
+.fbd.fpop{animation:fpopIn .55s cubic-bezier(.2,.9,.3,1.3) both;transform-origin:left center} .fsum-c.r .fbd.fpop{transform-origin:right center}
+@keyframes fpopBig{0%{transform:translateX(-50%) scale(.7);opacity:.3}60%{transform:translateX(-50%) scale(1.06);opacity:1}100%{transform:translateX(-50%) scale(1)}}
+.fdefra.fpop{animation:fpopBig .6s cubic-bezier(.2,.9,.3,1.3) both}
+@media (prefers-reduced-motion:reduce){.fbd.fpop,.fdefra.fpop{animation:none}}
 </style>
 </head>
 <body>
