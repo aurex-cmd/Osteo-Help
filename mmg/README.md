@@ -220,3 +220,7 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 ### Invio per un anabolico solo se in Nota 79
 - Nell'avviso «Rischio molto alto» di «Decidi la terapia» l'app controlla la Nota 79 (`n79Ana` in app.js): se il paziente rientra per teriparatide, abaloparatide o romosozumab, dice per quale farmaco e con quale condizione, e propone l'invio allo specialista.
 - Se almeno un anabolico è in Nota, quelli in Nota ma controindicati compaiono sotto con il motivo. Se nessun anabolico è indicato (non in Nota, o solo controindicati), degli anabolici non si parla: resta solo «Rischio molto alto … inizia la terapia senza ritardi». I dati mancanti per la Nota restano nella sezione «Da completare per la Nota 79».
+
+### Decidi la terapia: perché quel farmaco
+- Il titolo della zona gialla è «Terapia di prima linea» (non più «Prescrivi tu la terapia»).
+- Sotto il farmaco consigliato c'è il riquadro «Indicato dalla Nota 79 AIFA · I/II scelta» con la condizione della Nota; se è di II scelta dice perché (I scelta controindicata e motivo, oppure zoledronato di I scelta ma solo ospedaliero). Se il paziente non rientra nella Nota, il riquadro rosso «Fuori Nota 79» lo dice.

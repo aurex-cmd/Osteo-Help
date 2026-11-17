@@ -315,6 +315,19 @@ function vDecidi(p, inPanel){
       <div class="dd-b"><small>${DRUGS[id].via}</small>
       ${f.ci.map(x => `<div class="fwarn">Controindicato: ${x}</div>`).join("")}${f.warn.map(x => `<div class="fwarn a">Cautela: ${x}</div>`).join("")}
       ${!ci ? `<div class="fn79">${n79txt(id)}</div>` : ""}${id === D_ ? REBOUND : ""}</div></details>`; };
+  /* sotto il farmaco consigliato: perché è quello (condizione della Nota 79 e livello di scelta) e, se non è di I scelta, perché */
+  const okd = id => !(fl[id] && fl[id].ci.length), nmL = id => dnome(id).replace(/ \(.*\)$/, "").toLowerCase();
+  const andL = a => a.length > 1 ? a.slice(0, -1).join(", ") + " e " + a[a.length - 1] : a[0] || "";
+  const whyBest = id => { const c = n79of(id);
+    if(!c.length) return `<p class="dwhy out"><b>Fuori Nota 79</b>Con i dati inseriti il paziente non rientra in una condizione della Nota 79: il farmaco non sarebbe a carico del SSN. Verifica i dati o valuta l'invio allo specialista.</p>`;
+    const lv = c.map(x => N79_LEV.indexOf(n79Lev(x, id))), m = Math.min(...lv), cc = c.filter((x, i) => lv[i] === m);
+    let why = "";
+    if(m > 0){ const first = [...new Set(cc.flatMap(x => x.s[0]))].filter(x => x !== id), no = first.filter(x => !okd(x)), si = first.filter(okd);
+      const rs = [...new Set(no.flatMap(x => fl[x].ci))];
+      if(no.length) why += ` La I scelta (${andL(no.map(nmL))}) è controindicata: ${rs.join("; ")}.`;
+      if(si.includes(Z_)) why += " Lo zoledronato, anch'esso di I scelta, si fa solo in struttura ospedaliera: lo trovi tra le altre opzioni.";
+      else if(si.length) why += ` Di I scelta restano ${andL(si.map(nmL))}: li trovi tra le altre opzioni.`; }
+    return `<p class="dwhy"><b>Indicato dalla Nota 79 AIFA · ${N79_LEV[m]} scelta</b>${hx(cc.map(x => x.cond).join(" / "))}.${why}</p>`; };
   const pend = nota79Pend(p, F), PSTEP = { chi:"dati", fx:"dati", anam:"anamnesi", defra:"defra", dxa:"dxa" };
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
   const chk = []; let nDo = 0;
@@ -364,8 +377,8 @@ function vDecidi(p, inPanel){
     ${cur === "spec" ? specBlk : ""}
     <div class="dverd z-${F.zona}">
       <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
-      <b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : pr.tipo === "mmg" && best ? "Prescrivi tu la terapia" : pr.t}</b>
-      ${best ? `<div class="dbest">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span><em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em></div>${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
+      <b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : pr.tipo === "mmg" && best ? "Terapia di prima linea" : pr.t}</b>
+      ${best ? `<div class="dbest">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span><em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em></div>${!pr.paget ? whyBest(best) : ""}${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
       ${pr.paget ? `<p class="dnote">${pr.s}</p>` : ""}
       ${pr.tipo === "spec" ? `<p class="dnote">La lettera allo specialista è già compilata. Nell'attesa: calcio, vitamina D, prevenzione delle cadute.</p>` : pr.tipo === "nessuno" ? `<p class="dnote">${ZONE.verde.azione}</p>` : ""}
       <div class="dact">${actions}</div>
