@@ -223,4 +223,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 
 ### Decidi la terapia: perché quel farmaco
 - Il titolo della zona gialla è «Terapia di prima linea» (non più «Prescrivi tu la terapia»).
-- Sotto il farmaco consigliato c'è il riquadro «Indicato dalla Nota 79 AIFA · I/II scelta» con la condizione della Nota; se è di II scelta dice perché (I scelta controindicata e motivo, oppure zoledronato di I scelta ma solo ospedaliero). Se il paziente non rientra nella Nota, il riquadro rosso «Fuori Nota 79» lo dice.
+- Nella stessa scheda bianca del farmaco consigliato, sotto una linea sottile, c'è l'etichetta «Nota 79 AIFA · I/II scelta» con la condizione della Nota; se è di II scelta dice perché (I scelta controindicata e motivo, oppure zoledronato di I scelta ma solo ospedaliero). Se il paziente non rientra nella Nota, il riquadro rosso «Fuori Nota 79» lo dice.
