@@ -257,3 +257,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   - esami: gli esami con il valore scritto (vitamina D, eGFR, calcio corretto, albumina) restano nella griglia con lo stato calcolato e il valore, invece di sparire;
   - un solo nome per passo: «Anamnesi e farmaci», «Densitometria (DEXA)», «Fratture», anche nelle schede e sul pulsante Avanti; sul telefono le schede vanno a capo;
   - anamnesi: tutti i gruppi chiusi e apribili, con il numero di voci spuntate (`pzGroup`); «Altri dati per DeFRA e Nota 79», «Controindicazioni» e «Odontoiatria» (separata) come gli altri gruppi.
+- Zona gialla: tolto «La terapia la imposta il medico di medicina generale»; resta «Terapia antiriassorbitiva (bisfosfonati orali o denosumab) senza necessità di intervento specialistico, sempre con vitamina D.»
