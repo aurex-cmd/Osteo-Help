@@ -93,20 +93,6 @@ function figSpots(p, F, S){
       s: an.st === "miss" ? "incolla dal gestionale" : sec.length ? sec[0] : ciOn ? "da conoscere per la terapia" : "nessuna forma secondaria" }
   };
 }
-/* sulla figura: zona e rischio DeFRA, T-score di colonna e femore */
-function figBadges(p, F){
-  const dx = F.lastDxa, tF = dx ? [num(dx.tFt), num(dx.tFn)].filter(v => v !== null) : [];
-  const ts = (lbl, v) => { if(v === null) return `<button type="button" class="fbd miss" data-fsheet="dxa"><span class="fbd-c">5</span><span class="fbd-t"><b>${lbl}</b><small>DXA da inserire</small></span></button>`;
-    const c = tsCat(v); return `<button type="button" class="fbd t-${c[0]}" data-fsheet="dxa" aria-label="T-score ${lbl.toLowerCase()} ${fmtN(v)}, ${c[1].toLowerCase()}"><span class="fbd-c">${fmtN(v)}</span><span class="fbd-t"><b>${lbl}</b><small>${c[1].toLowerCase()}${F.dxaAge > 24 ? " · " + dx.data.slice(0, 4) : ""}</small></span></button>`; };
-  const z = F.zona, r = F.rischio;
-  const df = z ? `<button type="button" class="fbd zf z-${z}" data-fsheet="defra" aria-label="DeFRA zona ${ZONE[z].t.toLowerCase()}${r !== null ? ", rischio " + fmtN(r, 0) + "%" : ""}"><span class="fbd-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : "!"}</span><span class="fbd-t"><b>DeFRA</b><small>zona ${ZONE[z].t.toLowerCase()}</small></span></button>`
-    : `<button type="button" class="fbd miss" data-fsheet="defra"><span class="fbd-c">6</span><span class="fbd-t"><b>DeFRA</b><small>da calcolare</small></span></button>`;
-  const es = stepStatus(p, "esami", F, pzSecondary(p)), ls = labStatus(p);
-  const ex = `<button type="button" class="fbd ${es.st === "miss" ? "miss" : es.st === "warn" ? "k-a" : "k-ok"}" data-fsheet="esami"><span class="fbd-c">${es.st === "miss" ? "4" : es.st === "warn" ? "!" : "✓"}</span><span class="fbd-t"><b>Esami</b><small>${es.st === "miss" ? ls.done + " di " + ls.tot : es.st === "warn" ? "da rivedere" : "nella norma"}</small></span></button>`;
-  /* nell'ordine dei passi: 4 esami, 5 densitometria, 6 DeFRA; senza DXA un solo bollino «Densitometria» */
-  const dxb = dx ? ts("Colonna", num(dx.tL)) + ts("Femore", tF.length ? Math.min(...tF) : null) : `<button type="button" class="fbd miss" data-fsheet="dxa"><span class="fbd-c">5</span><span class="fbd-t"><b>DXA</b><small>da inserire</small></span></button>`;
-  return `<div class="fbads">${ex}${dxb}${df}</div>`;
-}
 /* caso completo: tutti gli indizi raccolti (dati, fratture, anamnesi, DXA, DeFRA) */
 const figDone = (F, spots) => !Object.values(spots).some(x => x.st === "miss") && !!F.zona && !!F.lastDxa;
 /* a caso completo restano sulla figura solo i dati che contano, tutti nello stesso modo */
@@ -165,11 +151,29 @@ function figStage(p, fig, spots, F, S){
   const d = FIGURE[fig], lblFx = d.fxLbl;
   const pos = { chi:d.testa, fx:d.fx, anam:d.busto };
   if(F && S && figDone(F, spots)) return `<div class="fstage done"${FIG.open && FIG.open !== "decidi" ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>${figSummary(p, F, S)}</div>`;
-  return `<div class="fstage"${FIG.open && FIG.open !== "decidi" ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : ""}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}">` +
-    Object.entries(spots).map(([k, s]) => { const [x, y] = pos[k], left = x > 52;
-      const t = k === "fx" && s.st === "miss" && lblFx ? lblFx : s.t;
-      return `<button type="button" class="fhs ${s.st}${left ? " l" : ""}" data-fsheet="${k}" style="left:${x}%;top:${y}%" aria-label="${hx(t)}: ${hx(s.s)}"><span class="fdot">${s.st === "ok" ? "✓" : s.st === "al" ? "!" : s.n}</span><span class="ftag"><b>${hx(t)}</b><small>${hx(s.s)}</small></span></button>`;
-    }).join("") + `</div>` + (F ? figBadges(p, F) : "") + `</div>`;
+  /* caso in corso: i 7 passi sulla figura, in ordine. A sinistra il paziente (1 chi è, 2 fratture, 3 anamnesi),
+     a destra gli esami (4 esami, 5 densitometria, 6 DeFRA), in basso, grande, 7 terapia: si legge come la strada */
+  const on = FIG.open && FIG.open !== "decidi" ? ` data-on="${FIG.open === "sec" ? "anam" : FIG.open}"` : "";
+  if(!F) return `<div class="fstage"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div></div>`;
+  const all = allSteps(p), nx = nextStep(all), ls = labStatus(p), es = stepStatus(p, "esami", F, S);
+  const dxS = figSecSt(p, "dxa", F, S, spots), dfS = figSecSt(p, "defra", F, S, spots), esS = es.st === "miss" ? "miss" : es.st === "warn" ? "al" : "ok";
+  const ms = F.lastDxa ? Math.min(...[F.lastDxa.tL, F.lastDxa.tFt, F.lastDxa.tFn].map(num).filter(v => v !== null)) : null;
+  const ST = [
+    ["dati", "chi", spots.chi.st, "Chi è", spots.chi.s],  /* età e sesso sono già sotto il nome */
+    ["fratture", "fx", spots.fx.st, spots.fx.t, spots.fx.s],
+    ["anamnesi", "anam", spots.anam.st, spots.anam.t, spots.anam.s],
+    ["esami", "esami", esS, "Esami del sangue", es.st === "miss" ? ls.done + " di " + ls.tot + " inseriti" : es.st === "warn" ? "da rivedere" : "nella norma"],
+    ["dxa", "dxa", dxS, "Densitometria", F.lastDxa && isFinite(ms) ? "T-score " + fmtN(ms) + " · " + tsCat(ms)[1].toLowerCase() : "T-score da inserire"],
+    ["defra", "defra", dfS, "DeFRA", F.zona ? "zona " + ZONE[F.zona].t.toLowerCase() + (F.rischio !== null ? " · " + fmtN(F.rischio, 0) + "%" : "") : "zona da inserire"]
+  ];
+  const pillS = ([k, sh, st, t, sm], i) => { const isNx = nx && nx.k === k, cls = st === "ok" ? "k-ok" : st === "al" ? "k-a" : isNx ? "k-n nx" : "miss";
+    return `<button type="button" class="fbd fstep ${cls}" data-fsheet="${sh}" aria-label="${hx("Passo " + (i + 1) + ": " + t + ", " + sm)}"><span class="fbd-c">${st === "ok" ? "✓" : st === "al" ? "!" : i + 1}</span><span class="fbd-t"><b>${hx(t)}</b><small>${hx(sm)}</small></span></button>`; };
+  const ready = !all.slice(0, 6).some(x => x.st === "miss"), t7 = all[6];
+  const terIn = `<span class="fter-c">${t7.st === "ok" ? "✓" : "7"}</span><span class="fter-t"><small>Passo 7 · terapia</small><b>${ready ? "Decidi la terapia" : "Terapia"}</b><span>${ready ? "zona e Nota 79 pronte" : "dopo i passi da 1 a 6"}</span></span>`;
+  const ter = ready ? `<a class="fter on" href="#paz-${p.id}-decidi" aria-label="Passo 7: decidi la terapia">${terIn}</a>`
+    : `<button type="button" class="fter" data-fsheet="${ST.find(x => x[2] === "miss")[1]}" aria-label="Passo 7: terapia, dopo i passi da 1 a 6">${terIn}</button>`;
+  return `<div class="fstage steps"${on}><div class="fimg"><img src="img/${fig}.jpg" alt="${d.alt}"></div>
+    <div class="fsum"><div class="fsum-c">${ST.slice(0, 3).map(pillS).join("")}</div><div class="fsum-c r">${ST.slice(3).map((x, i) => pillS(x, i + 3)).join("")}</div></div>${ter}</div>`;
 }
 /* la prossima mossa: una sola cosa da fare, la più utile adesso */
 function figNext(p, F, S, spots){
