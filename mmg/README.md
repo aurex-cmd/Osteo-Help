@@ -241,3 +241,11 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Su PC, toccando un passo nella strada a destra della figura si apre il suo pannello e, se quel dato manca, sulla figura compare (evidenziato) il suo punto nel posto dove arriverà la pill; il punto del prossimo passo resta, attenuato. Le pill già presenti restano tutte visibili, attenuate tranne quella della sezione aperta.
 
 - **DeFRA senza elenchi da ricopiare**: nella sezione DeFRA (passo 6) sono stati tolti «Cosa serve» (la lista dei dati con ok/manca) e «Da riportare nel DeFRA» (il riepilogo dei valori), perché nel calcolatore le risposte non si possono incollare. Restano il pulsante «Apri il DeFRA», la scelta della zona di rischio e la legenda delle zone.
+
+- **Controllo di semplicità e correzioni**:
+  - il «Report» andava in errore quando nessun esame del sangue era alterato (mancava `byForm` nel risultato vuoto di `computeA`): corretto;
+  - foglio per il paziente: «diventata più bassa» per le donne;
+  - esami: la nota sul testosterone compare solo per gli uomini; tolto «PTH e TSH se non già eseguiti» (sono già nell'elenco) e il suggerimento ripetuto in fondo;
+  - testi delle zone DeFRA in italiano piano: niente «prima linea» né «II o III livello» (si confondevano con le scelte della Nota 79);
+  - anamnesi: «Vampate al volto (flushing)», «Storia delle fratture» al posto di «pattern fratturativo»;
+  - decisione suggerita: etichetta «consigliata».

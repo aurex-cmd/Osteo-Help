@@ -316,7 +316,7 @@ const AXES = [
   ]},
   { label:"Sintomi e segni", groups:[
     { sub:"Cute e reazioni allergiche", feats:[
-      ["flushing","Flushing"],
+      ["flushing","Vampate al volto (flushing)"],
       ["orticaria_pigmentosa","Orticaria pigmentosa"],
       ["prurito","Prurito"],
       ["strie_rubre","Strie rubre"],
@@ -368,7 +368,7 @@ const AXES = [
       ["habitus_marfanoide","Habitus marfanoide (alta statura, arti lunghi, aracnodattilia)"]
     ]}
   ]},
-  { label:"Anamnesi e pattern fratturativo", groups:[
+  { label:"Storia delle fratture", groups:[
     { sub:"Pattern fratturativo", feats:[
       ["frattura_inspiegata","Osteoporosi o fratture inspiegate in età giovane"],
       ["vertebrali_giovane","Fratture vertebrali in soggetto giovane"],
@@ -749,7 +749,7 @@ function multiCauseF(elig, sel){
 /* Esito esami alterati: kind = none | inter (forme che spiegano tutto) | multi (più cause) | empty */
 function computeA(){
   const sel = selFindings();
-  if(!sel.length) return { sel, kind:"none", forms:[], leftover:[], panel:[], excluded:[] };
+  if(!sel.length) return { sel, kind:"none", forms:[], leftover:[], panel:[], byForm:[], excluded:[] };
   const needOk = f => !f.need || sel.some(s => f.need.some(n => n[0] === s[0] && n[1] === s[1]));
   const elig = FORMS.filter(f => !normEx(f) && !contradicted(f, sel) && needOk(f));
   const inter = elig.filter(f => sel.every(s => covers(f, s)));

@@ -309,11 +309,11 @@ const ZONE = {
   verde:{ t:"Verde", r:"basso rischio", cls:"ok", chi:"Medico di medicina generale",
     azione:"Nessun farmaco per l'osteoporosi. Vitamina D (Nota 96), calcio con la dieta, attività fisica e prevenzione delle cadute; nuova valutazione nel tempo." },
   gialla:{ t:"Gialla", r:"rischio moderato", cls:"warn", chi:"Medico di medicina generale",
-    azione:"Terapia di prima linea: bisfosfonati orali o denosumab, sempre con vitamina D." },
+    azione:"La terapia la imposta il medico di medicina generale: bisfosfonati orali o denosumab, sempre con vitamina D." },
   arancione:{ t:"Arancione", r:"alto rischio", cls:"d", chi:"Specialista dell'osso",
-    azione:"Invio allo specialista per una terapia di II o III livello: anabolico (teriparatide, abaloparatide) o romosozumab, seguito da un antiriassorbitivo; sempre con vitamina D." },
+    azione:"Invio allo specialista per un anabolico (teriparatide, abaloparatide) o il romosozumab, seguiti da un antiriassorbitivo; sempre con vitamina D." },
   rossa:{ t:"Rossa", r:"altissimo rischio", cls:"d", chi:"Specialista dell'osso, con priorità",
-    azione:"Invio prioritario allo specialista per anabolico o romosozumab, seguito da un antiriassorbitivo; sempre con vitamina D. Nell'attesa non lasciare il paziente senza protezione: calcio, vitamina D e prevenzione delle cadute." }
+    azione:"Invio prioritario allo specialista per un anabolico o il romosozumab, seguiti da un antiriassorbitivo; sempre con vitamina D. Nell'attesa: calcio, vitamina D e prevenzione delle cadute." }
 };
 const ZONE_ORDER = ["verde", "gialla", "arancione", "rossa"];
 const zoneHigh = z => z === "arancione" || z === "rossa";
@@ -803,7 +803,7 @@ function labReport(p, S){
     : `<div class="alert warn"><b>Vitamina D in eccesso · ${vdTxt(vd)}</b>Sopra 250 nmol/L (100 ng/mL): riduci o sospendi l'integrazione e ricontrolla. Si parla di intossicazione sopra 375 nmol/L (150 ng/mL; ${SIOMMMS_VD}).</div>`);
   if(vdLow(vd) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa${vd !== null ? " · " + vdTxt(vd) : ""}</b>Sotto 75 nmol/L (30 ng/mL): carenza sotto 50, insufficienza tra 50 e 75 (${SIOMMMS_VD}); 75 nmol/L è il valore da raggiungere nel paziente con osteoporosi o a rischio di ipovitaminosi D (Nota 96). Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
   if(A.sel.length === 1 && A.sel[0][0] === "Alb" && A.sel[0][1] === "d") out.push(`<div class="alert info"><b>Albumina bassa isolata</b>Nell'anziano è frequente e poco specifica: malnutrizione proteica, infiammazione cronica, malattie epatiche o renali. Da sola non basta a sospettare un malassorbimento: lo fanno pensare calcio, fosforo o vitamina D bassi, PTH alto, calciuria bassa, insieme ai sintomi intestinali.</div>`);
-  if(A.kind === "none") out.push(`<p class="hint">${labStatus(p).done ? "Tutti gli esami registrati sono nella norma." : "Segna ▲ o ▼ gli esami fuori norma e N quelli nella norma."}</p>`);
+  if(A.kind === "none" && labStatus(p).done) out.push(`<p class="hint">Tutti gli esami registrati sono nella norma.</p>`);
   else {
     const tags = `<div class="tags">${A.sel.map(s => `<span class="tag ${s[1]}">${ftag(s)}</span>`).join("")}</div>`;
     out.push(`<p class="lbl">${A.kind === "inter" ? "Forme compatibili" + (A.forms.length > 1 ? " · dalla più frequente" : "") : A.kind === "multi" ? "Più cause possibili" : "Nessuna forma nota"}</p>` + tags +
@@ -836,7 +836,7 @@ function vPazEsami(p){
     </div>
     <div class="btns"><button type="button" class="btn sec" id="labAllN">Tutti gli altri nella norma</button></div>
     <div id="pzGrid">${grid}</div>
-    <p class="small">Nell'uomo aggiungi il testosterone totale; in base alla clinica anti-transglutaminasi con IgA totali, PTH e TSH se non già eseguiti.</p>
+    <p class="small">${p.sesso === "uomo" ? "Nell'uomo aggiungi il testosterone totale. " : ""}Se sospetti una celiachia: anti-transglutaminasi con IgA totali.</p>
     <div data-live="lab">${labReport(p, pzSecondary(p))}</div>` };
 }
 
@@ -909,7 +909,7 @@ function vPazTerapia(p){
       <button type="button" class="btn" data-add="terapie">Aggiungi terapia</button>
     </div>
     <details class="dsec"${cur ? "" : " open"}><summary><span>${cur ? "Decisione: " + DECISIONI[cur].t.toLowerCase() + " · " + fmtD(p.decisione.data) : "La tua decisione"}</span></summary><div class="dsec-b">
-    <div class="decs">${Object.entries(DECISIONI).map(([k, d]) => `<button type="button" class="dec" data-dec="${k}" aria-pressed="${cur === k}"><span class="cb">${TICK}</span><span><b>${d.t}${sug === k ? ` <em>indicata dalla zona</em>` : ""}</b><small>${d.s}</small></span></button>`).join("")}</div>
+    <div class="decs">${Object.entries(DECISIONI).map(([k, d]) => `<button type="button" class="dec" data-dec="${k}" aria-pressed="${cur === k}"><span class="cb">${TICK}</span><span><b>${d.t}${sug === k ? ` <em>consigliata</em>` : ""}</b><small>${d.s}</small></span></button>`).join("")}</div>
     ${cur === "spec" || (!cur && zoneHigh(F.zona)) ? `<p class="small"><a href="#paz-${p.id}-lettera">Lettera allo specialista</a>: già compilata, aggiungi il quesito e stampala.</p>` : ""}
     </div></details>
     <p class="small">Ausilio alla decisione: verificare sempre il testo vigente della Nota 79 e le schede tecniche.</p>` };
@@ -1135,7 +1135,7 @@ function vPazFoglio(p){
       <li>Si alzi lentamente dal letto e dalla sedia; controlli la vista con regolarità.</li>
     </ul>
     <p class="lbl">Prossimi controlli</p>
-    <ul class="list fg"><li>${F.lastDxa ? pl.t.replace(/^Prossima DXA: /, "Densitometria (MOC): ") : "Densitometria (MOC): da prenotare secondo le indicazioni del medico"}.</li><li>Torni dal medico se ha una nuova frattura, un mal di schiena improvviso e forte o se si accorge di essere diventato più basso.</li></ul>
+    <ul class="list fg"><li>${F.lastDxa ? pl.t.replace(/^Prossima DXA: /, "Densitometria (MOC): ") : "Densitometria (MOC): da prenotare secondo le indicazioni del medico"}.</li><li>Torni dal medico se ha una nuova frattura, un mal di schiena improvviso e forte o se si accorge di essere ${p.sesso === "donna" ? "diventata più bassa" : "diventato più basso"}.</li></ul>
   </div>` };
 }
 
@@ -1266,7 +1266,7 @@ const GUIDA = [
     <li><i>8</i><span>Nell'uomo <b>testosterone totale</b>; in base alla clinica anti-transglutaminasi con IgA totali</span></li></ul>` },
   { k:"defra", t:"DeFRA e Nota 79", s:"Dal rischio di frattura alla prescrizione", html:`
     <p class="note">Il <b>DeFRA</b> è il calcolatore italiano del rischio di frattura a 10 anni, sviluppato da SIOMMMS e SIR a partire dal FRAX. Rispetto al FRAX considera numero e sede delle fratture, la dose dei glucocorticoidi, più malattie e la densità di colonna e femore. Si usa dai 50 anni.</p>
-    <p class="note">Il risultato cade in una di <b>quattro zone</b>, con soglie che salgono con l'età: <b>verde</b> (basso rischio) solo vitamina D, calcio e stile di vita; <b>gialla</b> (rischio moderato) terapia di prima linea dal MMG, bisfosfonati orali o denosumab; <b>arancione</b> (alto) e <b>rossa</b> (altissimo) invio allo specialista per anabolici o romosozumab. La stima del rischio aiuta così sia a scegliere la terapia più appropriata sia a decidere chi deve prescriverla.</p>
+    <p class="note">Il risultato cade in una di <b>quattro zone</b>, con soglie che salgono con l'età: <b>verde</b> (basso rischio) solo vitamina D, calcio e stile di vita; <b>gialla</b> (rischio moderato) la terapia la imposta il medico di medicina generale: bisfosfonati orali o denosumab; <b>arancione</b> (alto) e <b>rossa</b> (altissimo) invio allo specialista per anabolici o romosozumab. La stima del rischio aiuta così sia a scegliere la terapia più appropriata sia a decidere chi deve prescriverla.</p>
     <p class="note">Servono: età, sesso, peso, altezza, fratture da fragilità (sede, numero), familiarità per frattura di femore o vertebre, fumo, alcol, glucocorticoidi, malattie (artrite reumatoide e connettiviti, diabete, BPCO, MICI, HIV, Parkinson, sclerosi multipla, grave disabilità motoria), terapia ormonale adiuvante, T-score di colonna e femore.</p>
     <p class="note">La <b>Nota 79</b> stabilisce quando i farmaci sono a carico del SSN: in prevenzione secondaria (fratture vertebrali o di femore; altre fratture con T-score ≤ −3) e in prevenzione primaria (glucocorticoidi ≥5 mg/die per più di 3 mesi, blocco ormonale adiuvante, T-score ≤ −4, oppure ≤ −3 con familiarità o comorbilità). Il rischio a 10 anni ≥ 20% calcolato con un calcolatore validato entra nei criteri del romosozumab (per la donna in zona arancione o rossa). Fumo e alcol, in quanto modificabili, non contano ai fini della rimborsabilità.</p>
     <p class="note">Il passaggio dalla I alla II scelta richiede intolleranza, incapacità di assunzione corretta, effetti collaterali o controindicazioni; una nuova frattura dopo almeno un anno di terapia giustifica un cambio di classe. Zoledronato solo in strutture ospedaliere; denosumab prescrivibile dal MMG; teriparatide, abaloparatide e romosozumab su piano terapeutico specialistico.</p>
