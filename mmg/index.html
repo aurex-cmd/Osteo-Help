@@ -906,6 +906,13 @@ body.locked .bar{visibility:hidden}
 .pitem.anon .pcard{padding-right:0} .pitem.anon .ptop{padding-right:52px} .pitem .pdel{top:20px;transform:none}
 .pti.sup,.fdrugbig.sup .fpill{background:#E3B21A!important} .pti.sup .dic [stroke],.fdrugbig.sup .fpill .dic [stroke]{stroke:#3D2F00} .pti.sup .dic [fill]:not([fill="none"]),.fdrugbig.sup .fpill .dic [fill]:not([fill="none"]){fill:rgba(255,255,255,.55)}
 .supbox select{width:100%}
+/* gerarchia nella scheda: il nome comanda; terapia e percorso stanno sotto, rientrati nella colonna del nome, più piccoli */
+.pid b{font-size:1.12rem}
+.pter{margin:0 14px 8px 70px;padding:7px 10px 7px 8px;gap:10px;background:#fff;border-radius:12px}
+.pter b{font-size:.86rem} .pter small{font-size:.74rem} .pter .chev{width:16px;height:16px}
+.pti{width:28px;height:28px;margin-left:0;font-size:.85rem} .pti .dic{width:20px;height:20px} .pti.miss{width:24px;height:24px;margin:2px}
+.pst{padding:2px 14px 14px 70px}
+@media (max-width:380px){.pter{margin-left:14px}.pst{padding-left:14px}}
 </style>
 </head>
 <body>

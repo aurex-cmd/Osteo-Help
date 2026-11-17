@@ -203,3 +203,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Nella pagina Terapia c'è la sezione «Vitamina D e calcio», per tutti i pazienti: vitamina D (colecalciferolo o calcifediolo con le dosi più usate), calcio (500 o 1000 mg, o l'associazione), data di inizio e nota. Si salva da sola.
 - Se la decisione è «nessun farmaco» (es. zona verde), nel caso completo e nell'archivio compare «Solo vitamina D e calcio» con le dosi (icona del sole su cerchio giallo); se non è ancora registrata, la scheda invita a farlo e porta alla pagina Terapia.
 - Con un farmaco, sotto il nome del farmaco compare «con colecalciferolo …». Le dosi finiscono anche nel testo «Copia per la cartella».
+- Gerarchia nella scheda: il nome è più grande; terapia (in un riquadro bianco, icona e testo più piccoli) e percorso sono rientrati nella colonna del nome, sotto di lui.
