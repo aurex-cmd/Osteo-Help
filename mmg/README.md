@@ -227,3 +227,8 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 
 ### Testi giustificati nei riquadri
 - I testi lunghi dentro i riquadri (avvisi, Nota 79 del farmaco, rischio molto alto, rebound, note sotto i calendari, ecc.) sono giustificati, con la sillabazione italiana (`hyphens:auto`, la pagina è `lang="it"`) per non lasciare spazi larghi tra le parole sul telefono.
+
+### Anabolico come terapia consigliata
+- Se per la Nota 79 un anabolico è di I scelta per il paziente e non è controindicato (es. 3 o più fratture vertebrali o di femore → teriparatide; nella donna anche abaloparatide per la sua condizione), «Decidi la terapia» lo propone come «Terapia consigliata», con la sua Nota 79 e la frase «La prescrive lo specialista con piano terapeutico».
+- L'unico pulsante è «Invia allo specialista». Sotto, in «Cosa potrà valutare lo specialista», gli altri anabolici in Nota. L'avviso «Rischio molto alto» in questo caso riporta solo i motivi del rischio, senza ripetere gli anabolici.
+- Il riquadro della Nota sotto il farmaco non è giustificato (testo breve, colonna stretta).

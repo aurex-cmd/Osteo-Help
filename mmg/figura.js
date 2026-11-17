@@ -284,6 +284,11 @@ function proposta(p, F, S, fl){
   /* sospetto morbo di Paget: l'unica terapia indicata è lo zoledronato endovena, qualunque sia la zona */
   if(S.A.forms.some(x => x.cid === "paget")) return { tipo:"mmg", paget:true, t: okd(Z_) ? "Sospetto morbo di Paget: zoledronato endovena" : "Sospetto morbo di Paget: zoledronato non utilizzabile",
     s:"Nel Paget l'unica terapia indicata è lo zoledronato endovena; gli altri farmaci per l'osteoporosi non lo sono e gli anabolici sono controindicati. Conferma il sospetto (fosfatasi alcalina ossea, scintigrafia, radiografie) e prescrivi lo zoledronato in struttura ospedaliera.", opz:[Z_], best: okd(Z_) ? Z_ : null };
+  /* anabolico di I scelta nella Nota 79 (es. 3 o più fratture vertebrali o di femore: teriparatide): è la terapia consigliata,
+     ma la prescrive lo specialista con piano terapeutico, quindi l'unica azione è l'invio */
+  const n79a = nota79(p, F), anaI = [T_, ...(F.donna ? [AB_] : [])].filter(id => okd(id) && n79a.some(c => n79Lev(c, id) === "I"));
+  if(anaI.length) return { tipo:"spec", ana:true, t:"Terapia consigliata: " + dnome(anaI[0]), s:ZONE[F.zona].azione,
+    opz:[T_, ...(F.donna ? [AB_, RO_] : [])].filter(id => id !== anaI[0] && n79a.some(c => c.s.some(l => l.includes(id)))), best: anaI[0] };
   if(F.zona === "verde") return { tipo:"nessuno", t:"Nessun farmaco per l'osteoporosi", s:ZONE.verde.azione, opz:[] };
   if(zoneHigh(F.zona)){
     const spec = [T_, ...(F.donna ? [AB_, RO_] : [])];
@@ -327,6 +332,7 @@ function vDecidi(p, inPanel){
       if(no.length) why += ` La I scelta (${andL(no.map(nmL))}) è controindicata: ${rs.join("; ")}.`;
       if(si.includes(Z_)) why += " Lo zoledronato, anch'esso di I scelta, si fa solo in struttura ospedaliera: lo trovi tra le altre opzioni.";
       else if(si.length) why += ` Di I scelta restano ${andL(si.map(nmL))}: li trovi tra le altre opzioni.`; }
+    if([T_, AB_, RO_].includes(id)) why += " La prescrive lo specialista con piano terapeutico: dal medico di medicina generale serve l'invio.";
     return `<p class="dwhy"><em>Nota 79 AIFA · ${N79_LEV[m]} scelta</em>${hx(cc.map(x => x.cond).join(" / "))}.${why}</p>`; };
   const pend = nota79Pend(p, F), PSTEP = { chi:"dati", fx:"dati", anam:"anamnesi", defra:"defra", dxa:"dxa" };
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
@@ -364,20 +370,21 @@ function vDecidi(p, inPanel){
   let actions = "";
   if(pr.tipo === "mmg" && pr.best) actions = `<button type="button" class="btn" data-fdec="mmg:${pr.best}">Prescrivo ${dnome(pr.best).replace(/ \(.*\)$/, "").toLowerCase()}</button><button type="button" class="btn sec" data-fdec="spec">Invia allo specialista</button>`;
   else if(pr.tipo === "mmg") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
+  else if(pr.ana) actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
   else if(pr.tipo === "spec") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button><a class="btn sec" href="#paz-${p.id}-terapia">Imposto io la terapia</a>`;
   else actions = `<button type="button" class="btn" data-fdec="nessuno">Confermo: nessun farmaco</button><a class="btn sec" href="#paz-${p.id}-terapia">Valuto un farmaco</a>`;
   /* i fatti che contano, in una riga */
   const facts = [F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura").split(" / ")[0] + " " + fmtD(F.fx[0].data) : "nessuna frattura", F.minT !== null ? "T-score " + fmtN(F.minT) : "", F.rischio !== null ? "rischio " + fmtN(F.rischio, 0) + "%" : ""].filter(Boolean).join(" · ");
   const sec = (t, badge, body, open) => `<details class="dsec"${open ? " open" : ""}><summary><span>${t}</span>${badge ? `<em class="dbadge">${badge}</em>` : ""}</summary><div class="dsec-b">${body}</div></details>`;
   const others = pr.tipo === "mmg" ? pr.opz.filter(id => id !== pr.best) : pr.tipo === "spec" ? pr.opz : [];
-  const best = pr.tipo === "mmg" && pr.best ? pr.best : null;
+  const best = (pr.tipo === "mmg" || pr.ana) && pr.best ? pr.best : null;
   return { bar:"Decisione terapeutica", html: `
     ${inPanel ? "" : `<div class="dhead"><span class="dav" style="background-image:url(img/${fig}-viso.jpg)"></span><span><b>${hx(pzName(p))}</b><small>${F.age !== null ? F.age + " anni · " : ""}${facts}</small></span></div>`}
     ${secLevels(p, S).some(x => x.lev === 0) ? `<div class="dvh-a urg"><b>Urgenza medica se il calcio è molto alto</b>Con calcio oltre 14 mg/dL o sintomi (confusione, poliuria, disidratazione) sospetta un'ipercalcemia maligna: invio urgente in ospedale per idratazione e bisfosfonato endovena (denosumab se la funzione renale è ridotta). La terapia dell'osteoporosi viene dopo.</div>` : ""}
     ${cur === "spec" ? specBlk : ""}
     <div class="dverd z-${F.zona}">
       <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
-      <b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : pr.tipo === "mmg" && best ? "Terapia consigliata" : pr.t}</b>
+      <b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : best ? "Terapia consigliata" : pr.t}</b>
       ${best ? `<div class="dbest${pr.paget ? "" : " wn"}"><div class="dbest-r">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span>${pr.paget ? `<em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em>` : ""}</div>${!pr.paget ? whyBest(best) : ""}</div>${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
       ${pr.paget ? `<p class="dnote">${pr.s}</p>` : ""}
       ${pr.tipo === "spec" ? `<p class="dnote">La lettera allo specialista è già compilata. Nell'attesa: calcio, vitamina D, prevenzione delle cadute.</p>` : pr.tipo === "nessuno" ? `<p class="dnote">${ZONE.verde.azione}</p>` : ""}
@@ -386,6 +393,7 @@ function vDecidi(p, inPanel){
     </div>
     ${(() => { const r = pr.paget ? [] : vh.filter(x => !/zona rossa/i.test(x)); if(!r.length) return "";
       /* l'invio per un anabolico si propone solo se il paziente rientra nella Nota 79, e si dice per quale farmaco */
+      if(pr.ana) return `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}.</div>`;
       const A = n79Ana(p, F, fl, n79), nm = id => dnome(id).replace(/ \(.*\)$/, "");
       const okL = A.ok.map(x => `<li><b>${nm(x.id)}</b>${x.id === RO_ ? " (solo se non si possono seguire altri trattamenti efficaci)" : ""}<small>${hx(x.cond.join("; ").replace(/: solo se non è possibile seguire altri trattamenti efficaci.*$/, ""))}</small></li>`).join("");
       const noL = A.no.map(x => `<li class="ci"><b>${nm(x.id)}</b>: in Nota 79 ma controindicato<small>${hx(x.ci.join("; "))}</small></li>`).join(""); /* senza un anabolico in Nota non si parla di anabolici: resta solo il rischio */
