@@ -913,6 +913,13 @@ body.locked .bar{visibility:hidden}
 .pti{width:28px;height:28px;margin-left:0;font-size:.85rem} .pti .dic{width:20px;height:20px} .pti.miss{width:24px;height:24px;margin:2px}
 .pst{padding:2px 14px 14px 70px}
 @media (max-width:380px){.pter{margin-left:14px}.pst{padding-left:14px}}
+/* archivio: i 7 passi come la strada a pallini del PC, in orizzontale e in piccolo */
+.proad{display:flex;align-items:center;max-width:260px}
+.proad i{position:relative;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;font-style:normal;font-weight:800;font-size:.62rem;background:var(--bg);border:1.5px solid var(--line);color:var(--muted);z-index:1}
+.proad i + i{margin-left:14px} .proad i + i::before{content:"";position:absolute;right:100%;top:50%;width:15.5px;height:2px;margin-top:-1px;background:var(--line);z-index:-1}
+.proad i.ok{background:var(--teal);border-color:var(--teal);color:#fff} .proad i.ok + i::before,.proad i.warn + i::before{background:var(--teal)}
+.proad i.warn{background:#F8EEDC;border-color:var(--amber);color:var(--amber)}
+.proad i.next{border-color:var(--pri);color:var(--pri);border-width:2px}
 </style>
 </head>
 <body>

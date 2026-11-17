@@ -204,3 +204,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Se la decisione è «nessun farmaco» (es. zona verde), nel caso completo e nell'archivio compare «Solo vitamina D e calcio» con le dosi (icona del sole su cerchio giallo); se non è ancora registrata, la scheda invita a farlo e porta alla pagina Terapia.
 - Con un farmaco, sotto il nome del farmaco compare «con colecalciferolo …». Le dosi finiscono anche nel testo «Copia per la cartella».
 - Gerarchia nella scheda: il nome è più grande; terapia (in un riquadro bianco, icona e testo più piccoli) e percorso sono rientrati nella colonna del nome, sotto di lui.
+- Il percorso nella scheda dell'archivio è la strada a pallini numerati del PC, in orizzontale e in piccolo: ✓ verde i passi fatti, ! ambra quelli da rivedere, bordo viola il prossimo, grigi quelli da fare.
