@@ -234,6 +234,7 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Il riquadro della Nota sotto il farmaco non è giustificato (testo breve, colonna stretta).
 - Se un'altra condizione della Nota dà di I scelta un farmaco che il MMG può prescrivere (alendronato, risedronato, zoledronato, denosumab), l'anabolico non diventa la proposta: resta come alternativa nell'avviso «Rischio molto alto» (es. abaloparatide in una donna con frattura di polso recente e T-score −3,2, dove l'alendronato è di I scelta).
 
-### Numeri sulla figura = numeri dei passi
-- I punti sulla figura portano il numero del passo della strada in alto: «Chi è» e «Le fratture» sono entrambi 1 (passo 1, Dati e fratture), «Malattie e farmaci» è 2. Prima erano 1, 2, 3, con il 3 che si scontrava con il passo 3 (Esami) e stava più in alto del 2.
-- I bollini in basso sono nell'ordine dei passi e, finché mancano, portano il loro numero al posto del «?»: 3 Esami, 4 DXA (un solo bollino finché non c'è una densitometria, poi Colonna e Femore), 5 DeFRA.
+### I 7 passi
+1 Chi è · 2 Fratture · 3 Anamnesi e farmaci · 4 Esami del sangue · 5 Densitometria · 6 DeFRA · 7 Terapia.
+- Le fratture sono un passo a sé (prima erano nel passo 1 «Dati e fratture»); il follow-up non è più un passo: resta la sezione «Controlli nel tempo» del caso completo.
+- I punti sulla figura e i bollini in basso portano il numero del passo: 1 Chi è, 2 Le fratture, 3 Malattie e farmaci; in basso, nell'ordine, 4 Esami, 5 DXA (un solo bollino finché non c'è una densitometria, poi Colonna e Femore), 6 DeFRA. Finché mancano mostrano il numero al posto del «?».

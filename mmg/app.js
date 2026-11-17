@@ -610,13 +610,14 @@ function vPazienti(){
 
 /* ---------- il percorso: sette passi in ordine, ognuno con il suo stato ---------- */
 const STEPS = [
-  { k:"dati", t:"Dati e fratture", fare:"Anagrafica, peso e altezza, fratture da fragilità, familiarità." },
+  { k:"dati", t:"Chi è", fare:"Anagrafica, peso e altezza, menopausa, familiarità." },
+  { k:"fratture", t:"Fratture", fare:"Fratture da fragilità: dove, quando, gravità delle vertebrali." },
   { k:"anamnesi", t:"Anamnesi e farmaci", fare:"Malattie, farmaci e abitudini: le forme secondarie vengono riconosciute da sole." },
   { k:"esami", t:"Esami del sangue", fare:"Esami di I livello, per escludere le forme secondarie prima di trattare." },
   { k:"dxa", t:"Densitometria", fare:"T-score di colonna e femore dall'ultima DXA." },
   { k:"defra", t:"DeFRA", fare:"Calcola il rischio sul DeFRA e riporta qui la zona di colore." },
-  { k:"terapia", t:"Terapia", fare:"Cosa fare secondo la zona e la Nota 79, e la tua decisione." },
-  { k:"storico", t:"Follow-up", fare:"Prossima densitometria, rischio di rifrattura, andamento nel tempo." }
+  { k:"terapia", t:"Terapia", fare:"Cosa fare secondo la zona e la Nota 79, e la tua decisione." }
+  /* il follow-up non è un passo: è la sezione «Controlli nel tempo» del caso completo */
 ];
 const STEP_IX = Object.fromEntries(STEPS.map((x, i) => [x.k, i]));
 const DECISIONI = {
@@ -638,9 +639,12 @@ function stepStatus(p, k, F, S){
     const m = [];
     if(!p.nascita) m.push("data di nascita"); if(!p.sesso) m.push("sesso"); if(!F.bmi) m.push("peso e altezza");
     if(p.sesso === "donna" && p.postmeno === null) m.push("menopausa"); if(p.fam === null) m.push("familiarità");
-    if(!F.fx.length && !p.nessunaFx) m.push("fratture");
-    else if(p.rival && F.fx.length && !p.fxRiv) m.push("nuove fratture dall'ultima valutazione");
-    return m.length ? { st:"miss", s:"Mancano: " + m.join(", ") } : { st:"ok", s:[F.age + " anni", "BMI " + fmtN(F.bmi), F.fx.length ? plural(F.fx.length, "frattura", "fratture") : "nessuna frattura"].join(" · ") };
+    return m.length ? { st:"miss", s:"Mancano: " + m.join(", ") } : { st:"ok", s:[F.age + " anni", "BMI " + fmtN(F.bmi), p.fam ? "familiarità" : ""].filter(Boolean).join(" · ") };
+  }
+  if(k === "fratture"){
+    if(!F.fx.length && !p.nessunaFx) return { st:"miss", s:"Da indicare: fratture da fragilità o nessuna" };
+    if(p.rival && F.fx.length && !p.fxRiv) return { st:"miss", s:"Nuove fratture dall'ultima valutazione?" };
+    return { st:"ok", s:F.fx.length ? plural(F.fx.length, "frattura", "fratture") + (F.recent.length ? " · recente" : "") : "Nessuna frattura da fragilità" };
   }
   S = S || pzSecondary(p);
   if(k === "anamnesi"){ const n = S.N.note.length + S.N.sosp.length;
@@ -652,7 +656,6 @@ function stepStatus(p, k, F, S){
   if(k === "defra") return F.zona ? { st:"ok", s:"Zona " + ZONE[F.zona].t.toLowerCase() + " → " + ZONE[F.zona].chi } : { st:"miss", s:"Zona non ancora inserita" };
   if(k === "terapia"){ const d = p.decisione && DECISIONI[p.decisione.tipo];
     return !d ? { st:"miss", s:"Decisione da prendere" } : { st:p.decisione.tipo === "attesa" ? "warn" : "ok", s:d.t + " (" + fmtD(p.decisione.data) + ")" + (F.ther.length ? " · " + F.ther.map(t => DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome.replace(/ \(.*\)$/, "") : t.farmaco).join(", ") : "") }; }
-  if(k === "storico"){ if(!p.decisione || !F.lastDxa) return { st:"miss", s:"Dopo la densitometria e la decisione sulla terapia" }; const pl = dxaPlan(F); return { st:pl.st, s:pl.t }; }
 }
 function allSteps(p){ const F = pzFacts(p), S = pzSecondary(p); return STEPS.map((x, i) => Object.assign({ i, k:x.k, t:x.t, fare:x.fare }, stepStatus(p, x.k, F, S))); }
 /* il prossimo passo da fare: il primo che manca */
@@ -677,7 +680,7 @@ function vPaz(p){
   const done = all.filter(x => x.st !== "miss").length;
   const info = [p.sesso ? (p.sesso === "donna" ? "Donna" : "Uomo") : "", F.age !== null ? F.age + " anni" : "", F.bmi ? "BMI " + fmtN(F.bmi) : ""].filter(Boolean).join(" · ");
   const go1 = nx ? `<a class="cont" href="#paz-${p.id}-${nx.k}"><small>Prossimo passo · ${done} di ${STEPS.length} completati</small><b>${nx.i + 1} · ${nx.t}</b><span>${nx.fare}</span><em>Continua →</em></a>`
-    : `<div class="alert ok"><b>Percorso completato</b>${pl.t}. Torna al passo 7 a ogni controllo.</div>`;
+    : `<div class="alert ok"><b>Percorso completato</b>${pl.t}. A ogni controllo: nuova DXA (passo 5), DeFRA (passo 6), nuove fratture (passo 2).</div>`;
   return { bar:"Scheda paziente", html: head(hx(pzName(p)), info || "Dati anagrafici da completare") + go1 + `
     ${vh.length ? `<div class="alert"><b>Rischio di frattura molto alto</b>${vh.join("; ")}.</div>` : ""}
     ${S.hpp ? `<div class="alert"><b>Fosfatasi alcalina bassa</b>Escludi l'ipofosfatasia prima di qualsiasi antiriassorbitivo: i bisfosfonati sono controindicati.</div>` : ""}
@@ -1041,7 +1044,7 @@ function vPazStorico(p){
     return `<div class="ztl-i z-${d.zona}"><i></i><b>${ZONE[d.zona].t}</b><small>${fmtM(pDate(d.data))}${dir > 0 ? " · peggiorata" : dir < 0 ? " · migliorata" : ""}</small></div>`; }).join("")}</div>` : "";
   const imm = F.recent.length ? `<div class="alert"><b>Rischio imminente di rifrattura</b>${plural(F.recent.length, "frattura", "fratture")} negli ultimi 24 mesi (l'ultima il ${fmtD(F.recent[0].data)}). Dopo una frattura il rischio di una nuova frattura è massimo nei primi 1–2 anni: la terapia va iniziata o rivista subito, insieme alla prevenzione delle cadute.</div>`
     : F.fx.length ? `<div class="alert info"><b>Rischio di rifrattura</b>Una frattura da fragilità all'incirca raddoppia il rischio di altre fratture, anche dopo anni. Ultima frattura: ${fmtD(F.fx[0].data)}.</div>` : "";
-  return { bar: pzName(p), html: head("Follow-up", "Come va nel tempo. A ogni controllo: nuova DXA al passo 4, nuova zona al passo 5, nuove fratture al passo 1.") + `
+  return { bar: pzName(p), html: head("Follow-up", "Come va nel tempo. A ogni controllo: nuova DXA al passo 5, nuova zona al passo 6, nuove fratture al passo 2.") + `
     ${imm}
     ${notes.length ? notes.map((n, i) => `<div class="alert info"><b>${n.nome} · ${n.durata ? "da " + n.durata : "in corso"}</b>${n.s}${i === 0 ? ` <a href="#paz-${p.id}-terapia">Dosi e sospensione</a>` : ""}</div>`).join("")
       : d ? `<div class="alert info"><b>Decisione: ${d.t}</b>${fmtD(p.decisione.data)}. <a href="#paz-${p.id}-decidi">Rivedi</a></div>` : ""}
@@ -1362,10 +1365,10 @@ function pzView(route){
   if(!m[2] || m[2] === "percorso") return { redirect: "paz-" + p.id + "-figura" };
   if(m[2] === "figura") return vFigura(p);
   /* i passi del vecchio percorso: si apre la stessa sezione sulla figura */
-  const SH = { dati:"chi", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico" }[m[2]];
+  const SH = { dati:"chi", fratture:"fx", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra", storico:"storico" }[m[2]];
   if(SH){ FIG.anim = FIG.open !== SH; FIG.open = SH; setTimeout(() => { FIG.anim = false; }); return { redirect: "paz-" + p.id + "-figura" }; }
   if(m[2] === "decidi"){ if(figWide()){ FIG.anim = false; FIG.open = "decidi"; return { redirect: "paz-" + p.id + "-figura" }; } return vDecidi(p); }
-  const V = { "":vPaz, dati:vPazDati, anamnesi:vPazAnamnesi, esami:vPazEsami, dxa:vPazDxa, defra:vPazDefra, terapia:vPazTerapia, storico:vPazStorico, report:vPazReport, lettera:vPazLettera, foglio:vPazFoglio }[m[2] || ""];
+  const V = { "":vPaz, dati:vPazDati, fratture:vPazDati, anamnesi:vPazAnamnesi, esami:vPazEsami, dxa:vPazDxa, defra:vPazDefra, terapia:vPazTerapia, storico:vPazStorico, report:vPazReport, lettera:vPazLettera, foglio:vPazFoglio }[m[2] || ""];
   return V ? V(p) : { redirect:"paz-" + p.id };
 }
 const pzParent = r => /^paz-[a-z0-9]+-(figura|percorso)$/.test(r) ? "" : /^paz-[a-z0-9]+-/.test(r) ? r.replace(/-[a-z]+$/, "") : r.startsWith("paz-") ? "" : r.startsWith("guida-") || r.startsWith("farmaco-") ? "guida" : null;
