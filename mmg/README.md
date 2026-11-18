@@ -301,3 +301,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Fratture: la spunta «avvenuta nonostante almeno 1 anno di terapia» è ora per ogni frattura (colonna «In terapia» in ogni riga), non più una sola per tutte.
 - Le sezioni «da fare» compaiono solo se c'è qualcosa da fare: «Prima della prima dose» in «Decidi la terapia» e «Da fare» nella pagina iniziale.
 - Pulsanti secondari in tutta l'app (es. «Invia allo specialista», «Indietro», «Imposto io la terapia»): bianchi con bordo e testo viola; i − e + dei contatori restano neutri.
+- Home: il pulsante «Archivio pazienti» è bianco con bordo grigio, così si distingue da «Nuovo paziente» (lavanda).
