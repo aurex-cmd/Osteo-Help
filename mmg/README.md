@@ -260,3 +260,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Zona gialla: tolto «La terapia la imposta il medico di medicina generale»; resta «Terapia antiriassorbitiva (bisfosfonati orali o denosumab) senza necessità di intervento specialistico, sempre con vitamina D.»
 
 - **Icone vettoriali al posto delle emoji**: le sezioni (Chi è, Fratture, Anamnesi e farmaci, Esami del sangue, Densitometria, DeFRA, Forme secondarie, Controlli, Decidi la terapia) e le decisioni nell'archivio e nel riepilogo (specialista, farmaco da registrare, decisione rimandata) usano icone a tratto 24×24 (`SEC_SVG`, `secIcon` in `figura.js`), lo stesso stile della pagina iniziale; nel titolo della scheda stanno in un riquadro grigio come le icone della home.
+- Icone delle sezioni: contorno viola scuro (#3B3266) e riempimento lavanda (#CBC1F2) sulle forme chiuse (classe `.f`); sui cerchi colorati dell'archivio restano bianche.
