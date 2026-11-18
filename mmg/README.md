@@ -267,3 +267,13 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   - calcio: dose libera in mg al giorno (vuoto = basta la dieta);
   - i dati salvati con il vecchio elenco fisso si convertono nei campi (`supMigrate`); `p.supVD` e `p.supCa` restano il testo usato da archivio, riepilogo e cartella (`supCompose`);
   - «Registra un farmaco»: nessun farmaco preselezionato (prima compariva l'alendronato, che sembrava assegnato); senza scelta non si salva; chiuso se la decisione è «nessun farmaco» o «specialista»; per gli uomini non compaiono romosozumab, abaloparatide, ibandronato, raloxifene e bazedoxifene.
+
+- **Proposta di vitamina D e calcio** (Terapia), al posto degli schemi frequenti; aggiunto il **calcitriolo** (dose in µg). La proposta (`vdProposta`, regole commentate in `app.js`) segue l'Allegato 1 della Nota 96:
+  1. eGFR <30, nefrolitiasi, calcio o calciuria alti → niente schema, decide lo specialista (calcitriolo possibile nell'IRC avanzata);
+  2. malassorbimento (MICI, celiachia, chirurgia bariatrica o gastrica) o epatopatia → calcifediolo;
+  3. 25-OH-D <30 nmol/L → attacco 50.000 UI a settimana per 6 settimane (300.000 UI), poi mantenimento; col calcifediolo 0,266 mg ogni 2 settimane per 3 mesi, poi al mese;
+  4. 30–50 → mantenimento; 50–75 → mantenimento solo con osteoporosi, farmaco per l'osso o PTH alto; ≥75 → mantenimento solo in terapia per l'osso;
+  5. mantenimento 25.000 UI al mese, ogni 2 settimane con obesità, glucocorticoidi o antiepilettici;
+  6. senza valore: se inizia un farmaco → «dosala prima»; osteoporosi non candidata o allettamento → mantenimento senza dosare;
+  7. calcio 500 mg al giorno con un farmaco per l'osso.
+  «Usa la proposta» riempie i campi (la prima fase), mette in nota la durata e il mantenimento successivo, e la data di inizio se manca.

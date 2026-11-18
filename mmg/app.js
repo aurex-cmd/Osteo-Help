@@ -623,7 +623,7 @@ const DEC_ZONA = { verde:"nessuno", gialla:"mmg", arancione:"spec", rossa:"spec"
 const supList = p => [p.supVD, p.supCa].filter(Boolean);
 const supTxt = p => supList(p).map((x, i) => i ? x.charAt(0).toLowerCase() + x.slice(1) : x).join(" · ");
 /* vitamina D a schema libero: molecola, dose, ogni quanto. Il testo (p.supVD) si ricompone dai campi */
-const VD_MOL = { colecalciferolo:["Colecalciferolo", "UI"], calcifediolo:["Calcifediolo", "mg"] };
+const VD_MOL = { colecalciferolo:["Colecalciferolo", "UI"], calcifediolo:["Calcifediolo", "mg"], calcitriolo:["Calcitriolo", "µg"] };
 const VD_FR = { g:["giorno", "giorni", "al giorno"], s:["settimana", "settimane", "alla settimana"], m:["mese", "mesi", "al mese"] };
 const vdFreq = (n, u) => { n = Math.max(1, parseInt(n, 10) || 1); return n === 1 ? VD_FR[u][2] : "ogni " + n + " " + VD_FR[u][1]; };
 function supCompose(p){
@@ -632,6 +632,55 @@ function supCompose(p){
   const c = (p.supCaDose || "").trim();
   p.supCa = c ? `Calcio ${c} mg al giorno` : "";
 }
+/* ---------- proposta di vitamina D e calcio (Nota 96, Allegato 1) ----------
+   Regole, in ordine:
+   1. eGFR sotto 30, nefrolitiasi, calcio o calciuria alti: lo schema della Nota non si applica, serve lo specialista
+      (che può indicare il calcitriolo nell'insufficienza renale avanzata).
+   2. Malassorbimento (MICI, celiachia, chirurgia bariatrica o gastrica) o epatopatia: calcifediolo invece del colecalciferolo.
+   3. 25-OH-D sotto 30 nmol/L: attacco 300.000 UI in tutto (50.000 UI a settimana per 6 settimane), poi mantenimento.
+   4. 30–50 nmol/L: mantenimento. 50–75 nmol/L: mantenimento solo con osteoporosi, farmaco per l'osso o iperparatiroidismo.
+      Sopra 75: mantenimento solo se è in terapia per l'osso.
+   5. Mantenimento: 25.000 UI al mese (circa 800 UI al giorno); ogni 2 settimane con obesità, glucocorticoidi o antiepilettici.
+   6. Senza valore: se inizia un farmaco per l'osso, prima si dosa; con osteoporosi non candidata al farmaco o allettamento, mantenimento senza dosare.
+   7. Calcio: 500 mg al giorno se fa o inizia un farmaco per l'osso (la dieta di solito non arriva a 1.000–1.200 mg), salvo calcolosi, calcio o calciuria alti. */
+function vdProposta(p){
+  const F = pzFacts(p), ft = F.feats, lab = p.lab || {}, eg = num(p.egfr), v = num(p.vitd), nm = v === null ? null : vdNmol(v);
+  const dec = p.decisione && p.decisione.tipo, farm = F.ther.length > 0 || dec === "mmg" || dec === "spec" || F.zona === "gialla" || zoneHigh(F.zona);
+  const osteo = (F.minT !== null && F.minT <= -2.5) || F.fx.length > 0;
+  const perche = [], out = { schemi: [], perche, ca: "", caPerche: "" };
+  const stop = [eg !== null && eg < 30 && "eGFR " + fmtN(eg, 0) + " mL/min", ft.has("nefrolitiasi_ricorrente") && "nefrolitiasi", lab.Ca === "alto" && "calcio alto", lab.CaU === "alto" && "calciuria alta"].filter(Boolean);
+  if(stop.length){ out.stop = "Con " + stop.join(", ") + " lo schema della Nota 96 non si applica: dose e molecola le decide lo specialista" + (eg !== null && eg < 30 ? " (nell'insufficienza renale avanzata può servire il calcitriolo)" : "") + "."; return out; }
+  const malass = ["mici", "celiachia_nota", "bariatrica", "gastrectomia"].filter(x => ft.has(x)), epa = ft.has("epatopatia");
+  const cfd = malass.length > 0 || epa, alto = ft.has("obesita") || (F.bmi && F.bmi >= 30) || ft.has("glucocorticoidi") || ft.has("anticonvulsivanti");
+  const mant = cfd ? { mol:"calcifediolo", dose:"0,266", n:"1", u:"m" } : { mol:"colecalciferolo", dose:"25.000", n: alto ? "2" : "1", u: alto ? "s" : "m" };
+  if(cfd) perche.push((epa ? "epatopatia" : "malassorbimento") + ": calcifediolo, che non ha bisogno del fegato per attivarsi ed è assorbito meglio");
+  if(!cfd && alto) perche.push([ft.has("obesita") || (F.bmi && F.bmi >= 30) ? "obesità" : "", ft.has("glucocorticoidi") ? "glucocorticoidi" : "", ft.has("anticonvulsivanti") ? "antiepilettici" : ""].filter(Boolean).join(", ") + ": mantenimento più alto");
+  if(nm === null){
+    if(farm){ out.dosa = "Prima di iniziare il farmaco per l'osso dosa la 25-OH-vitamina D: sotto 75 nmol/L (30 ng/mL) va corretta prima e la Nota 96 la rimborsa."; return out; }
+    if((osteo && !farm) || ft.has("immobilizzazione")){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift((osteo ? "osteoporosi non candidata a un farmaco per l'osso" : "allettamento") + ": rimborsabile senza dosarla (Nota 96)"); }
+    else out.dosa = "Senza il valore della 25-OH-vitamina D non c'è una proposta: dosala se ha sintomi, farmaci che interferiscono, malassorbimento o una malattia dell'osso da trattare.";
+    return out;
+  }
+  if(nm < 30){
+    out.schemi.push(cfd ? { fase:"Correzione", mol:"calcifediolo", dose:"0,266", n:"2", u:"s", per:"per 3 mesi" } : { fase:"Attacco", mol:"colecalciferolo", dose:"50.000", n:"1", u:"s", per:"per 6 settimane (300.000 UI in tutto)" });
+    out.schemi.push(Object.assign({ fase:"Poi mantenimento" }, mant));
+    perche.unshift(vdTxt(v) + ": carenza grave, si corregge con una dose di attacco");
+  } else if(nm < 50){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift(vdTxt(v) + ": carenza"); }
+  else if(nm < 75){ if(osteo || farm || lab.PTH === "alto"){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift(vdTxt(v) + ": sotto 75 nmol/L con " + (farm ? "un farmaco per l'osso" : osteo ? "osteoporosi" : "PTH alto") + (farm ? ": correggila prima di iniziarlo" : "")); }
+    else perche.unshift(vdTxt(v) + ": insufficienza lieve, senza osteoporosi né farmaco per l'osso la Nota 96 non la rimborsa"); }
+  else { if(farm){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift(vdTxt(v) + ": valore buono, si mantiene per tutta la terapia per l'osso"); } else perche.unshift(vdTxt(v) + ": valore buono, non serve integrare"); }
+  if(farm){ out.ca = "500"; out.caPerche = "con un farmaco per l'osso servono 1.000–1.200 mg di calcio al giorno tra dieta e supplemento"; }
+  return out;
+}
+const vdSchemaTxt = x => `${VD_MOL[x.mol][0]} ${x.dose} ${VD_MOL[x.mol][1]} ${vdFreq(x.n, x.u)}${x.per ? " " + x.per : ""}`;
+function vdPropHTML(p){
+  const r = vdProposta(p);
+  const body = r.stop ? `<p>${r.stop}</p>` : r.dosa ? `<p>${r.dosa}</p>`
+    : (r.schemi.length ? `<ul>${r.schemi.map(x => `<li><b>${x.fase}:</b> ${vdSchemaTxt(x)}</li>`).join("")}${r.ca ? `<li><b>Calcio:</b> ${r.ca} mg al giorno</li>` : ""}</ul>` : "")
+      + `<p class="vdwhy">${r.perche.concat(r.caPerche ? [r.caPerche] : []).map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(". ")}.</p>`
+      + (r.schemi.length ? `<button type="button" class="btn sec mini" data-vdprop>Usa la proposta</button>` : "");
+  return `<div class="vdprop"><b class="vdprop-t">Proposta per ${p.sesso === "donna" ? "questa paziente" : "questo paziente"}</b>${body}</div>`;
+}
 /* i dati salvati con il vecchio elenco a scelta fissa diventano campi */
 function supMigrate(p){
   if(p.supVD && !p.supVDmol){ const m = /^(Colecalciferolo|Calcifediolo) ([\d.,]+) (?:UI|mg) (.+)$/.exec(p.supVD);
@@ -639,8 +688,6 @@ function supMigrate(p){
       if(o){ p.supVDn = o[1]; p.supVDu = { giorni:"g", settimane:"s", mesi:"m" }[o[2]]; } else { p.supVDn = "1"; p.supVDu = /settimana/.test(f) ? "s" : /mese/.test(f) ? "m" : "g"; } } }
   if(p.supCa && p.supCaDose === undefined){ const m = /^Calcio (\d+) mg/.exec(p.supCa); p.supCaDose = m ? m[1] : ""; if(!m) p.supCa = ""; }
 }
-/* schemi frequenti: un tocco riempie i campi, poi si possono cambiare */
-const VD_PRESET = [["colecalciferolo", "1.000", "1", "g"], ["colecalciferolo", "10.000", "1", "s"], ["colecalciferolo", "25.000", "2", "s"], ["colecalciferolo", "50.000", "1", "m"], ["colecalciferolo", "100.000", "1", "m"], ["calcifediolo", "0,266", "2", "s"]];
 function stepStatus(p, k, F, S){
   F = F || pzFacts(p);
   if(k === "dati"){
@@ -918,10 +965,10 @@ function vPazTerapia(p){
     <p class="lbl">Vitamina D e calcio</p>
     <div class="addbox supbox">
       ${(supMigrate(p), "")}
-      <p class="small" style="margin:0 0 6px">Schemi frequenti, poi modificabili:</p><div class="vdpre" role="group" aria-label="Schemi frequenti">${VD_PRESET.map(([m, d, n, u]) => `<button type="button" class="vdp" data-vdp="${m}|${d}|${n}|${u}">${m === "calcifediolo" ? "Calcifediolo " : ""}${d} ${VD_MOL[m][1]} ${vdFreq(n, u)}</button>`).join("")}<button type="button" class="vdp no" data-vdp="">Nessuna</button></div>
+      ${vdPropHTML(p)}
       <div class="grid2 suprow">
         <label class="fld">Vitamina D<select data-pf="supVDmol" data-sup><option value="">Nessuna</option>${Object.entries(VD_MOL).map(([k, v]) => `<option value="${k}"${p.supVDmol === k ? " selected" : ""}>${v[0]}</option>`).join("")}</select></label>
-        <label class="fld">Dose (${p.supVDmol === "calcifediolo" ? "mg" : "UI"})<input type="text" inputmode="decimal" autocomplete="off" data-pf="supVDdose" data-sup value="${hx(p.supVDdose || "")}" placeholder="${p.supVDmol === "calcifediolo" ? "es. 0,266" : "es. 25.000"}"></label>
+        <label class="fld">Dose (${(VD_MOL[p.supVDmol] || VD_MOL.colecalciferolo)[1]})<input type="text" inputmode="decimal" autocomplete="off" data-pf="supVDdose" data-sup value="${hx(p.supVDdose || "")}" placeholder="${{ calcifediolo:"es. 0,266", calcitriolo:"es. 0,25" }[p.supVDmol] || "es. 25.000"}"></label>
         <label class="fld">Ogni<input type="number" min="1" inputmode="numeric" data-pf="supVDn" data-sup value="${hx(p.supVDn || "1")}"></label>
         <label class="fld">&nbsp;<select data-pf="supVDu" data-sup>${Object.entries(VD_FR).map(([k, v]) => `<option value="${k}"${(p.supVDu || "g") === k ? " selected" : ""}>${v[1]}</option>`).join("")}</select></label>
       </div>
@@ -929,7 +976,7 @@ function vPazTerapia(p){
       <div class="grid2">
         <label class="fld">Calcio (mg al giorno)<input type="text" inputmode="numeric" autocomplete="off" data-pf="supCaDose" data-sup value="${hx(p.supCaDose || "")}" placeholder="vuoto: basta la dieta"></label>
         <label class="fld">Dal<input type="date" data-pf="supDal" value="${hx(p.supDal || "")}"></label>
-        <label class="fld">Nota (facoltativa)<input type="text" data-pf="supNota" value="${hx(p.supNota || "")}" placeholder="es. nome commerciale"></label>
+        <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" data-pf="supNota" value="${hx(p.supNota || "")}" placeholder="es. nome commerciale"></label>
       </div>
       <p class="small">Si salva da solo. Dosi e rimborsabilità: <a href="#guida-nota96">Vitamina D e Nota 96</a>.</p>
     </div>
@@ -1391,7 +1438,7 @@ document.addEventListener("input", e => {
   const lv = e.target.closest("[data-lv]"); if(lv){ const { p } = pzRoute(); if(!p) return; p.labVal = p.labVal || {}; p.labVal[lv.dataset.lv] = lv.value.trim(); savePz(p); return; }
   const ce = e.target.closest("[data-ce]"); if(ce){ const { p } = pzRoute(); if(p){ p[ce.dataset.ce] = ce.innerText.trim(); savePz(p); } return; }
   if(e.target.id === "medNome"){ try{ localStorage.setItem("oh-mmg-medico", e.target.value); }catch(err){} return; }
-  const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(el.dataset.pf === "supVDmol") p.supVDdose = ""; if(el.hasAttribute("data-sup")) supCompose(p); if(["egfr", "caTot", "albVal"].includes(el.dataset.pf)) applyAuto(p); savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
+  const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(el.dataset.pf === "supVDmol") p.supVDdose = ""; if(el.hasAttribute("data-sup")){ supCompose(p); const vt = document.querySelector('[data-live="vdtxt"]'); if(vt) vt.innerHTML = PZ_LIVE.vdtxt(p); } if(["egfr", "caTot", "albVal"].includes(el.dataset.pf)) applyAuto(p); savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
   if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); let n = 0; document.querySelectorAll("#pzList .pitem").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); if(!a.hidden) n++; }); const nn = $("#pzNone"); if(nn) nn.hidden = n > 0; }
 });
 document.addEventListener("change", e => {
@@ -1434,8 +1481,10 @@ document.addEventListener("click", e => {
   if(t.closest("#pzDel")){ if(confirm("Eliminare " + pzName(p) + " e tutti i suoi dati?")){ PZ.splice(PZ.indexOf(p), 1); savePz(); history.replaceState(null, "", location.pathname + location.search); stack.length = 0; stack.push(""); render(); } return; }
   const s = t.closest("[data-pset]");
   if(s){ const k = s.dataset.pset, v = s.dataset.val === "true" ? true : s.dataset.val === "false" ? false : s.dataset.val; p[k] = p[k] === v ? null : v; savePz(p); render(); return; }
-  const vp = t.closest("[data-vdp]");
-  if(vp){ const [m, d, n, u] = vp.dataset.vdp.split("|"); Object.assign(p, { supVDmol: m || "", supVDdose: d || "", supVDn: n || "1", supVDu: u || "g" }); supCompose(p); savePz(p); render(); return; }
+  if(t.closest("[data-vdprop]")){ const r = vdProposta(p), x = r.schemi[0]; if(!x) return;
+    Object.assign(p, { supVDmol: x.mol, supVDdose: x.dose, supVDn: x.n, supVDu: x.u }); if(r.ca) p.supCaDose = r.ca;
+    if(r.schemi[1] || x.per) p.supNota = [x.per, r.schemi[1] ? "poi " + vdSchemaTxt(r.schemi[1]).replace(/^./, c => c.toLowerCase()) : ""].filter(Boolean).join(", ");
+    if(!p.supDal) p.supDal = todayISO(); supCompose(p); savePz(p); render(); toast("Proposta inserita: controlla e modifica se serve."); return; }
   const b = t.closest(".ck[data-pbool]");
   if(b){ const k = b.dataset.pbool; p[k] = !p[k]; b.setAttribute("aria-pressed", p[k]); pzaxBadge(b); if(k === "disab"){ p.anamOk = true; p.anamMuta = false; delete p.anamPrev; } savePz(p); pzLive(p); return; }
   const c = t.closest(".ck[data-pci]");
