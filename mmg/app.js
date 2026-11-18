@@ -770,30 +770,33 @@ function fxEditRow(p, f){
     <div class="fxed-b"><div class="grid2">
       <label class="fld">Sede<select data-fxe="sede">${Object.entries(FX_SEDI).map(([k, v]) => `<option value="${k}"${f.sede === k ? " selected" : ""}>${v}</option>`).join("")}</select></label>
       <label class="fld">Gravità<select data-fxe="grado"${vert ? "" : " disabled"}><option value="">non nota</option>${Object.entries(FX_GRADO).map(([k, v]) => `<option value="${k}"${f.grado === k ? " selected" : ""}>${v}</option>`).join("")}</select></label>
-      <div class="fld fxwhen"><span>Quando</span><span class="fxw"><input type="number" data-fxe="anno" inputmode="numeric" value="${hx(an || "")}" placeholder="anno" aria-label="Anno (vuoto se non nota)">
+      <div class="fld fxwhen"><span>Quando · il mese non serve</span><span class="fxw fxw2"><input type="number" data-fxe="anno" inputmode="numeric" value="${hx(an || "")}" placeholder="anno" aria-label="Anno (vuoto se non nota)">
         <select data-fxe="mese" aria-label="Mese"><option value="">mese</option>${MESI.map((m, j) => `<option value="${String(j + 1).padStart(2, "0")}"${me === String(j + 1).padStart(2, "0") ? " selected" : ""}>${m}</option>`).join("")}</select>
-        <input type="number" data-fxe="giorno" inputmode="numeric" value="${gi ? +gi : ""}" placeholder="giorno" aria-label="Giorno"></span></div>
+</span></div>
     </div>
     ${ckPz("data-fxt", i, f.inTerapia, "Avvenuta nonostante almeno 1 anno di terapia per l'osteoporosi")}
     <div class="fxed-f"><button type="button" class="lnk" data-del="fratture:${i}">Elimina questa frattura</button></div></div></details>`;
 }
-/* più fratture nella stessa sede: la prima usa i campi del modulo, le altre una riga ciascuna (gravità, anno, mese),
-   all'inizio uguali alla prima e poi modificabili */
+/* una riga per ogni frattura della sede scelta: gravità (solo vertebre), anno, mese facoltativo */
+function fxRowsHTML(n, vert, old){
+  const opt = (v, k, t) => `<option value="${k}"${v === k ? " selected" : ""}>${t}</option>`;
+  return `<div class="fxh${vert ? "" : " nog"}"><span></span>${vert ? "<span>Gravità</span>" : ""}<span>Anno</span><span>Mese <small>non serve</small></span></div>` +
+    Array.from({ length: n }, (_, j) => { const v = old[j] || old[old.length - 1] || {};
+    return `<div class="fxr${vert ? "" : " nog"}"><b>${n > 1 ? j + 1 + "ª" : ""}</b>${vert ? `<select data-fr="g" aria-label="Gravità della frattura ${j + 1}">${opt(v.g || "", "", "non nota")}${Object.entries(FX_GRADO).map(([k, t]) => opt(v.g, k, t)).join("")}</select>` : ""}
+      <input type="number" data-fr="a" inputmode="numeric" min="1930" max="${new Date().getFullYear()}" placeholder="anno" value="${hx(v.a || "")}" aria-label="Anno della frattura ${j + 1} (vuoto se non noto)"><select data-fr="m" aria-label="Mese della frattura ${j + 1} (facoltativo)">${opt(v.m || "", "", "—")}${MESI.map((m, i) => opt(v.m, String(i + 1).padStart(2, "0"), m)).join("")}</select></div>`; }).join("") +
+    `<p class="small fxnote">Basta l'anno; se non è noto lascialo vuoto.</p>`;
+}
 function fxMoreRender(){
-  const box = document.getElementById("fxMore"), nEl = document.getElementById("fxN"); if(!box || !nEl) return;
+  const box = document.getElementById("fxRows"), nEl = document.getElementById("fxN"); if(!box || !nEl) return;
   const n = Math.max(1, Math.min(12, parseInt(nEl.value, 10) || 1)), vert = (document.getElementById("fxSede") || {}).value === "vertebra";
-  const old = [...box.querySelectorAll(".fxr")].map(r => ({ g: r.querySelector('[data-fr="g"]').value, a: r.querySelector('[data-fr="a"]').value, m: r.querySelector('[data-fr="m"]').value }));
-  const d0 = { g: (document.getElementById("fxGrado") || {}).value || "", a: (document.getElementById("fxAnno") || {}).value || "", m: (document.getElementById("fxMese") || {}).value || "" };
-  if(n < 2){ box.innerHTML = ""; return; }
-  box.innerHTML = `<p class="fxm-t">Le altre ${n - 1 === 1 ? "frattura" : n - 1 + " fratture"} <small>cambia gravità e data se sono diverse dalla prima</small></p>` + Array.from({ length: n - 1 }, (_, j) => { const v = old[j] || d0;
-    return `<div class="fxr"><b>${j + 2}ª</b><select data-fr="g" aria-label="Gravità della frattura ${j + 2}"${vert ? "" : " disabled"}><option value="">gravità non nota</option>${Object.entries(FX_GRADO).map(([k, t]) => `<option value="${k}"${v.g === k ? " selected" : ""}>${t}</option>`).join("")}</select>
-      <input type="number" data-fr="a" inputmode="numeric" placeholder="anno" value="${hx(v.a)}" aria-label="Anno della frattura ${j + 2}"><select data-fr="m" aria-label="Mese della frattura ${j + 2}"><option value="">mese</option>${MESI.map((m, i) => { const mm = String(i + 1).padStart(2, "0"); return `<option value="${mm}"${v.m === mm ? " selected" : ""}>${m}</option>`; }).join("")}</select></div>`; }).join("");
+  const old = [...box.querySelectorAll(".fxr")].map(r => { const q = k => { const el = r.querySelector(`[data-fr="${k}"]`); return el ? el.value : ""; }; return { g: q("g"), a: q("a"), m: q("m") }; });
+  box.innerHTML = fxRowsHTML(n, vert, old);
 }
 /* legge i campi della riga aperta e aggiorna la frattura; con una data non valida avvisa e non cambia nulla */
 function fxEditSave(p, row){
   const f = p.fratture[+row.dataset.fxi]; if(!f) return;
   const g = k => { const el = row.querySelector(`[data-fxe="${k}"]`); return el ? el.value.trim() : ""; };
-  const an = +g("anno"), me = g("mese"), gi = +g("giorno"), oggi = new Date();
+  const an = +g("anno"), me = g("mese"), oggi = new Date(), old = (f.data || "").split("-"), gi = an === +old[0] && me && me === old[1] && old[2] ? +old[2] : 0;
   if(an && (an < 1930 || an > oggi.getFullYear())){ toast("L'anno non è valido."); return; }
   if(!an && me){ toast("Per indicare il mese scrivi anche l'anno."); return; }
   if(gi && !me){ toast("Per indicare il giorno scegli anche il mese."); return; }
@@ -826,16 +829,12 @@ function datiFx(p){
     <p class="small">Fratture per traumi minimi (cadere dalla propria altezza o meno). Le vertebrali con il criterio di Genant: lieve 20–25%, moderata 25–40%, grave oltre il 40% di riduzione di un'altezza vertebrale.</p>
     ${fxRows ? `<div class="fxlist">${fxRows}</div><p class="small">Tocca una frattura per cambiarne data, sede o gravità.</p>` : ckPz("data-pbool", "nessunaFx", p.nessunaFx, "Nessuna frattura da fragilità pregressa")}
     ${p.rival && F.fx.length ? `<div class="confirm">${ckPz("data-pbool", "fxRiv", p.fxRiv, `<b>Nessuna nuova frattura</b> dalla valutazione precedente (prima del ${fmtD(p.rival.dal)})`)}</div>` : ""}
-    <div class="addbox">
-      <div class="grid2">
+    <div class="addbox fxadd">
+      <div class="fxtop">
         <label class="fld">Sede<select id="fxSede">${Object.entries(FX_SEDI).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
-        <label class="fld">Gravità (vertebre)<select id="fxGrado"><option value="">non nota</option>${Object.entries(FX_GRADO).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
-        <div class="fld fxwhen"><span>Quando · basta l'anno, vuoto se non nota</span><span class="fxw"><input type="number" id="fxAnno" inputmode="numeric" min="1930" max="${new Date().getFullYear()}" placeholder="Anno" aria-label="Anno della frattura">
-          <select id="fxMese" aria-label="Mese (facoltativo)"><option value="">mese</option>${["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"].map((m, i) => `<option value="${String(i + 1).padStart(2, "0")}">${m}</option>`).join("")}</select>
-          <input type="number" id="fxGiorno" inputmode="numeric" min="1" max="31" placeholder="giorno" aria-label="Giorno (facoltativo)"></span></div>
+        <div class="fld">Quante<span class="stp"><button type="button" class="btn sec" data-fxn="-1" aria-label="Una in meno">−</button><input type="number" id="fxN" value="1" min="1" max="12" inputmode="numeric" aria-label="Quante fratture in questa sede"><button type="button" class="btn sec" data-fxn="1" aria-label="Una in più">+</button></span></div>
       </div>
-      <div class="fxqn"><span>Quante fratture in questa sede<small>se sono più di una, sotto data e gravità di ognuna</small></span><span class="stp"><button type="button" class="btn sec" data-fxn="-1" aria-label="Una in meno">−</button><input type="number" id="fxN" value="1" min="1" max="12" inputmode="numeric" aria-label="Numero di fratture"><button type="button" class="btn sec" data-fxn="1" aria-label="Una in più">+</button></span></div>
-      <div id="fxMore"></div>
+      <div id="fxRows">${fxRowsHTML(1, true, [])}</div>
       ${ckPz("data-tmp", "fxInT", false, "Avvenuta nonostante almeno 1 anno di terapia per l'osteoporosi")}
       <button type="button" class="btn" data-add="fratture">Salva</button>
     </div>`;
@@ -1626,26 +1625,19 @@ function addRec(p, k, auto){
   const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
   const no = msg => { if(!auto) alert(msg); return false; };
   let rec = null, msg = "";
-  if(k === "fratture"){ if(!document.getElementById("fxAnno")) return false;
-    const an = +v("fxAnno"), me = v("fxMese"), gi = +v("fxGiorno"), oggi = new Date();
-    if(auto && !an) return false;
-    if(an && (an < 1930 || an > oggi.getFullYear())) return no("L'anno della frattura non è valido.");
-    if(gi && !me) return no("Per indicare il giorno scegli anche il mese.");
-    if(!an && me) return no("Per indicare il mese scrivi anche l'anno.");
-    const dd = an ? an + (me ? "-" + me + (gi ? "-" + String(gi).padStart(2, "0") : "") : "") : "";
-    const chk = pDate(dd); if(gi && (gi > 31 || chk.getMonth() !== +me - 1)) return no("Il giorno non esiste in quel mese.");
-    if(me && pDate(an + "-" + me) > oggi) return no("La data è nel futuro.");
-    const it = document.querySelector('.ck[data-tmp="fxInT"]');
-    rec = { sede: v("fxSede"), data: dd, grado: v("fxSede") === "vertebra" ? v("fxGrado") : "", inTerapia: !!it && it.getAttribute("aria-pressed") === "true" };
-    const more = [];
-    for(const r of document.querySelectorAll("#fxMore .fxr")){ const a = +r.querySelector('[data-fr="a"]').value, m = r.querySelector('[data-fr="m"]').value;
-      if(a && (a < 1930 || a > oggi.getFullYear())) return no("Un anno nelle altre fratture non è valido.");
-      if(!a && m) return no("Nelle altre fratture, per indicare il mese scrivi anche l'anno.");
-      const d2 = a ? a + (m ? "-" + m : "") : ""; if(m && pDate(d2) > oggi) return no("Una data nelle altre fratture è nel futuro.");
-      more.push(Object.assign({}, rec, { data: d2, grado: rec.sede === "vertebra" ? r.querySelector('[data-fr="g"]').value : "" })); }
-    p.fratture.push(rec, ...more); const nn = 1 + more.length;
-    const fn = document.getElementById("fxN"); if(fn) fn.value = "1"; const fm = document.getElementById("fxMore"); if(fm) fm.innerHTML = "";
-    p.nessunaFx = false; if(p.rival) p.fxRiv = true; msg = (nn > 1 ? nn + " fratture aggiunte: " + (FX_SEDI[rec.sede] || rec.sede) : "Frattura aggiunta: " + (FX_SEDI[rec.sede] || rec.sede) + " · " + fxData(dd)); }
+  if(k === "fratture"){ const rows = [...document.querySelectorAll("#fxRows .fxr")]; if(!rows.length) return false;
+    const oggi = new Date(), sede = v("fxSede"), it = document.querySelector('.ck[data-tmp="fxInT"]'), inT = !!it && it.getAttribute("aria-pressed") === "true";
+    const q = (r, k) => { const el = r.querySelector(`[data-fr="${k}"]`); return el ? el.value.trim() : ""; };
+    if(auto && !rows.some(r => q(r, "a"))) return false;
+    const recs = [];
+    for(const [j, r] of rows.entries()){ const a = +q(r, "a"), m = q(r, "m"), lab = rows.length > 1 ? " (frattura " + (j + 1) + ")" : "";
+      if(a && (a < 1930 || a > oggi.getFullYear())) return no("L'anno non è valido" + lab + ".");
+      if(!a && m) return no("Per indicare il mese scrivi anche l'anno" + lab + ".");
+      const dd = a ? a + (m ? "-" + m : "") : ""; if(m && pDate(dd) > oggi) return no("La data è nel futuro" + lab + ".");
+      recs.push({ sede, data: dd, grado: sede === "vertebra" ? q(r, "g") : "", inTerapia: inT }); }
+    p.fratture.push(...recs); rec = recs[0]; const nn = recs.length;
+    const fn = document.getElementById("fxN"); if(fn) fn.value = "1"; fxMoreRender(); const r0 = document.querySelector("#fxRows .fxr"); if(r0) r0.querySelectorAll("input,select").forEach(x => x.value = "");
+    p.nessunaFx = false; if(p.rival) p.fxRiv = true; msg = (nn > 1 ? nn + " fratture aggiunte: " + (FX_SEDI[sede] || sede) : "Frattura aggiunta: " + (FX_SEDI[sede] || sede) + " · " + fxData(rec.data)); }
   if(k === "dxa"){ if(!document.getElementById("dxD")) return false;
     const any = [v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null);
     if(auto && !any) return false;
