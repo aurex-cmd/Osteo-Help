@@ -1001,7 +1001,7 @@ function vPazTerapia(p){
 const SERIES = [["tL", "Colonna", "#2a78d6"], ["tFt", "Femore totale", "#eb6834"], ["tFn", "Collo femorale", "#1baf7a"]];
 function lineChart(points, series, opt){
   /* points: [{x:Date, ...valori}]; un asse solo, etichette dirette sull'ultimo punto */
-  const W = 520, H = opt.h || 220, L = 34, R = 132, T = 14, B = 26;
+  const W = 460, H = opt.h || 240, L = 38, R = 150, T = 14, B = 30;
   const xs = points.map(pt => pt.x.getTime()), x0 = Math.min(...xs), x1 = Math.max(...xs), span = x1 - x0 || 1;
   const vals = points.flatMap(pt => series.map(s => pt[s[0]]).filter(v => v !== null));
   let y0 = Math.min(...vals, ...(opt.ref || [])), y1 = Math.max(...vals, ...(opt.ref || []));
@@ -1012,49 +1012,62 @@ function lineChart(points, series, opt){
   g += ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" class="ax">${String(v).replace("-", "−")}</text>`).join("");
   (opt.ref || []).forEach((v, i) => { g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="rl"/><text x="${L + 4}" y="${Y(v) - 4}" class="ax">${opt.refLbl[i]}</text>`; });
   g += [points[0], points[points.length - 1]].filter((v, i, a) => a.indexOf(v) === i).map(pt => `<text x="${X(pt.x.getTime())}" y="${H - 6}" text-anchor="middle" class="ax">${fmtM(pt.x)}</text>`).join("");
+  g += `<line class="cx" x1="0" x2="0" y1="${T}" y2="${H - B}" visibility="hidden"/>`;
   const used = [];
   series.forEach(s => {
     const pts = points.filter(pt => pt[s[0]] !== null); if(!pts.length) return;
     if(pts.length > 1) g += `<polyline fill="none" stroke="${s[2]}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(pt => X(pt.x.getTime()) + "," + Y(pt[s[0]])).join(" ")}"/>`;
     g += pts.map(pt => `<circle cx="${X(pt.x.getTime())}" cy="${Y(pt[s[0]])}" r="4.5" fill="${s[2]}" stroke="var(--bg)" stroke-width="2"><title>${s[1]} · ${fmtM(pt.x)}: ${fmtN(pt[s[0]])}${opt.unit || ""}</title></circle>`).join("");
     const last = pts[pts.length - 1]; let ly = Y(last[s[0]]) + 4; while(used.some(u => Math.abs(u - ly) < 13)) ly += 13; used.push(ly);
-    if(series.length > 1) g += `<text x="${W - R + 12}" y="${ly}" class="dl" fill="${s[2]}">${fmtN(last[s[0]])}<tspan class="dn"> ${s[1]}</tspan></text>`;
+    if(series.length > 1) g += `<text x="${W - R + 12}" y="${ly}" class="dl">${fmtN(last[s[0]])}<tspan class="dn"> ${s[1]}</tspan></text>`;
   });
-  return `<figure class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">${g}</svg></figure>`;
+  /* una colonna invisibile per data (larga fino a metà strada dalle vicine): toccandola o passandoci sopra compare il riquadro con i valori */
+  const cxs = points.map(pt => X(pt.x.getTime()));
+  g += points.map((pt, i) => { const a = i ? (cxs[i - 1] + cxs[i]) / 2 : L, b = i < points.length - 1 ? (cxs[i] + cxs[i + 1]) / 2 : W - R;
+    const tip = `<b>${fmtD(pt.iso || "") || fmtM(pt.x)}</b>` + series.filter(s => pt[s[0]] !== null).map(s => `<span><i style="background:${s[2]}"></i>${s[1]} <em>${fmtN(pt[s[0]])}${opt.unit || ""}</em></span>`).join("");
+    return `<rect class="ccol" x="${a}" y="${T}" width="${Math.max(b - a, 24)}" height="${H - T - B}" data-cx="${cxs[i]}" data-tip="${hx(tip)}" tabindex="0" aria-label="${hx(tip.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim())}"/>`; }).join("");
+  const leg = series.length > 1 ? `<div class="cleg">${series.map(s => `<span><i style="background:${s[2]}"></i>${s[1]}</span>`).join("")}</div>` : "";
+  return `<figure class="chart">${leg}<div class="cwrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">${g}</svg><div class="ctip" hidden></div></div></figure>`;
 }
-function dxaChartHTML(F){
+/* tabelle: una riga per esame, le cifre in colonna allineate */
+function dxaTable(F){
+  if(!F.dxa.length) return "";
+  return `<div class="dtab-w"><table class="dtab"><thead><tr><th>Data</th>${SERIES.map(s => `<th class="nr">${s[1]}</th>`).join("")}</tr></thead><tbody>${F.dxa.map(d => `<tr><td>${fmtD(d.data)}</td>${SERIES.map(s => { const v = num(d[s[0]]); return `<td class="nr${v !== null && v <= -2.5 ? " op" : ""}">${v === null ? "—" : fmtN(v)}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function defraTable(F){
+  const L = F.defra.filter(d => ZONE[d.zona]); if(!L.length) return "";
+  return `<div class="dtab-w"><table class="dtab"><thead><tr><th>Data</th><th>Zona</th><th class="nr">Rischio a 10 anni</th></tr></thead><tbody>${L.map(d => `<tr><td>${fmtD(d.data)}</td><td>${zchip(d.zona)}</td><td class="nr">${num(d.rischio) === null ? "—" : fmtN(num(d.rischio), 0) + "%"}</td></tr>`).join("")}</tbody></table></div>`;
+}
+/* l'ultimo DeFRA come numero, con la differenza dal precedente */
+function defraTile(F){
+  const L = F.defra.filter(d => ZONE[d.zona]); if(!L.length) return "";
+  const d = L[0], pv = L[1], r = num(d.rischio), rp = pv ? num(pv.rischio) : null;
+  const dz = pv ? Math.sign(ZONE_ORDER.indexOf(d.zona) - ZONE_ORDER.indexOf(pv.zona)) : 0;
+  const delta = r !== null && rp !== null ? (r === rp ? "= invariato" : (r > rp ? "▲ +" : "▼ −") + fmtN(Math.abs(r - rp), 0) + (Math.abs(r - rp) === 1 ? " punto" : " punti")) + " dal " + fmtM(pDate(pv.data)) + " (" + fmtN(rp, 0) + "%)" : pv ? (dz > 0 ? "zona peggiorata" : dz < 0 ? "zona migliorata" : "stessa zona") + " dal " + fmtM(pDate(pv.data)) : "";
+  return `<div class="dftile z-${d.zona}"><span class="dft-v">${r !== null ? fmtN(r, 0) + "<small>%</small>" : "—"}</span><span class="dft-t"><small>Rischio a 10 anni · ${fmtD(d.data)}</small>${zchip(d.zona)}${delta ? `<em class="${r !== null && rp !== null ? (r > rp ? "dn" : r < rp ? "up" : "st") : dz > 0 ? "dn" : dz < 0 ? "up" : "st"}">${delta}</em>` : ""}</span></div>`;
+}
+function dxaChartHTML(F, p){
   const asc = F.dxa.slice().reverse().filter(d => pDate(d.data) && [d.tL, d.tFt, d.tFn].some(v => num(v) !== null));
   if(!asc.length) return "";
-  const chart = asc.length > 1 ? lineChart(asc.map(d => ({ x: pDate(d.data), tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES,
+  const chart = asc.length > 1 ? lineChart(asc.map(d => ({ x: pDate(d.data), iso: d.data, tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES,
     { label:"Andamento del T-score", bands:[[-99, -2.5, "b-op", "Osteoporosi"], [-2.5, -1, "b-on", "Osteopenia", 1], [-1, 99, "b-ok", "Normale", 1]] }) : "";
-  return `<div class="tsum">${tsSummary(asc)}</div>${chart}`;
+  return dxaCard(p, F.dxa[0], F.dxa[1], true, true) + chart + (F.dxa.length > 1 ? dxaTable(F) : "");
 }
 /* variazione minima considerata reale tra due DXA: 0,2 di T-score */
 const TS_LSC = 0.2;
 const tsCat = v => v <= -2.5 ? ["op", "Osteoporosi"] : v < -1 ? ["on", "Osteopenia"] : ["ok", "Normale"];
-function tsSummary(asc){
-  return SERIES.map(([k, nome, col]) => {
-    const pts = asc.filter(d => num(d[k]) !== null); if(!pts.length) return "";
-    const v = num(pts[pts.length - 1][k]), prev = pts.length > 1 ? num(pts[pts.length - 2][k]) : null, c = tsCat(v);
-    let tr = "";
-    if(prev !== null){ const dl = Math.round((v - prev) * 10) / 10;
-      tr = Math.abs(dl) < TS_LSC ? `<span class="tr st">= stabile</span>`
-        : dl > 0 ? `<span class="tr up">▲ migliorata di ${fmtN(dl)}</span>` : `<span class="tr dn">▼ peggiorata di ${fmtN(-dl)}</span>`; }
-    return `<div class="ts-r"><i style="background:${col}"></i><span class="ts-n">${nome}</span><b class="ts-v">${fmtN(v)}</b><span class="ts-c ${c[0]}">${c[1]}</span>${tr}</div>`;
-  }).join("") + (asc.length > 1 ? `<p class="small">Variazioni rispetto alla DXA precedente; sotto ${fmtN(TS_LSC)} si considerano stabili (entro l'errore di misura).</p>` : "");
-}
 /* una densitometria = una scheda: la data in testa, sotto i tre siti con il loro T-score e il confronto con la DXA precedente */
-function dxaCard(p, d, prev, big){
+function dxaCard(p, d, prev, big, noDel){
   const sites = SERIES.map(([k, nome]) => [k, nome, num(d[k])]).filter(x => x[2] !== null);
   const worst = sites.length ? Math.min(...sites.map(x => x[2])) : null, wc = worst !== null ? tsCat(worst) : null;
   const rows = sites.map(([k, nome, v]) => { const c = tsCat(v), pv = prev ? num(prev[k]) : null;
     let tr = ""; if(pv !== null){ const dl = Math.round((v - pv) * 10) / 10;
-      tr = Math.abs(dl) < TS_LSC ? `<em class="st">= stabile</em>` : dl > 0 ? `<em class="up">▲ ${fmtN(dl)}</em>` : `<em class="dn">▼ ${fmtN(-dl)}</em>`; }
+      tr = Math.abs(dl) < TS_LSC ? `<em class="st">= stabile</em>` : dl > 0 ? `<em class="up">▲ migliorata di ${fmtN(dl)}</em>` : `<em class="dn">▼ peggiorata di ${fmtN(-dl)}</em>`; }
     return `<li class="t-${c[0]}"><span class="dxv">${fmtN(v)}</span><span class="dxn"><b>${nome}</b><small>${c[1].toLowerCase()}</small></span>${tr}</li>`; }).join("");
   return `<div class="dxcard${big ? " big" : ""}">
     <div class="dxh"><span><small>Densitometria</small><b>${fmtD(d.data)}</b></span>${wc ? `<span class="dxw t-${wc[0]}">${wc[1]}</span>` : ""}</div>
     <ul class="dxs">${rows || `<li class="none">Nessun T-score inserito</li>`}</ul>
-    <div class="dxf">${prev ? `<small>Confronto con la DXA del ${fmtD(prev.data)}; sotto ${fmtN(TS_LSC)} è stabile.</small>` : "<small></small>"}<button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(d)}">Elimina</button></div></div>`;
+    <div class="dxf">${prev ? `<small>Confronto con la DXA del ${fmtD(prev.data)}; sotto ${fmtN(TS_LSC)} è stabile.</small>` : "<small></small>"}${noDel ? "" : `<button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(d)}">Elimina</button>`}</div></div>`;
 }
 function vPazDxa(p){
   const F = pzFacts(p), pl = dxaPlan(F), L = F.dxa;
@@ -1069,7 +1082,7 @@ function vPazDxa(p){
       <button type="button" class="btn" data-add="dxa">Salva la densitometria</button>
     </div>`;
   const asc = L.slice().reverse().filter(d => pDate(d.data) && [d.tL, d.tFt, d.tFn].some(v => num(v) !== null));
-  const chart = asc.length > 1 ? lineChart(asc.map(d => ({ x: pDate(d.data), tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES,
+  const chart = asc.length > 1 ? lineChart(asc.map(d => ({ x: pDate(d.data), iso: d.data, tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES,
     { label:"Andamento del T-score", bands:[[-99, -2.5, "b-op", "Osteoporosi"], [-2.5, -1, "b-on", "Osteopenia", 1], [-1, 99, "b-ok", "Normale", 1]] }) : "";
   return { bar: pzName(p), html: head("Densitometria (DEXA)", L.length ? "Ogni scheda è una densitometria: la data e i T-score di quel referto." : "Riporta il T-score di colonna lombare e femore dal referto della DXA.") + `
     ${L.length ? dxaCard(p, L[0], L[1], true) : ""}
@@ -1081,9 +1094,6 @@ function vPazDxa(p){
 }
 function vPazStorico(p){
   const F = pzFacts(p), pl = dxaPlan(F), notes = therapyNotes(F), d = p.decisione && DECISIONI[p.decisione.tipo];
-  const dfAsc = F.defra.slice().reverse().filter(d => pDate(d.data) && ZONE[d.zona]);
-  const dfChart = dfAsc.length ? `<div class="ztl">${dfAsc.map((d, i) => { const prev = dfAsc[i - 1], dir = prev ? Math.sign(ZONE_ORDER.indexOf(d.zona) - ZONE_ORDER.indexOf(prev.zona)) : 0;
-    return `<div class="ztl-i z-${d.zona}"><i></i><b>${ZONE[d.zona].t}</b><small>${fmtM(pDate(d.data))}${dir > 0 ? " · peggiorata" : dir < 0 ? " · migliorata" : ""}</small></div>`; }).join("")}</div>` : "";
   const imm = F.recent.length ? `<div class="alert"><b>Rischio imminente di rifrattura</b>${plural(F.recent.length, "frattura", "fratture")} negli ultimi 24 mesi (l'ultima il ${fmtD(F.recent[0].data)}). Dopo una frattura il rischio di una nuova frattura è massimo nei primi 1–2 anni: la terapia va iniziata o rivista subito, insieme alla prevenzione delle cadute.</div>`
     : F.fx.length ? `<div class="alert info"><b>Rischio di rifrattura</b>Una frattura da fragilità all'incirca raddoppia il rischio di altre fratture, anche dopo anni. Ultima frattura: ${fmtD(F.fx[0].data)}.</div>` : "";
   return { bar: pzName(p), html: head("Follow-up", "Come va nel tempo. A ogni controllo: nuova DXA al passo 5, nuova zona al passo 6, nuove fratture al passo 2.") + `
@@ -1092,9 +1102,9 @@ function vPazStorico(p){
       : d ? `<div class="alert info"><b>Decisione: ${d.t}</b>${fmtD(p.decisione.data)}. <a href="#paz-${p.id}-decidi">Rivedi</a></div>` : ""}
     ${(p.visite || []).length ? `<p class="lbl">Valutazioni precedenti</p><ul class="list recs vis">${p.visite.slice().reverse().map(v => `<li class="rec"><span><b>${fmtD(v.data)}${v.zona && ZONE[v.zona] ? ` · <span class="zn z-${v.zona}"><i></i>zona ${ZONE[v.zona].t.toLowerCase()}</span>` : ""}</b><small>${[v.minT !== null && v.minT !== undefined ? "T-score " + fmtN(v.minT) : "", v.dec && DECISIONI[v.dec] ? DECISIONI[v.dec].t.toLowerCase() : "", v.farmaci.length ? v.farmaci.map(id => DRUGS[id] ? DRUGS[id].nome.replace(/ \(.*\)$/, "") : id).join(" + ") : "", v.sec.length ? plural(v.sec.length, "forma secondaria", "forme secondarie") : ""].filter(Boolean).join(" · ")}</small></span></li>`).join("")}</ul>` : ""}
     <p class="lbl">T-score nel tempo</p>
-    ${dxaChartHTML(F) || `<p class="hint">Nessuna DXA registrata.</p>`}
-    <p class="lbl">Zona del DeFRA nel tempo</p>
-    ${dfChart || `<p class="hint">Nessuna zona registrata.</p>`}
+    ${dxaChartHTML(F, p) || `<p class="hint">Nessuna DXA registrata.</p>`}
+    <p class="lbl">DeFRA nel tempo</p>
+    ${F.defra.length ? defraTile(F) + (F.defra.length > 1 ? defraTable(F) : "") : `<p class="hint">Nessuna zona registrata.</p>`}
     <p class="lbl">Fratture</p>
     ${F.fx.length ? `<ul class="list recs">${F.fx.map(f => `<li class="rec"><span><b>${FX_SEDI[f.sede]}${f.grado ? " · " + f.grado : ""}</b><small>${fmtD(f.data)}</small></span></li>`).join("")}</ul>` : `<p class="hint">${p.nessunaFx ? "Nessuna frattura da fragilità." : "Nessuna frattura registrata."}</p>`}` };
 }
@@ -1112,9 +1122,9 @@ function vPazReport(p){
     + sec("Esami di I livello" + (p.labData ? " (" + fmtD(p.labData) + ")" : ""), ll ? [ll] : [], "esami")
     + (S.A.byForm.length ? `<p class="note">${S.A.byForm.length ? "Esami di II livello, solo su sospetto clinico, partendo da " + COND[S.A.byForm[0][0]].toLowerCase() + ": " + S.A.byForm[0][1].join("; ") + "." : ""}</p>` : "")
     + (S.hpp ? `<p class="note"><b>Fosfatasi alcalina bassa:</b> escludere l'ipofosfatasia; bisfosfonati controindicati.</p>` : "")
-    + sec("Densitometria (T-score)", F.dxa.map(d => fmtD(d.data) + " — " + tsTxt(d)), "densitometria")
+    + (F.dxa.length ? `<p class="lbl">Densitometria (T-score)</p>${dxaTable(F)}` : (miss.push("densitometria"), ""))
     + (F.lastDxa ? `<p class="note">${pl.t}.</p>` : "")
-    + sec("Rischio di frattura (DeFRA)", F.defra.filter(d => ZONE[d.zona]).map(d => fmtD(d.data) + " — " + defraTxt(d, F)), "zona del DeFRA")
+    + (F.defra.some(d => ZONE[d.zona]) ? `<p class="lbl">Rischio di frattura (DeFRA)</p>${defraTable(F)}` : (miss.push("zona del DeFRA"), ""))
     + (rc ? `<p class="note"><b>Zona ${rc.t.toLowerCase()} → ${rc.chi}.</b> ${rc.azione}</p>` : "")
     + (vh.length ? `<p class="note"><b>Rischio molto alto:</b> ${vh.join("; ")}.</p>` : "")
     + sec("Nota 79", n79.map(c => `<b>${c.cond}</b>${c.nb ? ", " + c.nb : ""} — ${c.s.map((l, i) => l.length ? ["I", "II", "III"][i] + " scelta: " + nomi(l) : "").filter(Boolean).join("; ")}`), "")
@@ -1442,6 +1452,19 @@ document.addEventListener("input", e => {
   const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(el.dataset.pf === "supVDmol") p.supVDdose = ""; if(el.hasAttribute("data-sup")){ supCompose(p); const vt = document.querySelector('[data-live="vdtxt"]'); if(vt) vt.innerHTML = PZ_LIVE.vdtxt(p); } if(["egfr", "caTot", "albVal"].includes(el.dataset.pf)) applyAuto(p); savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
   if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); let n = 0; document.querySelectorAll("#pzList .pitem").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); if(!a.hidden) n++; }); const nn = $("#pzNone"); if(nn) nn.hidden = n > 0; }
 });
+/* grafico: riquadro con i valori della data toccata, con il mouse, il dito o la tastiera */
+function chartTip(col){
+  const w = col.closest(".cwrap"), tip = w.querySelector(".ctip"), svg = w.querySelector("svg"), cx = svg.querySelector(".cx"), vb = svg.viewBox.baseVal, k = svg.getBoundingClientRect().width / vb.width;
+  const x = +col.dataset.cx; cx.setAttribute("x1", x); cx.setAttribute("x2", x); cx.setAttribute("visibility", "visible");
+  tip.innerHTML = col.dataset.tip; tip.hidden = false;
+  const px = x * k, tw = tip.offsetWidth, ww = w.clientWidth; tip.style.left = Math.max(0, Math.min(ww - tw, px > ww / 2 ? px - tw - 12 : px + 12)) + "px";
+}
+function chartTipOff(w){ if(!w) return; const tip = w.querySelector(".ctip"), cx = w.querySelector(".cx"); if(tip) tip.hidden = true; if(cx) cx.setAttribute("visibility", "hidden"); }
+document.addEventListener("pointerover", e => { const c = e.target.closest && e.target.closest(".ccol"); if(c) chartTip(c); });
+document.addEventListener("pointerout", e => { const w = e.target.closest && e.target.closest(".cwrap"); if(w && !w.contains(e.relatedTarget)) chartTipOff(w); });
+document.addEventListener("focusin", e => { const c = e.target.closest && e.target.closest(".ccol"); if(c) chartTip(c); });
+document.addEventListener("focusout", e => { const c = e.target.closest && e.target.closest(".ccol"); if(c) chartTipOff(c.closest(".cwrap")); });
+document.addEventListener("pointerdown", e => { const c = e.target.closest && e.target.closest(".ccol"); if(c){ chartTip(c); return; } document.querySelectorAll(".cwrap").forEach(chartTipOff); });
 document.addEventListener("change", e => {
   if(e.target.closest('[data-pf="supVDmol"]')){ const { p } = pzRoute(); if(p) render(); return; }
   if(e.target.closest("[data-pf]") || e.target.id === "vdIn"){ const { p } = pzRoute(); if(p) pzLive(p); return; }

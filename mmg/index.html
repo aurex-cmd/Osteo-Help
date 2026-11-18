@@ -999,6 +999,27 @@ body.locked .bar{visibility:hidden}
 .vdprop ul{margin:0 0 6px;padding-left:18px} .vdprop p{margin:0 0 8px} .vdprop .vdwhy{color:var(--muted);font-size:.8rem}
 .supbox .suprow{grid-template-columns:1.3fr 1fr .6fr 1fr}
 @media (max-width:560px){ .supbox .suprow{grid-template-columns:1fr 1fr} }
+/* grafico del T-score: testi leggibili sul telefono, legenda, riquadro dei valori al tocco */
+.chart .ax{font-size:13px} .chart .dl{font-size:14px} .chart .dl .dn{font-size:12.5px} .chart text.bl{font-size:12px}
+.chart svg{max-width:620px}
+.cleg{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 6px;font-size:.8rem;color:var(--ink)} .cleg span{display:inline-flex;align-items:center;gap:6px} .cleg i,.ctip i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.cwrap{position:relative}
+.chart .ccol{fill:transparent;cursor:pointer;outline:none} .chart .ccol:focus-visible{fill:rgba(80,64,160,.06)}
+.chart .cx{stroke:var(--muted);stroke-width:1}
+.ctip{position:absolute;top:6px;z-index:3;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(30,20,70,.14);padding:8px 10px;font-size:.8rem;line-height:1.45;pointer-events:none;min-width:150px}
+.ctip b{display:block;margin-bottom:2px} .ctip span{display:flex;align-items:center;gap:6px;color:var(--ink)} .ctip em{font-style:normal;font-weight:700;margin-left:auto;padding-left:10px;font-variant-numeric:tabular-nums}
+/* tabelle di DXA e DeFRA */
+.dtab-w{overflow-x:auto;margin:6px 0 12px}
+.dtab{width:100%;border-collapse:collapse;font-size:.88rem}
+.dtab th{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.dtab td{padding:8px;border-bottom:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.dtab .nr{text-align:right;font-variant-numeric:tabular-nums} .dtab td.op{font-weight:800}
+.dtab tr:last-child td{border-bottom:0}
+/* ultimo DeFRA: il numero, la zona e la differenza dal precedente */
+.dftile{display:flex;align-items:center;gap:14px;border-radius:14px;padding:12px 14px;background:var(--zb);border-left:6px solid var(--zc);margin-bottom:6px}
+.dft-v{font-size:2rem;font-weight:800;color:var(--ink);line-height:1} .dft-v small{font-size:.9rem;font-weight:700}
+.dft-t{display:flex;flex-direction:column;align-items:flex-start;gap:3px} .dft-t small{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dft-t em{font-style:normal;font-size:.8rem;font-weight:700} .dft-t em.dn{color:var(--coral)} .dft-t em.up{color:var(--teal)} .dft-t em.st{color:var(--muted)}
 </style>
 </head>
 <body>

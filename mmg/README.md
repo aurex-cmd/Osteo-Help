@@ -281,3 +281,9 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Proposta di vitamina D con valore buono (≥50 nmol/L senza farmaco per l'osso): se la vitamina D è registrata, «continua lo schema attuale»; se non lo è, avvisa che il valore può dipendere da una vitamina D già in corso («continuala e registrala»), e solo altrimenti «non serve integrare».
 - Vitamina D e calcio: pulsante «Salva vitamina D e calcio» (conferma con il testo salvato e «Salvata il …»; mette la data di inizio se manca). I campi restano comunque registrati mentre si scrive, così non si perde nulla uscendo senza premere.
 - Il pulsante di vitamina D e calcio si chiama solo «Salva»; il calcio è facoltativo (vuoto = basta la dieta).
+
+- **Regole di design applicate a grafico, tabelle e riquadri**:
+  - densitometrie e DeFRA come vere tabelle (Data · Colonna · Femore totale · Collo; Data · Zona · Rischio a 10 anni), cifre allineate a destra; i T-score da osteoporosi in grassetto (`dxaTable`, `defraTable`), nel report e in «Controlli nel tempo»;
+  - DeFRA nel tempo: l'ultimo valore come numero grande con zona e differenza dal precedente («17% · ▲ +3 punti dal apr 2024 (14%)», `defraTile`), sotto la tabella;
+  - T-score con un solo modello: in «Controlli nel tempo» la stessa scheda del passo 5 (cerchi colorati per categoria); nella scheda la variazione è scritta per intero («▲ migliorata di 0,2», «▼ peggiorata di 0,2», «= stabile»);
+  - grafico del T-score: legenda sopra il grafico, testi più grandi (leggibili sul telefono), riquadro con data e tre valori quando si passa o si tocca una data (colonne invisibili larghe almeno 24 px, linea verticale sulla data, raggiungibile anche da tastiera).
