@@ -261,3 +261,9 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 
 - **Icone vettoriali al posto delle emoji**: le sezioni (Chi è, Fratture, Anamnesi e farmaci, Esami del sangue, Densitometria, DeFRA, Forme secondarie, Controlli, Decidi la terapia) e le decisioni nell'archivio e nel riepilogo (specialista, farmaco da registrare, decisione rimandata) usano icone a tratto 24×24 (`SEC_SVG`, `secIcon` in `figura.js`), lo stesso stile della pagina iniziale; nel titolo della scheda stanno in un riquadro grigio come le icone della home.
 - Icone delle sezioni: contorno viola scuro (#3B3266) e riempimento lavanda (#CBC1F2) sulle forme chiuse (classe `.f`); sui cerchi colorati dell'archivio restano bianche.
+
+- **Vitamina D e calcio a schema libero** (Terapia):
+  - vitamina D: molecola (colecalciferolo o calcifediolo), dose libera (UI o mg secondo la molecola), «ogni N giorni / settimane / mesi»; il testo si compone da solo («Colecalciferolo 25.000 UI ogni 10 giorni», «… 100.000 UI al mese»); sopra, schemi frequenti da un tocco, poi modificabili; cambiando molecola la dose si svuota;
+  - calcio: dose libera in mg al giorno (vuoto = basta la dieta);
+  - i dati salvati con il vecchio elenco fisso si convertono nei campi (`supMigrate`); `p.supVD` e `p.supCa` restano il testo usato da archivio, riepilogo e cartella (`supCompose`);
+  - «Registra un farmaco»: nessun farmaco preselezionato (prima compariva l'alendronato, che sembrava assegnato); senza scelta non si salva; chiuso se la decisione è «nessun farmaco» o «specialista»; per gli uomini non compaiono romosozumab, abaloparatide, ibandronato, raloxifene e bazedoxifene.

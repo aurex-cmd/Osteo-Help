@@ -620,11 +620,27 @@ const DECISIONI = {
 };
 const DEC_ZONA = { verde:"nessuno", gialla:"mmg", arancione:"spec", rossa:"spec" };
 /* vitamina D e calcio: si registrano a parte, per tutti (anche per chi non fa un farmaco per l'osteoporosi) */
-const SUP_VD = ["Colecalciferolo 1.000 UI al giorno", "Colecalciferolo 2.000 UI al giorno", "Colecalciferolo 10.000 UI alla settimana", "Colecalciferolo 25.000 UI ogni 2 settimane", "Colecalciferolo 25.000 UI al mese", "Colecalciferolo 50.000 UI al mese", "Calcifediolo 0,266 mg ogni 2 settimane", "Calcifediolo 0,266 mg al mese"];
-const SUP_CA = ["Calcio 500 mg al giorno", "Calcio 1000 mg al giorno", "Colecalciferolo con calcio (associazione)"];
 const supList = p => [p.supVD, p.supCa].filter(Boolean);
 const supTxt = p => supList(p).map((x, i) => i ? x.charAt(0).toLowerCase() + x.slice(1) : x).join(" · ");
-const supSel = (p, k, opts, none) => `<select data-pf="${k}"><option value="">${none}</option>${opts.map(o => `<option value="${hx(o)}"${p[k] === o ? " selected" : ""}>${hx(o)}</option>`).join("")}</select>`;
+/* vitamina D a schema libero: molecola, dose, ogni quanto. Il testo (p.supVD) si ricompone dai campi */
+const VD_MOL = { colecalciferolo:["Colecalciferolo", "UI"], calcifediolo:["Calcifediolo", "mg"] };
+const VD_FR = { g:["giorno", "giorni", "al giorno"], s:["settimana", "settimane", "alla settimana"], m:["mese", "mesi", "al mese"] };
+const vdFreq = (n, u) => { n = Math.max(1, parseInt(n, 10) || 1); return n === 1 ? VD_FR[u][2] : "ogni " + n + " " + VD_FR[u][1]; };
+function supCompose(p){
+  const m = VD_MOL[p.supVDmol], d = (p.supVDdose || "").trim();
+  p.supVD = m && d ? `${m[0]} ${d} ${m[1]} ${vdFreq(p.supVDn, p.supVDu || "g")}` : "";
+  const c = (p.supCaDose || "").trim();
+  p.supCa = c ? `Calcio ${c} mg al giorno` : "";
+}
+/* i dati salvati con il vecchio elenco a scelta fissa diventano campi */
+function supMigrate(p){
+  if(p.supVD && !p.supVDmol){ const m = /^(Colecalciferolo|Calcifediolo) ([\d.,]+) (?:UI|mg) (.+)$/.exec(p.supVD);
+    if(m){ p.supVDmol = m[1].toLowerCase(); p.supVDdose = m[2]; const f = m[3], o = /ogni (\d+) (giorni|settimane|mesi)/.exec(f);
+      if(o){ p.supVDn = o[1]; p.supVDu = { giorni:"g", settimane:"s", mesi:"m" }[o[2]]; } else { p.supVDn = "1"; p.supVDu = /settimana/.test(f) ? "s" : /mese/.test(f) ? "m" : "g"; } } }
+  if(p.supCa && p.supCaDose === undefined){ const m = /^Calcio (\d+) mg/.exec(p.supCa); p.supCaDose = m ? m[1] : ""; if(!m) p.supCa = ""; }
+}
+/* schemi frequenti: un tocco riempie i campi, poi si possono cambiare */
+const VD_PRESET = [["colecalciferolo", "1.000", "1", "g"], ["colecalciferolo", "10.000", "1", "s"], ["colecalciferolo", "25.000", "2", "s"], ["colecalciferolo", "50.000", "1", "m"], ["colecalciferolo", "100.000", "1", "m"], ["calcifediolo", "0,266", "2", "s"]];
 function stepStatus(p, k, F, S){
   F = F || pzFacts(p);
   if(k === "dati"){
@@ -901,23 +917,31 @@ function vPazTerapia(p){
     ${notes.length ? `<p class="small"><a href="#paz-${p.id}-foglio">Foglio per il paziente</a>: come prendere la terapia e cosa fare a casa, da stampare.</p>` : ""}
     <p class="lbl">Vitamina D e calcio</p>
     <div class="addbox supbox">
+      ${(supMigrate(p), "")}
+      <p class="small" style="margin:0 0 6px">Schemi frequenti, poi modificabili:</p><div class="vdpre" role="group" aria-label="Schemi frequenti">${VD_PRESET.map(([m, d, n, u]) => `<button type="button" class="vdp" data-vdp="${m}|${d}|${n}|${u}">${m === "calcifediolo" ? "Calcifediolo " : ""}${d} ${VD_MOL[m][1]} ${vdFreq(n, u)}</button>`).join("")}<button type="button" class="vdp no" data-vdp="">Nessuna</button></div>
+      <div class="grid2 suprow">
+        <label class="fld">Vitamina D<select data-pf="supVDmol" data-sup><option value="">Nessuna</option>${Object.entries(VD_MOL).map(([k, v]) => `<option value="${k}"${p.supVDmol === k ? " selected" : ""}>${v[0]}</option>`).join("")}</select></label>
+        <label class="fld">Dose (${p.supVDmol === "calcifediolo" ? "mg" : "UI"})<input type="text" inputmode="decimal" autocomplete="off" data-pf="supVDdose" data-sup value="${hx(p.supVDdose || "")}" placeholder="${p.supVDmol === "calcifediolo" ? "es. 0,266" : "es. 25.000"}"></label>
+        <label class="fld">Ogni<input type="number" min="1" inputmode="numeric" data-pf="supVDn" data-sup value="${hx(p.supVDn || "1")}"></label>
+        <label class="fld">&nbsp;<select data-pf="supVDu" data-sup>${Object.entries(VD_FR).map(([k, v]) => `<option value="${k}"${(p.supVDu || "g") === k ? " selected" : ""}>${v[1]}</option>`).join("")}</select></label>
+      </div>
+      <p class="small" data-live="vdtxt">${p.supVD ? "<b>" + hx(p.supVD) + "</b>" : "Nessuna vitamina D registrata."}</p>
       <div class="grid2">
-        <label class="fld" style="grid-column:1/-1">Vitamina D${supSel(p, "supVD", SUP_VD, "Nessuna")}</label>
-        <label class="fld" style="grid-column:1/-1">Calcio${supSel(p, "supCa", SUP_CA, "Basta la dieta")}</label>
+        <label class="fld">Calcio (mg al giorno)<input type="text" inputmode="numeric" autocomplete="off" data-pf="supCaDose" data-sup value="${hx(p.supCaDose || "")}" placeholder="vuoto: basta la dieta"></label>
         <label class="fld">Dal<input type="date" data-pf="supDal" value="${hx(p.supDal || "")}"></label>
         <label class="fld">Nota (facoltativa)<input type="text" data-pf="supNota" value="${hx(p.supNota || "")}" placeholder="es. nome commerciale"></label>
       </div>
       <p class="small">Si salva da solo. Dosi e rimborsabilità: <a href="#guida-nota96">Vitamina D e Nota 96</a>.</p>
     </div>
-    <p class="lbl">${rows ? "Aggiungi un farmaco" : "Registra un farmaco"}</p>
+    <details class="dsec thadd"${cur === "nessuno" || cur === "spec" ? "" : " open"}><summary><span>${rows ? "Aggiungi un farmaco" : "Registra un farmaco per l'osteoporosi"}</span></summary><div class="dsec-b">
     <div class="addbox">
       <div class="grid2">
-        <label class="fld">Farmaco<select id="thF">${DRUG_ORDER.map(id => `<option value="${id}">${DRUGS[id].nome}</option>`).join("")}</select></label>
+        <label class="fld">Farmaco<select id="thF"><option value="">Scegli il farmaco…</option>${DRUG_ORDER.filter(id => p.sesso !== "uomo" || ![RO_, AB_, I_, RX_, BZ_].includes(id)).map(id => `<option value="${id}">${DRUGS[id].nome}</option>`).join("")}</select></label>
         <label class="fld">Inizio<input type="date" id="thI" value="${todayISO()}"></label>
         <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" id="thN"></label>
       </div>
       <button type="button" class="btn" data-add="terapie">Aggiungi terapia</button>
-    </div>
+    </div></div></details>
     <details class="dsec"${cur ? "" : " open"}><summary><span>${cur ? "Decisione: " + DECISIONI[cur].t.toLowerCase() + " · " + fmtD(p.decisione.data) : "La tua decisione"}</span></summary><div class="dsec-b">
     <div class="decs">${Object.entries(DECISIONI).map(([k, d]) => `<button type="button" class="dec" data-dec="${k}" aria-pressed="${cur === k}"><span class="cb">${TICK}</span><span><b>${d.t}${sug === k ? ` <em>consigliata</em>` : ""}</b><small>${d.s}</small></span></button>`).join("")}</div>
     ${cur === "spec" || (!cur && zoneHigh(F.zona)) ? `<p class="small"><a href="#paz-${p.id}-lettera">Lettera allo specialista</a>: già compilata, aggiungi il quesito e stampala.</p>` : ""}
@@ -1354,7 +1378,8 @@ const PZ_LIVE = {
   stepper: p => { const m = /-([a-z]+)$/.exec(routeNow()); return m && STEP_IX[m[1]] !== undefined ? stepperInner(p, m[1]) : ""; },
   cacorr: caLine,
   sec: p => secReport(p, pzSecondary(p)), amuta: anamMutaHTML, anov: anamNovHTML, lab: p => labReport(p, pzSecondary(p)),
-  bmi: p => bmiTxt(pzFacts(p))
+  bmi: p => bmiTxt(pzFacts(p)),
+  vdtxt: p => p.supVD ? "<b>" + hx(p.supVD) + "</b>" : "Nessuna vitamina D registrata."
 };
 function pzLive(p){
   document.querySelectorAll("[data-live]").forEach(el => { const f = PZ_LIVE[el.dataset.live]; if(f) el.innerHTML = f(p); });
@@ -1366,10 +1391,11 @@ document.addEventListener("input", e => {
   const lv = e.target.closest("[data-lv]"); if(lv){ const { p } = pzRoute(); if(!p) return; p.labVal = p.labVal || {}; p.labVal[lv.dataset.lv] = lv.value.trim(); savePz(p); return; }
   const ce = e.target.closest("[data-ce]"); if(ce){ const { p } = pzRoute(); if(p){ p[ce.dataset.ce] = ce.innerText.trim(); savePz(p); } return; }
   if(e.target.id === "medNome"){ try{ localStorage.setItem("oh-mmg-medico", e.target.value); }catch(err){} return; }
-  const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(["egfr", "caTot", "albVal"].includes(el.dataset.pf)) applyAuto(p); savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
+  const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(el.dataset.pf === "supVDmol") p.supVDdose = ""; if(el.hasAttribute("data-sup")) supCompose(p); if(["egfr", "caTot", "albVal"].includes(el.dataset.pf)) applyAuto(p); savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
   if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); let n = 0; document.querySelectorAll("#pzList .pitem").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); if(!a.hidden) n++; }); const nn = $("#pzNone"); if(nn) nn.hidden = n > 0; }
 });
 document.addEventListener("change", e => {
+  if(e.target.closest('[data-pf="supVDmol"]')){ const { p } = pzRoute(); if(p) render(); return; }
   if(e.target.closest("[data-pf]") || e.target.id === "vdIn"){ const { p } = pzRoute(); if(p) pzLive(p); return; }
   if(e.target.id === "pzImport"){
     const f = e.target.files && e.target.files[0]; if(!f) return;
@@ -1408,6 +1434,8 @@ document.addEventListener("click", e => {
   if(t.closest("#pzDel")){ if(confirm("Eliminare " + pzName(p) + " e tutti i suoi dati?")){ PZ.splice(PZ.indexOf(p), 1); savePz(); history.replaceState(null, "", location.pathname + location.search); stack.length = 0; stack.push(""); render(); } return; }
   const s = t.closest("[data-pset]");
   if(s){ const k = s.dataset.pset, v = s.dataset.val === "true" ? true : s.dataset.val === "false" ? false : s.dataset.val; p[k] = p[k] === v ? null : v; savePz(p); render(); return; }
+  const vp = t.closest("[data-vdp]");
+  if(vp){ const [m, d, n, u] = vp.dataset.vdp.split("|"); Object.assign(p, { supVDmol: m || "", supVDdose: d || "", supVDn: n || "1", supVDu: u || "g" }); supCompose(p); savePz(p); render(); return; }
   const b = t.closest(".ck[data-pbool]");
   if(b){ const k = b.dataset.pbool; p[k] = !p[k]; b.setAttribute("aria-pressed", p[k]); pzaxBadge(b); if(k === "disab"){ p.anamOk = true; p.anamMuta = false; delete p.anamPrev; } savePz(p); pzLive(p); return; }
   const c = t.closest(".ck[data-pci]");
@@ -1495,7 +1523,7 @@ function addRec(p, k, auto){
     if(!zb || !v("dfD")) return no("Scegli la zona indicata dal DeFRA e la data.");
     rec = { data: v("dfD"), zona: zb.dataset.zona, rischio: num(v("dfR")) === null ? "" : String(num(v("dfR"))), note: v("dfN") }; p.defra.push(rec);
     msg = "DeFRA salvato: zona " + ZONE[rec.zona].t.toLowerCase() + (rec.rischio ? ", " + rec.rischio + "%" : ""); }
-  if(k === "terapie"){ if(auto) return false; if(!v("thI")) return no("Indica la data di inizio."); rec = { farmaco: v("thF"), inizio: v("thI"), fine:"", note: v("thN") }; p.terapie.push(rec); msg = dnome(rec.farmaco) + " aggiunto"; }
+  if(k === "terapie"){ if(auto) return false; if(!v("thF")) return no("Scegli il farmaco."); if(!v("thI")) return no("Indica la data di inizio."); rec = { farmaco: v("thF"), inizio: v("thI"), fine:"", note: v("thN") }; p.terapie.push(rec); msg = dnome(rec.farmaco) + " aggiunto"; }
   if(!rec) return false;
   savePz(p);
   if(auto){ toast(msg); return true; }
