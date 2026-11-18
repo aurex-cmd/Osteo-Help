@@ -667,8 +667,8 @@ function vdProposta(p){
     perche.unshift(vdTxt(v) + ": carenza grave, si corregge con una dose di attacco");
   } else if(nm < 50){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift(vdTxt(v) + ": carenza"); }
   else if(nm < 75){ if(osteo || farm || lab.PTH === "alto"){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift(vdTxt(v) + ": sotto 75 nmol/L con " + (farm ? "un farmaco per l'osso" : osteo ? "osteoporosi" : "PTH alto") + (farm ? ": correggila prima di iniziarlo" : "")); }
-    else perche.unshift(vdTxt(v) + ": insufficienza lieve, senza osteoporosi né farmaco per l'osso la Nota 96 non la rimborsa"); }
-  else { if(farm){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift(vdTxt(v) + ": valore buono, si mantiene per tutta la terapia per l'osso"); } else perche.unshift(vdTxt(v) + ": valore buono, non serve integrare"); }
+    else perche.unshift(vdTxt(v) + ": insufficienza lieve" + (p.supVD ? ", con la vitamina D che sta già prendendo: valuta se aumentarla" : ". Se prende già vitamina D, continuala e registrala qui sotto; altrimenti, senza osteoporosi né farmaco per l'osso, la Nota 96 non la rimborsa")); }
+  else { if(farm){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift(vdTxt(v) + ": valore buono, si mantiene per tutta la terapia per l'osso"); } else perche.unshift(vdTxt(v) + ": valore buono" + (p.supVD ? " con la vitamina D che sta già prendendo: continua lo schema attuale" : ". Se prende già vitamina D, il valore buono dipende da quella: continuala e registrala qui sotto. Se non la prende, non serve integrare")); }
   if(farm){ out.ca = "500"; out.caPerche = "con un farmaco per l'osso servono 1.000–1.200 mg di calcio al giorno tra dieta e supplemento"; }
   return out;
 }
