@@ -1037,6 +1037,17 @@ body.locked .bar{visibility:hidden}
 .supbox .btns{justify-content:flex-end} .supbox .btns .btn{min-width:120px;justify-content:center}
 .addbox .small{text-align:left;hyphens:manual}
 .addbox .fxwhen{grid-column:1/-1}
+/* fratture: righe apribili per modificarle, contatore per più fratture uguali */
+.fxlist{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px}
+.fxed{background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.fxed > summary{list-style:none;display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer} .fxed > summary::-webkit-details-marker{display:none}
+.fxed > summary > span{flex:1;min-width:0} .fxed > summary b{display:block;font-size:.95rem} .fxed > summary small{font-size:.8rem;color:var(--muted)}
+.fxed > summary .chev{width:18px;height:18px;color:var(--muted);transition:transform .15s} .fxed[open] > summary .chev{transform:rotate(90deg)}
+.fxed-b{padding:4px 12px 12px;border-top:1px solid var(--line)} .fxed-b .grid2{margin-top:8px}
+.fxed-f{display:flex;justify-content:flex-end;margin-top:6px} .fxed-f .lnk{color:var(--coral);font-size:.82rem}
+.fld select:disabled{opacity:.5}
+.fxqn{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 4px;font-size:.85rem;font-weight:600;color:var(--ink)} .fxqn small{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
+.stp{display:flex;align-items:center;gap:6px} .stp .btn{width:40px;height:40px;padding:0;justify-content:center;font-size:1.2rem} .stp input{width:52px;height:40px;text-align:center;border:1px solid var(--line);border-radius:8px;font-size:16px;background:var(--bg);color:var(--ink)}
 </style>
 </head>
 <body>

@@ -760,6 +760,36 @@ function vPaz(p){
 
 /* ---------- 1 · dati e fratture ---------- */
 const segPz = (key, val, txt, cur) => `<button type="button" data-pset="${key}" data-val="${val}" aria-pressed="${cur === val}">${txt}</button>`;
+/* una frattura già inserita: si apre e si modifica sul posto (sede, data, gravità, in terapia), si salva da sola */
+const FX_OPEN = new Set();
+const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+function fxEditRow(p, f){
+  const i = p.fratture.indexOf(f), [an, me, gi] = (f.data || "").split("-"), vert = f.sede === "vertebra";
+  return `<details class="fxed" data-fxi="${i}"${FX_OPEN.has(i) ? " open" : ""}><summary><span><b>${FX_SEDI[f.sede] || f.sede}${vert ? " · " + (f.grado || "gravità non nota") : ""}</b><small>${fmtD(f.data)}${f.inTerapia ? " · durante terapia da ≥1 anno" : ""}</small></span>${CHEV}</summary>
+    <div class="fxed-b"><div class="grid2">
+      <label class="fld">Sede<select data-fxe="sede">${Object.entries(FX_SEDI).map(([k, v]) => `<option value="${k}"${f.sede === k ? " selected" : ""}>${v}</option>`).join("")}</select></label>
+      <label class="fld">Gravità<select data-fxe="grado"${vert ? "" : " disabled"}><option value="">non nota</option>${Object.entries(FX_GRADO).map(([k, v]) => `<option value="${k}"${f.grado === k ? " selected" : ""}>${v}</option>`).join("")}</select></label>
+      <div class="fld fxwhen"><span>Quando</span><span class="fxw"><input type="number" data-fxe="anno" inputmode="numeric" value="${hx(an || "")}" placeholder="Anno" aria-label="Anno">
+        <select data-fxe="mese" aria-label="Mese"><option value="">mese</option>${MESI.map((m, j) => `<option value="${String(j + 1).padStart(2, "0")}"${me === String(j + 1).padStart(2, "0") ? " selected" : ""}>${m}</option>`).join("")}</select>
+        <input type="number" data-fxe="giorno" inputmode="numeric" value="${gi ? +gi : ""}" placeholder="giorno" aria-label="Giorno"></span></div>
+    </div>
+    ${ckPz("data-fxt", i, f.inTerapia, "Avvenuta nonostante almeno 1 anno di terapia per l'osteoporosi")}
+    <div class="fxed-f"><button type="button" class="lnk" data-del="fratture:${i}">Elimina questa frattura</button></div></div></details>`;
+}
+/* legge i campi della riga aperta e aggiorna la frattura; con una data non valida avvisa e non cambia nulla */
+function fxEditSave(p, row){
+  const f = p.fratture[+row.dataset.fxi]; if(!f) return;
+  const g = k => { const el = row.querySelector(`[data-fxe="${k}"]`); return el ? el.value.trim() : ""; };
+  const an = +g("anno"), me = g("mese"), gi = +g("giorno"), oggi = new Date();
+  if(!an || an < 1930 || an > oggi.getFullYear()){ toast("Indica l'anno della frattura."); return; }
+  if(gi && !me){ toast("Per indicare il giorno scegli anche il mese."); return; }
+  const dd = an + (me ? "-" + me + (gi ? "-" + String(gi).padStart(2, "0") : "") : "");
+  if(gi && (gi > 31 || pDate(dd).getMonth() !== +me - 1)){ toast("Il giorno non esiste in quel mese."); return; }
+  if(pDate(dd) > oggi){ toast("La data è nel futuro."); return; }
+  f.sede = g("sede") || f.sede; f.data = dd; f.grado = f.sede === "vertebra" ? g("grado") : "";
+  /* ridisegna solo questa riga: l'elenco non si riordina mentre la si modifica */
+  savePz(p); row.outerHTML = fxEditRow(p, f); pzLive(p); toast("Frattura aggiornata.");
+}
 const ckPz = (attr, key, on, txt) => `<button type="button" class="ck" ${attr}="${key}" aria-pressed="${!!on}"><span class="cb">${TICK}</span><span>${txt}</span></button>`;
 function datiAnag(p){
   const F = pzFacts(p);
@@ -777,10 +807,10 @@ function datiAnag(p){
 }
 function datiFx(p){
   const F = pzFacts(p);
-  const fxRows = F.fx.map(f => `<li class="rec"><span><b>${FX_SEDI[f.sede] || f.sede}${f.sede === "vertebra" && f.grado ? " · " + f.grado : ""}</b><small>${fmtD(f.data)}${f.inTerapia ? " · durante terapia da ≥1 anno" : ""}</small></span><button type="button" class="x" data-del="fratture:${p.fratture.indexOf(f)}" aria-label="Elimina">✕</button></li>`).join("");
+  const fxRows = F.fx.map(f => fxEditRow(p, f)).join("");
   return `    <p class="lbl">Fratture da fragilità</p>
     <p class="small">Fratture per traumi minimi (cadere dalla propria altezza o meno). Le vertebrali con il criterio di Genant: lieve 20–25%, moderata 25–40%, grave oltre il 40% di riduzione di un'altezza vertebrale.</p>
-    ${fxRows ? `<ul class="list recs">${fxRows}</ul>` : ckPz("data-pbool", "nessunaFx", p.nessunaFx, "Nessuna frattura da fragilità pregressa")}
+    ${fxRows ? `<div class="fxlist">${fxRows}</div><p class="small">Tocca una frattura per cambiarne data, sede o gravità.</p>` : ckPz("data-pbool", "nessunaFx", p.nessunaFx, "Nessuna frattura da fragilità pregressa")}
     ${p.rival && F.fx.length ? `<div class="confirm">${ckPz("data-pbool", "fxRiv", p.fxRiv, `<b>Nessuna nuova frattura</b> dalla valutazione precedente (prima del ${fmtD(p.rival.dal)})`)}</div>` : ""}
     <div class="addbox">
       <div class="grid2">
@@ -790,6 +820,7 @@ function datiFx(p){
           <select id="fxMese" aria-label="Mese (facoltativo)"><option value="">mese</option>${["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"].map((m, i) => `<option value="${String(i + 1).padStart(2, "0")}">${m}</option>`).join("")}</select>
           <input type="number" id="fxGiorno" inputmode="numeric" min="1" max="31" placeholder="giorno" aria-label="Giorno (facoltativo)"></span></div>
       </div>
+      <div class="fxqn"><span>Quante fratture uguali<small>stessa sede, data e gravità</small></span><span class="stp"><button type="button" class="btn sec" data-fxn="-1" aria-label="Una in meno">−</button><input type="number" id="fxN" value="1" min="1" max="12" inputmode="numeric" aria-label="Numero di fratture"><button type="button" class="btn sec" data-fxn="1" aria-label="Una in più">+</button></span></div>
       ${ckPz("data-tmp", "fxInT", false, "Avvenuta nonostante almeno 1 anno di terapia per l'osteoporosi")}
       <button type="button" class="btn" data-add="fratture">Salva</button>
     </div>`;
@@ -1467,6 +1498,7 @@ document.addEventListener("focusin", e => { const c = e.target.closest && e.targ
 document.addEventListener("focusout", e => { const c = e.target.closest && e.target.closest(".ccol"); if(c) chartTipOff(c.closest(".cwrap")); });
 document.addEventListener("pointerdown", e => { const c = e.target.closest && e.target.closest(".ccol"); if(c){ chartTip(c); return; } document.querySelectorAll(".cwrap").forEach(chartTipOff); });
 document.addEventListener("change", e => {
+  const fe = e.target.closest("[data-fxe]"); if(fe){ const { p } = pzRoute(); const row = fe.closest(".fxed"); if(p && row) fxEditSave(p, row); return; }
   if(e.target.closest('[data-pf="supVDmol"]')){ const { p } = pzRoute(); if(p) render(); return; }
   if(e.target.closest("[data-pf]") || e.target.id === "vdIn"){ const { p } = pzRoute(); if(p) pzLive(p); return; }
   if(e.target.id === "pzImport"){
@@ -1478,7 +1510,7 @@ document.addEventListener("change", e => {
     rd.readAsText(f);
   }
 });
-document.addEventListener("toggle", e => { const d = e.target; if(d.matches && d.matches("details.pzax")){ const i = d.dataset.pax; d.open ? pzOpenAx.add(i) : pzOpenAx.delete(i); } }, true);
+document.addEventListener("toggle", e => { const d = e.target; if(d.matches && d.matches("details.fxed")){ const i = +d.dataset.fxi; d.open ? FX_OPEN.add(i) : FX_OPEN.delete(i); return; } if(d.matches && d.matches("details.pzax")){ const i = d.dataset.pax; d.open ? pzOpenAx.add(i) : pzOpenAx.delete(i); } }, true);
 document.addEventListener("click", e => {
   const t = e.target;
   if(t.closest("#pzExport, #pzExport2")){ doExport(); return; }
@@ -1497,6 +1529,8 @@ document.addEventListener("click", e => {
   if(vu){ VD_U = vu.dataset.vdu; try{ localStorage.setItem("oh-mmg-vitd-unit", VD_U); }catch(e){} render(); return; }
   const sg = t.closest(".sgn[data-sgn]");
   if(sg){ const neg = sg.getAttribute("aria-pressed") !== "true"; sg.setAttribute("aria-pressed", neg); sg.textContent = neg ? "−" : "+"; sg.setAttribute("aria-label", "Segno del T-score: " + (neg ? "meno (tocca per più)" : "più (tocca per meno)")); return; }
+  const fxn = t.closest("[data-fxn]"); if(fxn){ const el = document.getElementById("fxN"); if(el) el.value = Math.max(1, Math.min(12, (parseInt(el.value, 10) || 1) + +fxn.dataset.fxn)); return; }
+  const fxt = t.closest(".ck[data-fxt]"); if(fxt){ const { p } = pzRoute(); const f = p && p.fratture[+fxt.dataset.fxt]; if(f){ f.inTerapia = !f.inTerapia; savePz(p); const row = fxt.closest(".fxed"); if(row) row.outerHTML = fxEditRow(p, f); pzLive(p); } return; }
   const tmp = t.closest(".ck[data-tmp]"); if(tmp){ tmp.setAttribute("aria-pressed", tmp.getAttribute("aria-pressed") !== "true"); return; }
   const lc = t.closest(".ck[data-lea]");
   if(lc){ lc.setAttribute("aria-pressed", lc.getAttribute("aria-pressed") !== "true"); leaUpdate(); return; }
@@ -1586,7 +1620,10 @@ function addRec(p, k, auto){
     if(me && pDate(an + "-" + me) > oggi) return no("La data è nel futuro.");
     const it = document.querySelector('.ck[data-tmp="fxInT"]');
     rec = { sede: v("fxSede"), data: dd, grado: v("fxSede") === "vertebra" ? v("fxGrado") : "", inTerapia: !!it && it.getAttribute("aria-pressed") === "true" };
-    p.fratture.push(rec); p.nessunaFx = false; if(p.rival) p.fxRiv = true; msg = "Frattura aggiunta: " + (FX_SEDI[rec.sede] || rec.sede) + " · " + fmtD(dd); }
+    const nn = Math.max(1, Math.min(12, parseInt(v("fxN"), 10) || 1));
+    for(let j = 0; j < nn; j++) p.fratture.push(Object.assign({}, rec));
+    const fn = document.getElementById("fxN"); if(fn) fn.value = "1";
+    p.nessunaFx = false; if(p.rival) p.fxRiv = true; msg = (nn > 1 ? nn + " fratture aggiunte: " : "Frattura aggiunta: ") + (FX_SEDI[rec.sede] || rec.sede) + " · " + fmtD(dd); }
   if(k === "dxa"){ if(!document.getElementById("dxD")) return false;
     const any = [v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null);
     if(auto && !any) return false;
