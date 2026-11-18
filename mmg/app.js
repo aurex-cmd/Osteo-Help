@@ -785,13 +785,13 @@ function datiFx(p){
     <div class="addbox">
       <div class="grid2">
         <label class="fld">Sede<select id="fxSede">${Object.entries(FX_SEDI).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
+        <label class="fld">Gravità (vertebre)<select id="fxGrado"><option value="">non nota</option>${Object.entries(FX_GRADO).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
         <div class="fld fxwhen"><span>Quando · basta l'anno</span><span class="fxw"><input type="number" id="fxAnno" inputmode="numeric" min="1930" max="${new Date().getFullYear()}" placeholder="Anno" aria-label="Anno della frattura">
           <select id="fxMese" aria-label="Mese (facoltativo)"><option value="">mese</option>${["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"].map((m, i) => `<option value="${String(i + 1).padStart(2, "0")}">${m}</option>`).join("")}</select>
           <input type="number" id="fxGiorno" inputmode="numeric" min="1" max="31" placeholder="giorno" aria-label="Giorno (facoltativo)"></span></div>
-        <label class="fld">Gravità (vertebre)<select id="fxGrado"><option value="">non nota</option>${Object.entries(FX_GRADO).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
       </div>
       ${ckPz("data-tmp", "fxInT", false, "Avvenuta nonostante almeno 1 anno di terapia per l'osteoporosi")}
-      <button type="button" class="btn" data-add="fratture">Salva la frattura</button>
+      <button type="button" class="btn" data-add="fratture">Salva</button>
     </div>`;
 }
 function vPazDati(p){
@@ -975,9 +975,9 @@ function vPazTerapia(p){
       </div>
       <p class="small" data-live="vdtxt">${p.supVD ? "<b>" + hx(p.supVD) + "</b>" : "Nessuna vitamina D registrata."}</p>
       <div class="grid2">
-        <label class="fld">Calcio (mg al giorno)<input type="text" inputmode="numeric" autocomplete="off" data-pf="supCaDose" data-sup value="${hx(p.supCaDose || "")}" placeholder="vuoto: basta la dieta"></label>
+        <label class="fld">Calcio (mg al giorno)<input type="text" inputmode="numeric" autocomplete="off" data-pf="supCaDose" data-sup value="${hx(p.supCaDose || "")}" placeholder="facoltativo"></label>
         <label class="fld">Dal<input type="date" data-pf="supDal" value="${hx(p.supDal || "")}"></label>
-        <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" data-pf="supNota" value="${hx(p.supNota || "")}" placeholder="es. nome commerciale"></label>
+        <label class="fld" style="grid-column:1/-1">Nota<input type="text" data-pf="supNota" value="${hx(p.supNota || "")}" placeholder="facoltativa, es. nome commerciale"></label>
       </div>
       <div class="btns"><button type="button" class="btn" data-supsave>Salva</button></div>
       <p class="small">${p.supSaved ? "Salvata il " + fmtD(p.supSaved) + ". " : ""}Dosi e rimborsabilità: <a href="#guida-nota96">Vitamina D e Nota 96</a>.</p>
@@ -985,11 +985,11 @@ function vPazTerapia(p){
     <details class="dsec thadd"${cur === "nessuno" || cur === "spec" ? "" : " open"}><summary><span>${rows ? "Aggiungi un farmaco" : "Registra un farmaco per l'osteoporosi"}</span></summary><div class="dsec-b">
     <div class="addbox">
       <div class="grid2">
-        <label class="fld">Farmaco<select id="thF"><option value="">Scegli il farmaco…</option>${DRUG_ORDER.filter(id => p.sesso !== "uomo" || ![RO_, AB_, I_, RX_, BZ_].includes(id)).map(id => `<option value="${id}">${DRUGS[id].nome}</option>`).join("")}</select></label>
+        <label class="fld">Farmaco<select id="thF"><option value="">Scegli…</option>${DRUG_ORDER.filter(id => p.sesso !== "uomo" || ![RO_, AB_, I_, RX_, BZ_].includes(id)).map(id => `<option value="${id}">${DRUGS[id].nome}</option>`).join("")}</select></label>
         <label class="fld">Inizio<input type="date" id="thI" value="${todayISO()}"></label>
-        <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" id="thN"></label>
+        <label class="fld" style="grid-column:1/-1">Nota<input type="text" id="thN" placeholder="facoltativa"></label>
       </div>
-      <button type="button" class="btn" data-add="terapie">Aggiungi terapia</button>
+      <button type="button" class="btn" data-add="terapie">Salva</button>
     </div></div></details>
     <details class="dsec"${cur ? "" : " open"}><summary><span>${cur ? "Decisione: " + DECISIONI[cur].t.toLowerCase() + " · " + fmtD(p.decisione.data) : "La tua decisione"}</span></summary><div class="dsec-b">
     <div class="decs">${Object.entries(DECISIONI).map(([k, d]) => `<button type="button" class="dec" data-dec="${k}" aria-pressed="${cur === k}"><span class="cb">${TICK}</span><span><b>${d.t}${sug === k ? ` <em>consigliata</em>` : ""}</b><small>${d.s}</small></span></button>`).join("")}</div>
@@ -1080,7 +1080,7 @@ function vPazDxa(p){
         <div class="fld">T-score collo femorale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFn" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFn" aria-label="T-score collo femorale"></div></div>
       </div>
       <p class="small">Il segno meno è già inserito: per −2,7 scrivi solo 2,7. Tocca «−» per cambiarlo in «+» se il T-score è positivo.</p>
-      <button type="button" class="btn" data-add="dxa">Salva la densitometria</button>
+      <button type="button" class="btn" data-add="dxa">Salva</button>
     </div>`;
   const asc = L.slice().reverse().filter(d => pDate(d.data) && [d.tL, d.tFt, d.tFn].some(v => num(v) !== null));
   const chart = asc.length > 1 ? lineChart(asc.map(d => ({ x: pDate(d.data), iso: d.data, tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES,
