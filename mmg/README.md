@@ -293,3 +293,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - **Fratture più veloci da inserire e da correggere**:
   - nel modulo «Quante fratture uguali» con − e + (fino a 12): per 4 vertebrali lievi del 2024 basta un salvataggio, si creano 4 fratture con la stessa sede, data e gravità;
   - ogni frattura inserita si apre toccandola: sede, gravità (solo per le vertebre), anno/mese/giorno e «durante la terapia» si cambiano sul posto e si salvano da soli; la riga resta aperta e l'elenco non si riordina mentre la si modifica; una data non valida viene segnalata e non cambia nulla; «Elimina questa frattura» in fondo alla riga.
+- Proposta di vitamina D senza valore: «Dosa la 25-OH-vitamina D: nella valutazione per osteoporosi serve il valore…» (non più «dosala se ha sintomi…», lettura troppo letterale della Nota 96). Testo della proposta giustificato.

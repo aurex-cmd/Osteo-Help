@@ -641,7 +641,7 @@ function supCompose(p){
    4. 30–50 nmol/L: mantenimento. 50–75 nmol/L: mantenimento solo con osteoporosi, farmaco per l'osso o iperparatiroidismo.
       Sopra 75: mantenimento solo se è in terapia per l'osso.
    5. Mantenimento: 25.000 UI ogni 2 settimane (circa 1.800 UI al giorno); ogni settimana con obesità, glucocorticoidi o antiepilettici.
-   6. Senza valore: se inizia un farmaco per l'osso, prima si dosa; con osteoporosi non candidata al farmaco o allettamento, mantenimento senza dosare.
+   6. Senza valore: si chiede di dosarla (è un paziente valutato per osteoporosi); con osteoporosi non candidata al farmaco o allettamento, intanto il mantenimento.
    7. Calcio: 500 mg al giorno se fa o inizia un farmaco per l'osso (la dieta di solito non arriva a 1.000–1.200 mg), salvo calcolosi, calcio o calciuria alti. */
 function vdProposta(p){
   const F = pzFacts(p), ft = F.feats, lab = p.lab || {}, eg = num(p.egfr), v = num(p.vitd), nm = v === null ? null : vdNmol(v);
@@ -657,8 +657,8 @@ function vdProposta(p){
   if(!cfd && alto) perche.push([ft.has("obesita") || (F.bmi && F.bmi >= 30) ? "obesità" : "", ft.has("glucocorticoidi") ? "glucocorticoidi" : "", ft.has("anticonvulsivanti") ? "antiepilettici" : ""].filter(Boolean).join(", ") + ": mantenimento più alto");
   if(nm === null){
     if(farm){ out.dosa = "Prima di iniziare il farmaco per l'osso dosa la 25-OH-vitamina D: sotto 75 nmol/L (30 ng/mL) va corretta prima e la Nota 96 la rimborsa."; return out; }
-    if((osteo && !farm) || ft.has("immobilizzazione")){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift((osteo ? "osteoporosi non candidata a un farmaco per l'osso" : "allettamento") + ": rimborsabile senza dosarla (Nota 96)"); }
-    else out.dosa = "Senza il valore della 25-OH-vitamina D non c'è una proposta: dosala se ha sintomi, farmaci che interferiscono, malassorbimento o una malattia dell'osso da trattare.";
+    if((osteo && !farm) || ft.has("immobilizzazione")){ out.schemi.push(Object.assign({ fase:"Mantenimento" }, mant)); perche.unshift((osteo ? "osteoporosi non candidata a un farmaco per l'osso" : "allettamento") + ": si può iniziare il mantenimento anche senza il valore (Nota 96), ma dosala per decidere la dose giusta"); }
+    else out.dosa = "Dosa la 25-OH-vitamina D: nella valutazione per osteoporosi serve il valore per decidere se integrarla e con quale schema. Inseriscilo negli esami del sangue e qui comparirà la proposta.";
     return out;
   }
   if(nm < 30){
