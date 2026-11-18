@@ -1020,6 +1020,12 @@ body.locked .bar{visibility:hidden}
 .dft-v{font-size:2rem;font-weight:800;color:var(--ink);line-height:1} .dft-v small{font-size:.9rem;font-weight:700}
 .dft-t{display:flex;flex-direction:column;align-items:flex-start;gap:3px} .dft-t small{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .dft-t em{font-style:normal;font-size:.8rem;font-weight:700} .dft-t em.dn{color:var(--coral)} .dft-t em.up{color:var(--teal)} .dft-t em.st{color:var(--muted)}
+/* passi nella scheda (telefono): fila di pallini numerati, come il percorso sotto il nome */
+.fsroad{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 4px;position:relative}
+.fsroad::before{content:"";position:absolute;left:34px;right:34px;top:50%;margin-top:4px;height:2px;background:var(--line);z-index:0}
+.fsr{position:relative;z-index:1;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);font:inherit;font-size:.82rem;font-weight:800;display:grid;place-items:center;cursor:pointer;padding:0}
+.fsr.ok{background:var(--teal);border-color:var(--teal);color:#fff} .fsr.warn{background:#F8EEDC;border-color:var(--amber);color:var(--amber)}
+.fsr.on{background:var(--pri);border-color:var(--pri);color:#fff;box-shadow:0 0 0 4px rgba(80,64,160,.18)}
 </style>
 </head>
 <body>

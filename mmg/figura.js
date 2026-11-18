@@ -245,7 +245,10 @@ function figSecSt(p, k, F, S, spots){
 function figSecInner(p, F, S, spots, wide){
   const k = FIG.open, sh = FIG_SHEETS[k], i = FIG_SEQ.indexOf(k === "sec" ? "anam" : k);
   /* su PC le sezioni sono già nella strada dei 7 passi, in mezzo: le schede servono solo sul telefono */
-  const tabs = i < 0 || wide ? "" : `<div class="fstabs" role="tablist">${FIG_SEQ.map((x, j) => `<button type="button" role="tab" class="fstab ${figSecSt(p, x, F, S, spots)}" aria-selected="${j === i}" data-fsheet="${x}"><i></i>${FIG_TAB[x]}</button>`).join("")}</div>`;
+  /* sul telefono: i sette passi come la fila di pallini del percorso, uno per passo, quello aperto pieno */
+  const SHK = { dati:"chi", fratture:"fx", anamnesi:"anam", esami:"esami", dxa:"dxa", defra:"defra", terapia:"decidi" }, all = allSteps(p);
+  const tabs = (i < 0 && k !== "decidi") || wide ? "" : `<div class="fsroad" role="tablist" aria-label="Passi">${all.map((x, j) => { const sk = SHK[x.k], on = sk === (k === "sec" ? "anam" : k);
+    return `<button type="button" role="tab" class="fsr ${x.st}${on ? " on" : ""}" aria-selected="${on}" data-fsheet="${sk}" aria-label="Passo ${j + 1}: ${STEPS[j].t}">${x.st === "ok" && !on ? "✓" : x.st === "warn" && !on ? "!" : j + 1}</button>`; }).join("")}</div>`;
   const prev = i > 0 ? `<button type="button" class="btn sec" data-fsheet="${FIG_SEQ[i - 1]}">‹ Indietro</button>` : k === "decidi" ? `<button type="button" class="btn sec" data-fsheet="defra">‹ DeFRA</button>` : `<span></span>`;
   const next = k === "decidi" ? "" : i < 0 ? `<button type="button" class="btn" data-fclose>Fatto</button>`
     : i < FIG_SEQ.length - 1 ? `<button type="button" class="btn" data-fsheet="${FIG_SEQ[i + 1]}">Avanti<small>${FIG_TAB[FIG_SEQ[i + 1]]}</small> ›</button>`
