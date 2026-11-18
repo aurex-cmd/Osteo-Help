@@ -978,7 +978,8 @@ function vPazTerapia(p){
         <label class="fld">Dal<input type="date" data-pf="supDal" value="${hx(p.supDal || "")}"></label>
         <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" data-pf="supNota" value="${hx(p.supNota || "")}" placeholder="es. nome commerciale"></label>
       </div>
-      <p class="small">Si salva da solo. Dosi e rimborsabilità: <a href="#guida-nota96">Vitamina D e Nota 96</a>.</p>
+      <div class="btns"><button type="button" class="btn" data-supsave>Salva vitamina D e calcio</button></div>
+      <p class="small">${p.supSaved ? "Salvata il " + fmtD(p.supSaved) + ". " : ""}Dosi e rimborsabilità: <a href="#guida-nota96">Vitamina D e Nota 96</a>.</p>
     </div>
     <details class="dsec thadd"${cur === "nessuno" || cur === "spec" ? "" : " open"}><summary><span>${rows ? "Aggiungi un farmaco" : "Registra un farmaco per l'osteoporosi"}</span></summary><div class="dsec-b">
     <div class="addbox">
@@ -1481,6 +1482,8 @@ document.addEventListener("click", e => {
   if(t.closest("#pzDel")){ if(confirm("Eliminare " + pzName(p) + " e tutti i suoi dati?")){ PZ.splice(PZ.indexOf(p), 1); savePz(); history.replaceState(null, "", location.pathname + location.search); stack.length = 0; stack.push(""); render(); } return; }
   const s = t.closest("[data-pset]");
   if(s){ const k = s.dataset.pset, v = s.dataset.val === "true" ? true : s.dataset.val === "false" ? false : s.dataset.val; p[k] = p[k] === v ? null : v; savePz(p); render(); return; }
+  if(t.closest("[data-supsave]")){ supCompose(p); if(!supList(p).length){ toast("Inserisci la vitamina D o il calcio."); return; }
+    if(!p.supDal) p.supDal = todayISO(); p.supSaved = todayISO(); savePz(p); render(); toast("Salvato: " + supTxt(p)); return; }
   if(t.closest("[data-vdprop]")){ const r = vdProposta(p), x = r.schemi[0]; if(!x) return;
     Object.assign(p, { supVDmol: x.mol, supVDdose: x.dose, supVDn: x.n, supVDu: x.u }); if(r.ca) p.supCaDose = r.ca;
     if(r.schemi[1] || x.per) p.supNota = [x.per, r.schemi[1] ? "poi " + vdSchemaTxt(r.schemi[1]).replace(/^./, c => c.toLowerCase()) : ""].filter(Boolean).join(", ");

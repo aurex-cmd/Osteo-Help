@@ -279,3 +279,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   «Usa la proposta» riempie i campi (la prima fase), mette in nota la durata e il mantenimento successivo, e la data di inizio se manca.
 - Proposta di vitamina D: mantenimento 25.000 UI ogni 2 settimane (prima al mese); con obesità, glucocorticoidi o antiepilettici 25.000 UI a settimana.
 - Proposta di vitamina D con valore buono (≥50 nmol/L senza farmaco per l'osso): se la vitamina D è registrata, «continua lo schema attuale»; se non lo è, avvisa che il valore può dipendere da una vitamina D già in corso («continuala e registrala»), e solo altrimenti «non serve integrare».
+- Vitamina D e calcio: pulsante «Salva vitamina D e calcio» (conferma con il testo salvato e «Salvata il …»; mette la data di inizio se manca). I campi restano comunque registrati mentre si scrive, così non si perde nulla uscendo senza premere.
