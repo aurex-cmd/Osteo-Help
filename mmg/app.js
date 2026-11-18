@@ -919,12 +919,13 @@ function vPazDefra(p){
   const hist = F.defra.map(d => `<li class="rec"><span><b>${zchip(d.zona)}</b><small>${fmtD(d.data)}${num(d.rischio) !== null ? " · rischio a 10 anni " + fmtN(num(d.rischio), 0) + "%" : ""}${d.note ? " · " + hx(d.note) : ""}</small></span><button type="button" class="x" data-del="defra:${p.defra.indexOf(d)}" aria-label="Elimina">✕</button></li>`).join("");
   const form = `<div class="addbox">
       <div class="zpick" role="group" aria-label="Zona del DeFRA">${ZONE_ORDER.map(z => `<button type="button" class="zbtn z-${z}" data-zona="${z}" aria-pressed="false"><i></i><span><b>${ZONE[z].t}</b><small>${ZONE[z].r}</small></span></button>`).join("")}</div>
-      <div class="grid2">
+      <div class="dfrow">
+        <label class="fld">Rischio a 10 anni<span class="pct"><input type="text" inputmode="decimal" autocomplete="off" id="dfR" placeholder="facoltativo" aria-describedby="dfRh"><i>%</i></span></label>
         <label class="fld">Data<input type="date" id="dfD" value="${todayISO()}"></label>
-        <label class="fld">Rischio a 10 anni, % (facoltativo)<input type="text" inputmode="decimal" autocomplete="off" id="dfR" placeholder="fratture maggiori"></label>
-        <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" id="dfN"></label>
       </div>
-      <button type="button" class="btn" data-add="defra">Salva la zona del DeFRA</button>
+      <p class="small" id="dfRh">Il rischio di fratture maggiori che indica il DeFRA.</p>
+      <label class="fld dfn">Nota<input type="text" id="dfN" placeholder="facoltativa"></label>
+      <button type="button" class="btn" data-add="defra">Salva</button>
     </div>`;
   const serve = `<div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>`;
   const zone = `<ul class="list zleg">${ZONE_ORDER.map(z => `<li>${zchip(z)}<span><b>${ZONE[z].r[0].toUpperCase() + ZONE[z].r.slice(1)} → ${ZONE[z].chi}</b><small>${ZONE[z].azione}</small></span></li>`).join("")}</ul>

@@ -854,7 +854,6 @@ body.locked .bar{visibility:hidden}
   main{max-width:880px;padding-left:28px;padding-right:28px}
   .bar-in{max-width:880px}
   #pzGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-items:start}
-  .zpick{grid-template-columns:repeat(4,minmax(0,1fr))}
   .mhome{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:44px;align-items:start}
   .mh-l,.mh-r{display:flex;flex-direction:column;gap:14px}
   .mh-r{padding-top:74px}
@@ -1026,6 +1025,13 @@ body.locked .bar{visibility:hidden}
 .fsr{position:relative;z-index:1;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);font:inherit;font-size:.82rem;font-weight:800;display:grid;place-items:center;cursor:pointer;padding:0}
 .fsr.ok{background:var(--teal);border-color:var(--teal);color:#fff} .fsr.warn{background:#F8EEDC;border-color:var(--amber);color:var(--amber)}
 .fsr.on{background:var(--pri);border-color:var(--pri);color:#fff;box-shadow:0 0 0 4px rgba(80,64,160,.18)}
+/* DeFRA: zone 2×2 sempre (nel pannello del computer quattro in fila venivano tagliate), campi allineati */
+.zbtn{border:1.5px solid var(--line);min-height:58px}
+.zbtn[aria-pressed="true"]{border-width:2px;box-shadow:0 0 0 3px color-mix(in srgb,var(--zc) 22%,transparent)}
+.dfrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:end;margin-top:12px}
+.dfrow .dfn{grid-column:1/-1}
+.pct{position:relative;display:block} .pct input{width:100%;padding-right:34px} .pct i{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-style:normal;font-weight:700;color:var(--muted);pointer-events:none}
+#dfRh{margin:6px 0 10px} .addbox > .dfn{margin-bottom:12px}
 </style>
 </head>
 <body>
