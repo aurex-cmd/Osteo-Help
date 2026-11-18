@@ -430,7 +430,7 @@ function vDecidi(p, inPanel){
     ${pend.length ? sec("Da completare per la Nota 79", pend.length, `<ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>`, false) : ""}
     ${best ? sec("Dettagli del farmaco consigliato", "", drug(best, true), false) : ""}
     ${others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : ""}
-    ${sec("Prima della prima dose", nDo ? nDo + " da fare" : "tutto ok", `<div class="todo fchk">${chk.join("")}</div>`, false)}
+    ${nDo ? sec("Prima della prima dose", nDo + " da fare", `<div class="todo fchk">${chk.join("")}</div>`, false) : ""}
     <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della <a href="#guida-nota79">Nota 79</a> e le schede tecniche.</p>` };
 }
 
