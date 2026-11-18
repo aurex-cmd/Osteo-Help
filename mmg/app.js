@@ -978,7 +978,7 @@ function vPazTerapia(p){
         <label class="fld">Dal<input type="date" data-pf="supDal" value="${hx(p.supDal || "")}"></label>
         <label class="fld" style="grid-column:1/-1">Nota (facoltativa)<input type="text" data-pf="supNota" value="${hx(p.supNota || "")}" placeholder="es. nome commerciale"></label>
       </div>
-      <div class="btns"><button type="button" class="btn" data-supsave>Salva vitamina D e calcio</button></div>
+      <div class="btns"><button type="button" class="btn" data-supsave>Salva</button></div>
       <p class="small">${p.supSaved ? "Salvata il " + fmtD(p.supSaved) + ". " : ""}Dosi e rimborsabilità: <a href="#guida-nota96">Vitamina D e Nota 96</a>.</p>
     </div>
     <details class="dsec thadd"${cur === "nessuno" || cur === "spec" ? "" : " open"}><summary><span>${rows ? "Aggiungi un farmaco" : "Registra un farmaco per l'osteoporosi"}</span></summary><div class="dsec-b">
