@@ -1066,6 +1066,14 @@ body.locked .bar{visibility:hidden}
 .fxw2{grid-template-columns:1fr 1fr}
 .fxgo{display:flex;justify-content:flex-end;margin-top:12px} .fxgo[hidden],.fxstep2[hidden]{display:none}
 .fxstep2 > .btn[data-add]{display:flex;margin:12px 0 0 auto;min-width:120px;justify-content:center}
+/* spunta «in terapia» per ogni frattura */
+.fxh,.fxr{grid-template-columns:26px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 46px} .fxh.nog,.fxr.nog{grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 46px}
+.fxtc{text-align:center;font-size:.7rem;line-height:1.1}
+.fxt{width:42px;height:42px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);display:grid;place-items:center;cursor:pointer;padding:0;color:transparent}
+.fxt svg{width:20px;height:20px} .fxt[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.fxnote b{color:var(--ink)}
+.fxh,.fxr{gap:5px;grid-template-columns:20px minmax(0,1.35fr) minmax(0,1fr) minmax(0,.9fr) 42px} .fxh.nog,.fxr.nog{grid-template-columns:20px minmax(0,1fr) minmax(0,1fr) 42px}
+.fxr select{padding:6px 2px 6px 7px} .fxr input{padding:6px 7px} .fxt{width:42px}
 </style>
 </head>
 <body>
