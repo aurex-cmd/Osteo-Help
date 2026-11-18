@@ -277,3 +277,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   6. senza valore: se inizia un farmaco → «dosala prima»; osteoporosi non candidata o allettamento → mantenimento senza dosare;
   7. calcio 500 mg al giorno con un farmaco per l'osso.
   «Usa la proposta» riempie i campi (la prima fase), mette in nota la durata e il mantenimento successivo, e la data di inizio se manca.
+- Proposta di vitamina D: mantenimento 25.000 UI ogni 2 settimane (prima al mese); con obesità, glucocorticoidi o antiepilettici 25.000 UI a settimana.

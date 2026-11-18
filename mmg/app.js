@@ -640,7 +640,7 @@ function supCompose(p){
    3. 25-OH-D sotto 30 nmol/L: attacco 300.000 UI in tutto (50.000 UI a settimana per 6 settimane), poi mantenimento.
    4. 30–50 nmol/L: mantenimento. 50–75 nmol/L: mantenimento solo con osteoporosi, farmaco per l'osso o iperparatiroidismo.
       Sopra 75: mantenimento solo se è in terapia per l'osso.
-   5. Mantenimento: 25.000 UI al mese (circa 800 UI al giorno); ogni 2 settimane con obesità, glucocorticoidi o antiepilettici.
+   5. Mantenimento: 25.000 UI ogni 2 settimane (circa 1.800 UI al giorno); ogni settimana con obesità, glucocorticoidi o antiepilettici.
    6. Senza valore: se inizia un farmaco per l'osso, prima si dosa; con osteoporosi non candidata al farmaco o allettamento, mantenimento senza dosare.
    7. Calcio: 500 mg al giorno se fa o inizia un farmaco per l'osso (la dieta di solito non arriva a 1.000–1.200 mg), salvo calcolosi, calcio o calciuria alti. */
 function vdProposta(p){
@@ -652,7 +652,7 @@ function vdProposta(p){
   if(stop.length){ out.stop = "Con " + stop.join(", ") + " lo schema della Nota 96 non si applica: dose e molecola le decide lo specialista" + (eg !== null && eg < 30 ? " (nell'insufficienza renale avanzata può servire il calcitriolo)" : "") + "."; return out; }
   const malass = ["mici", "celiachia_nota", "bariatrica", "gastrectomia"].filter(x => ft.has(x)), epa = ft.has("epatopatia");
   const cfd = malass.length > 0 || epa, alto = ft.has("obesita") || (F.bmi && F.bmi >= 30) || ft.has("glucocorticoidi") || ft.has("anticonvulsivanti");
-  const mant = cfd ? { mol:"calcifediolo", dose:"0,266", n:"1", u:"m" } : { mol:"colecalciferolo", dose:"25.000", n: alto ? "2" : "1", u: alto ? "s" : "m" };
+  const mant = cfd ? { mol:"calcifediolo", dose:"0,266", n:"1", u:"m" } : { mol:"colecalciferolo", dose:"25.000", n: alto ? "1" : "2", u:"s" };
   if(cfd) perche.push((epa ? "epatopatia" : "malassorbimento") + ": calcifediolo, che non ha bisogno del fegato per attivarsi ed è assorbito meglio");
   if(!cfd && alto) perche.push([ft.has("obesita") || (F.bmi && F.bmi >= 30) ? "obesità" : "", ft.has("glucocorticoidi") ? "glucocorticoidi" : "", ft.has("anticonvulsivanti") ? "antiepilettici" : ""].filter(Boolean).join(", ") + ": mantenimento più alto");
   if(nm === null){
