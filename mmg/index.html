@@ -871,6 +871,14 @@ body.locked .bar{visibility:hidden}
 .mhome .entry.big.arc{background:var(--home-n)}
 .mhome .entry.big.arc .chev{background:rgba(255,255,255,.6)}
 .mh-br{display:none} @media (max-width:600px){.mh-br{display:inline}}
+/* PC: passando col mouse sui passi il pallino si ingrandisce e a destra compare l'anteprima della sezione */
+.froad .pn{transition:transform .18s ease,box-shadow .18s ease}
+.froad li > *:hover .pn{transform:scale(1.3)}
+.froad li > *:hover .frd-t b{color:var(--ink)}
+.fcol-r.prev > :not(.fprev){display:none}
+.fprev{animation:fprevIn .24s cubic-bezier(.2,.8,.2,1)}
+@keyframes fprevIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.froad .pn{transition:none}.fprev{animation:none}}
 .bkline{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0;font-size:.82rem;color:var(--muted)}
 .bkline i{width:7px;height:7px;border-radius:50%;background:var(--amber);flex:0 0 auto}
 .bkline .lnk{font-size:.82rem;color:var(--pri);text-decoration:none;font-weight:700} .bkline .lnk:hover{text-decoration:underline}

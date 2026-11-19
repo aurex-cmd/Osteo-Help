@@ -434,6 +434,32 @@ function vDecidi(p, inPanel){
     <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della <a href="#guida-nota79">Nota 79</a> e le schede tecniche.</p>` };
 }
 
+/* su PC, col mouse sulla strada dei passi: anteprima della sezione nel pannello a destra; col clic resta aperta */
+let fPrevIn = 0, fPrevOut = 0;
+function figPrevHide(){ document.querySelectorAll(".fprev").forEach(x => x.remove()); document.querySelectorAll(".fcol-r.prev").forEach(x => x.classList.remove("prev")); }
+function figPrevShow(k){
+  const col = document.querySelector(".fgrid .fcol-r"), cur = document.querySelector(".fprev");
+  if(!col || (cur && cur.dataset.k === k)) return;
+  figPrevHide();
+  if(k === FIG.open || !FIG_SHEETS[k]) return;
+  const { p } = pzRoute(); if(!p) return;
+  const F = pzFacts(p), S = pzSecondary(p), spots = figSpots(p, F, S), o = FIG.open;
+  let h; FIG.open = k; try { h = figSecInner(p, F, S, spots, true); } finally { FIG.open = o; }
+  col.classList.add("prev");
+  col.insertAdjacentHTML("beforeend", `<div class="fpanel fprev" data-k="${k}" aria-hidden="true" inert>${h}</div>`);
+}
+document.addEventListener("pointerover", e => {
+  if(e.pointerType !== "mouse" || !figWide() || !e.target.closest) return;
+  const it = e.target.closest(".froad li > *"); if(!it) return;
+  clearTimeout(fPrevOut); clearTimeout(fPrevIn);
+  const k = it.dataset.fsheet || (it.matches('a[href$="-decidi"]') ? "decidi" : null); if(!k) return;
+  fPrevIn = setTimeout(() => figPrevShow(k), 80);
+});
+document.addEventListener("pointerout", e => {
+  const r = e.target.closest && e.target.closest(".froad"); if(!r || r.contains(e.relatedTarget)) return;
+  clearTimeout(fPrevIn); fPrevOut = setTimeout(figPrevHide, 140);
+});
+
 /* torna alla figura senza pannelli aperti (anche se si è già sulla figura) */
 function figBack(p){ const r = "paz-" + p.id + "-figura"; FIG.open = null; if(routeNow() === r) render(); else go(r); }
 /* ---------- interazioni ---------- */
@@ -442,7 +468,7 @@ document.addEventListener("click", e => {
   if(t.closest("[data-ciopen]")){ FIG.ciOpen = !FIG.ciOpen; if(FIG.ciOpen) FIG.secOpen = false; FIG.anim = false; render(); return; }
   if(t.closest("[data-secopen]")){ FIG.secOpen = !FIG.secOpen; if(FIG.secOpen) FIG.ciOpen = false; FIG.anim = false; render(); return; }
   const op = t.closest("[data-fsheet]");
-  if(op){ e.preventDefault(); if(FIG.open){ const { p } = pzRoute(); commitPending(p); } FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
+  if(op){ e.preventDefault(); clearTimeout(fPrevIn); figPrevHide(); if(FIG.open){ const { p } = pzRoute(); commitPending(p); } FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
     const pn = document.querySelector(".fpanel"); if(pn && pn.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + pn.getBoundingClientRect().top - 70 }); return; }
   if(t.closest("[data-fclose]")){ figClose(); return; }
   if(t.closest("[data-rival]")){ const { p } = pzRoute(); if(!p) return; pzRivaluta(p); toast("Rivalutazione iniziata: la valutazione precedente è salvata nei Controlli nel tempo."); FIG.anim = true; FIG.open = "chi"; render(); return; }
