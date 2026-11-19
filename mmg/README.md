@@ -313,3 +313,8 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   - «Aggiorna il DeFRA» è nel riquadro tratteggiato col +, come «Aggiungi una nuova densitometria»;
   - «Elimina questo DeFRA» è in rosso a destra, come gli altri «Elimina»;
   - «Note» in «Chi è» è un campo come gli altri, con il segnaposto «facoltative».
+- Anamnesi ed esami più leggeri:
+  - introduzioni più corte;
+  - riquadro «Incolla dal gestionale» più basso (3 righe) e senza la nota lunga, solo «controllale prima di aggiungerle»;
+  - sotto ogni gruppo dell'anamnesi compaiono le voci spuntate (es. «Diabete tipo 2»), altrimenti solo quante sono («17 voci»), su una riga; si aggiorna mentre spunti;
+  - negli esami la frase sul calcio corretto compare solo quando serve, e «Nessuna forma nota» non compare finché non c'è un esame fuori norma.

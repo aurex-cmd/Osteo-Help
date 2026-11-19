@@ -871,7 +871,9 @@ function gestResHTML(p){
 const pzOpenAx = new Set();
 /* un gruppo dell'anamnesi: chiuso, si apre toccandolo; il numero dice quante voci sono spuntate */
 const pzGroup = (key, label, sub, nsel, body) => `<details class="acc pzax" data-pax="${key}"${pzOpenAx.has(key) ? " open" : ""}><summary><span>${label}<small>${sub}</small></span><span class="n"${nsel ? "" : " hidden"}>${nsel}</span>${CHEV}</summary><div class="accbody">${body}</div></details>`;
-const pzaxBadge = el => { const ax = el.closest("details.pzax"); if(!ax) return; const n = ax.querySelectorAll('.ck[aria-pressed="true"]').length, badge = ax.querySelector(".n"); badge.textContent = n; badge.hidden = !n; };
+const pzaxBadge = el => { const ax = el.closest("details.pzax"); if(!ax) return; const on = [...ax.querySelectorAll('.ck[aria-pressed="true"]')], n = on.length, badge = ax.querySelector(".n"); badge.textContent = n; badge.hidden = !n;
+  /* nei gruppi di voci il sottotitolo mostra quelle spuntate */
+  if(/^(\d+|ci)$/.test(ax.dataset.pax)){ const sm = ax.querySelector("summary small"); if(sm) sm.innerHTML = axSub(on.map(b => b.lastElementChild.textContent), ax.querySelectorAll(".ck").length); } };
 function secReport(p, S){
   const item = (x, isSosp) => `<a class="entry ${x.hasForte ? "teal" : ""}" target="_blank" rel="noopener" href="${OH}#causa-${x.f.id}"><div><b>${x.f.nome}</b><small>${FORMA_CAT[x.f.cat] || x.f.cat} · <span class="badge ${x.hasForte ? "forte" : "lieve"}">${badgeOf(x, isSosp)}</span> · ${x.fired.filter(t => t[2] !== "supp").map(t => FEATLABEL[t[0]]).join(", ")}</small></div>${CHEV}</a>`;
   if(!(p.feats || []).length) return `<p class="hint">Spunta farmaci, malattie, segni e abitudini: le forme secondarie compaiono qui.</p>`;
@@ -882,21 +884,22 @@ function secReport(p, S){
 /* «Anamnesi muta» come una voce: in cima, selezionabile; toglie le altre e, se la si deseleziona, le rimette */
 const anamMutaHTML = p => ckPz("data-amuta", "1", p.anamOk && p.anamMuta, "<b>Anamnesi muta</b> · nessuna malattia, farmaco o controindicazione rilevante per l'osso");
 const anamNovHTML = p => p.rival && !p.anamOk ? `<div class="amuta"><button type="button" class="btn sec" data-anov>Nessuna novità dalla valutazione precedente</button><small>Oppure aggiorna le voci qui sopra.</small></div>` : "";
+/* sottotitolo di un gruppo dell'anamnesi: le voci spuntate, o solo quante sono */
+const axSub = (sel, n) => sel.length ? hx(sel.map(t => t.replace(/ \(.*$/, "")).join(", ")) : n + " voci";
 function vPazAnamnesi(p){
   const own = new Set(p.feats || []), vis = id => !FEATSEX[id] || !p.sesso || FEATSEX[id] === p.sesso;
   const axes = AXES.map((a, i) => {
     const all = axisFeats(a).filter(f => vis(f[0])); if(!all.length) return "";
     const nsel = all.filter(f => own.has(f[0])).length;
     const body = a.groups.map(g => { const fs = g.feats.filter(f => vis(f[0])); return fs.length ? `<p class="lbl" style="margin:10px 0 0">${g.sub}</p><div>` + fs.map(f => ckPz("data-pfeat", f[0], own.has(f[0]), f[1])).join("") + `</div>` : ""; }).join("");
-    return pzGroup(String(i), a.label, `${all.slice(0, 4).map(f => f[1].replace(/ \(.*$/, "")).join(", ")}${all.length > 4 ? "…" : ""} · ${all.length} voci`, nsel, body);
+    return pzGroup(String(i), a.label, axSub(all.filter(f => own.has(f[0])).map(f => f[1]), all.length), nsel, body);
   }).join("");
-  return { bar: pzName(p), html: head("Anamnesi e farmaci", "Spunta malattie, farmaci e abitudini: le forme secondarie compaiono in fondo alla pagina. Se non c'è nulla, usa «Anamnesi muta».") + `
+  return { bar: pzName(p), html: head("Anamnesi e farmaci", "Incolla dal gestionale o spunta malattie, farmaci e abitudini. Se non c'è nulla, usa «Anamnesi muta».") + `
     ${p.sesso ? "" : `<p class="hint">Indica il sesso nei dati del paziente per nascondere le voci non pertinenti.</p>`}
-    <div class="gestbox"><p class="gestbox-t">Incolla dal gestionale<small>Copia il riassunto di patologie e farmaci: l'app propone le voci da spuntare</small></p>
-      <textarea class="area" data-pf="testoGest" id="gestIn" rows="6" placeholder="Incolla qui l'elenco dei problemi e la terapia in corso (anche con nomi commerciali e dosi)">${hx(p.testoGest)}</textarea>
+    <div class="gestbox"><p class="gestbox-t">Incolla dal gestionale<small>L'app propone le voci da spuntare: controllale prima di aggiungerle.</small></p>
+      <textarea class="area" data-pf="testoGest" id="gestIn" rows="3" placeholder="Incolla qui l'elenco dei problemi e la terapia in corso (anche con nomi commerciali e dosi)">${hx(p.testoGest)}</textarea>
       <div class="btns"><button type="button" class="btn" id="gestGo">Riconosci</button></div>
       <div id="gestRes">${gestResHTML(p)}</div>
-      <p class="small">Riconosce principi attivi e nomi commerciali, sinonimi, abbreviazioni (BPCO, AR, DM2, TVP…) e parole scritte in modo un po' diverso. Il testo resta in questo browser. Controlla sempre le proposte prima di aggiungerle.</p>
     </div>
     <div data-live="amuta">${anamMutaHTML(p)}</div>
     <div>${axes}
@@ -904,7 +907,7 @@ function vPazAnamnesi(p){
       ((p.feats || []).includes("glucocorticoidi") ? [["3", "Glucocorticoidi: prednisone ≥5 mg/die (o equivalenti) per più di 3 mesi"], ["12", "Glucocorticoidi: prednisone ≥5 mg/die (o equivalenti) da più di 12 mesi"], ["0", "Glucocorticoidi per meno di 3 mesi o a dose minore"]].map(([v, t]) => ckPz("data-gcdur", v, gcDurOf(p) === v, t)).join("") : "")
       + ckPz("data-pbool", "disab", p.disab, "Grave disabilità motoria"))}
     ${(() => { const ci = Object.entries(CI_LBL).filter(([k]) => k !== "denti");
-      return pzGroup("ci", "Controindicazioni da conoscere prima della terapia", ci.slice(0, 3).map(([, t]) => t.replace(/ \(.*$/, "")).join(", ") + "… · " + ci.length + " voci", ci.filter(([k]) => (p.ci || {})[k]).length,
+      return pzGroup("ci", "Controindicazioni da conoscere prima della terapia", axSub(ci.filter(([k]) => (p.ci || {})[k]).map(([, t]) => t), ci.length), ci.filter(([k]) => (p.ci || {})[k]).length,
         ci.map(([k, t]) => ckPz("data-pci", k, (p.ci || {})[k], t)).join("")); })()}
     ${pzGroup("dent", "Odontoiatria", "Visita per il nulla osta prima di bisfosfonati, denosumab o romosozumab", p.dentista || (p.ci || {}).denti ? 1 : 0,
       [["fare", "Visita odontoiatrica da fare per il nulla osta"], ["ok", "Visita odontoiatrica fatta, bocca in ordine"]].map(([v, t]) => ckPz("data-dent", v, (p.dentista ? "ok" : (p.ci || {}).denti ? "fare" : "") === v, t)).join(""))}</div>
@@ -924,7 +927,7 @@ function labReport(p, S){
   if(vdLow(vd) || lab.D === "basso") out.push(`<div class="alert info"><b>Vitamina D bassa${vd !== null ? " · " + vdTxt(vd) : ""}</b>Sotto 75 nmol/L (30 ng/mL): carenza sotto 50, insufficienza tra 50 e 75 (${SIOMMMS_VD}); 75 nmol/L è il valore da raggiungere nel paziente con osteoporosi o a rischio di ipovitaminosi D (Nota 96). Correggi la carenza prima di iniziare la terapia: la carenza ne riduce l'efficacia e aumenta il rischio di ipocalcemia.</div>`);
   if(A.sel.length === 1 && A.sel[0][0] === "Alb" && A.sel[0][1] === "d") out.push(`<div class="alert info"><b>Albumina bassa isolata</b>Nell'anziano è frequente e poco specifica: malnutrizione proteica, infiammazione cronica, malattie epatiche o renali. Da sola non basta a sospettare un malassorbimento: lo fanno pensare calcio, fosforo o vitamina D bassi, PTH alto, calciuria bassa, insieme ai sintomi intestinali.</div>`);
   if(A.kind === "none" && labStatus(p).done) out.push(`<p class="hint">Tutti gli esami registrati sono nella norma.</p>`);
-  else {
+  else if(A.sel.length) {
     const tags = `<div class="tags">${A.sel.map(s => `<span class="tag ${s[1]}">${ftag(s)}</span>`).join("")}</div>`;
     out.push(`<p class="lbl">${A.kind === "inter" ? "Forme compatibili" + (A.forms.length > 1 ? " · dalla più frequente" : "") : A.kind === "multi" ? "Più cause possibili" : "Nessuna forma nota"}</p>` + tags +
       (A.forms.length ? (A.byForm.length ? `<p class="small">Tocca una forma per gli esami di II livello. ${L2_NOTE}</p>` : "") + `<div>${A.forms.map((x, i) => { const l2 = (A.byForm.find(b => b[0] === x.cid) || [, []])[1];
@@ -942,10 +945,10 @@ function triRow(p, e){
 }
 const caLine = p => { const c = caCorr(p);
   return c !== null ? `Calcio corretto per l'albumina: <b>${fmtN(c)} mg/dL</b> (calcio + 0,8 × (4 − albumina)); segnato sotto con i limiti 8,5–10,5 mg/dL.`
-    : num(p.caTot) !== null ? "Inserisci l'albumina per calcolare il calcio corretto." : "Con calcio totale e albumina il calcio corretto si calcola da solo."; };
+    : num(p.caTot) !== null ? "Inserisci l'albumina per calcolare il calcio corretto." : ""; };
 function vPazEsami(p){
   const grid = COMBO_GROUPS.map(g => `<div class="lgrp"><p class="lbl">${g.label}</p><div>` + g.exams.map(e => `<div class="row"><span>${e.name}</span><div class="rowr" data-trirow="${e.id}">${triRow(p, e)}</div></div>`).join("") + `</div></div>`).join("");
-  return { bar: pzName(p), html: head("Esami del sangue", "Esami di I livello, per escludere le forme secondarie prima di trattare. Scrivi i valori che hai; per gli altri segna ▲ ▼ quelli fuori norma, poi «tutti gli altri nella norma».") + `
+  return { bar: pzName(p), html: head("Esami del sangue", "Scrivi i valori che hai e segna ▲ ▼ quelli fuori norma, poi «Tutti gli altri nella norma».") + `
     <div class="grid2">
       <label class="fld">Data dei prelievi<input type="date" data-pf="labData" value="${hx(p.labData)}"></label>
       <label class="fld">eGFR (mL/min)<input type="text" inputmode="decimal" autocomplete="off" data-pf="egfr" value="${hx(p.egfr)}"></label>
