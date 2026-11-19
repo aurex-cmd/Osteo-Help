@@ -303,4 +303,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Pulsanti secondari in tutta l'app (es. «Invia allo specialista», «Indietro», «Imposto io la terapia»): bianchi con bordo e testo viola; i − e + dei contatori restano neutri.
 - Home: «Nuovo paziente» lavanda e «Archivio pazienti» menta (#B0DFCC, lo stesso verde di Osteo Help), senza bordi: due colori come nella home di Osteo Help.
 - Home: su iPhone e schermi piccoli (fino a 600px) il titolo va su due righe, «Gestionale» sopra e «osteoporosi» sotto; su PC resta su una riga.
-- PC, vista a figura: passando col mouse sui passi della strada verticale il pallino si ingrandisce e a destra compare, con una breve animazione, l'anteprima di quella sezione; uscendo dalla strada torna quello che c'era prima. Con il clic la sezione resta aperta.
+- PC, vista a figura: passando col mouse sui passi della strada verticale il pallino si ingrandisce (e la scritta accanto un po' meno) e a destra compare, con una breve animazione, l'anteprima di quella sezione; uscendo dalla strada torna quello che c'era prima. Con il clic la sezione resta aperta.
