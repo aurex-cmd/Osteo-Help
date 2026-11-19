@@ -307,3 +307,9 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Lo spazio della barra di scorrimento della finestra è sempre riservato: quando compare (per esempio con una scheda lunga a destra) la pagina non si sposta più di lato, e la figura del paziente resta ferma.
 - Archivio a lista compatta: un elenco unico con una riga per paziente (nome, sesso ed età, zona DeFRA, terapia e passo a cui è arrivato), senza riquadri grigi, così ne stanno molti di più per schermata. Su PC nome, terapia e pallini dei passi stanno sulla stessa riga. Tolta la riga «Mancano…» dalla scheda: si vede aprendo il paziente.
 - Anteprima dei passi su PC: dopo un clic, se la pagina scorre e sotto il mouse fermo finisce un altro passo, la sua anteprima non copre più la sezione appena aperta; riparte quando si muove il mouse.
+- Schede dei passi uniformate, con la stessa grammatica per tutte:
+  - ogni scheda si apre con una riga di introduzione grigia (aggiunta in «Chi è» e nel DeFRA; in «Fratture» il testo sui traumi minimi e Genant è diventato l'introduzione);
+  - tutti i menu apribili (gruppi dell'anamnesi, fratture inserite, densitometrie precedenti, sezioni di DeFRA e decisione) hanno la freccia in giù che si gira quando si aprono;
+  - «Aggiorna il DeFRA» è nel riquadro tratteggiato col +, come «Aggiungi una nuova densitometria»;
+  - «Elimina questo DeFRA» è in rosso a destra, come gli altri «Elimina»;
+  - «Note» in «Chi è» è un campo come gli altri, con il segnaposto «facoltative».

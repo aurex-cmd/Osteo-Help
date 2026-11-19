@@ -822,11 +822,11 @@ function datiAnag(p){
     ${p.sesso === "donna" ? `<div class="fld">In postmenopausa?<div class="seg" role="group">${segPz("postmeno", true, "Sì", p.postmeno)}${segPz("postmeno", false, "No", p.postmeno)}</div></div>` : ""}
     <div class="fld">Frattura di femore o vertebrale in uno dei genitori?<div class="seg" role="group">${segPz("fam", true, "Sì", p.fam)}${segPz("fam", false, "No", p.fam)}</div></div>`;
 }
-function datiFx(p){
+function datiFx(p, sheet){
   const F = pzFacts(p);
   const fxRows = F.fx.map(f => fxEditRow(p, f)).join("");
-  return `    <p class="lbl">Fratture da fragilità</p>
-    <p class="small">Fratture per traumi minimi (cadere dalla propria altezza o meno). Le vertebrali con il criterio di Genant: lieve 20–25%, moderata 25–40%, grave oltre il 40% di riduzione di un'altezza vertebrale.</p>
+  const txt = "Fratture per traumi minimi (cadere dalla propria altezza o meno). Le vertebrali con il criterio di Genant: lieve 20–25%, moderata 25–40%, grave oltre il 40% di riduzione di un'altezza vertebrale.";
+  return (sheet ? `<p class="sub">${txt}</p>` : `<p class="lbl">Fratture da fragilità</p><p class="small">${txt}</p>`) + `
     ${fxRows ? `<div class="fxlist">${fxRows}</div><p class="small">Tocca una frattura per cambiarne data, sede o gravità.</p>` : ckPz("data-pbool", "nessunaFx", p.nessunaFx, "Nessuna frattura da fragilità pregressa")}
     ${p.rival && F.fx.length ? `<div class="confirm">${ckPz("data-pbool", "fxRiv", p.fxRiv, `<b>Nessuna nuova frattura</b> dalla valutazione precedente (prima del ${fmtD(p.rival.dal)})`)}</div>` : ""}
     <div class="addbox fxadd">
@@ -980,10 +980,11 @@ function vPazDefra(p){
   const acc = (t, body, open) => `<details class="dsec"${open ? " open" : ""}><summary><span>${t}</span></summary><div class="dsec-b">${body}</div></details>`;
   const head0 = head("DeFRA e rischio di frattura", "Il DeFRA (SIOMMMS e SIR) stima il rischio di fratture maggiori a 10 anni, unendo DXA e fattori clinici, e lo colloca in una zona di colore.");
   if(rc){ const r = F.rischio;
-    return { bar: pzName(p), html: head("DeFRA e rischio di frattura") + `
+    return { bar: pzName(p), html: head("DeFRA e rischio di frattura", "Il rischio di fratture maggiori a 10 anni e la zona che indica il DeFRA.") + `
     <div class="dfz z-${F.zona}"><span class="dfz-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : ""}</span><span><small>Zona del DeFRA · ${fmtD(F.lastDefra.data)}</small><b>Zona ${rc.t.toLowerCase()}</b><span>${rc.r} → ${rc.chi}</span></span></div>
-    ${acc("Aggiorna il DeFRA", serve + form, false)}
-    ${F.defra.length > 1 ? acc("Tutti i DeFRA (" + F.defra.length + ")", `<ul class="list recs">${hist}</ul>`, false) : `<p class="small">Inserito per errore? <button type="button" class="lnk" data-del="defra:${p.defra.indexOf(F.lastDefra)}">Elimina questo DeFRA</button></p>`}
+    ${F.defra.length > 1 ? "" : `<p class="fdel"><button type="button" class="lnk" data-del="defra:${p.defra.indexOf(F.lastDefra)}">Elimina questo DeFRA</button></p>`}
+    <details class="dxadd"><summary><span class="dxplus">+</span><span><b>Aggiorna il DeFRA</b><small>se lo hai ricalcolato, per esempio dopo una nuova densitometria</small></span></summary>${serve}${form}</details>
+    ${F.defra.length > 1 ? acc("Tutti i DeFRA (" + F.defra.length + ")", `<ul class="list recs">${hist}</ul>`, false) : ""}
     ${acc("Cosa significano le zone", zone, false)}` };
   }
   return { bar: pzName(p), html: head0 + `
@@ -1137,7 +1138,7 @@ function vPazDxa(p){
     ${L.length ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}${F.gc ? " Con glucocorticoidi ad alte dosi si può anticipare a 12 mesi." : ""}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila (<a href="#guida-dxa-lea">a chi farla in LEA</a>) e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
     ${L.length ? `<details class="dxadd"><summary><span class="dxplus">+</span><span><b>Aggiungi una nuova densitometria</b><small>di solito dopo 18–24 mesi dalla precedente</small></span></summary>${form}</details>` : form}
     ${chart ? `<p class="lbl">T-score nel tempo</p>${chart}` : ""}
-    ${L.length > 1 ? `<details class="dxprev"><summary>${plural(L.length - 1, "densitometria precedente", "densitometrie precedenti")}</summary>${L.slice(1).map((d, i) => dxaCard(p, d, L[i + 2], false)).join("")}</details>` : ""}
+    ${L.length > 1 ? `<details class="dsec dxprev"><summary><span>${plural(L.length - 1, "densitometria precedente", "densitometrie precedenti")}</span></summary><div class="dsec-b">${L.slice(1).map((d, i) => dxaCard(p, d, L[i + 2], false)).join("")}</div></details>` : ""}
     <p class="small">T-score uguale o inferiore a −2,5: osteoporosi; tra −1 e −2,5: osteopenia.</p>` };
 }
 function vPazStorico(p){

@@ -1117,6 +1117,16 @@ html{scrollbar-gutter:stable}
   .pitem.anon .ptop{padding-right:14px} .pitem.anon .pst{padding-right:52px}
   .pitem .pdel{top:50%;transform:translateY(-50%)}
 }
+/* schede dei passi, stessa grammatica per tutte: una riga di introduzione, menu apribili con la freccia in giù, «aggiungi» nel riquadro tratteggiato col +, «elimina» in rosso a destra */
+.fsheet-b > .sub:first-child{margin:0 0 14px;font-size:.9rem;line-height:1.45;text-align:left}
+details.acc > summary .chev{transform:rotate(90deg);transition:transform .2s}
+details.acc[open] > summary .chev{transform:rotate(-90deg)}
+details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
+.fxed > summary .chev{transform:rotate(90deg)} .fxed[open] > summary .chev{transform:rotate(-90deg)}
+.dsec.dxprev{margin:6px 0 0} .dsec.dxprev > summary{color:var(--ink);padding:14px 2px;font-size:.95rem}
+.dxadd > .btns{margin:0 14px 10px}
+.fsheet-b .fdel{margin:6px 0 10px}
+@media (prefers-reduced-motion:reduce){details.acc > summary .chev{transition:none}}
 </style>
 </head>
 <body>
