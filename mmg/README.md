@@ -318,3 +318,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   - riquadro «Incolla dal gestionale» più basso (3 righe) e senza la nota lunga, solo «controllale prima di aggiungerle»;
   - sotto ogni gruppo dell'anamnesi compaiono le voci spuntate (es. «Diabete tipo 2»), altrimenti solo quante sono («17 voci»), su una riga; si aggiorna mentre spunti;
   - negli esami la frase sul calcio corretto compare solo quando serve, e «Nessuna forma nota» non compare finché non c'è un esame fuori norma.
+- Esami del sangue: albumina, calcio totale, 25-OH-vitamina D ed eGFR non sono più in alto, ma nelle loro righe dell'elenco con la casella del valore (unità nel segnaposto). Scritto il valore, accanto compare subito «▲ alto», «▼ basso» o «nella norma»; per il calcio anche il valore corretto per l'albumina. Senza valore restano i pulsanti ▲ N ▼. Per la vitamina D l'unità (nmol/L o ng/mL) si sceglie sotto il nome. In alto resta solo la data dei prelievi.

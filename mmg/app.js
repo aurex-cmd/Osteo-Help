@@ -935,27 +935,37 @@ function labReport(p, S){
   }
   return out.join("");
 }
+/* esami che si scrivono col valore nella riga: albumina, calcio totale (si corregge con l'albumina), vitamina D, eGFR */
+const VROW = {
+  Alb:  { name:"Albumina", pf:"albVal", ph:"g/dL" },
+  Ca:   { name:"Calcio totale", pf:"caTot", ph:"mg/dL" },
+  D:    { name:"25-OH-vit D", ph:"" },
+  eGFR: { name:"eGFR", pf:"egfr", ph:"mL/min" }
+};
+function vRow(p, e){
+  const v = VROW[e.id];
+  const inp = e.id === "D" ? `<input class="lv" type="text" inputmode="decimal" autocomplete="off" id="vdIn" value="${vdShow(num(p.vitd))}" placeholder="${vdUnit()}" aria-label="25-OH-vitamina D in ${vdUnit()}">`
+    : `<input class="lv" type="text" inputmode="decimal" autocomplete="off" data-pf="${v.pf}" value="${hx(p[v.pf])}" placeholder="${v.ph}" aria-label="${v.name} in ${v.ph}">`;
+  const sub = e.id === "D" ? `<small class="vdu">${["nmol", "ng"].map(u => `<button type="button" data-vdu="${u}" aria-pressed="${VD_U === u}">${u === "ng" ? "ng/mL" : "nmol/L"}</button>`).join("")}</small>`
+    : e.id === "Ca" ? `<small data-live="cacorr">${caLine(p)}</small>` : "";
+  return `<div class="row vrow"><span>${v.name}${sub}</span><div class="rowr">${inp}<span data-trirow="${e.id}">${triRow(p, e)}</span></div></div>`;
+}
 function triRow(p, e){
   const lab = p.lab || {}, a = AUTO[e.id] && AUTO[e.id](p), lv = (p.labVal || {})[e.id] || "";
   const btn = (kind, txt, cls, lbl) => `<button type="button" class="${cls}" data-pex="${e.id}" data-kind="${kind}" aria-pressed="${lab[e.id] === kind}" aria-label="${lbl}">${txt}</button>`;
-  if(a){ const d = a.disp || a.st; return `<span class="auto ${d}" title="Ricavato dal valore inserito sopra">${ST_ARR[d]} · ${a.val}</span>`; }
+  if(a){ const d = a.disp || a.st; return VROW[e.id] ? `<span class="auto ${d}" title="Ricavato dal valore">${ST_ARR[d]}${e.id === "Ca" ? " · " + a.val : ""}</span>` : `<span class="auto ${d}" title="Ricavato dal valore inserito sopra">${ST_ARR[d]} · ${a.val}</span>`; }
+  if(VROW[e.id]) return `<div class="tri">${btn("alto", "▲", "u", e.name + " alto") + btn("norm", "N", "n", e.name + " normale") + btn("basso", "▼", "d", e.name + " basso")}</div>`;
   return (e.binary ? "" : `<input class="lv" data-lv="${e.id}" value="${hx(lv)}" inputmode="decimal" autocomplete="off" placeholder="valore" aria-label="Valore di ${e.name} (facoltativo)">`) + `<div class="tri">${
     e.binary ? btn("pres", "Presente", "u", e.name + " presente") + btn("norm", "Assente", "n", e.name + " assente")
       : btn("alto", "▲", "u", e.name + " alto") + btn("norm", "N", "n", e.name + " normale") + btn("basso", "▼", "d", e.name + " basso")}</div>`;
 }
 const caLine = p => { const c = caCorr(p);
-  return c !== null ? `Calcio corretto per l'albumina: <b>${fmtN(c)} mg/dL</b> (calcio + 0,8 × (4 − albumina)); segnato sotto con i limiti 8,5–10,5 mg/dL.`
-    : num(p.caTot) !== null ? "Inserisci l'albumina per calcolare il calcio corretto." : ""; };
+  return c !== null ? "corretto per l'albumina" : num(p.caTot) !== null ? "scrivi l'albumina per correggerlo" : ""; };
 function vPazEsami(p){
-  const grid = COMBO_GROUPS.map(g => `<div class="lgrp"><p class="lbl">${g.label}</p><div>` + g.exams.map(e => `<div class="row"><span>${e.name}</span><div class="rowr" data-trirow="${e.id}">${triRow(p, e)}</div></div>`).join("") + `</div></div>`).join("");
-  return { bar: pzName(p), html: head("Esami del sangue", "Scrivi i valori che hai e segna ▲ ▼ quelli fuori norma, poi «Tutti gli altri nella norma».") + `
+  const grid = COMBO_GROUPS.map(g => `<div class="lgrp"><p class="lbl">${g.label}</p><div>` + g.exams.map(e => VROW[e.id] ? vRow(p, e) : `<div class="row"><span>${e.name}</span><div class="rowr" data-trirow="${e.id}">${triRow(p, e)}</div></div>`).join("") + `</div></div>`).join("");
+  return { bar: pzName(p), html: head("Esami del sangue", "Scrivi i valori che hai: albumina, calcio, vitamina D ed eGFR si segnano da soli. Per gli altri segna ▲ ▼ quelli fuori norma, poi «Tutti gli altri nella norma».") + `
     <div class="grid2">
       <label class="fld">Data dei prelievi<input type="date" data-pf="labData" value="${hx(p.labData)}"></label>
-      <label class="fld">eGFR (mL/min)<input type="text" inputmode="decimal" autocomplete="off" data-pf="egfr" value="${hx(p.egfr)}"></label>
-      <label class="fld">Calcio totale (mg/dL)<input type="text" inputmode="decimal" autocomplete="off" data-pf="caTot" value="${hx(p.caTot)}"></label>
-      <label class="fld">Albumina (g/dL)<input type="text" inputmode="decimal" autocomplete="off" data-pf="albVal" value="${hx(p.albVal)}"></label>
-      <p class="small" data-live="cacorr" style="grid-column:1/-1;margin:0">${caLine(p)}</p>
-      <div class="fld" style="grid-column:1/-1">25-OH-vitamina D<div class="vdrow"><input type="text" inputmode="decimal" autocomplete="off" id="vdIn" value="${vdShow(num(p.vitd))}" aria-label="25-OH-vitamina D in ${vdUnit()}"><div class="seg" role="group" aria-label="Unità">${["nmol", "ng"].map(u => `<button type="button" data-vdu="${u}" aria-pressed="${VD_U === u}">${u === "ng" ? "ng/mL" : "nmol/L"}</button>`).join("")}</div></div></div>
     </div>
     <div class="btns"><button type="button" class="btn sec" id="labAllN">Tutti gli altri nella norma</button></div>
     <div id="pzGrid">${grid}</div>
@@ -1497,11 +1507,11 @@ function pzLive(p){
 }
 
 document.addEventListener("input", e => {
-  if(e.target.id === "vdIn"){ const { p } = pzRoute(); if(!p) return; const v = num(e.target.value); p.vitd = v === null ? "" : String(Math.round((VD_U === "nmol" ? v / VD_F : v) * 10) / 10); applyAuto(p); savePz(p); return; }
+  if(e.target.id === "vdIn"){ const { p } = pzRoute(); if(!p) return; const v = num(e.target.value); p.vitd = v === null ? "" : String(Math.round((VD_U === "nmol" ? v / VD_F : v) * 10) / 10); applyAuto(p); savePz(p); pzLive(p); return; }
   const lv = e.target.closest("[data-lv]"); if(lv){ const { p } = pzRoute(); if(!p) return; p.labVal = p.labVal || {}; p.labVal[lv.dataset.lv] = lv.value.trim(); savePz(p); return; }
   const ce = e.target.closest("[data-ce]"); if(ce){ const { p } = pzRoute(); if(p){ p[ce.dataset.ce] = ce.innerText.trim(); savePz(p); } return; }
   if(e.target.id === "medNome"){ try{ localStorage.setItem("oh-mmg-medico", e.target.value); }catch(err){} return; }
-  const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(el.dataset.pf === "supVDmol") p.supVDdose = ""; if(el.hasAttribute("data-sup")){ supCompose(p); const vt = document.querySelector('[data-live="vdtxt"]'); if(vt) vt.innerHTML = PZ_LIVE.vdtxt(p); } if(["egfr", "caTot", "albVal"].includes(el.dataset.pf)) applyAuto(p); savePz(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
+  const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(el.dataset.pf === "supVDmol") p.supVDdose = ""; if(el.hasAttribute("data-sup")){ supCompose(p); const vt = document.querySelector('[data-live="vdtxt"]'); if(vt) vt.innerHTML = PZ_LIVE.vdtxt(p); } const au = ["egfr", "caTot", "albVal"].includes(el.dataset.pf); if(au) applyAuto(p); savePz(p); if(au) pzLive(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
   if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); let n = 0; document.querySelectorAll("#pzList .pitem").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); if(!a.hidden) n++; }); const nn = $("#pzNone"); if(nn) nn.hidden = n > 0; }
 });
 /* grafico: riquadro con i valori della data toccata, con il mouse, il dito o la tastiera */
