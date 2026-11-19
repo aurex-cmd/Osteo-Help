@@ -435,7 +435,9 @@ function vDecidi(p, inPanel){
 }
 
 /* su PC, col mouse sulla strada dei passi: anteprima della sezione nel pannello a destra; col clic resta aperta */
-let fPrevIn = 0, fPrevOut = 0;
+let fPrevIn = 0, fPrevOut = 0, fPrevLock = null;
+/* dopo un clic la pagina può scorrere e sotto il mouse fermo finire un altro passo: niente anteprima finché il mouse non si muove davvero */
+document.addEventListener("pointermove", e => { if(fPrevLock && Math.hypot(e.clientX - fPrevLock.x, e.clientY - fPrevLock.y) > 4) fPrevLock = null; });
 function figPrevHide(){ document.querySelectorAll(".fprev").forEach(x => x.remove()); document.querySelectorAll(".fcol-r.prev").forEach(x => x.classList.remove("prev")); }
 function figPrevShow(k){
   const col = document.querySelector(".fgrid .fcol-r"), cur = document.querySelector(".fprev");
@@ -449,7 +451,7 @@ function figPrevShow(k){
   col.insertAdjacentHTML("beforeend", `<div class="fpanel fprev" data-k="${k}" aria-hidden="true" inert>${h}</div>`);
 }
 document.addEventListener("pointerover", e => {
-  if(e.pointerType !== "mouse" || !figWide() || !e.target.closest) return;
+  if(e.pointerType !== "mouse" || fPrevLock || !figWide() || !e.target.closest) return;
   const it = e.target.closest(".froad li > *"); if(!it) return;
   clearTimeout(fPrevOut); clearTimeout(fPrevIn);
   const k = it.dataset.fsheet || (it.matches('a[href$="-decidi"]') ? "decidi" : null); if(!k) return;
@@ -468,7 +470,7 @@ document.addEventListener("click", e => {
   if(t.closest("[data-ciopen]")){ FIG.ciOpen = !FIG.ciOpen; if(FIG.ciOpen) FIG.secOpen = false; FIG.anim = false; render(); return; }
   if(t.closest("[data-secopen]")){ FIG.secOpen = !FIG.secOpen; if(FIG.secOpen) FIG.ciOpen = false; FIG.anim = false; render(); return; }
   const op = t.closest("[data-fsheet]");
-  if(op){ e.preventDefault(); clearTimeout(fPrevIn); figPrevHide(); if(FIG.open){ const { p } = pzRoute(); commitPending(p); } FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
+  if(op){ e.preventDefault(); clearTimeout(fPrevIn); figPrevHide(); fPrevLock = { x: e.clientX, y: e.clientY }; if(FIG.open){ const { p } = pzRoute(); commitPending(p); } FIG.anim = !FIG.open; FIG.open = op.dataset.fsheet; render(); FIG.anim = false; const b = document.querySelector(".fsheet-b"); if(b) b.scrollTop = 0;
     const pn = document.querySelector(".fpanel"); if(pn && pn.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + pn.getBoundingClientRect().top - 70 }); return; }
   if(t.closest("[data-fclose]")){ figClose(); return; }
   if(t.closest("[data-rival]")){ const { p } = pzRoute(); if(!p) return; pzRivaluta(p); toast("Rivalutazione iniziata: la valutazione precedente è salvata nei Controlli nel tempo."); FIG.anim = true; FIG.open = "chi"; render(); return; }
