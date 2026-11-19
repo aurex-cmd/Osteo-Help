@@ -964,11 +964,11 @@ const caLine = p => { const c = caCorr(p);
   return c !== null ? "corretto per l'albumina" : num(p.caTot) !== null ? "scrivi l'albumina per correggerlo" : ""; };
 function vPazEsami(p){
   const grid = COMBO_GROUPS.map(g => `<div class="lgrp"><p class="lbl">${g.label}</p><div>` + g.exams.map(e => VROW[e.id] ? vRow(p, e) : `<div class="row"><span>${e.name}</span><div class="rowr" data-trirow="${e.id}">${triRow(p, e)}</div></div>`).join("") + `</div></div>`).join("");
-  return { bar: pzName(p), html: head("Esami del sangue", "Scrivi i valori che hai: albumina, calcio, vitamina D ed eGFR si segnano da soli. Per gli altri segna ▲ ▼ quelli fuori norma, poi «Tutti gli altri nella norma».") + `
+  return { bar: pzName(p), html: head("Esami del sangue", "Scrivi i valori che hai: albumina, calcio, vitamina D ed eGFR si segnano da soli. Per gli altri segna ▲ ▼ quelli fuori norma; se il resto è normale, «Tutti nella norma».") + `
     <div class="grid2">
       <label class="fld">Data dei prelievi<input type="date" data-pf="labData" value="${hx(p.labData)}"></label>
     </div>
-    <div class="btns"><button type="button" class="btn sec" id="labAllN">Tutti gli altri nella norma</button></div>
+    <div class="btns"><button type="button" class="btn sec" id="labAllN">Tutti nella norma</button></div>
     <div id="pzGrid">${grid}</div>
     <p class="small">${p.sesso === "uomo" ? "Nell'uomo aggiungi il testosterone totale. " : ""}Se sospetti una celiachia: anti-transglutaminasi con IgA totali.</p>
     <div data-live="lab">${labReport(p, pzSecondary(p))}</div>` };
