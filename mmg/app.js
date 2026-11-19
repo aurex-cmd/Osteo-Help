@@ -558,11 +558,10 @@ function pzCards(list){
       : [ic("miss", ""), "Terapia da decidere", ""];
     const q = [pzName(p), ...F.ther.map(t => dn(t.farmaco))].join(" ").toLowerCase();
     const done = !nx, stTxt = nx ? `Passo ${nx.i + 1} di ${STEPS.length} · ${nx.t}` : pl.st !== "ok" ? pl.t : "Percorso completo";
-    const miss = nx && nx.s && /^Manca/.test(nx.s) ? nx.s : "";
     return `<div class="pitem${anon ? " anon" : ""}" data-q="${hx(q)}"><a class="pcard" href="#paz-${p.id}">
       <span class="ptop">${avatar(p)}<span class="pid"><b>${hx(pzName(p))}</b><small>${bits || "Dati da completare"}</small></span>${F.zona ? `<span class="pzone z-${F.zona}">Zona ${ZONE[F.zona].t.toLowerCase()}</span>` : ""}</span>
       <span class="pter${F.ther.length || dec === "spec" || dec === "mmg" || (dec === "nessuno" && supList(p).length) ? "" : " no"}">${ter[0]}<span><b>${hx(ter[1])}</b>${ter[2] ? `<small>${hx(ter[2])}</small>` : ""}</span>${CHEV}</span>
-      <span class="pst${done && pl.st === "ok" ? " ok" : ""}"><span class="proad" aria-hidden="true">${all.map(x => `<i class="${x.st}${nx && x.i === nx.i ? " next" : ""}">${MARK[x.st] || x.i + 1}</i>`).join("")}</span><small><b>${hx(stTxt)}</b>${miss ? `<br>${hx(miss.charAt(0).toUpperCase() + miss.slice(1))}` : ""}</small></span></a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
+      <span class="pst${done && pl.st === "ok" ? " ok" : ""}"><span class="proad" aria-hidden="true">${all.map(x => `<i class="${x.st}${nx && x.i === nx.i ? " next" : ""}">${MARK[x.st] || x.i + 1}</i>`).join("")}</span><small><b>${hx(stTxt)}</b></small></span></a>${anon ? `<button type="button" class="pdel" data-pzdel="${p.id}" aria-label="Elimina questo paziente senza nome" title="Elimina">✕</button>` : ""}</div>`;
   }).join("");
 }
 /* archivio: tutti i pazienti, con la ricerca */
