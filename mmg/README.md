@@ -345,3 +345,13 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Figura su PC: con una sezione aperta, un clic sul bianco (fuori dal pannello, dai bollini e dai passi) chiude la sezione e torna alla figura completa.
 - «Prima di trattare»: «da correggere prima del farmaco, che altrimenti può non funzionare o essere rischioso» (prima: «senza correzione non funziona o fa danno»).
 - Osteo Help (pagina principale): stesso testo per «Prima di trattare» e nella guida («può non funzionare o essere rischioso» invece di «fa danno»).
+- Correzioni di funzionamento:
+  - Prossima dose (denosumab, zoledronato) a fine mese: dal 31/08 la dose dopo 6 mesi è il 28/02, non più il 03/03.
+  - Densitometria: non accetta date future né T-score fuori scala (oltre ±6, per esempio 27 invece di 2,7).
+  - DeFRA: non accetta date future né un rischio fuori da 0–100%.
+  - Data di nascita nel futuro o di oltre 110 anni fa: non viene salvata e compare un avviso (prima la scheda mostrava «−4 anni»).
+  - Fratture modificate con il solo anno corrente: non vengono più rifiutate come «nel futuro».
+  - Dose registrata: niente date future e niente doppioni della stessa data.
+  - Ripristino del backup: si può scegliere di nuovo lo stesso file.
+  - Eliminando una voce si chiude la modifica eventualmente aperta.
+  - I calendari di nascita, esami, densitometria, DeFRA e dosi non propongono date future.

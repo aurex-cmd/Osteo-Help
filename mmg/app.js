@@ -28,8 +28,8 @@ const pDate = s => { if(!s) return null; const m = /^(\d{4})(?:-(\d{2})(?:-(\d{2
 const fmtD = s => { const d = pDate(s); if(!d) return "—"; if(/^\d{4}$/.test(s)) return s; return (/^\d{4}-\d{2}$/.test(s) ? "" : String(d.getDate()).padStart(2, "0") + "/") + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear(); };
 const fmtM = d => d ? ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"][d.getMonth()] + " " + d.getFullYear() : "—";
 const monthsSince = s => { const d = pDate(s); if(!d) return null; const n = new Date(); return (n.getFullYear() - d.getFullYear()) * 12 + (n.getMonth() - d.getMonth()) + (n.getDate() < d.getDate() ? -1 : 0); };
-const addMonths = (d, m) => { const x = new Date(d); x.setMonth(x.getMonth() + m); return x; };
-function ageOf(s){ const d = pDate(s); if(!d) return null; const n = new Date(); let a = n.getFullYear() - d.getFullYear(); if(n.getMonth() < d.getMonth() || (n.getMonth() === d.getMonth() && n.getDate() < d.getDate())) a--; return a; }
+const addMonths = (d, m) => { const x = new Date(d), g = x.getDate(); x.setDate(1); x.setMonth(x.getMonth() + m); x.setDate(Math.min(g, new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate())); return x; };
+function ageOf(s){ const d = pDate(s); if(!d) return null; const n = new Date(); let a = n.getFullYear() - d.getFullYear(); if(n.getMonth() < d.getMonth() || (n.getMonth() === d.getMonth() && n.getDate() < d.getDate())) a--; return a < 0 ? null : a; }
 const byDateDesc = (a, b) => (b.data || "").localeCompare(a.data || "");
 
 let PZ = [], pzStorageOk = true;
@@ -803,7 +803,7 @@ function fxEditSave(p, row){
   if(gi && !me){ toast("Per indicare il giorno scegli anche il mese."); return; }
   const dd = an ? an + (me ? "-" + me + (gi ? "-" + String(gi).padStart(2, "0") : "") : "") : "";
   if(gi && (gi > 31 || pDate(dd).getMonth() !== +me - 1)){ toast("Il giorno non esiste in quel mese."); return; }
-  if(dd && pDate(dd) > oggi){ toast("La data è nel futuro."); return; }
+  if(me && pDate(dd) > oggi){ toast("La data è nel futuro."); return; }
   f.sede = g("sede") || f.sede; f.data = dd; f.grado = f.sede === "vertebra" ? g("grado") : "";
   /* ridisegna solo questa riga: l'elenco non si riordina mentre la si modifica */
   savePz(p); row.outerHTML = fxEditRow(p, f); pzLive(p); toast("Frattura aggiornata.");
@@ -814,7 +814,7 @@ function datiAnag(p){
   return `<div class="fcard"><p class="fct">Dati</p>
     <div class="grid2">
       <label class="fld" style="grid-column:1/-1">Nome, iniziali o codice<input type="text" data-pf="nome" value="${hx(p.nome)}" autocomplete="off"></label>
-      <label class="fld">Data di nascita<input type="date" data-pf="nascita" value="${hx(p.nascita)}"></label>
+      <label class="fld">Data di nascita<input type="date" data-pf="nascita" max="${todayISO()}" value="${hx(p.nascita)}"></label>
       <div class="fld">Sesso<div class="seg" role="group">${segPz("sesso", "donna", "Donna", p.sesso)}${segPz("sesso", "uomo", "Uomo", p.sesso)}</div></div>
       <label class="fld">Peso (kg)<input type="text" inputmode="decimal" autocomplete="off" data-pf="peso" value="${hx(p.peso)}"></label>
       <label class="fld">Altezza (cm)<input type="text" inputmode="decimal" autocomplete="off" data-pf="altezza" value="${hx(p.altezza)}"></label>
@@ -968,7 +968,7 @@ function vPazEsami(p){
   const grid = COMBO_GROUPS.map(g => `<div class="lgrp"><p class="lbl">${g.label}</p><div>` + g.exams.map(e => VROW[e.id] ? vRow(p, e) : `<div class="row"><span>${e.name}</span><div class="rowr" data-trirow="${e.id}">${triRow(p, e)}</div></div>`).join("") + `</div></div>`).join("");
   return { bar: pzName(p), html: head("Esami del sangue", "Scrivi i valori che hai: albumina, calcio, vitamina D ed eGFR si segnano da soli. Per gli altri segna ▲ ▼ quelli fuori norma; se il resto è normale, «Tutti nella norma».") + `
     <div class="grid2">
-      <label class="fld">Data dei prelievi<input type="date" data-pf="labData" value="${hx(p.labData)}"></label>
+      <label class="fld">Data dei prelievi<input type="date" data-pf="labData" max="${todayISO()}" value="${hx(p.labData)}"></label>
     </div>
     <div class="btns"><button type="button" class="btn sec" id="labAllN">Tutti nella norma</button></div>
     <div id="pzGrid">${grid}</div>
@@ -1009,7 +1009,7 @@ function vPazDefra(p){
       <div class="zpick" role="group" aria-label="Zona del DeFRA">${ZONE_ORDER.map(z => `<button type="button" class="zbtn z-${z}" data-zona="${z}" aria-pressed="${!!ed && ed.zona === z}"><i></i><span><b>${ZONE[z].t}</b><small>${ZONE[z].r}</small></span></button>`).join("")}</div>
       <div class="dfrow">
         <label class="fld">Rischio a 10 anni<span class="pct"><input type="text" inputmode="decimal" autocomplete="off" id="dfR" placeholder="facoltativo" aria-describedby="dfRh" value="${ed && num(ed.rischio) !== null ? fmtN(num(ed.rischio), 0) : ""}"><i>%</i></span></label>
-        <label class="fld">Data<input type="date" id="dfD" value="${ed ? hx(ed.data) : todayISO()}"></label>
+        <label class="fld">Data<input type="date" id="dfD" max="${todayISO()}" value="${ed ? hx(ed.data) : todayISO()}"></label>
       </div>
       <p class="small" id="dfRh">Il rischio di fratture maggiori che indica il DeFRA.</p>
       <label class="fld dfn">Nota<input type="text" id="dfN" placeholder="facoltativa" value="${ed ? hx(ed.note || "") : ""}"></label>
@@ -1047,7 +1047,7 @@ function vPazTerapia(p){
   const rows = all.map(t => { const i = p.terapie.indexOf(t), nd = !t.fine && nextDose(t);
     const nt = !t.fine && notes.find(n => n.id === t.farmaco);
     return `<li class="rec"><span><b>${DRUGS[t.farmaco] ? DRUGS[t.farmaco].nome : hx(t.farmaco)}</b><small>dal ${fmtD(t.inizio)}${t.fine ? " al " + fmtD(t.fine) : " · in corso"}${t.note ? " · " + hx(t.note) : ""}</small>${nt ? `<small class="tnote">${nt.s}</small><small class="n79l">${n79of(nt.id)}</small>` : ""}${nd ? `<small class="dose-i">Ultima dose ${fmtD(lastDose(t))} · <b>prossima ${fmtDt(nd)}</b>${(t.dosi || []).length ? " · " + plural(t.dosi.length + 1, "dose", "dosi") + " registrate" : ""}</small>
-      <span class="dose"><input type="date" id="dz${i}" value="${todayISO()}" aria-label="Data della dose"><button type="button" class="btn sec mini" data-dose="${i}">Registra dose fatta</button></span>` : ""}</span>${t.fine ? "" : `<button type="button" class="btn sec mini" data-stop="${p.terapie.indexOf(t)}">Termina</button>`}<button type="button" class="x" data-del="terapie:${p.terapie.indexOf(t)}" aria-label="Elimina">✕</button></li>`; }).join("");
+      <span class="dose"><input type="date" id="dz${i}" max="${todayISO()}" value="${todayISO()}" aria-label="Data della dose"><button type="button" class="btn sec mini" data-dose="${i}">Registra dose fatta</button></span>` : ""}</span>${t.fine ? "" : `<button type="button" class="btn sec mini" data-stop="${p.terapie.indexOf(t)}">Termina</button>`}<button type="button" class="x" data-del="terapie:${p.terapie.indexOf(t)}" aria-label="Elimina">✕</button></li>`; }).join("");
   const sug = F.zona ? DEC_ZONA[F.zona] : null, cur = p.decisione ? p.decisione.tipo : null;
   return { bar: pzName(p), html: head("Terapia", "Il registro dei farmaci: inizio, dosi fatte, sospensione. La proposta, con Nota 79 e controindicazioni, è in «Decidi la terapia».") + `
     <div class="btns"><a class="btn sec" href="#paz-${p.id}-decidi">Decidi la terapia</a></div>
@@ -1218,7 +1218,7 @@ function vPazDxa(p){
   const tv = (k, r) => { const n = r ? num(r[k]) : null; return n === null ? "" : fmtN(Math.abs(n)); }, neg = (k, r) => { const n = r ? num(r[k]) : null; return n === null || n < 0; };
   const form = `<div class="addbox">
       <div class="grid2">
-        <label class="fld">Data della DXA<input type="date" id="dxD" value="${ed ? hx(ed.data) : todayISO()}"></label>
+        <label class="fld">Data della DXA<input type="date" id="dxD" max="${todayISO()}" value="${ed ? hx(ed.data) : todayISO()}"></label>
         <div class="fld">T-score colonna (L1–L4)<div class="tsrow"><button type="button" class="sgn" data-sgn="dxL" aria-pressed="${neg("tL", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tL", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxL" value="${tv("tL", ed)}" aria-label="T-score colonna (L1–L4)"></div></div>
         <div class="fld">T-score femore totale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFt" aria-pressed="${neg("tFt", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tFt", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFt" value="${tv("tFt", ed)}" aria-label="T-score femore totale"></div></div>
         <div class="fld">T-score collo femorale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFn" aria-pressed="${neg("tFn", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tFn", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFn" value="${tv("tFn", ed)}" aria-label="T-score collo femorale"></div></div>
@@ -1595,7 +1595,10 @@ document.addEventListener("input", e => {
   const lv = e.target.closest("[data-lv]"); if(lv){ const { p } = pzRoute(); if(!p) return; p.labVal = p.labVal || {}; p.labVal[lv.dataset.lv] = lv.value.trim(); savePz(p); return; }
   const ce = e.target.closest("[data-ce]"); if(ce){ const { p } = pzRoute(); if(p){ p[ce.dataset.ce] = ce.innerText.trim(); savePz(p); } return; }
   if(e.target.id === "medNome"){ try{ localStorage.setItem("oh-mmg-medico", e.target.value); }catch(err){} return; }
-  const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return; p[el.dataset.pf] = el.value; if(el.dataset.pf === "supVDmol") p.supVDdose = ""; if(el.hasAttribute("data-sup")){ supCompose(p); const vt = document.querySelector('[data-live="vdtxt"]'); if(vt) vt.innerHTML = PZ_LIVE.vdtxt(p); } const au = ["egfr", "caTot", "albVal"].includes(el.dataset.pf); if(au) applyAuto(p); savePz(p); if(au) pzLive(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
+  const el = e.target.closest("[data-pf]"); if(el){ const { p } = pzRoute(); if(!p) return;
+    if(el.dataset.pf === "nascita" && el.value){ const a = ageOf(el.value); if(a === null || a < 0 || a > 110){ el.setCustomValidity("Data di nascita non valida"); return; } }
+    if(el.dataset.pf === "nascita") el.setCustomValidity("");
+    p[el.dataset.pf] = el.value; if(el.dataset.pf === "supVDmol") p.supVDdose = ""; if(el.hasAttribute("data-sup")){ supCompose(p); const vt = document.querySelector('[data-live="vdtxt"]'); if(vt) vt.innerHTML = PZ_LIVE.vdtxt(p); } const au = ["egfr", "caTot", "albVal"].includes(el.dataset.pf); if(au) applyAuto(p); savePz(p); if(au) pzLive(p); if(el.dataset.pf === "nome") $("#barT").textContent = pzName(p); return; }
   if(e.target.id === "pzQ"){ const q = e.target.value.trim().toLowerCase(); let n = 0; document.querySelectorAll("#pzList .pitem").forEach(a => { a.hidden = q && !a.dataset.q.includes(q); if(!a.hidden) n++; }); const nn = $("#pzNone"); if(nn) nn.hidden = n > 0; }
 });
 /* grafico: riquadro con i valori della data toccata, con il mouse, il dito o la tastiera */
@@ -1615,6 +1618,7 @@ document.addEventListener("change", e => {
   if(e.target.id === "fxN" || e.target.id === "fxSede"){ fxMoreRender(); return; }
   const fe = e.target.closest("[data-fxe]"); if(fe){ const { p } = pzRoute(); const row = fe.closest(".fxed"); if(p && row) fxEditSave(p, row); return; }
   if(e.target.closest('[data-pf="supVDmol"]')){ const { p } = pzRoute(); if(p) render(); return; }
+  if(e.target.dataset && e.target.dataset.pf === "nascita" && e.target.validationMessage){ toast("Data di nascita non valida: è nel futuro o di oltre 110 anni fa."); return; }
   if(e.target.closest("[data-pf]") || e.target.id === "vdIn"){ const { p } = pzRoute(); if(p) pzLive(p); return; }
   if(e.target.id === "pzImport"){
     const f = e.target.files && e.target.files[0]; if(!f) return;
@@ -1622,7 +1626,7 @@ document.addEventListener("change", e => {
     rd.onload = () => { try{ const d = JSON.parse(rd.result), arr = Array.isArray(d) ? d : d.pazienti; if(!Array.isArray(arr)) throw 0;
       let n = 0; arr.forEach(x => { if(!x || !x.id || !/^[a-z0-9]+$/.test(x.id)) return; const p = Object.assign(pzBlank(), x); const i = PZ.findIndex(y => y.id === p.id); if(i >= 0) PZ[i] = p; else PZ.push(p); n++; });
       savePz(); alert(plural(n, "paziente ripristinato", "pazienti ripristinati") + "."); render(); }catch(err){ alert("Il file non è un backup valido di Osteo Help."); } };
-    rd.readAsText(f);
+    rd.readAsText(f); e.target.value = "";
   }
 });
 document.addEventListener("toggle", e => { const d = e.target; if(d.matches && d.matches("details.fxed")){ const i = +d.dataset.fxi; d.open ? FX_OPEN.add(i) : FX_OPEN.delete(i); return; } if(d.matches && d.matches("details.pzax")){ const i = d.dataset.pax; d.open ? pzOpenAx.add(i) : pzOpenAx.delete(i); } }, true);
@@ -1678,7 +1682,7 @@ document.addEventListener("click", e => {
   if(ed){ const [k, i] = ed.dataset.edit.split(":"); if(p[k] && p[k][+i]){ PZEDIT = { k, i:+i }; render(); const f = document.querySelector(".edbox"); if(f) f.scrollIntoView({ block:"start", behavior:"smooth" }); } return; }
   if(t.closest("[data-editno]")){ PZEDIT = null; render(); return; }
   const del = t.closest("[data-del]");
-  if(del){ const [k, i] = del.dataset.del.split(":"); if(p[k] && p[k][+i] && confirm("Eliminare questa voce?")){ p[k].splice(+i, 1); savePz(p); render(); } return; }
+  if(del){ const [k, i] = del.dataset.del.split(":"); if(p[k] && p[k][+i] && confirm("Eliminare questa voce?")){ p[k].splice(+i, 1); PZEDIT = null; savePz(p); render(); } return; }
   const dc = t.closest(".dec[data-dec]");
   if(dc){ const k = dc.dataset.dec; p.decisione = p.decisione && p.decisione.tipo === k ? null : { tipo:k, data:todayISO() }; savePz(p); render(); return; }
   if(t.closest("#gestGo")){ const el = $("#gestIn"); if(el){ p.testoGest = el.value; savePz(p); } $("#gestRes").innerHTML = gestResHTML(p); if(!$("#gestRes").innerHTML) toast("Incolla prima il testo dal gestionale."); return; }
@@ -1712,7 +1716,7 @@ document.addEventListener("click", e => {
   const dn = t.closest("[data-dent]");
   if(dn){ p.ci = p.ci || {}; const cur = p.dentista ? "ok" : p.ci.denti ? "fare" : "", v = cur === dn.dataset.dent ? "" : dn.dataset.dent; p.dentista = v === "ok"; p.ci.denti = v === "fare"; savePz(p); render(); return; }
   const dz = t.closest("[data-dose]");
-  if(dz){ const th = p.terapie[+dz.dataset.dose], el = document.getElementById("dz" + dz.dataset.dose); if(th && el && el.value){ th.dosi = (th.dosi || []).concat(el.value).sort(); savePz(p); render(); toast("Dose registrata: prossima il " + fmtDt(nextDose(th)) + "."); } return; }
+  if(dz){ const th = p.terapie[+dz.dataset.dose], el = document.getElementById("dz" + dz.dataset.dose); if(th && el && el.value){ if(pDate(el.value) > new Date()){ toast("La data della dose è nel futuro."); return; } if((th.dosi || []).includes(el.value) || el.value === th.inizio){ toast("Questa dose è già registrata."); return; } th.dosi = (th.dosi || []).concat(el.value).sort(); savePz(p); render(); toast("Dose registrata: prossima il " + fmtDt(nextDose(th)) + "."); } return; }
   const cp = t.closest("[data-copy]");
   if(cp){ cp.dataset.copy === "lettera" ? copyText(letterText(p), "Lettera copiata.") : copyText(pzText(p), "Riepilogo copiato: incollalo nella cartella del paziente."); return; }
   if(t.closest("#labAllN")){ p.lab = p.lab || {}; let n = 0, vd = false;
@@ -1754,12 +1758,16 @@ function addRec(p, k, auto){
     const any = [v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x) !== null);
     if(auto && !any) return false;
     if(!v("dxD") || !any) return no("Indica la data e almeno un T-score.");
+    if(pDate(v("dxD")) > new Date()) return no("La data della densitometria è nel futuro.");
+    if([v("dxL"), v("dxFt"), v("dxFn")].some(x => num(x.replace("−", "-")) !== null && Math.abs(num(x.replace("−", "-"))) > 6)) return no("Un T-score è fuori scala: di solito è tra −5 e +3 (per −2,7 scrivi 2,7, con la virgola).");
     /* il segno viene dal pulsante −/+ (già su «−»); un «-» o «−» scritto a mano vale comunque come negativo */
     const T = id => { const raw = v(id).replace("−", "-"), n = num(raw); if(n === null) return ""; const sg = document.querySelector(`[data-sgn="${id}"]`), neg = /^\s*-/.test(raw) || (sg && sg.getAttribute("aria-pressed") === "true"); return String(neg ? -Math.abs(n) : Math.abs(n)); };
     rec = { data: v("dxD"), tL: T("dxL"), tFt: T("dxFt"), tFn: T("dxFn") }; put("dxa", rec); msg = "Densitometria del " + fmtD(rec.data) + (edited ? " modificata" : " salvata"); }
   if(k === "defra"){ const zb = document.querySelector('.zbtn[aria-pressed="true"]');
     if(auto && !zb) return false;
     if(!zb || !v("dfD")) return no("Scegli la zona indicata dal DeFRA e la data.");
+    if(pDate(v("dfD")) > new Date()) return no("La data del DeFRA è nel futuro.");
+    if(num(v("dfR")) !== null && (num(v("dfR")) < 0 || num(v("dfR")) > 100)) return no("Il rischio a 10 anni è una percentuale tra 0 e 100.");
     rec = { data: v("dfD"), zona: zb.dataset.zona, rischio: num(v("dfR")) === null ? "" : String(num(v("dfR"))), note: v("dfN") }; put("defra", rec);
     msg = (edited ? "DeFRA modificato: zona " : "DeFRA salvato: zona ") + ZONE[rec.zona].t.toLowerCase() + (rec.rischio ? ", " + rec.rischio + "%" : ""); }
   if(k === "terapie"){ if(auto) return false; if(!v("thF")) return no("Scegli il farmaco."); if(!v("thI")) return no("Indica la data di inizio."); rec = { farmaco: v("thF"), inizio: v("thI"), fine:"", note: v("thN") }; p.terapie.push(rec); msg = dnome(rec.farmaco) + " aggiunto"; }
