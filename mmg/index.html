@@ -1177,6 +1177,22 @@ details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
 .dxfig .vl{font-size:8px;font-weight:800;fill:#fff;text-anchor:middle;dominant-baseline:middle}
 .dxfig .fl{font-size:9px;font-weight:700;fill:var(--muted);text-anchor:middle}
 .dxn em{display:block;margin-top:1px}
+/* densitometria: disegno al centro, femore in alto a destra, colonna in basso a sinistra, legati da linee sottili */
+.dxmap{position:relative;padding-top:10px}
+.dxtop{display:flex;justify-content:flex-end;gap:12px}
+.dxbot{display:flex;justify-content:flex-start}
+.dxfigw{display:flex;justify-content:center;padding:28px 0 16px}
+.dxmap .dxfig{width:180px}
+.dxcard:not(.big) .dxmap .dxfig{width:150px}
+.dxlab{display:flex;align-items:flex-start;gap:6px;max-width:50%;min-width:0;position:relative;z-index:1}
+.dxlab .dxv{width:34px;height:34px;font-size:.8rem}
+.dxlab .dxn b{font-size:.88rem;line-height:1.2} .dxlab .dxn small{display:block;font-size:.76rem;color:var(--muted)}
+.dxlab .dxn em{display:block;font-style:normal;font-size:.72rem;font-weight:700;white-space:nowrap}
+.dxlab .dxn em.up{color:var(--teal)} .dxlab .dxn em.dn{color:var(--coral)} .dxlab .dxn em.st{color:var(--muted)}
+.dxlab.t-op .dxv{background:var(--coral)} .dxlab.t-on .dxv{background:#E3B21A;color:#3D2F00} .dxlab.t-op .dxn small{color:var(--coral);font-weight:700}
+.dxlines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.dxlines polyline{fill:none;stroke:#9AA3AF;stroke-width:1;stroke-linejoin:round} .dxlines circle{fill:#fff;stroke:#5B6472;stroke-width:1}
+.dxfig .anc{fill:none}
 </style>
 </head>
 <body>

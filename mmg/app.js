@@ -1134,14 +1134,30 @@ function dxaFig(d){
     const tr = `M${x + w - 1},${y + 6} L${x + w + t},${y + 3} Q${x + w + t + 2},${y + 5.5} ${x + w + t},${y + 8} L${x + w - 1},${y + 11} Z`;
     const disc = i < 3 ? `<rect class="disc" x="${x + 3}" y="${y + h + 1.5}" width="${w - 6}" height="3" rx="1.5"/>` : "";
     return `<g class="vt ${c("tL")}"><path d="${tl}"/><path d="${tr}"/><path d="${body}"/></g>${disc}<text x="${x + w / 2}" y="${y + h / 2 + .5}" class="vl">L${i + 1}</text>`; }).join("");
-  return `<svg class="dxfig" viewBox="0 0 156 132" role="img" aria-label="Colonna lombare e femore con i siti colorati secondo il T-score">
+  return `<svg class="dxfig" viewBox="0 0 156 120" role="img" aria-label="Colonna lombare e femore con i siti colorati secondo il T-score">
     ${vert}
     <g transform="translate(34,0)"><g class="fem ${c("tFt")}"><circle cx="70" cy="30" r="12"/><path d="M73,22 L99,34 L97,53 L71,41 Z"/>
       <path d="M93,32 Q103,21 111,29 L111,47 Q104,58 104,72 L106,116 L89,116 L89,75 Q89,60 85,52 Z"/><circle cx="88" cy="67" r="4.5"/></g>
     <path class="rg neck ${c("tFn")}" d="M78,29 L96,38 L94,50 L76,41 Z"/></g>
-    <text x="31" y="128" class="fl">Colonna</text><text x="127" y="128" class="fl">Femore</text>
+    <circle class="anc" data-k="tL" cx="22" cy="98" r="1"/><circle class="anc" data-k="tFn" cx="120" cy="40" r="1"/><circle class="anc" data-k="tFt" cx="141" cy="30" r="1"/>
   </svg>`;
 }
+/* linee sottili tra le scritte e le parti del disegno: si ricalcolano quando la card cambia misura (anche quando si apre) */
+function dxLines(m){
+  const sv = m.querySelector(".dxlines"), R = m.getBoundingClientRect(); if(!sv || !R.width) return;
+  sv.setAttribute("viewBox", `0 0 ${R.width} ${R.height}`);
+  sv.innerHTML = [...m.querySelectorAll(".dxlab[data-k]")].map(l => {
+    const a = m.querySelector(`.anc[data-k="${l.dataset.k}"]`), c = l.querySelector(".dxv"); if(!a || !c) return "";
+    const ra = a.getBoundingClientRect(), rc = c.getBoundingClientRect(), up = l.classList.contains("up");
+    const rl = l.getBoundingClientRect(), x1 = rc.left + rc.width / 2 - R.left, y1 = (up ? rl.bottom + 3 : rl.top - 3) - R.top, x2 = ra.left + ra.width / 2 - R.left, y2 = ra.top + ra.height / 2 - R.top;
+    /* le linee del femore passano sopra il disegno (scendono, vanno a destra, poi giù) per non attraversare la colonna né incrociarsi */
+    const fy = m.querySelector(".dxfig").getBoundingClientRect().top - R.top - 6;
+    const k = l.dataset.k, ly = k === "tFn" ? fy : fy - 9;
+    const pts = k === "tL" ? `${x1},${y1} ${x2},${y2}` : `${x1},${y1} ${x1},${ly} ${x2},${ly} ${x2},${y2}`;
+    return `<polyline points="${pts}"/><circle cx="${x2}" cy="${y2}" r="2.5"/>`; }).join("");
+}
+const dxRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(es => es.forEach(e => dxLines(e.target))) : null;
+new MutationObserver(() => document.querySelectorAll(".dxmap:not([data-ro])").forEach(m => { m.dataset.ro = "1"; if(dxRO) dxRO.observe(m); dxLines(m); })).observe(document.documentElement, { childList:true, subtree:true });
 function dxaCard(p, d, prev, big, noDel){
   const sites = SERIES.map(([k, nome]) => [k, nome, num(d[k])]).filter(x => x[2] !== null);
   const worst = sites.length ? Math.min(...sites.map(x => x[2])) : null, wc = worst !== null ? tsCat(worst) : null;
@@ -1149,9 +1165,13 @@ function dxaCard(p, d, prev, big, noDel){
     let tr = ""; if(pv !== null){ const dl = Math.round((v - pv) * 10) / 10;
       tr = Math.abs(dl) < TS_LSC ? `<em class="st">= stabile</em>` : dl > 0 ? `<em class="up">▲ migliorata di ${fmtN(dl)}</em>` : `<em class="dn">▼ peggiorata di ${fmtN(-dl)}</em>`; }
     return `<li class="t-${c[0]}"><span class="dxv">${fmtN(v)}</span><span class="dxn"><b>${nome}</b><small>${c[1].toLowerCase()}</small>${tr}</span></li>`; }).join("");
+  const lab = (k, up) => { const st = sites.find(x => x[0] === k); if(!st) return ""; const [, nome, v] = st, c = tsCat(v), pv = prev ? num(prev[k]) : null;
+    let tr = ""; if(pv !== null){ const dl = Math.round((v - pv) * 10) / 10;
+      tr = Math.abs(dl) < TS_LSC ? `<em class="st">= stabile</em>` : dl > 0 ? `<em class="up">▲ migliorata di ${fmtN(dl)}</em>` : `<em class="dn">▼ peggiorata di ${fmtN(-dl)}</em>`; }
+    return `<div class="dxlab t-${c[0]}${up ? " up" : ""}" data-k="${k}"><span class="dxv">${fmtN(v)}</span><span class="dxn"><b>${nome}</b><small>${c[1].toLowerCase()}</small>${tr}</span></div>`; };
   return `<div class="dxcard${big ? " big" : ""}">
     <div class="dxh"><span><small>Densitometria</small><b>${fmtD(d.data)}</b></span>${wc ? `<span class="dxw t-${wc[0]}">${wc[1]}</span>` : ""}</div>
-    <div class="dxbody">${rows ? dxaFig(d) : ""}<ul class="dxs">${rows || `<li class="none">Nessun T-score inserito</li>`}</ul></div>
+    ${rows ? `<div class="dxmap"><div class="dxtop">${lab("tFn", true)}${lab("tFt", true)}</div><div class="dxfigw">${dxaFig(d)}</div><div class="dxbot">${lab("tL", false)}</div><svg class="dxlines" aria-hidden="true"></svg></div>` : `<ul class="dxs"><li class="none">Nessun T-score inserito</li></ul>`}
     <div class="dxf">${prev ? `<small>Confronto con la DXA del ${fmtD(prev.data)}; sotto ${fmtN(TS_LSC)} è stabile.</small>` : "<small></small>"}${noDel ? "" : `<button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(d)}">Elimina</button>`}</div></div>`;
 }
 function vPazDxa(p){
