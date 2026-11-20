@@ -351,7 +351,7 @@ function vDecidi(p, inPanel){
   const okd = id => !(fl[id] && fl[id].ci.length), nmL = id => dnome(id).replace(/ \(.*\)$/, "").toLowerCase();
   const andL = a => a.length > 1 ? a.slice(0, -1).join(", ") + " e " + a[a.length - 1] : a[0] || "";
   const whyBest = id => { const c = n79of(id);
-    if(!c.length) return `<p class="dwhy out"><em>Fuori Nota 79</em>Con i dati inseriti il paziente non rientra in una condizione della Nota 79: il farmaco non sarebbe a carico del SSN. Verifica i dati o valuta l'invio allo specialista.</p>`;
+    if(!c.length) return `<div class="dst out"><i aria-hidden="true">!</i><div><em>Fuori Nota 79</em><p>Con i dati inseriti il paziente non rientra in una condizione della Nota 79: il farmaco non sarebbe a carico del SSN. Verifica i dati o valuta l'invio allo specialista.</p>${pendL()}</div></div>`;
     const lv = c.map(x => N79_LEV.indexOf(n79Lev(x, id))), m = Math.min(...lv), cc = c.filter((x, i) => lv[i] === m);
     let why = "";
     if(m > 0){ const first = [...new Set(cc.flatMap(x => x.s[0]))].filter(x => x !== id), no = first.filter(x => !okd(x)), si = first.filter(okd);
@@ -361,7 +361,8 @@ function vDecidi(p, inPanel){
       else if(si.length) why += ` Di I scelta restano ${andL(si.map(nmL))}: li trovi tra le altre opzioni.`; }
     if([T_, AB_, RO_].includes(id)) why += " La prescrive lo specialista con piano terapeutico: dal medico di medicina generale serve l'invio.";
     const nb = cc.find(x => x.nb); if(nb) why = " Solo " + nb.nb.replace(/^solo /, "") + "." + why;
-    return `<p class="dwhy"><em>Nota 79 AIFA · ${N79_LEV[m]} scelta</em>${hx(cc.map(x => x.cond).join(" / "))}.${why}</p>`; };
+    return `<div class="dst ok"><i aria-hidden="true">✓</i><div><em>Nota 79 AIFA · ${N79_LEV[m]} scelta</em><p>${hx(cc.map(x => x.cond).join(" / "))}.${why}</p>${pendL()}</div></div>`; };
+  const pendL = () => pend.length ? `<p class="dmanca">Da completare:</p><ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>` : "";
   const pend = nota79Pend(p, F), PSTEP = { chi:"dati", fx:"fratture", anam:"anamnesi", defra:"defra", dxa:"dxa" };
   const ls = labStatus(p), vd = num(p.vitd), lab = p.lab || {}, eg = num(p.egfr);
   const chk = []; let nDo = 0;
@@ -396,29 +397,51 @@ function vDecidi(p, inPanel){
       <div class="fspec-cur">${tt.map(t => `<div>${drugIcon(t.farmaco)}<span><b>${dnome(t.farmaco).replace(/ \(.*\)$/, "")}</b><small>dal ${fmtD(t.inizio)}</small></span></div>`).join("")}</div>
       <details class="fspec-ch"><summary>Lo specialista ha cambiato terapia</summary><p class="small">Scegli la nuova terapia: quella in corso si chiude alla data indicata, la nuova parte dallo stesso giorno.</p>${dt}${list}</details></div>`; })();
   let actions = "";
-  if(pr.tipo === "mmg" && pr.best) actions = `<button type="button" class="btn" data-fdec="mmg:${pr.best}">Prescrivo ${dnome(pr.best).replace(/ \(.*\)$/, "").toLowerCase()}</button><button type="button" class="btn sec" data-fdec="spec">Invia allo specialista</button>`;
+  if(pr.tipo === "mmg" && pr.best) actions = `<button type="button" class="btn sec" data-fdec="spec">Invia allo specialista</button><button type="button" class="btn" data-fdec="mmg:${pr.best}">Prescrivo ${dnome(pr.best).replace(/ \(.*\)$/, "").toLowerCase()}</button>`;
   else if(pr.tipo === "mmg") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
   else if(pr.ana) actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
-  else if(pr.tipo === "spec") actions = `<button type="button" class="btn" data-fdec="spec">Invia allo specialista</button><a class="btn sec" href="#paz-${p.id}-terapia">Imposto io la terapia</a>`;
-  else actions = `<button type="button" class="btn" data-fdec="nessuno">Confermo: nessun farmaco</button><a class="btn sec" href="#paz-${p.id}-terapia">Valuto un farmaco</a>`;
+  else if(pr.tipo === "spec") actions = `<a class="btn sec" href="#paz-${p.id}-terapia">Imposto io la terapia</a><button type="button" class="btn" data-fdec="spec">Invia allo specialista</button>`;
+  else actions = `<a class="btn sec" href="#paz-${p.id}-terapia">Valuto un farmaco</a><button type="button" class="btn" data-fdec="nessuno">Confermo: nessun farmaco</button>`;
   /* i fatti che contano, in una riga */
   const facts = [F.fx.length ? (FX_SEDI[F.fx[0].sede] || "Frattura").split(" / ")[0] + " " + fxData(F.fx[0].data) : "nessuna frattura", F.minT !== null ? "T-score " + fmtN(F.minT) : "", F.rischio !== null ? "rischio " + fmtN(F.rischio, 0) + "%" : ""].filter(Boolean).join(" · ");
   const sec = (t, badge, body, open) => `<details class="dsec"${open ? " open" : ""}><summary><span>${t}</span>${badge ? `<em class="dbadge">${badge}</em>` : ""}</summary><div class="dsec-b">${body}</div></details>`;
   const others = pr.tipo === "mmg" ? pr.opz.filter(id => id !== pr.best) : pr.tipo === "spec" ? pr.opz : [];
   const best = (pr.tipo === "mmg" || pr.ana) && pr.best ? pr.best : null;
+  const verdHTML = withAct => `
+    <div class="dverd z-${F.zona}">
+      <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} · ${ZONE[F.zona].r}</small>
+      ${best && !pr.paget ? "" : `<b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : pr.t}</b>`}
+      ${best ? `<div class="dbest${pr.paget ? "" : " wn"}"><div class="dbest-r">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span>${pr.paget ? `<em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em>` : ""}</div>${!pr.paget ? whyBest(best) : ""}</div>${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
+      ${pr.paget ? `<p class="dnote">${pr.s}</p>` : ""}
+      ${pr.tipo === "spec" ? `<p class="dnote">La lettera allo specialista è già compilata. Nell'attesa: calcio, vitamina D, prevenzione delle cadute.</p>` : pr.tipo === "nessuno" ? `<p class="dnote">${ZONE.verde.azione}</p>` : ""}
+      ${withAct ? `<div class="dact">${actions}</div>
+      ${cur ? `<p class="dcur">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}` : ""}
+    </div>`;
+  /* terapia avviata dal medico: la card diventa «Terapia in corso», con le tappe e la durata prevista */
+  const run = cur === "mmg" ? F.ther.filter(t => !t.fine) : [];
+  const runHTML = (() => { if(!run.length) return ""; const th = run[0], st = pDate(th.inizio), now = new Date();
+    const tp = []; tp.push([st, "Inizio", fmtD(th.inizio)]);
+    const nd = nextDose(th); if(nd) tp.push([nd, "Prossima " + doseWord(th.farmaco), fmtD(nd.toISOString().slice(0, 10))]);
+    if(F.lastDxa){ const ld = pDate(F.lastDxa.data), a = addMonths(ld, 18), b = addMonths(ld, 24); tp.push([a, "Densitometria di controllo", fmtM(a) + " – " + fmtM(b)]); }
+    else tp.push([now, "Densitometria", "da richiedere"]);
+    const fm = FINE_MESI[th.farmaco], ra = RIVAL_ANNI[th.farmaco], tot = fm || (ra ? ra * 12 : 0), end = tot && st ? addMonths(st, tot) : null;
+    if(end) tp.push([end, fm ? "Fine del trattamento, poi un antiriassorbitivo" : "Rivalutazione: proseguire o pausa", (fm ? "dopo " + plural(fm, "mese", "mesi") : "dopo " + plural(ra, "anno", "anni")) + " · " + fmtM(end)]);
+    tp.sort((x, y) => x[0] - y[0]);
+    const nx = tp.findIndex(x => x[0] > now);
+    const el = st ? Math.max(0, Math.min(1, (now - st) / (end - st || 1))) : 0;
+    return `<div class="drun"><small class="dzone run">Terapia in corso · decisa il ${fmtD(p.decisione.data)}</small>
+      <div class="dbest-r">${drugIcon(th.farmaco)}<span><b>${run.map(t => dnome(t.farmaco).replace(/ \(.*\)$/, "")).join(" + ")}</b><small>${DRUGS[th.farmaco] ? DRUGS[th.farmaco].via.replace(/\.$/, "") + " · " : ""}dal ${fmtD(th.inizio)}</small></span></div>
+      ${th.farmaco === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}
+      <ol class="dtl">${tp.map((x, k) => `<li class="${x[0] <= now ? "done" : k === nx ? "next" : ""}">${x[1]}<small>${x[2]}</small></li>`).join("")}</ol>
+      ${end ? `<div class="dprog" role="img" aria-label="Trascorso ${Math.round(el * 100)}% della durata prevista"><i style="width:${Math.max(2, el * 100)}%"></i></div><p class="dprog-l"><span>dal ${fmtM(st)}</span><span>Durata prevista: ${fm ? plural(fm, "mese", "mesi") : plural(ra, "anno", "anni")}</span></p>` : ""}
+      <div class="btns"><button type="button" class="btn sec" data-stop="${p.terapie.indexOf(th)}">Termina</button><a class="btn sec" href="#paz-${p.id}-foglio">Foglio per la paziente</a></div></div>`; })();
+  const todo = runHTML ? chk.filter(x => !x.includes('class="td ok"')) : chk;
   return { bar:"Decisione terapeutica", html: `
     ${inPanel ? "" : `<div class="dhead"><span class="dav" style="background-image:url(img/${fig}-viso.jpg)"></span><span><b>${hx(pzName(p))}</b><small>${F.age !== null ? F.age + " anni · " : ""}${facts}</small></span></div>`}
     ${secLevels(p, S).some(x => x.lev === 0) ? `<div class="dvh-a urg"><b>Urgenza medica se il calcio è molto alto</b>Con calcio oltre 14 mg/dL o sintomi (confusione, poliuria, disidratazione) sospetta un'ipercalcemia maligna: invio urgente in ospedale per idratazione e bisfosfonato endovena (denosumab se la funzione renale è ridotta). La terapia dell'osteoporosi viene dopo.</div>` : ""}
     ${cur === "spec" ? specBlk : ""}
-    <div class="dverd z-${F.zona}">
-      <small class="dzone"><i></i>Zona ${ZONE[F.zona].t.toLowerCase()} del DeFRA</small>
-      <b class="dtit">${pr.paget ? "Sospetto morbo di Paget" : best ? "Terapia consigliata" : pr.t}</b>
-      ${best ? `<div class="dbest${pr.paget ? "" : " wn"}"><div class="dbest-r">${drugIcon(best)}<span><b>${dnome(best).replace(/ \(.*\)$/, "")}</b><small>${DRUGS[best].via.replace(/\.$/, "")}</small></span>${pr.paget ? `<em class="dtag ${levTag(best)[0]}">${levTag(best)[1]}</em>` : ""}</div>${!pr.paget ? whyBest(best) : ""}</div>${best === D_ ? `<p class="dreb"><b>Rebound:</b> mai sospendere o ritardare le dosi; se si interrompe serve un bisfosfonato.</p>` : ""}` : ""}
-      ${pr.paget ? `<p class="dnote">${pr.s}</p>` : ""}
-      ${pr.tipo === "spec" ? `<p class="dnote">La lettera allo specialista è già compilata. Nell'attesa: calcio, vitamina D, prevenzione delle cadute.</p>` : pr.tipo === "nessuno" ? `<p class="dnote">${ZONE.verde.azione}</p>` : ""}
-      <div class="dact">${actions}</div>
-      ${cur ? `<p class="dcur">Decisione registrata il ${fmtD(p.decisione.data)}: ${DECISIONI[cur].t.toLowerCase()}.</p>` : ""}
-    </div>
+    ${runHTML || verdHTML(true)}
+
     ${(() => { const r = pr.paget ? [] : vh.filter(x => !/zona rossa/i.test(x)); if(!r.length) return "";
       /* l'invio per un anabolico si propone solo se il paziente rientra nella Nota 79, e si dice per quale farmaco */
       if(pr.ana) return `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}.</div>`;
@@ -427,10 +450,11 @@ function vDecidi(p, inPanel){
       const noL = A.no.map(x => `<li class="ci"><b>${nm(x.id)}</b>: in Nota 79 ma controindicato<small>${hx(x.ci.join("; "))}</small></li>`).join(""); /* senza un anabolico in Nota non si parla di anabolici: resta solo il rischio */
       return A.ok.length ? `<div class="dvh-a ana"><b>Rischio molto alto</b>${r.join("; ")}.<p>Rientra nella Nota 79 per ${A.ok.map(x => nm(x.id)).join(" e ")}: valuta l'invio allo specialista per la prescrizione con piano terapeutico.</p><ul>${okL}${noL}</ul></div>`
         : `<div class="dvh-a"><b>Rischio molto alto</b>${r.join("; ")}: inizia la terapia senza ritardi.</div>`; })()}
-    ${pend.length ? sec("Da completare per la Nota 79", pend.length, `<ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>`, false) : ""}
-    ${best ? sec("Dettagli del farmaco consigliato", "", drug(best, true), false) : ""}
-    ${others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : ""}
-    ${nDo ? sec("Prima della prima dose", nDo + " da fare", `<div class="todo fchk">${chk.join("")}</div>`, false) : ""}
+    ${nDo ? `<div class="dchk"><p class="fct">${runHTML ? "Ancora da fare" : "Prima della prima dose"}<em class="dbadge">${runHTML ? nDo : nDo + " da fare"}</em></p><div class="todo fchk">${todo.join("")}</div></div>` : ""}
+    ${pend.length && !best ? sec("Da completare per la Nota 79", pend.length, `<ul class="dpend">${pend.map(([k, t]) => `<li><a href="#paz-${p.id}-${PSTEP[k]}">${t}</a></li>`).join("")}</ul>`, false) : ""}
+    ${runHTML ? sec("Proposta iniziale e altre opzioni", "", verdHTML(false) + (best ? drug(best, false) : "") + others.map(id => drug(id, false)).join(""), false) + sec("Cambia decisione", "", `<div class="dact">${actions}</div>`, false)
+      : (best ? sec("Perché " + nmL(best) + " e altre opzioni", others.length || "", drug(best, true) + others.map(id => drug(id, false)).join(""), false)
+      : others.length ? sec(pr.tipo === "spec" ? "Cosa potrà valutare lo specialista" : "Altre opzioni", others.length, others.map(id => drug(id, false)).join(""), false) : "")}
     <p class="small">Ausilio alla decisione: la scelta resta del medico. Verifica il testo vigente della <a href="#guida-nota79">Nota 79</a> e le schede tecniche.</p>` };
 }
 

@@ -1248,6 +1248,42 @@ details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
 .dfhist svg{display:block;width:100%;height:auto;border-radius:8px}
 .dfhist .hz{font-size:10px;font-weight:700} .dfhist .hv{font-size:10px;font-weight:800;text-anchor:middle}
 .dfhist .hd{font-size:10px;fill:var(--muted);text-anchor:middle}
+/* terapia: proposta in una card bianca come le altre schede; dopo «Prescrivo» diventa «Terapia in corso» */
+.fsheet-b .dverd,.fsheet-b .drun,.fsheet-b .dchk,.fpanel .dverd,.fpanel .drun,.fpanel .dchk,.dverd,.drun,.dchk{background:#fff;border:1px solid #E2E5EA;border-top:1px solid #E2E5EA;border-radius:16px;padding:14px;gap:10px}
+.dverd .dzone,.drun .dzone{color:var(--muted);opacity:1}
+.drun{display:flex;flex-direction:column;border-top:4px solid var(--teal)} .drun .dzone.run{color:var(--teal)}
+.dverd .dbest,.dverd .dbest.wn{background:none;padding:0;border-radius:0;overflow:visible;gap:10px}
+.dverd .dbest-r,.drun .dbest-r{padding:0;display:flex;align-items:center;gap:12px}
+.dbest-r .dic{width:44px;height:44px;flex:0 0 auto;background:#EEEAFB;border-radius:12px;padding:5px;overflow:visible}
+.dbest-r b{display:block;font-size:1.15rem} .dbest-r small{display:block;font-size:.8rem;color:var(--muted);line-height:1.35}
+.dst{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:10px 12px;font-size:.8rem;line-height:1.45}
+.dst.out{background:#FBEAE6} .dst.ok{background:#E3F3EE}
+.dst > i{width:20px;height:20px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;color:#fff;font-style:normal;font-weight:800;font-size:.75rem;margin-top:1px}
+.dst.out > i{background:var(--coral)} .dst.ok > i{background:var(--teal)}
+.dst > div{flex:1;min-width:0} .dst em{display:block;font-style:normal;font-weight:800;font-size:.84rem;margin-bottom:2px}
+.dst.out em{color:var(--coral)} .dst.ok em{color:var(--teal)}
+.dst p{margin:0;text-align:justify;hyphens:auto;-webkit-hyphens:auto;color:var(--ink)}
+.dst p em{display:inline;font-weight:400;font-size:inherit;color:inherit}
+.dst .dmanca{margin-top:6px;font-weight:700} .dst .dpend{margin-top:2px;font-size:.8rem;gap:3px} .dst .dpend a{color:var(--pri);font-weight:600}
+/* due pulsanti sulla stessa riga, a destra; il principale per ultimo */
+.dact,.dact.dact{flex-direction:row;flex-wrap:nowrap;justify-content:flex-end;gap:8px;margin-top:2px}
+.dact .btn,.dact .btn.btn{width:auto;flex:0 1 auto;min-width:0;white-space:normal;text-align:center;padding:10px 14px;font-size:.88rem;line-height:1.2}
+/* «Prima della prima dose» sempre aperta */
+.dchk{display:block;margin:12px 0 8px} .dchk .fct{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dchk .dbadge{background:#FDECC8;color:#8A5A00;letter-spacing:0;text-transform:none}
+.dchk .fchk{display:flex;flex-direction:column;gap:6px}
+/* tappe della terapia in corso */
+.dtl{list-style:none;margin:4px 0 0;padding:0 0 0 24px;position:relative}
+.dtl::before{content:"";position:absolute;left:7px;top:8px;bottom:14px;width:2px;background:#D5DAE1}
+.dtl li{position:relative;padding:3px 0 10px;font-size:.86rem}
+.dtl li::before{content:"";position:absolute;left:-23px;top:6px;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #C9CDD5;box-sizing:border-box}
+.dtl li.done::before{background:var(--teal);border-color:var(--teal)}
+.dtl li.next{font-weight:700} .dtl li.next::before{background:var(--pri);border-color:var(--pri);box-shadow:0 0 0 4px #EEEAFB}
+.dtl small{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
+.dprog{height:8px;border-radius:4px;background:#E6E8EC;overflow:hidden} .dprog i{display:block;height:100%;background:var(--teal);border-radius:4px}
+.dprog-l{display:flex;justify-content:space-between;margin:4px 0 0;font-size:.72rem;color:var(--muted)}
+.drun .btns{margin:4px 0 0}
+.dsec .dverd{border:0;padding:0 0 10px;margin-bottom:6px;border-bottom:1px solid #EEF0F3;border-radius:0}
 </style>
 </head>
 <body>
