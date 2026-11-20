@@ -1162,6 +1162,18 @@ details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
 .fsheet-b .vrow .lv{width:72px}
 .fsheet-b .dvh-a{position:relative;background:#fff;border:1px solid #E2E5EA;border-radius:16px;padding:12px 14px 12px 18px;margin:0}
 .fsheet-b .dvh-a::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:16px 0 0 16px;background:var(--coral)}
+/* densitometria: disegno di colonna e femore accanto ai T-score */
+.dxbody{display:flex;align-items:center;gap:14px;padding-top:8px}
+.dxfig{width:112px;flex:0 0 auto;height:auto;overflow:visible}
+.dxcard:not(.big) .dxfig{width:84px}
+.dxbody .dxs{flex:1;min-width:0;padding-top:0}
+.dxfig .rg{stroke:#fff;stroke-width:1.5}
+.dxfig .rg.t-op{fill:var(--coral)} .dxfig .rg.t-on{fill:#E3B21A} .dxfig .rg.t-ok{fill:var(--teal)} .dxfig .rg.t-na{fill:#D5DAE1}
+.dxfig .neck{stroke-width:2}
+.dxfig .fem.t-op{fill:var(--coral)} .dxfig .fem.t-on{fill:#E3B21A} .dxfig .fem.t-ok{fill:var(--teal)} .dxfig .fem.t-na{fill:#D5DAE1}
+.dxfig .vl{font-size:8px;font-weight:800;fill:#fff;text-anchor:middle;dominant-baseline:middle}
+.dxfig .fl{font-size:9px;font-weight:700;fill:var(--muted);text-anchor:middle}
+.dxn em{display:block;margin-top:1px}
 </style>
 </head>
 <body>

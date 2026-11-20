@@ -1121,16 +1121,29 @@ function dxaChartHTML(F, p){
 const TS_LSC = 0.2;
 const tsCat = v => v <= -2.5 ? ["op", "Osteoporosi"] : v < -1 ? ["on", "Osteopenia"] : ["ok", "Normale"];
 /* una densitometria = una scheda: la data in testa, sotto i tre siti con il loro T-score e il confronto con la DXA precedente */
+/* disegno semplice di colonna lombare (L1–L4) e femore prossimale: ogni sito colorato come il suo T-score
+   (rosso osteoporosi, giallo osteopenia, verde normale, grigio se manca); il collo femorale è una zona a parte del femore */
+function dxaFig(d){
+  const c = k => { const v = num(d[k]); return v === null ? "t-na" : "t-" + tsCat(v)[0]; };
+  const vert = [0, 1, 2, 3].map(i => { const y = 8 + i * 27; return `<rect class="rg ${c("tL")}" x="14" y="${y}" width="30" height="21" rx="5"/><rect class="rg ${c("tL")}" x="5" y="${y + 7}" width="10" height="6" rx="2"/><rect class="rg ${c("tL")}" x="43" y="${y + 7}" width="10" height="6" rx="2"/><text x="29" y="${y + 11}" class="vl">L${i + 1}</text>`; }).join("");
+  return `<svg class="dxfig" viewBox="0 0 124 132" role="img" aria-label="Colonna lombare e femore con i siti colorati secondo il T-score">
+    <g>${vert}</g>
+    <g class="fem ${c("tFt")}"><circle cx="70" cy="30" r="12"/><path d="M73,22 L99,34 L97,53 L71,41 Z"/>
+      <path d="M93,32 Q103,21 111,29 L111,47 Q104,58 104,72 L106,120 L89,120 L89,75 Q89,60 85,52 Z"/><circle cx="88" cy="67" r="4.5"/></g>
+    <path class="rg neck ${c("tFn")}" d="M78,29 L96,38 L94,50 L76,41 Z"/>
+    <text x="29" y="128" class="fl">Colonna</text><text x="98" y="128" class="fl">Femore</text>
+  </svg>`;
+}
 function dxaCard(p, d, prev, big, noDel){
   const sites = SERIES.map(([k, nome]) => [k, nome, num(d[k])]).filter(x => x[2] !== null);
   const worst = sites.length ? Math.min(...sites.map(x => x[2])) : null, wc = worst !== null ? tsCat(worst) : null;
   const rows = sites.map(([k, nome, v]) => { const c = tsCat(v), pv = prev ? num(prev[k]) : null;
     let tr = ""; if(pv !== null){ const dl = Math.round((v - pv) * 10) / 10;
       tr = Math.abs(dl) < TS_LSC ? `<em class="st">= stabile</em>` : dl > 0 ? `<em class="up">▲ migliorata di ${fmtN(dl)}</em>` : `<em class="dn">▼ peggiorata di ${fmtN(-dl)}</em>`; }
-    return `<li class="t-${c[0]}"><span class="dxv">${fmtN(v)}</span><span class="dxn"><b>${nome}</b><small>${c[1].toLowerCase()}</small></span>${tr}</li>`; }).join("");
+    return `<li class="t-${c[0]}"><span class="dxv">${fmtN(v)}</span><span class="dxn"><b>${nome}</b><small>${c[1].toLowerCase()}</small>${tr}</span></li>`; }).join("");
   return `<div class="dxcard${big ? " big" : ""}">
     <div class="dxh"><span><small>Densitometria</small><b>${fmtD(d.data)}</b></span>${wc ? `<span class="dxw t-${wc[0]}">${wc[1]}</span>` : ""}</div>
-    <ul class="dxs">${rows || `<li class="none">Nessun T-score inserito</li>`}</ul>
+    <div class="dxbody">${rows ? dxaFig(d) : ""}<ul class="dxs">${rows || `<li class="none">Nessun T-score inserito</li>`}</ul></div>
     <div class="dxf">${prev ? `<small>Confronto con la DXA del ${fmtD(prev.data)}; sotto ${fmtN(TS_LSC)} è stabile.</small>` : "<small></small>"}${noDel ? "" : `<button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(d)}">Elimina</button>`}</div></div>`;
 }
 function vPazDxa(p){
