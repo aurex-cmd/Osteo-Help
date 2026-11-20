@@ -38,7 +38,7 @@ const figViso = p => { const f = figOf(p); return f ? `img/${f}-viso.jpg` : null
 /* stato della vista: quale riquadro è aperto */
 const FIG = { open:null, anim:false };
 const FIG_SHEETS = {
-  chi:   { t:"Chi è", ic:secIcon("chi"), k:"dati", body: p => `<p class="sub">Anagrafica, peso e altezza, menopausa e familiarità.</p>` + datiAnag(p) + `<label class="fld">Note<textarea class="area" data-pf="note" rows="3" placeholder="facoltative">${hx(p.note)}</textarea></label>` },
+  chi:   { t:"Chi è", ic:secIcon("chi"), k:"dati", body: p => `<p class="sub">Anagrafica, peso e altezza, menopausa e familiarità.</p>` + datiAnag(p) + `<div class="fcard"><p class="fct">Note</p><textarea class="area" data-pf="note" rows="3" placeholder="facoltative" aria-label="Note">${hx(p.note)}</textarea></div>` },
   fx:    { t:"Fratture", ic:secIcon("fx"), k:"fratture", body: p => datiFx(p, true) },
   anam:  { t:"Anamnesi e farmaci", ic:secIcon("anam"), k:"anamnesi", body: p => noHead(vPazAnamnesi(p).html) },
   esami: { t:"Esami del sangue", ic:secIcon("esami"), k:"esami", body: p => noHead(vPazEsami(p).html) },

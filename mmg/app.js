@@ -810,7 +810,7 @@ function fxEditSave(p, row){
 const ckPz = (attr, key, on, txt) => `<button type="button" class="ck" ${attr}="${key}" aria-pressed="${!!on}"><span class="cb">${TICK}</span><span>${txt}</span></button>`;
 function datiAnag(p){
   const F = pzFacts(p);
-  return `
+  return `<div class="fcard"><p class="fct">Dati</p>
     <div class="grid2">
       <label class="fld" style="grid-column:1/-1">Nome, iniziali o codice<input type="text" data-pf="nome" value="${hx(p.nome)}" autocomplete="off"></label>
       <label class="fld">Data di nascita<input type="date" data-pf="nascita" value="${hx(p.nascita)}"></label>
@@ -818,9 +818,10 @@ function datiAnag(p){
       <label class="fld">Peso (kg)<input type="text" inputmode="decimal" autocomplete="off" data-pf="peso" value="${hx(p.peso)}"></label>
       <label class="fld">Altezza (cm)<input type="text" inputmode="decimal" autocomplete="off" data-pf="altezza" value="${hx(p.altezza)}"></label>
     </div>
-    <p class="small" data-live="bmi">${bmiTxt(F)}</p>
+    <p class="small" data-live="bmi">${bmiTxt(F)}</p></div>
+    <div class="fcard"><p class="fct">${p.sesso === "donna" ? "Menopausa e familiarità" : "Familiarità"}</p>
     ${p.sesso === "donna" ? `<div class="fld">In postmenopausa?<div class="seg" role="group">${segPz("postmeno", true, "Sì", p.postmeno)}${segPz("postmeno", false, "No", p.postmeno)}</div></div>` : ""}
-    <div class="fld">Frattura di femore o vertebrale in uno dei genitori?<div class="seg" role="group">${segPz("fam", true, "Sì", p.fam)}${segPz("fam", false, "No", p.fam)}</div></div>`;
+    <div class="fld">Frattura di femore o vertebrale in uno dei genitori?<div class="seg" role="group">${segPz("fam", true, "Sì", p.fam)}${segPz("fam", false, "No", p.fam)}</div></div></div>`;
 }
 function datiFx(p, sheet){
   const F = pzFacts(p);

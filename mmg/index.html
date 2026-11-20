@@ -1138,6 +1138,30 @@ details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
 .vrow [data-trirow]{display:flex}
 .pzax > summary small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){details.acc > summary .chev{transition:none}}
+/* stile unico delle schede dei passi: fondo grigio chiaro, ogni blocco una card bianca con bordo sottile;
+   etichette nere; il colore solo per pulsanti, scelte e significato (zone, avvisi, T-score) */
+.fcard{display:flex;flex-direction:column;gap:12px}
+.fct{margin:0;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fsheet-b{background:#F3F4F7}
+.fsheet-b .fld{color:var(--ink);font-size:.84rem}
+.fsheet-b .fld input,.fsheet-b .fld select,.fsheet-b .area,.fsheet-b .lv{background:#F7F8FA;border-color:#D5DAE1}
+.fsheet-b .fcard,.fsheet-b .gestbox,.fsheet-b > .addbox,.fsheet-b .fxadd,.fsheet-b .dxcard,.fsheet-b .dxadd,.fsheet-b .alert,
+.fsheet-b details.pzax,.fsheet-b .dsec,.fsheet-b .fxed,.fsheet-b [data-live="amuta"] > *,.fsheet-b .lgrp,.fsheet-b > .grid2,
+.fsheet-b figure.chart,.fsheet-b .supbox,.fsheet-b .vdprop{background:#fff;border:1px solid #E2E5EA;border-radius:16px;box-shadow:none}
+.fsheet-b .fcard,.fsheet-b .gestbox,.fsheet-b .fxadd,.fsheet-b > .grid2,.fsheet-b figure.chart{padding:14px}
+.fsheet-b .lgrp{padding:10px 14px 4px} .fsheet-b .lgrp > .lbl{margin-top:2px}
+.fsheet-b details.pzax,.fsheet-b .dsec{padding:0 14px;margin:0 0 8px} .fsheet-b .dsec:first-of-type{margin-top:0}
+.fsheet-b .fxed{background:#fff}
+.fsheet-b .dxadd .addbox{background:none;border:0;padding:0 4px 4px}
+.fsheet-b .dxadd[open]{border-color:var(--pri)}
+.fsheet-b .alert{padding-left:18px;background:#fff}
+.fsheet-b .gestbox-t{color:var(--ink)}
+.fsheet-b [data-live="amuta"] > *{padding:12px 14px}
+.fsheet-b figure.chart{margin:0}
+.fsheet-b .lgrp + .lgrp{margin-top:10px}
+.fsheet-b .vrow .lv{width:72px}
+.fsheet-b .dvh-a{position:relative;background:#fff;border:1px solid #E2E5EA;border-radius:16px;padding:12px 14px 12px 18px;margin:0}
+.fsheet-b .dvh-a::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:16px 0 0 16px;background:var(--coral)}
 </style>
 </head>
 <body>
