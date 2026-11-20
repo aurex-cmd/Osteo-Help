@@ -1217,6 +1217,14 @@ details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
 .dxinfo{display:flex;align-items:center;gap:10px;margin:0;flex:1;min-width:0;padding:8px 12px;border-radius:12px;background:var(--blue-box);font-size:.78rem;color:var(--ink);line-height:1.35}
 .dxinfo i{width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-style:normal;font-weight:800;font-size:.75rem;display:grid;place-items:center;flex:0 0 auto;font-family:Georgia,serif}
 .dxf{gap:10px;padding-top:12px}
+/* densitometria in rilievo: le sfumature stanno nel disegno; i dischi la ricevono nello style */
+.dxfig .shade{pointer-events:none}
+.dxfig .vl{paint-order:stroke;stroke:rgba(0,0,0,.18);stroke-width:1.2px}
+.dxfig .vl.t-on,.dxfig .vl.t-na{stroke:rgba(255,255,255,.4)}
+/* + di «Aggiungi»: croce disegnata, così sta al centro esatto del cerchio (e ruotata diventa una X centrata) */
+.dxplus{position:relative;font-size:0;transition:transform .2s}
+.dxplus::before,.dxplus::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:2.5px;border-radius:2px;background:#fff;transform:translate(-50%,-50%)}
+.dxplus::after{transform:translate(-50%,-50%) rotate(90deg)}
 </style>
 </head>
 <body>

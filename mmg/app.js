@@ -1134,15 +1134,26 @@ function dxaFig(d){
     `M${x},${y + 4} Q${x},${y} ${x + 4},${y} L${x + w - 4},${y} Q${x + w},${y} ${x + w},${y + 4} Q${x + w - 2},${y + h / 2} ${x + w},${y + h - 4} Q${x + w},${y + h} ${x + w - 4},${y + h} L${x + 4},${y + h} Q${x},${y + h} ${x},${y + h - 4} Q${x + 2},${y + h / 2} ${x},${y + 4} Z`];
   const ys = [0, 1, 2, 3].map(i => 6 + i * 27);
   const vshape = ys.map((y, i) => vb(y, W[i]).map(dd => `<path d="${dd}"/>`).join("")).join("");
-  const discs = ys.slice(0, 3).map(y => `<rect class="disc" x="${x + 3}" y="${y + h + 1}" width="${w - 6}" height="4" rx="2"/>`).join("");
-  const rois = ys.map((y, i) => `<rect class="roi ${cl}" x="${x + 5}" y="${y + 3.5}" width="${w - 10}" height="${h - 7}" rx="3"/><text x="${x + w / 2}" y="${y + h / 2 + .5}" class="vl ${cl}">L${i + 1}</text>`).join("");
+  /* rilievo: sfumature sopra ossa e zone colorate (corpo vertebrale e diafisi come cilindri, testa del femore come sfera) */
+  const g = id + "g", sh = ys.map((y, i) => { const [pl, pr, bd] = vb(y, W[i]); return `<path d="${pl}" fill="url(#${g}v)"/><path d="${pr}" fill="url(#${g}v)"/><path d="${bd}" fill="url(#${g}h)"/>`; }).join("");
+  const femSh = `<circle cx="70" cy="30" r="12" fill="url(#${g}s)"/><path d="M73,22 L99,34 L97,53 L71,41 Z" fill="url(#${g}n)"/><path d="M93,32 Q103,21 111,29 L111,47 Q104,58 104,72 L106,116 L89,116 L89,75 Q89,60 85,52 Z" fill="url(#${g}h)"/><circle cx="88" cy="67" r="4.5" fill="url(#${g}s)"/>`;
+  const cyl = `<stop offset="0" stop-color="#5A3C14" stop-opacity=".38"/><stop offset=".3" stop-color="#fff" stop-opacity=".45"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#5A3C14" stop-opacity=".42"/>`;
+  const defs = `<linearGradient id="${g}h" x1="0" y1="0" x2="1" y2="0">${cyl}</linearGradient><linearGradient id="${g}v" x1="0" y1="0" x2="0" y2="1">${cyl}</linearGradient>
+    <linearGradient id="${g}n" x1=".62" y1="0" x2=".38" y2="1">${cyl}</linearGradient>
+    <radialGradient id="${g}s" cx=".36" cy=".32" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#5A3C14" stop-opacity=".45"/></radialGradient>
+    <linearGradient id="${g}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#DCE3EA"/></linearGradient>
+    <filter id="${g}f" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="1.5" dy="2" stdDeviation="1.6" flood-color="#5A3C14" flood-opacity=".22"/></filter>`;
+  const discs = ys.slice(0, 3).map(y => `<rect class="disc" x="${x + 3}" y="${y + h + 1}" width="${w - 6}" height="4" rx="2" style="fill:url(#${id}gd)"/>`).join("");
+  const rois = ys.map(y => `<rect class="roi ${cl}" x="${x + 5}" y="${y + 3.5}" width="${w - 10}" height="${h - 7}" rx="3"/>`).join(""),
+    vls = ys.map((y, i) => `<text x="${x + w / 2}" y="${y + h / 2 + .5}" class="vl ${cl}">L${i + 1}</text>`).join("");
   const fem = `<circle cx="70" cy="30" r="12"/><path d="M73,22 L99,34 L97,53 L71,41 Z"/><path d="M93,32 Q103,21 111,29 L111,47 Q104,58 104,72 L106,116 L89,116 L89,75 Q89,60 85,52 Z"/><circle cx="88" cy="67" r="4.5"/>`;
   return `<svg class="dxfig" viewBox="0 0 156 120" role="img" aria-label="Colonna lombare e femore con le zone della densitometria colorate secondo il T-score">
-    <defs><clipPath id="${id}" transform="translate(34,0)">${fem}</clipPath></defs>
-    <g class="bone-o">${vshape}</g><g class="bone">${vshape}</g>${discs}${rois}
-    <g transform="translate(34,0)"><g class="bone-o">${fem}</g><g class="bone">${fem}</g></g>
+    <defs><clipPath id="${id}" transform="translate(34,0)">${fem}</clipPath>${defs}</defs>
+    <g class="bone-o" filter="url(#${g}f)">${vshape}</g><g class="bone">${vshape}</g>${discs}${rois}<g class="shade">${sh}</g>${vls}
+    <g transform="translate(34,0)"><g class="bone-o" filter="url(#${g}f)">${fem}</g><g class="bone">${fem}</g></g>
     <g clip-path="url(#${id})"><path class="roi ${c("tFt")}" transform="translate(34,0)" d="M80,26 L99,33 L103,25 L113,27 L113,49 L106,61 L106,78 L87,78 L86,61 L83,54 L76,46 Z"/></g>
     <path class="roi neck ${c("tFn")}" transform="translate(34,0)" d="M79,29 L96,37.5 L93,50 L76,41.5 Z"/>
+    <g class="shade" transform="translate(34,0)">${femSh}</g>
     <circle class="anc" data-k="tL" cx="18" cy="9" r="1"/><circle class="anc" data-k="tFn" cx="120" cy="40" r="1"/><circle class="anc" data-k="tFt" cx="136" cy="62" r="1"/>
   </svg>`;
 }
