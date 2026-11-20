@@ -1193,6 +1193,30 @@ details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
 .dxlines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 .dxlines polyline{fill:none;stroke:#9AA3AF;stroke-width:1;stroke-linejoin:round} .dxlines circle{fill:#fff;stroke:#5B6472;stroke-width:1}
 .dxfig .anc{fill:none}
+/* densitometria, versione con le ossa color osso: colonna in alto a sinistra, collo e femore totale a destra del femore */
+.dxmap{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);grid-template-areas:"tL tL" "fig tFn" "fig tFt";column-gap:10px;row-gap:8px;padding-top:10px;align-items:start}
+.dxmap .dxfigw{grid-area:fig;padding:6px 0 0;justify-content:center}
+.dxmap [data-k="tL"]{justify-self:start;max-width:75%}
+.dxmap #tFt,.dxmap [data-k="tFt"]{align-self:end}
+.dxmap .dxfig{width:100%;max-width:190px}
+.dxlab{max-width:none;padding:8px 10px;border-radius:14px;background:var(--teal-box);gap:8px;align-items:center}
+.dxlab.t-op{background:#FBEAE6} .dxlab.t-on{background:#FCF4DC}
+.dxlab .dxn{display:flex;flex-direction:column;min-width:0}
+.dxlab .dxn small{font-weight:700;color:var(--teal)} .dxlab.t-on .dxn small{color:#8A6A00} .dxlab.t-op .dxn small{color:var(--coral)}
+.dxlab .dxn em{border-top:1px solid rgba(0,0,0,.08);margin-top:4px;padding-top:3px;white-space:normal}
+.dxlab .dxn b{font-size:.84rem} .dxlab{padding:8px 9px;gap:7px}
+.dxlab.t-ok .dxv{background:var(--teal)}
+.dxfig .bone{fill:#F4E9D6} .dxfig .bone-o{fill:#F4E9D6;stroke:#D9C7A6;stroke-width:2.2;stroke-linejoin:round}
+.dxfig .disc{fill:#fff;stroke:#E4D7BF;stroke-width:.8}
+.dxfig .roi.t-op{fill:#C24A33} .dxfig .roi.t-on{fill:#E8B21E} .dxfig .roi.t-ok{fill:var(--teal)} .dxfig .roi.t-na{fill:#D5DAE1}
+.dxfig g[clip-path] .roi{opacity:.85}
+.dxfig .roi.neck{stroke:#fff;stroke-width:1.6}
+.dxfig .vl{fill:#fff} .dxfig .vl.t-on,.dxfig .vl.t-na{fill:#3D2F00}
+.dxlines polyline{stroke-width:1.2;stroke:#9AA3AF} .dxlines circle{fill:#fff;stroke-width:2;stroke:#9AA3AF}
+.dxlines .t-op{stroke:#C24A33} .dxlines .t-on{stroke:#C99A12} .dxlines .t-ok{stroke:var(--teal)}
+.dxinfo{display:flex;align-items:center;gap:10px;margin:0;flex:1;min-width:0;padding:8px 12px;border-radius:12px;background:var(--blue-box);font-size:.78rem;color:var(--ink);line-height:1.35}
+.dxinfo i{width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-style:normal;font-weight:800;font-size:.75rem;display:grid;place-items:center;flex:0 0 auto;font-family:Georgia,serif}
+.dxf{gap:10px;padding-top:12px}
 </style>
 </head>
 <body>
