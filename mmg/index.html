@@ -1227,6 +1227,27 @@ details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
 .dxplus::after{transform:translate(-50%,-50%) rotate(90deg)}
 /* densitometria: nome del sito più grande, categoria e confronto più piccoli */
 .dxlab .dxn b{font-size:.95rem;line-height:1.2} .dxlab .dxn small{font-size:.7rem;line-height:1.3} .dxlab .dxn em{font-size:.66rem}
+/* DeFRA: barra a quattro zone con il segno sulla zona indicata, e sotto la storia dei DeFRA */
+.dfbar{background:#fff;border:1px solid #E2E5EA;border-radius:16px;padding:14px 16px 16px}
+.dfb-d{display:block;font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dfb-t{display:block;font-size:1.15rem;margin:2px 0 0;line-height:1.25}
+.dfb-s{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:46px 0 8px}
+.dfb-s.nop{margin-top:18px}
+.dfb-s > i{height:14px;border-radius:7px;background:var(--zc)}
+.dfb-ring{position:absolute;left:var(--x);top:-5px;width:24px;height:24px;border-radius:50%;background:#fff;border:5px solid var(--zc);transform:translateX(-50%);box-sizing:border-box;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.dfb-pin{position:absolute;left:var(--x);bottom:calc(100% + 12px);transform:translateX(-50%);background:var(--zc);color:#fff;font-weight:800;font-size:1rem;padding:4px 10px;border-radius:10px;white-space:nowrap}
+.dfb-pin::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--zc);border-bottom:0}
+.dfbar.z-gialla .dfb-pin{color:#3D2F00}
+.dfb-l{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center;font-size:.68rem;color:var(--muted)}
+.dfb-l b{display:block;font-size:.76rem;color:var(--ink)} .dfb-l .on b{color:var(--zc)}
+.dfbar.z-gialla .dfb-l .on b{color:#9A7400}
+.dfb-w{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:10px;font-size:.7rem;font-weight:700;text-align:center;color:var(--muted)}
+.dfb-w span{border-top:2px solid #D5DAE1;padding-top:5px} .dfb-w .on{border-color:var(--zc);color:var(--ink)}
+.dfhist{margin:12px 0 0;background:#fff;border:1px solid #E2E5EA;border-radius:16px;padding:14px 16px}
+.dfhist figcaption{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.dfhist svg{display:block;width:100%;height:auto;border-radius:8px}
+.dfhist .hz{font-size:10px;font-weight:700} .dfhist .hv{font-size:10px;font-weight:800;text-anchor:middle}
+.dfhist .hd{font-size:10px;fill:var(--muted);text-anchor:middle}
 </style>
 </head>
 <body>

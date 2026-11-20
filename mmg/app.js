@@ -976,6 +976,31 @@ function vPazEsami(p){
 }
 
 /* ---------- 4 · DeFRA ---------- */
+/* DeFRA come barra a quattro zone: il segno sta sulla zona indicata (le soglie cambiano con l'età, quindi non è una scala di percentuali);
+   sotto, chi segue la paziente: medico di famiglia per verde e gialla, specialista per arancione e rossa */
+const ZLIV = { verde:"basso", gialla:"moderato", arancione:"alto", rossa:"altissimo" };
+const ZCOL = { verde:["#3A9A3A", "#E6F3E4"], gialla:["#E3B21A", "#FBF3D6"], arancione:["#E8641E", "#FCE9DC"], rossa:["#B3261E", "#F8E3E1"] };
+function defraBar(d){
+  const z = d.zona, i = ZONE_ORDER.indexOf(z), rc = ZONE[z], r = num(d.rischio), sp = i >= 2;
+  return `<div class="dfbar z-${z}"><small class="dfb-d">DeFRA · ${fmtD(d.data)}</small><b class="dfb-t">Zona ${rc.t.toLowerCase()} · ${rc.r}</b>
+    <div class="dfb-s${r === null ? " nop" : ""}" style="--x:${(i + .5) * 25}%">${ZONE_ORDER.map(k => `<i class="z-${k}"></i>`).join("")}<span class="dfb-ring"></span>${r !== null ? `<span class="dfb-pin">${fmtN(r, 0)}%</span>` : ""}</div>
+    <div class="dfb-l">${ZONE_ORDER.map(k => `<span${k === z ? ` class="on"` : ""}><b>${ZONE[k].t}</b>${ZLIV[k]}</span>`).join("")}</div>
+    <div class="dfb-w"><span${sp ? "" : ` class="on"`}>Medico di famiglia</span><span${sp ? ` class="on"` : ""}>Specialista dell'osso${z === "rossa" ? ", con priorità" : ""}</span></div></div>`;
+}
+/* storia dei DeFRA: le zone come fasce, un pallino per ogni DeFRA (con la percentuale se c'è); solo con almeno due DeFRA */
+function defraHist(F){
+  const L = F.defra.filter(d => ZONE[d.zona] && pDate(d.data)).slice().reverse(); if(L.length < 2) return "";
+  const W = 340, H = 140, x0 = 92, x1 = W - 32, bh = 30, t0 = pDate(L[0].data).getTime(), t1 = pDate(L[L.length - 1].data).getTime();
+  const X = d => t1 === t0 ? (x0 + x1) / 2 : x0 + (pDate(d.data).getTime() - t0) / (t1 - t0) * (x1 - x0), Y = z => (3 - ZONE_ORDER.indexOf(z)) * bh + bh / 2;
+  const bands = ZONE_ORDER.slice().reverse().map((z, k) => `<rect x="0" y="${k * bh}" width="${W}" height="${bh}" fill="${ZCOL[z][1]}"/><text x="8" y="${k * bh + 19}" class="hz" fill="${z === "gialla" ? "#9A7400" : ZCOL[z][0]}">${ZONE[z].t}</text>`).join("");
+  const pts = L.map(d => [X(d), Y(d.zona)]);
+  const lab = L.length <= 4 ? L : [L[0], L[L.length - 1]];
+  const dots = L.map((d, k) => { const r = num(d.rischio), big = k === L.length - 1;
+    return `<circle cx="${pts[k][0]}" cy="${pts[k][1]}" r="${r !== null ? (big ? 13 : 11) : 6}" fill="${ZCOL[d.zona][0]}" stroke="#fff" stroke-width="2"/>${r !== null ? `<text x="${pts[k][0]}" y="${pts[k][1] + 3.6}" class="hv" fill="${d.zona === "gialla" ? "#3D2F00" : "#fff"}">${fmtN(r, 0)}</text>` : ""}`; }).join("");
+  return `<figure class="dfhist"><figcaption>Zona del DeFRA nel tempo</figcaption><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Zona del DeFRA nel tempo">${bands}
+    <polyline points="${pts.map(q => q.join(",")).join(" ")}" fill="none" stroke="#1F2433" stroke-width="1.6"/>${dots}
+    ${lab.map(d => `<text x="${X(d)}" y="${4 * bh + 15}" class="hd">${fmtM(pDate(d.data))}</text>`).join("")}</svg></figure>`;
+}
 function vPazDefra(p){
   const F = pzFacts(p), rc = riskCat(F.zona);
   const hist = F.defra.map(d => `<li class="rec"><span><b>${zchip(d.zona)}</b><small>${fmtD(d.data)}${num(d.rischio) !== null ? " · rischio a 10 anni " + fmtN(num(d.rischio), 0) + "%" : ""}${d.note ? " · " + hx(d.note) : ""}</small></span><button type="button" class="x" data-del="defra:${p.defra.indexOf(d)}" aria-label="Elimina">✕</button></li>`).join("");
@@ -996,7 +1021,7 @@ function vPazDefra(p){
   const head0 = head("DeFRA e rischio di frattura", "Il DeFRA (SIOMMMS e SIR) stima il rischio di fratture maggiori a 10 anni, unendo DXA e fattori clinici, e lo colloca in una zona di colore.");
   if(rc){ const r = F.rischio;
     return { bar: pzName(p), html: head("DeFRA e rischio di frattura", "Il rischio di fratture maggiori a 10 anni e la zona che indica il DeFRA.") + `
-    <div class="dfz z-${F.zona}"><span class="dfz-c">${r !== null ? fmtN(r, 0) + "<i>%</i>" : ""}</span><span><small>Zona del DeFRA · ${fmtD(F.lastDefra.data)}</small><b>Zona ${rc.t.toLowerCase()}</b><span>${rc.r} → ${rc.chi}</span></span></div>
+    ${defraBar(F.lastDefra)}${defraHist(F)}
     ${F.defra.length > 1 ? "" : `<p class="fdel"><button type="button" class="lnk" data-del="defra:${p.defra.indexOf(F.lastDefra)}">Elimina questo DeFRA</button></p>`}
     <details class="dxadd"><summary><span class="dxplus">+</span><span><b>Aggiorna il DeFRA</b><small>se lo hai ricalcolato, per esempio dopo una nuova densitometria</small></span></summary>${serve}${form}</details>
     ${F.defra.length > 1 ? acc("Tutti i DeFRA (" + F.defra.length + ")", `<ul class="list recs">${hist}</ul>`, false) : ""}
