@@ -790,6 +790,7 @@ const AXES = [
       ["diabete_t2","Diabete tipo 2"],
       ["diabete_t1","Diabete tipo 1"],
       ["obesita","Obesità"],
+      ["ipertiroidismo","Ipertiroidismo (anche subclinico)"],
       ["ipopituitarismo","Ipopituitarismo / deficit ipofisari noti"],
       ["incidentaloma_surr","Incidentaloma surrenalico"]
     ]},
@@ -943,6 +944,10 @@ const FORME = [
     trigger:[["tiroxina_soppr","forte"]],
     conferma:["TSH sotto il limite inferiore in corso di L-tiroxina; rischio maggiore con TSH <0,1 mU/L"],
     nota:"L'eccesso di ormone tiroideo accelera il turnover osseo. Il rischio riguarda soprattutto la donna in postmenopausa con TSH <0,1 mU/L; nella donna in premenopausa e nell'uomo i dati sono meno chiari. Spesso basta ridurre la dose, salvo che la soppressione sia voluta (es. carcinoma tiroideo ad alto rischio)." },
+  { id:"ipertiroidismo", nome:"Ipertiroidismo", cat:"Endocrina",
+    trigger:[["ipertiroidismo","forte"]],
+    conferma:["TSH, FT4 e FT3 (TSH soppresso con FT4/FT3 normali = forma subclinica)","Causa: TRAb (Graves), anti-TPO, ecografia o scintigrafia tiroidea (gozzo multinodulare tossico, adenoma tossico, tiroidite)"],
+    nota:"L'eccesso di ormoni tiroidei accelera il turnover osseo con prevalenza del riassorbimento: si perde massa ossea e aumenta il rischio di frattura, anche nella forma subclinica con TSH <0,1 mU/L. La perdita è in gran parte reversibile con il ritorno all'eutiroidismo: prima si cura la tiroide, poi si rivaluta l'osso. Cause più frequenti: morbo di Graves-Basedow, gozzo multinodulare tossico, adenoma tossico; anche l'amiodarone." },
   { id:"ipo_aromatasi", nome:"Osteoporosi da inibitori dell'aromatasi", cat:"Farmaci",
     trigger:[["aromatasi","forte"]],
     conferma:["Nessun test: legata al farmaco assunto"],
@@ -1485,7 +1490,7 @@ function dockN(){
 
 /* ---------- esami normali: risultato ---------- */
 /* gerarchia delle forme secondarie, per quello che cambiano nella cura (la stessa di Osteo Help MMG) */
-const LEV_L1 = new Set(["tiroxina", "gen_ipofosfatasia",
+const LEV_L1 = new Set(["tiroxina", "ipertiroidismo", "gen_ipofosfatasia",
   "ipofosfatasia", "deficitD", "osteomalIpoP", "fanconi", "ipopara", "ipomagne"]);
 const LEV_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
 const LEV = [{ t:"Urgenza medica", s:"Se il calcio è molto alto (oltre 14 mg/dL) o ci sono sintomi, non è una forma da inquadrare con calma: si tratta subito, in ospedale, e qui il bisfosfonato endovena è la terapia." },
@@ -1612,7 +1617,7 @@ const SRC = {
   intoxD:["vitd2022","kanis2019","burt","sanders"], farmaciD:["vitd2022","kanis2019"], ridIntroito:["vitd2022","kanis2019"],
   osteomalIpoP:["jandebeur","wolf"], ipofosfatasia:["khanhpp","whyte"], paget:["ralston"], irc:["kdigo"], colestasi:["easlchol"], malassorb:["rubiotapia"],
   farmaciCa:["griebeler","meehan"], ipomagne:["debaaij"], fanconi:["hall"], ipercalciuriaId:["ryan"], acidosiTub:["walsh"], epatopatia:["easlnutr"],
-  ipogonadismo:["bhasin"], gio:["humphrey","nota79"], ipo_adt:["coleman"], ipo_aromatasi:["coleman"], op_chemio:["coleman"], tiroxina:["ross"],
+  ipogonadismo:["bhasin"], gio:["humphrey","nota79"], ipo_adt:["coleman"], ipo_aromatasi:["coleman"], op_chemio:["coleman"], tiroxina:["ross"], ipertiroidismo:["ross"],
   op_glitazoni:["loke"], op_sglt2:["neal"], op_tenofovir:["eacs"], op_dmpa:["acog602"], op_oppioidi:["fountas"], mastocitosi:["valent","lyons"],
   oi:["marini"], gen_marfan:["loeys"], gen_eds:["malfait","ellervainicher"], gen_omocistinuria:["morris"], gen_ipofosfatasia:["khanhpp","whyte"], diabete:["vilaca","leslie"],
   dm1:["vilaca"], cushing:["nieman","fassnacht"], acromegalia:["katznelson"], iperprl:["melmed"], deficit_gh:["molitch","yuen"], poi:["panay"],

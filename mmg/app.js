@@ -269,7 +269,7 @@ function pzSecondary(p){
 /* gerarchia delle forme secondarie, per quello che cambiano nella cura:
    1 prima di trattare (correggere o escludere prima del farmaco, o cambia il farmaco), 2 da approfondire (si tratta intanto),
    3 fattori noti: si tratta comunque (alcuni da rivedere se possibile) */
-const SEC_L1 = new Set(["tiroxina", "gen_ipofosfatasia",
+const SEC_L1 = new Set(["tiroxina", "ipertiroidismo", "gen_ipofosfatasia",
   "ipofosfatasia", "deficitD", "osteomalIpoP", "fanconi", "ipopara", "ipomagne"]);
 const SEC_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
 const SEC_LEV = [{ t:"Urgenza medica", s:"se il calcio è molto alto (oltre 14 mg/dL) o ci sono sintomi: subito in ospedale, idratazione e bisfosfonato endovena", k:"r" },
