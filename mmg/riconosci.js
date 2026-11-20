@@ -35,10 +35,12 @@ const RIC_DIZ = [
   ["f", "parkinson", ["levodopa", "madopar", "sinemet", "stalevo", "pramipexol*", "mirapexin", "ropinirol*", "requip", "rasagilin*", "azilect", "safinamide", "xadago"], { v:1, n:"Dedotto da un farmaco antiparkinson: verifica la diagnosi." }],
 
   /* ---------- malattie ---------- */
-  ["f", "diabete_t1", ["diabete mellito tipo 1", "diabete tipo 1", "diabete mellito tipo i", "diabete tipo i", "diabete mellito di tipo 1", "diabete di tipo 1", "dm1", "dmt1", "iddm", "diabete insulino dipendente", "diabete giovanile"]],
-  ["f", "diabete_t2", ["diabete mellito tipo 2", "diabete tipo 2", "diabete mellito tipo ii", "diabete tipo ii", "diabete mellito di tipo 2", "diabete di tipo 2", "dm2", "dmt2", "niddm", "diabete non insulino dipendente", "diabete mellito non insulino dipendente"]],
-  ["f", "diabete_tipo", ["diabete", "diabetic*", "diabete mellito"], { v:1, n:"Tipo di diabete non indicato: scegli tipo 1 o tipo 2." }],
+  ["f", "diabete_t1", ["diabete mellito tipo 1", "diabete tipo 1", "diabete mellito tipo i", "diabete tipo i", "diabete mellito di tipo 1", "diabete di tipo 1", "dm1", "dmt1", "dm tipo 1", "dm di tipo 1", "dm 1", "iddm", "diabete insulino dipendente", "diabete giovanile"]],
+  ["f", "diabete_t2", ["diabete mellito tipo 2", "diabete tipo 2", "diabete mellito tipo ii", "diabete tipo ii", "diabete mellito di tipo 2", "diabete di tipo 2", "dm2", "dmt2", "dm tipo 2", "dm di tipo 2", "dm tipo ii", "dm 2", "dm ii", "niddm", "diabete non insulino dipendente", "diabete mellito non insulino dipendente"]],
+  ["f", "diabete_tipo", ["diabete", "diabetic*", "diabete mellito", "dm"], { v:1, n:"Tipo di diabete non indicato: scegli tipo 1 o tipo 2." }],
   ["f", "obesita", ["obesit*", "obeso", "obesa", "grande obesit*"]],
+  ["f", "ipertiroidismo", ["ipertiroidismo", "ipertiroid*", "tireotossicosi", "tireotossic*", "morbo di basedow", "basedow", "morbo di graves", "malattia di graves", "graves", "gozzo multinodulare tossico", "gozzo tossico", "struma tossico", "adenoma tossico", "adenoma tiroideo tossico", "nodulo tossico", "nodulo caldo"]],
+  ["f", "ipertiroidismo", ["tiamazolo", "metimazolo", "tapazole", "propiltiouracile", "carbimazolo"], { v:1, n:"Dedotto da un farmaco antitiroideo: verifica la diagnosi." }],
   ["f", "ipopituitarismo", ["ipopituitarismo", "panipopituitarismo", "deficit ipofisari*", "insufficienza ipofisaria", "deficit di gh", "deficit gh"]],
   ["f", "incidentaloma_surr", ["incidentaloma surrenal*", "adenoma surrenal*", "nodulo surrenal*", "massa surrenal*"]],
   ["f", "artrite_reumatoide", ["artrite reumatoide", "poliartrite reumatoide", "ar"]],
@@ -136,6 +138,8 @@ function riconosci(text){
         let ok = true; for(let j = 0; j < n; j++) if(!ricEq(toks[s + j], T.toks[j])){ ok = false; break; }
         if(!ok) continue;
         /* «non insulino dipendente» non è tipo 1 */
+        /* «ipotiroidismo» somiglia a «ipertiroidismo» ma è l'opposto */
+        if(T.id === "ipertiroidismo" && /^ipo/.test(toks[s])) continue;
         if(T.id === "diabete_t1" && all.slice(Math.max(0, idx[s] - 1), idx[s + n - 1] + 1).includes("non")) continue;
         for(let j = 0; j < n; j++) used[s + j] = true;
         const before = all.slice(Math.max(0, idx[s] - 3), idx[s]), neg = before.some(w => RIC_NEG.has(w) || w.startsWith("esclus") || w.startsWith("negativ"));

@@ -283,6 +283,7 @@ const AXES = [
       ["diabete_t2","Diabete tipo 2"],
       ["diabete_t1","Diabete tipo 1"],
       ["obesita","Obesità"],
+      ["ipertiroidismo","Ipertiroidismo (anche subclinico)"],
       ["ipopituitarismo","Ipopituitarismo / deficit ipofisari noti"],
       ["incidentaloma_surr","Incidentaloma surrenalico"]
     ]},
@@ -436,6 +437,10 @@ const FORME = [
     trigger:[["tiroxina_soppr","forte"]],
     conferma:["TSH sotto il limite inferiore in corso di L-tiroxina; rischio maggiore con TSH <0,1 mU/L"],
     nota:"L'eccesso di ormone tiroideo accelera il turnover osseo. Il rischio riguarda soprattutto la donna in postmenopausa con TSH <0,1 mU/L; nella donna in premenopausa e nell'uomo i dati sono meno chiari. Spesso basta ridurre la dose, salvo che la soppressione sia voluta (es. carcinoma tiroideo ad alto rischio)." },
+  { id:"ipertiroidismo", nome:"Ipertiroidismo", cat:"Endocrina",
+    trigger:[["ipertiroidismo","forte"]],
+    conferma:["TSH, FT4 e FT3 (TSH soppresso con FT4/FT3 normali = forma subclinica)","Causa: TRAb (Graves), anti-TPO, ecografia o scintigrafia tiroidea (gozzo multinodulare tossico, adenoma tossico, tiroidite)"],
+    nota:"L'eccesso di ormoni tiroidei accelera il turnover osseo con prevalenza del riassorbimento: si perde massa ossea e aumenta il rischio di frattura, anche nella forma subclinica con TSH <0,1 mU/L. La perdita è in gran parte reversibile con il ritorno all'eutiroidismo: prima si cura la tiroide, poi si rivaluta l'osso. Cause più frequenti: morbo di Graves-Basedow, gozzo multinodulare tossico, adenoma tossico; anche l'amiodarone." },
   { id:"ipo_aromatasi", nome:"Osteoporosi da inibitori dell'aromatasi", cat:"Farmaci",
     trigger:[["aromatasi","forte"]],
     conferma:["Nessun test: legata al farmaco assunto"],
