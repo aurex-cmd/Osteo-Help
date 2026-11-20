@@ -274,7 +274,7 @@ const SEC_L1 = new Set(["tiroxina", "ipertiroidismo", "gen_ipofosfatasia",
   "ipofosfatasia", "deficitD", "osteomalIpoP", "fanconi", "ipopara", "ipomagne"]);
 const SEC_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
 const SEC_LEV = [{ t:"Urgenza medica", s:"se il calcio è molto alto (oltre 14 mg/dL) o ci sono sintomi: subito in ospedale, idratazione e bisfosfonato endovena", k:"r" },
-  { t:"Prima di trattare", s:"da correggere prima del farmaco: senza correzione non funziona o fa danno", k:"r" },
+  { t:"Prima di trattare", s:"da correggere prima del farmaco, che altrimenti può non funzionare o essere rischioso", k:"r" },
   { t:"Da approfondire", s:"si indaga, anche con urgenza, ma intanto si tratta", k:"a" },
   { t:"Fattori noti", s:"spiegano il rischio, si tratta comunque", k:"g" }];
 function secLevels(p, S){

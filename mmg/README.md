@@ -343,3 +343,4 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Fratture: ogni frattura mostra «Modifica» (si apre e si cambiano sede, gravità, data, «durante terapia»; in fondo «Elimina questa frattura»).
 - Densitometria: il segno del T-score torna come prima (un pulsante «−» già scelto accanto alla casella, da toccare per «+»).
 - Figura su PC: con una sezione aperta, un clic sul bianco (fuori dal pannello, dai bollini e dai passi) chiude la sezione e torna alla figura completa.
+- «Prima di trattare»: «da correggere prima del farmaco, che altrimenti può non funzionare o essere rischioso» (prima: «senza correzione non funziona o fa danno»).
