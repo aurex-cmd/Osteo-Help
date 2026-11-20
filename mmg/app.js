@@ -175,10 +175,11 @@ function pzFacts(p){
   const fx = (p.fratture || []).slice().sort(byDateDesc);
   const vert = fx.filter(f => f.sede === "vertebra"), fem = fx.filter(f => f.sede === "femore");
   const oth = fx.filter(f => f.sede !== "vertebra" && f.sede !== "femore");
-  const dxa = (p.dxa || []).slice().sort(byDateDesc), lastDxa = dxa[0] || null;
+  const byNew = a => (a || []).map((x, i) => [x, i]).sort((x, y) => byDateDesc(x[0], y[0]) || y[1] - x[1]).map(x => x[0]);
+  const dxa = byNew(p.dxa), lastDxa = dxa[0] || null;
   const tv = lastDxa ? [num(lastDxa.tL), num(lastDxa.tFt), num(lastDxa.tFn)].filter(x => x !== null) : [];
   const minT = tv.length ? Math.min(...tv) : null;
-  const defra = (p.defra || []).slice().sort(byDateDesc), lastDefra = defra[0] || null;
+  const defra = byNew(p.defra), lastDefra = defra[0] || null;
   const zona = lastDefra && ZONE[lastDefra.zona] ? lastDefra.zona : null, rischio = lastDefra ? num(lastDefra.rischio) : null;
   const feats = new Set(p.feats || []);
   const recent = fx.filter(f => { const m = monthsSince(f.data); return m !== null && m <= 24; });
@@ -977,7 +978,7 @@ function vPazEsami(p){
 
 /* ---------- 4 · DeFRA ---------- */
 /* DeFRA come barra a quattro zone: il segno sta sulla zona indicata (le soglie cambiano con l'età, quindi non è una scala di percentuali);
-   sotto, chi segue la paziente: medico di famiglia per verde e gialla, specialista per arancione e rossa */
+   sotto, chi segue la paziente: medico di medicina generale per verde e gialla, specialista per arancione e rossa */
 const ZLIV = { verde:"basso", gialla:"moderato", arancione:"alto", rossa:"altissimo" };
 const ZCOL = { verde:["#3A9A3A", "#E6F3E4"], gialla:["#E3B21A", "#FBF3D6"], arancione:["#E8641E", "#FCE9DC"], rossa:["#B3261E", "#F8E3E1"] };
 function defraBar(d){
@@ -985,7 +986,7 @@ function defraBar(d){
   return `<div class="dfbar z-${z}"><small class="dfb-d">DeFRA · ${fmtD(d.data)}</small><b class="dfb-t">Zona ${rc.t.toLowerCase()} · ${rc.r}</b>
     <div class="dfb-s${r === null ? " nop" : ""}" style="--x:${(i + .5) * 25}%">${ZONE_ORDER.map(k => `<i class="z-${k}"></i>`).join("")}<span class="dfb-ring"></span>${r !== null ? `<span class="dfb-pin">${fmtN(r, 0)}%</span>` : ""}</div>
     <div class="dfb-l">${ZONE_ORDER.map(k => `<span${k === z ? ` class="on"` : ""}><b>${ZONE[k].t}</b>${ZLIV[k]}</span>`).join("")}</div>
-    <div class="dfb-w"><span${sp ? "" : ` class="on"`}>Medico di famiglia</span><span${sp ? ` class="on"` : ""}>Specialista dell'osso${z === "rossa" ? ", con priorità" : ""}</span></div></div>`;
+    <div class="dfb-w"><span${sp ? "" : ` class="on"`}>Medico di Medicina Generale</span><span${sp ? ` class="on"` : ""}>Specialista dell'osso${z === "rossa" ? ", con priorità" : ""}</span></div></div>`;
 }
 /* storia dei DeFRA: le zone come fasce, un pallino per ogni DeFRA (con la percentuale se c'è); solo con almeno due DeFRA */
 function defraHist(F){
@@ -1002,27 +1003,28 @@ function defraHist(F){
     ${lab.map(d => `<text x="${X(d)}" y="${4 * bh + 15}" class="hd">${fmtM(pDate(d.data))}</text>`).join("")}</svg></figure>`;
 }
 function vPazDefra(p){
-  const F = pzFacts(p), rc = riskCat(F.zona);
-  const hist = F.defra.map(d => `<li class="rec"><span><b>${zchip(d.zona)}</b><small>${fmtD(d.data)}${num(d.rischio) !== null ? " · rischio a 10 anni " + fmtN(num(d.rischio), 0) + "%" : ""}${d.note ? " · " + hx(d.note) : ""}</small></span><button type="button" class="x" data-del="defra:${p.defra.indexOf(d)}" aria-label="Elimina">✕</button></li>`).join("");
+  const F = pzFacts(p), rc = riskCat(F.zona), ed = PZEDIT && PZEDIT.k === "defra" ? p.defra[PZEDIT.i] : null;
+  const hist = F.defra.map(d => `<li class="rec"><span><b>${zchip(d.zona)}</b><small>${fmtD(d.data)}${num(d.rischio) !== null ? " · rischio a 10 anni " + fmtN(num(d.rischio), 0) + "%" : ""}${d.note ? " · " + hx(d.note) : ""}</small></span><button type="button" class="x ed" data-edit="defra:${p.defra.indexOf(d)}" aria-label="Modifica">✎</button><button type="button" class="x" data-del="defra:${p.defra.indexOf(d)}" aria-label="Elimina">✕</button></li>`).join("");
   const form = `<div class="addbox">
-      <div class="zpick" role="group" aria-label="Zona del DeFRA">${ZONE_ORDER.map(z => `<button type="button" class="zbtn z-${z}" data-zona="${z}" aria-pressed="false"><i></i><span><b>${ZONE[z].t}</b><small>${ZONE[z].r}</small></span></button>`).join("")}</div>
+      <div class="zpick" role="group" aria-label="Zona del DeFRA">${ZONE_ORDER.map(z => `<button type="button" class="zbtn z-${z}" data-zona="${z}" aria-pressed="${!!ed && ed.zona === z}"><i></i><span><b>${ZONE[z].t}</b><small>${ZONE[z].r}</small></span></button>`).join("")}</div>
       <div class="dfrow">
-        <label class="fld">Rischio a 10 anni<span class="pct"><input type="text" inputmode="decimal" autocomplete="off" id="dfR" placeholder="facoltativo" aria-describedby="dfRh"><i>%</i></span></label>
-        <label class="fld">Data<input type="date" id="dfD" value="${todayISO()}"></label>
+        <label class="fld">Rischio a 10 anni<span class="pct"><input type="text" inputmode="decimal" autocomplete="off" id="dfR" placeholder="facoltativo" aria-describedby="dfRh" value="${ed && num(ed.rischio) !== null ? fmtN(num(ed.rischio), 0) : ""}"><i>%</i></span></label>
+        <label class="fld">Data<input type="date" id="dfD" value="${ed ? hx(ed.data) : todayISO()}"></label>
       </div>
       <p class="small" id="dfRh">Il rischio di fratture maggiori che indica il DeFRA.</p>
-      <label class="fld dfn">Nota<input type="text" id="dfN" placeholder="facoltativa"></label>
-      <button type="button" class="btn" data-add="defra">Salva</button>
+      <label class="fld dfn">Nota<input type="text" id="dfN" placeholder="facoltativa" value="${ed ? hx(ed.note || "") : ""}"></label>
+      ${ed ? editBtns("defra", "Salva le modifiche") : `<button type="button" class="btn" data-add="defra">Salva</button>`}
     </div>`;
   const serve = `<div class="btns"><a class="btn" href="${DEFRA_URL}" target="_blank" rel="noopener">Apri il DeFRA ↗</a></div>`;
   const zone = `<ul class="list zleg">${ZONE_ORDER.map(z => `<li>${zchip(z)}<span><b>${ZONE[z].r[0].toUpperCase() + ZONE[z].r.slice(1)} → ${ZONE[z].chi}</b><small>${ZONE[z].azione}</small></span></li>`).join("")}</ul>
     <p class="small">Le soglie delle zone dipendono dall'età: per questo basta riportare la zona che indica il DeFRA. La rimborsabilità resta legata alle condizioni della Nota 79.</p>`;
   const acc = (t, body, open) => `<details class="dsec"${open ? " open" : ""}><summary><span>${t}</span></summary><div class="dsec-b">${body}</div></details>`;
   const head0 = head("DeFRA e rischio di frattura", "Il DeFRA (SIOMMMS e SIR) stima il rischio di fratture maggiori a 10 anni, unendo DXA e fattori clinici, e lo colloca in una zona di colore.");
+  if(ed) return { bar: pzName(p), html: head("DeFRA e rischio di frattura", "Correggi zona, rischio, data o nota.") + `<div class="edbox"><p class="fct">Modifica il DeFRA del ${fmtD(ed.data)}</p>${form}</div>${acc("Cosa significano le zone", zone, false)}` };
   if(rc){ const r = F.rischio;
     return { bar: pzName(p), html: head("DeFRA e rischio di frattura", "Il rischio di fratture maggiori a 10 anni e la zona che indica il DeFRA.") + `
     ${defraBar(F.lastDefra)}${defraHist(F)}
-    ${F.defra.length > 1 ? "" : `<p class="fdel"><button type="button" class="lnk" data-del="defra:${p.defra.indexOf(F.lastDefra)}">Elimina questo DeFRA</button></p>`}
+    <p class="fdel"><button type="button" class="lnk ed" data-edit="defra:${p.defra.indexOf(F.lastDefra)}">Modifica</button>${F.defra.length > 1 ? "" : `<button type="button" class="lnk" data-del="defra:${p.defra.indexOf(F.lastDefra)}">Elimina</button>`}</p>
     <details class="dxadd"><summary><span class="dxplus">+</span><span><b>Aggiorna il DeFRA</b><small>se lo hai ricalcolato, per esempio dopo una nuova densitometria</small></span></summary>${serve}${form}</details>
     ${F.defra.length > 1 ? acc("Tutti i DeFRA (" + F.defra.length + ")", `<ul class="list recs">${hist}</ul>`, false) : ""}
     ${acc("Cosa significano le zone", zone, false)}` };
@@ -1209,27 +1211,29 @@ function dxaCard(p, d, prev, big, noDel){
   return `<div class="dxcard${big ? " big" : ""}">
     <div class="dxh"><span><small>Densitometria</small><b>${fmtD(d.data)}</b></span>${wc ? `<span class="dxw t-${wc[0]}">${wc[1]}</span>` : ""}</div>
     ${rows ? `<div class="dxmap">${lab("tL")}${lab("tFn")}${lab("tFt")}<div class="dxfigw">${dxaFig(d)}</div><svg class="dxlines" aria-hidden="true"></svg></div>` : `<ul class="dxs"><li class="none">Nessun T-score inserito</li></ul>`}
-    <div class="dxf">${prev ? `<p class="dxinfo"><i aria-hidden="true">i</i>Confronto con la DXA del ${fmtD(prev.data)}; sotto ${fmtN(TS_LSC)} è stabile.</p>` : "<span></span>"}${noDel ? "" : `<button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(d)}">Elimina</button>`}</div></div>`;
+    <div class="dxf">${prev ? `<p class="dxinfo"><i aria-hidden="true">i</i>Confronto con la DXA del ${fmtD(prev.data)}; sotto ${fmtN(TS_LSC)} è stabile.</p>` : "<span></span>"}${noDel ? "" : `<span class="dxf-a"><button type="button" class="lnk ed" data-edit="dxa:${p.dxa.indexOf(d)}">Modifica</button><button type="button" class="lnk" data-del="dxa:${p.dxa.indexOf(d)}">Elimina</button></span>`}</div></div>`;
 }
 function vPazDxa(p){
-  const F = pzFacts(p), pl = dxaPlan(F), L = F.dxa;
+  const F = pzFacts(p), pl = dxaPlan(F), L = F.dxa, ed = PZEDIT && PZEDIT.k === "dxa" ? p.dxa[PZEDIT.i] : null;
+  const tv = (k, r) => { const n = r ? num(r[k]) : null; return n === null ? "" : fmtN(Math.abs(n)); }, neg = (k, r) => { const n = r ? num(r[k]) : null; return n === null || n < 0; };
   const form = `<div class="addbox">
       <div class="grid2">
-        <label class="fld">Data della DXA<input type="date" id="dxD" value="${todayISO()}"></label>
-        <div class="fld">T-score colonna (L1–L4)<div class="tsrow"><button type="button" class="sgn" data-sgn="dxL" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxL" aria-label="T-score colonna (L1–L4)"></div></div>
-        <div class="fld">T-score femore totale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFt" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFt" aria-label="T-score femore totale"></div></div>
-        <div class="fld">T-score collo femorale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFn" aria-pressed="true" aria-label="Segno del T-score: meno (tocca per più)">−</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFn" aria-label="T-score collo femorale"></div></div>
+        <label class="fld">Data della DXA<input type="date" id="dxD" value="${ed ? hx(ed.data) : todayISO()}"></label>
+        <div class="fld">T-score colonna (L1–L4)<div class="tsrow"><button type="button" class="sgn" data-sgn="dxL" aria-pressed="${neg("tL", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tL", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxL" value="${tv("tL", ed)}" aria-label="T-score colonna (L1–L4)"></div></div>
+        <div class="fld">T-score femore totale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFt" aria-pressed="${neg("tFt", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tFt", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFt" value="${tv("tFt", ed)}" aria-label="T-score femore totale"></div></div>
+        <div class="fld">T-score collo femorale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFn" aria-pressed="${neg("tFn", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tFn", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFn" value="${tv("tFn", ed)}" aria-label="T-score collo femorale"></div></div>
       </div>
       <p class="small">Il segno meno è già inserito: per −2,7 scrivi solo 2,7. Tocca «−» per cambiarlo in «+» se il T-score è positivo.</p>
-      <button type="button" class="btn" data-add="dxa">Salva</button>
+      ${ed ? editBtns("dxa", "Salva le modifiche") : `<button type="button" class="btn" data-add="dxa">Salva</button>`}
     </div>`;
   const asc = L.slice().reverse().filter(d => pDate(d.data) && [d.tL, d.tFt, d.tFn].some(v => num(v) !== null));
   const chart = asc.length > 1 ? lineChart(asc.map(d => ({ x: pDate(d.data), iso: d.data, tL: num(d.tL), tFt: num(d.tFt), tFn: num(d.tFn) })), SERIES,
     { label:"Andamento del T-score", bands:[[-99, -2.5, "b-op", "Osteoporosi"], [-2.5, -1, "b-on", "Osteopenia", 1], [-1, 99, "b-ok", "Normale", 1]] }) : "";
   return { bar: pzName(p), html: head("Densitometria (DEXA)", L.length ? "Ogni scheda è una densitometria: la data e i T-score di quel referto." : "Riporta il T-score di colonna lombare e femore dal referto della DXA.") + `
+    ${ed ? `<div class="edbox"><p class="fct">Modifica la densitometria del ${fmtD(ed.data)}</p>${form}</div>` : ""}
     ${L.length ? dxaCard(p, L[0], L[1], true) : ""}
     ${L.length ? `<div class="alert ${pl.st === "ok" ? "ok" : pl.st === "warn" ? "warn" : ""}"><b>${pl.t}</b>${pl.s}${F.gc ? " Con glucocorticoidi ad alte dosi si può anticipare a 12 mesi." : ""}</div>` : `<div class="alert info"><b>Nessuna densitometria</b>Se il paziente non ha una DXA lombare e femorale recente, richiedila (<a href="#guida-dxa-lea">a chi farla in LEA</a>) e torna a questo passo quando hai il referto. Per la Nota 79 deve essere eseguita in una struttura pubblica o convenzionata.</div>`}
-    ${L.length ? `<details class="dxadd"><summary><span class="dxplus">+</span><span><b>Aggiungi una nuova densitometria</b><small>di solito dopo 18–24 mesi dalla precedente</small></span></summary>${form}</details>` : form}
+    ${ed ? "" : L.length ? `<details class="dxadd"><summary><span class="dxplus">+</span><span><b>Aggiungi una nuova densitometria</b><small>di solito dopo 18–24 mesi dalla precedente</small></span></summary>${form}</details>` : form}
     ${chart ? `<p class="lbl">T-score nel tempo</p>${chart}` : ""}
     ${L.length > 1 ? `<details class="dsec dxprev"><summary><span>${plural(L.length - 1, "densitometria precedente", "densitometrie precedenti")}</span></summary><div class="dsec-b">${L.slice(1).map((d, i) => dxaCard(p, d, L[i + 2], false)).join("")}</div></details>` : ""}
     <p class="small">T-score uguale o inferiore a −2,5: osteoporosi; tra −1 e −2,5: osteopenia.</p>` };
@@ -1670,6 +1674,9 @@ document.addEventListener("click", e => {
   const x = t.closest("#pzGrid button[data-pex]");
   if(x){ p.lab = p.lab || {}; const ex = x.dataset.pex, k = x.dataset.kind; if(p.lab[ex] === k) delete p.lab[ex]; else p.lab[ex] = k;
     x.closest(".tri").querySelectorAll("button").forEach(y => y.setAttribute("aria-pressed", p.lab[ex] === y.dataset.kind)); savePz(p); pzLive(p); return; }
+  const ed = t.closest("[data-edit]");
+  if(ed){ const [k, i] = ed.dataset.edit.split(":"); if(p[k] && p[k][+i]){ PZEDIT = { k, i:+i }; render(); const f = document.querySelector(".edbox"); if(f) f.scrollIntoView({ block:"start", behavior:"smooth" }); } return; }
+  if(t.closest("[data-editno]")){ PZEDIT = null; render(); return; }
   const del = t.closest("[data-del]");
   if(del){ const [k, i] = del.dataset.del.split(":"); if(p[k] && p[k][+i] && confirm("Eliminare questa voce?")){ p[k].splice(+i, 1); savePz(p); render(); } return; }
   const dc = t.closest(".dec[data-dec]");
@@ -1719,7 +1726,12 @@ document.addEventListener("click", e => {
 });
 /* aggiunge frattura, DXA, DeFRA o terapia dal modulo aperto. auto = salvataggio da solo quando si chiude
    la scheda o si va avanti: in quel caso salva solo se nel modulo c'è qualcosa di compilato, senza avvisi */
+/* voce in modifica (densitometria o DeFRA): il modulo si apre già compilato e il salvataggio la sostituisce */
+let PZEDIT = null;
+const editBtns = (k, lbl) => `<div class="btns"><button type="button" class="btn sec" data-editno>Annulla</button><button type="button" class="btn" data-add="${k}">${lbl}</button></div>`;
 function addRec(p, k, auto){
+  let edited = false;
+  const put = (k, r) => { if(PZEDIT && PZEDIT.k === k && p[k][PZEDIT.i]){ p[k][PZEDIT.i] = r; PZEDIT = null; edited = true; } else p[k].push(r); };
   const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
   const no = msg => { if(!auto) alert(msg); return false; };
   let rec = null, msg = "";
@@ -1744,12 +1756,12 @@ function addRec(p, k, auto){
     if(!v("dxD") || !any) return no("Indica la data e almeno un T-score.");
     /* il segno viene dal pulsante −/+ (già su «−»); un «-» o «−» scritto a mano vale comunque come negativo */
     const T = id => { const raw = v(id).replace("−", "-"), n = num(raw); if(n === null) return ""; const sg = document.querySelector(`[data-sgn="${id}"]`), neg = /^\s*-/.test(raw) || (sg && sg.getAttribute("aria-pressed") === "true"); return String(neg ? -Math.abs(n) : Math.abs(n)); };
-    rec = { data: v("dxD"), tL: T("dxL"), tFt: T("dxFt"), tFn: T("dxFn") }; p.dxa.push(rec); msg = "Densitometria del " + fmtD(rec.data) + " salvata"; }
+    rec = { data: v("dxD"), tL: T("dxL"), tFt: T("dxFt"), tFn: T("dxFn") }; put("dxa", rec); msg = "Densitometria del " + fmtD(rec.data) + (edited ? " modificata" : " salvata"); }
   if(k === "defra"){ const zb = document.querySelector('.zbtn[aria-pressed="true"]');
     if(auto && !zb) return false;
     if(!zb || !v("dfD")) return no("Scegli la zona indicata dal DeFRA e la data.");
-    rec = { data: v("dfD"), zona: zb.dataset.zona, rischio: num(v("dfR")) === null ? "" : String(num(v("dfR"))), note: v("dfN") }; p.defra.push(rec);
-    msg = "DeFRA salvato: zona " + ZONE[rec.zona].t.toLowerCase() + (rec.rischio ? ", " + rec.rischio + "%" : ""); }
+    rec = { data: v("dfD"), zona: zb.dataset.zona, rischio: num(v("dfR")) === null ? "" : String(num(v("dfR"))), note: v("dfN") }; put("defra", rec);
+    msg = (edited ? "DeFRA modificato: zona " : "DeFRA salvato: zona ") + ZONE[rec.zona].t.toLowerCase() + (rec.rischio ? ", " + rec.rischio + "%" : ""); }
   if(k === "terapie"){ if(auto) return false; if(!v("thF")) return no("Scegli il farmaco."); if(!v("thI")) return no("Indica la data di inizio."); rec = { farmaco: v("thF"), inizio: v("thI"), fine:"", note: v("thN") }; p.terapie.push(rec); msg = dnome(rec.farmaco) + " aggiunto"; }
   if(!rec) return false;
   savePz(p);
@@ -1771,7 +1783,7 @@ function leaUpdate(){
     : `<b>${mag + min ? "Non ancora" : "Spunta i fattori presenti"}</b>${min ? plural(min, "fattore minore", "fattori minori") + ": ne servono almeno tre, oppure un fattore maggiore." : "Con almeno un fattore maggiore, o tre minori, la DXA rientra nei LEA."}`;
 }
 /* moduli lasciati a metà: si salvano da soli quando si chiude la scheda, si cambia sezione o si lascia la pagina */
-function commitPending(p){ if(!p) return false; let n = false; ["fratture", "dxa", "defra"].forEach(k => { if(addRec(p, k, true)) n = true; }); return n; }
+function commitPending(p){ if(!p) return false; let n = false; ["fratture", "dxa", "defra"].forEach(k => { if(addRec(p, k, true)) n = true; }); PZEDIT = null; return n; }
 
 /* ---------- navigazione ---------- */
 const stack = [];

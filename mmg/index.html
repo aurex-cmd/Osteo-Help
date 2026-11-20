@@ -1284,6 +1284,21 @@ details.acc > summary .chev{width:18px;height:18px;color:var(--muted)}
 .dprog-l{display:flex;justify-content:space-between;margin:4px 0 0;font-size:.72rem;color:var(--muted)}
 .drun .btns{margin:4px 0 0}
 .dsec .dverd{border:0;padding:0 0 10px;margin-bottom:6px;border-bottom:1px solid #EEF0F3;border-radius:0}
+/* bollini che si aprono (forme secondarie, controindicazioni): restano in primo piano quando è aperta una delle loro voci */
+.fstage[data-on="anam"] [data-src~="anam"],.fstage[data-on="esami"] [data-src~="esami"],.fstage[data-on="chi"] [data-src~="chi"],.fstage[data-on="dxa"] [data-src~="dxa"]{opacity:1!important}
+/* card della decisione presa: titolo più piccolo, testo breve allineato a sinistra, icona bianca */
+.fdrugbig b{font-size:1.12rem;line-height:1.2}
+.fdrugbig small,.fdrugbig.spec small,.fdrugbig.reg small{text-align:left;hyphens:manual;-webkit-hyphens:manual;margin-top:2px}
+.fdrugbig .fpill,.fdrugbig.spec .fpill,.fdrugbig.none .fpill{width:46px;height:46px}
+.fdrugbig .fpill .sic{width:24px;height:24px;color:#fff} .fdrugbig .fpill .sic .f{fill:rgba(255,255,255,.3)}
+/* modifica di densitometria e DeFRA */
+.edbox{background:#fff;border:2px solid var(--pri);border-radius:16px;padding:14px;margin:0 0 12px}
+.edbox .fct{margin:0 0 10px;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pri)}
+.edbox .addbox{background:none;border:0;padding:0;margin:0}
+.edbox .btns{margin-top:10px}
+.dxf-a{display:flex;gap:14px;flex:0 0 auto} .lnk.ed{color:var(--pri)}
+.fdel{display:flex;justify-content:flex-end;gap:16px}
+.rec .x.ed{color:var(--pri);font-size:1rem}
 </style>
 </head>
 <body>
