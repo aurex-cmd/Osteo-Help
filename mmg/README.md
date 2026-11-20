@@ -341,4 +341,5 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - A parità di data vale l'ultimo inserito: un nuovo DeFRA (o una nuova densitometria) dello stesso giorno, per esempio nella rivalutazione, diventa quello attuale, con la sua percentuale.
 - La barra del DeFRA dice «Medico di Medicina Generale» invece di «Medico di famiglia».
 - Fratture: ogni frattura mostra «Modifica» (si apre e si cambiano sede, gravità, data, «durante terapia»; in fondo «Elimina questa frattura»).
-- Densitometria, segno del T-score più chiaro: accanto a ogni casella due pulsanti affiancati «−» e «+» (quello scelto è pieno; il «−» è già scelto); sotto la casella compare il valore come verrà salvato, con il segno e la categoria colorata (es. «−2,7 · osteoporosi», «+0,3 · normale»). Vale anche quando si modifica una densitometria.
+- Densitometria: il segno del T-score torna come prima (un pulsante «−» già scelto accanto alla casella, da toccare per «+»).
+- Figura su PC: con una sezione aperta, un clic sul bianco (fuori dal pannello, dai bollini e dai passi) chiude la sezione e torna alla figura completa.

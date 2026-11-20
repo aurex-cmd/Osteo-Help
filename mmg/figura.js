@@ -516,6 +516,13 @@ document.addEventListener("click", e => {
   }
 });
 document.addEventListener("keydown", e => { if(e.key === "Escape" && FIG.open) figClose(); });
+/* su PC, con una sezione aperta: un clic sul bianco (fuori dal pannello e da pulsanti, bollini e passi) torna alla figura completa */
+document.addEventListener("click", e => {
+  if(!FIG.open || !figWide() || !/-figura$/.test(routeNow()) || e.defaultPrevented) return;
+  const t = e.target; if(!t.closest || !document.contains(t)) return;
+  if(t.closest(".fpanel, .fsheet, a, button, input, select, textarea, label, summary, details, [data-fsheet], [role=dialog], .toast, .froad")) return;
+  figClose();
+});
 
 /* chiusura della scheda dal basso: scende con la stessa curva con cui è salita (come le schede di iOS) */
 function figClose(){
