@@ -1125,13 +1125,21 @@ const tsCat = v => v <= -2.5 ? ["op", "Osteoporosi"] : v < -1 ? ["on", "Osteopen
    (rosso osteoporosi, giallo osteopenia, verde normale, grigio se manca); il collo femorale è una zona a parte del femore */
 function dxaFig(d){
   const c = k => { const v = num(d[k]); return v === null ? "t-na" : "t-" + tsCat(v)[0]; };
-  const vert = [0, 1, 2, 3].map(i => { const y = 8 + i * 27; return `<rect class="rg ${c("tL")}" x="14" y="${y}" width="30" height="21" rx="5"/><rect class="rg ${c("tL")}" x="5" y="${y + 7}" width="10" height="6" rx="2"/><rect class="rg ${c("tL")}" x="43" y="${y + 7}" width="10" height="6" rx="2"/><text x="29" y="${y + 11}" class="vl">L${i + 1}</text>`; }).join("");
-  return `<svg class="dxfig" viewBox="0 0 124 132" role="img" aria-label="Colonna lombare e femore con i siti colorati secondo il T-score">
-    <g>${vert}</g>
-    <g class="fem ${c("tFt")}"><circle cx="70" cy="30" r="12"/><path d="M73,22 L99,34 L97,53 L71,41 Z"/>
-      <path d="M93,32 Q103,21 111,29 L111,47 Q104,58 104,72 L106,120 L89,120 L89,75 Q89,60 85,52 Z"/><circle cx="88" cy="67" r="4.5"/></g>
-    <path class="rg neck ${c("tFn")}" d="M78,29 L96,38 L94,50 L76,41 Z"/>
-    <text x="29" y="128" class="fl">Colonna</text><text x="98" y="128" class="fl">Femore</text>
+  /* vertebre lombari viste di fronte, come nella DXA: corpo con i fianchi appena incavati, processi trasversi
+     (più lunghi in L3), dischi grigi tra una vertebra e l'altra */
+  const W = [10, 12, 14, 12], x = 16, w = 30, h = 21;
+  const vert = [0, 1, 2, 3].map(i => { const y = 6 + i * 27, t = W[i];
+    const body = `M${x},${y + 4} Q${x},${y} ${x + 4},${y} L${x + w - 4},${y} Q${x + w},${y} ${x + w},${y + 4} Q${x + w - 2},${y + h / 2} ${x + w},${y + h - 4} Q${x + w},${y + h} ${x + w - 4},${y + h} L${x + 4},${y + h} Q${x},${y + h} ${x},${y + h - 4} Q${x + 2},${y + h / 2} ${x},${y + 4} Z`;
+    const tl = `M${x + 1},${y + 6} L${x - t},${y + 3} Q${x - t - 2},${y + 5.5} ${x - t},${y + 8} L${x + 1},${y + 11} Z`;
+    const tr = `M${x + w - 1},${y + 6} L${x + w + t},${y + 3} Q${x + w + t + 2},${y + 5.5} ${x + w + t},${y + 8} L${x + w - 1},${y + 11} Z`;
+    const disc = i < 3 ? `<rect class="disc" x="${x + 3}" y="${y + h + 1.5}" width="${w - 6}" height="3" rx="1.5"/>` : "";
+    return `<g class="vt ${c("tL")}"><path d="${tl}"/><path d="${tr}"/><path d="${body}"/></g>${disc}<text x="${x + w / 2}" y="${y + h / 2 + .5}" class="vl">L${i + 1}</text>`; }).join("");
+  return `<svg class="dxfig" viewBox="0 0 156 132" role="img" aria-label="Colonna lombare e femore con i siti colorati secondo il T-score">
+    ${vert}
+    <g transform="translate(34,0)"><g class="fem ${c("tFt")}"><circle cx="70" cy="30" r="12"/><path d="M73,22 L99,34 L97,53 L71,41 Z"/>
+      <path d="M93,32 Q103,21 111,29 L111,47 Q104,58 104,72 L106,116 L89,116 L89,75 Q89,60 85,52 Z"/><circle cx="88" cy="67" r="4.5"/></g>
+    <path class="rg neck ${c("tFn")}" d="M78,29 L96,38 L94,50 L76,41 Z"/></g>
+    <text x="31" y="128" class="fl">Colonna</text><text x="127" y="128" class="fl">Femore</text>
   </svg>`;
 }
 function dxaCard(p, d, prev, big, noDel){
