@@ -766,7 +766,7 @@ const FX_OPEN = new Set();
 const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
 function fxEditRow(p, f){
   const i = p.fratture.indexOf(f), [an, me, gi] = (f.data || "").split("-"), vert = f.sede === "vertebra";
-  return `<details class="fxed" data-fxi="${i}"${FX_OPEN.has(i) ? " open" : ""}><summary><span><b>${FX_SEDI[f.sede] || f.sede}${vert ? " · " + (f.grado || "gravità non nota") : ""}</b><small>${fxData(f.data)}${f.inTerapia ? " · durante terapia da ≥1 anno" : ""}</small></span>${CHEV}</summary>
+  return `<details class="fxed" data-fxi="${i}"${FX_OPEN.has(i) ? " open" : ""}><summary><span><b>${FX_SEDI[f.sede] || f.sede}${vert ? " · " + (f.grado || "gravità non nota") : ""}</b><small>${fxData(f.data)}${f.inTerapia ? " · durante terapia da ≥1 anno" : ""}</small></span><span class="fxmod"><i>Modifica</i>${CHEV}</span></summary>
     <div class="fxed-b"><div class="grid2">
       <label class="fld">Sede<select data-fxe="sede">${Object.entries(FX_SEDI).map(([k, v]) => `<option value="${k}"${f.sede === k ? " selected" : ""}>${v}</option>`).join("")}</select></label>
       <label class="fld">Gravità<select data-fxe="grado"${vert ? "" : " disabled"}><option value="">non nota</option>${Object.entries(FX_GRADO).map(([k, v]) => `<option value="${k}"${f.grado === k ? " selected" : ""}>${v}</option>`).join("")}</select></label>
@@ -829,7 +829,7 @@ function datiFx(p, sheet){
   const fxRows = F.fx.map(f => fxEditRow(p, f)).join("");
   const txt = "Fratture per traumi minimi (cadere dalla propria altezza o meno). Le vertebrali con il criterio di Genant: lieve 20–25%, moderata 25–40%, grave oltre il 40% di riduzione di un'altezza vertebrale.";
   return (sheet ? `<p class="sub">${txt}</p>` : `<p class="lbl">Fratture da fragilità</p><p class="small">${txt}</p>`) + `
-    ${fxRows ? `<div class="fxlist">${fxRows}</div><p class="small">Tocca una frattura per cambiarne data, sede o gravità.</p>` : ckPz("data-pbool", "nessunaFx", p.nessunaFx, "Nessuna frattura da fragilità pregressa")}
+    ${fxRows ? `<div class="fxlist">${fxRows}</div>` : ckPz("data-pbool", "nessunaFx", p.nessunaFx, "Nessuna frattura da fragilità pregressa")}
     ${p.rival && F.fx.length ? `<div class="confirm">${ckPz("data-pbool", "fxRiv", p.fxRiv, `<b>Nessuna nuova frattura</b> dalla valutazione precedente (prima del ${fmtD(p.rival.dal)})`)}</div>` : ""}
     <div class="addbox fxadd">
       <div class="fxtop">
@@ -1219,11 +1219,11 @@ function vPazDxa(p){
   const form = `<div class="addbox">
       <div class="grid2">
         <label class="fld">Data della DXA<input type="date" id="dxD" value="${ed ? hx(ed.data) : todayISO()}"></label>
-        <div class="fld">T-score colonna (L1–L4)<div class="tsrow"><button type="button" class="sgn" data-sgn="dxL" aria-pressed="${neg("tL", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tL", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxL" value="${tv("tL", ed)}" aria-label="T-score colonna (L1–L4)"></div></div>
-        <div class="fld">T-score femore totale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFt" aria-pressed="${neg("tFt", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tFt", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFt" value="${tv("tFt", ed)}" aria-label="T-score femore totale"></div></div>
-        <div class="fld">T-score collo femorale<div class="tsrow"><button type="button" class="sgn" data-sgn="dxFn" aria-pressed="${neg("tFn", ed)}" aria-label="Segno del T-score: meno (tocca per più)">${neg("tFn", ed) ? "−" : "+"}</button><input type="text" inputmode="decimal" autocomplete="off" id="dxFn" value="${tv("tFn", ed)}" aria-label="T-score collo femorale"></div></div>
+        <div class="fld">T-score colonna (L1–L4)<div class="tsrow"><span class="tseg" data-sgn="dxL" aria-pressed="${neg("tL", ed)}" role="group" aria-label="Segno del T-score"><button type="button" data-sv="-" aria-label="Negativo (meno)">−</button><button type="button" data-sv="+" aria-label="Positivo (più)">+</button></span><input type="text" inputmode="decimal" autocomplete="off" id="dxL" value="${tv("tL", ed)}" aria-label="T-score colonna (L1–L4)"></div><small class="tsv" data-tsv="dxL">${tsPrevTxt(ed ? num(ed.tL) : null)}</small></div>
+        <div class="fld">T-score femore totale<div class="tsrow"><span class="tseg" data-sgn="dxFt" aria-pressed="${neg("tFt", ed)}" role="group" aria-label="Segno del T-score"><button type="button" data-sv="-" aria-label="Negativo (meno)">−</button><button type="button" data-sv="+" aria-label="Positivo (più)">+</button></span><input type="text" inputmode="decimal" autocomplete="off" id="dxFt" value="${tv("tFt", ed)}" aria-label="T-score femore totale"></div><small class="tsv" data-tsv="dxFt">${tsPrevTxt(ed ? num(ed.tFt) : null)}</small></div>
+        <div class="fld">T-score collo femorale<div class="tsrow"><span class="tseg" data-sgn="dxFn" aria-pressed="${neg("tFn", ed)}" role="group" aria-label="Segno del T-score"><button type="button" data-sv="-" aria-label="Negativo (meno)">−</button><button type="button" data-sv="+" aria-label="Positivo (più)">+</button></span><input type="text" inputmode="decimal" autocomplete="off" id="dxFn" value="${tv("tFn", ed)}" aria-label="T-score collo femorale"></div><small class="tsv" data-tsv="dxFn">${tsPrevTxt(ed ? num(ed.tFn) : null)}</small></div>
       </div>
-      <p class="small">Il segno meno è già inserito: per −2,7 scrivi solo 2,7. Tocca «−» per cambiarlo in «+» se il T-score è positivo.</p>
+      <p class="small">Il T-score è quasi sempre negativo: il «−» è già scelto, scrivi solo il numero (per −2,7 scrivi 2,7). Se è positivo, tocca «+». Sotto ogni casella vedi il valore che verrà salvato.</p>
       ${ed ? editBtns("dxa", "Salva le modifiche") : `<button type="button" class="btn" data-add="dxa">Salva</button>`}
     </div>`;
   const asc = L.slice().reverse().filter(d => pDate(d.data) && [d.tL, d.tFt, d.tFn].some(v => num(v) !== null));
@@ -1642,6 +1642,8 @@ document.addEventListener("click", e => {
   const zb = t.closest(".zbtn"); if(zb){ document.querySelectorAll(".zbtn").forEach(x => x.setAttribute("aria-pressed", x === zb)); return; }
   const vu = t.closest("[data-vdu]");
   if(vu){ VD_U = vu.dataset.vdu; try{ localStorage.setItem("oh-mmg-vitd-unit", VD_U); }catch(e){} render(); return; }
+  const sv = t.closest(".tseg [data-sv]");
+  if(sv){ const g = sv.closest(".tseg"); g.setAttribute("aria-pressed", sv.dataset.sv === "-"); tsPrev(g.dataset.sgn); return; }
   const sg = t.closest(".sgn[data-sgn]");
   if(sg){ const neg = sg.getAttribute("aria-pressed") !== "true"; sg.setAttribute("aria-pressed", neg); sg.textContent = neg ? "−" : "+"; sg.setAttribute("aria-label", "Segno del T-score: " + (neg ? "meno (tocca per più)" : "più (tocca per meno)")); return; }
   const fxtb = t.closest(".fxt[data-fr]"); if(fxtb){ fxtb.setAttribute("aria-pressed", fxtb.getAttribute("aria-pressed") !== "true"); return; }
@@ -1726,6 +1728,12 @@ document.addEventListener("click", e => {
 });
 /* aggiunge frattura, DXA, DeFRA o terapia dal modulo aperto. auto = salvataggio da solo quando si chiude
    la scheda o si va avanti: in quel caso salva solo se nel modulo c'è qualcosa di compilato, senza avvisi */
+/* T-score: il valore come verrà salvato, con la categoria, sotto la casella */
+function tsPrevTxt(n){ if(n === null) return "&nbsp;"; const c = tsCat(n); return `<b class="t-${c[0]}">${n < 0 ? "−" : n > 0 ? "+" : ""}${fmtN(Math.abs(n))}</b> · ${c[1].toLowerCase()}`; }
+function tsPrev(id){ const el = document.getElementById(id), out = document.querySelector(`[data-tsv="${id}"]`), g = document.querySelector(`.tseg[data-sgn="${id}"]`); if(!el || !out) return;
+  const raw = el.value.trim().replace("−", "-"), n = num(raw); if(n === null){ out.innerHTML = "&nbsp;"; return; }
+  out.innerHTML = tsPrevTxt(/^\s*-/.test(raw) || (g && g.getAttribute("aria-pressed") === "true") ? -Math.abs(n) : Math.abs(n)); }
+document.addEventListener("input", e => { const t = e.target; if(t && /^dx(L|Ft|Fn)$/.test(t.id)) tsPrev(t.id); });
 /* voce in modifica (densitometria o DeFRA): il modulo si apre già compilato e il salvataggio la sostituisce */
 let PZEDIT = null;
 const editBtns = (k, lbl) => `<div class="btns"><button type="button" class="btn sec" data-editno>Annulla</button><button type="button" class="btn" data-add="${k}">${lbl}</button></div>`;

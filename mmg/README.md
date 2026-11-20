@@ -340,3 +340,5 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
 - Densitometrie e DeFRA si possono modificare: «Modifica» nella card di ogni densitometria, sotto la barra del DeFRA e (✎) in «Tutti i DeFRA». Il modulo si apre già compilato, con «Annulla» e «Salva le modifiche», e sostituisce la voce.
 - A parità di data vale l'ultimo inserito: un nuovo DeFRA (o una nuova densitometria) dello stesso giorno, per esempio nella rivalutazione, diventa quello attuale, con la sua percentuale.
 - La barra del DeFRA dice «Medico di Medicina Generale» invece di «Medico di famiglia».
+- Fratture: ogni frattura mostra «Modifica» (si apre e si cambiano sede, gravità, data, «durante terapia»; in fondo «Elimina questa frattura»).
+- Densitometria, segno del T-score più chiaro: accanto a ogni casella due pulsanti affiancati «−» e «+» (quello scelto è pieno; il «−» è già scelto); sotto la casella compare il valore come verrà salvato, con il segno e la categoria colorata (es. «−2,7 · osteoporosi», «+0,3 · normale»). Vale anche quando si modifica una densitometria.
