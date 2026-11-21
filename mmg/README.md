@@ -355,3 +355,6 @@ Sulla figura la pill «Osteoporosi secondaria» prende il colore del livello pi�
   - Ripristino del backup: si può scegliere di nuovo lo stesso file.
   - Eliminando una voce si chiude la modifica eventualmente aperta.
   - I calendari di nascita, esami, densitometria, DeFRA e dosi non propongono date future.
+- Tiroide (ipertiroidismo, anche dagli esami, e L-tiroxina a dose soppressiva): passa da «Prima di trattare» a «Da approfondire», perché non blocca il farmaco per l'osso. Indicazione: la tiroide la cura l'endocrinologo (o si riduce la L-tiroxina); con rischio alto si tratta subito anche l'osso, altrimenti si rivaluta l'osso a funzione tiroidea normale. Compare nel pannello «Osteoporosi secondaria», nella decisione («Tiroide da curare»), nel report e nel riepilogo.
+- Lettera allo specialista: la tiroide non è più un motivo di invio («inquadramento di una possibile forma secondaria»); resta solo tra le «Forme secondarie considerate», con «da curare con l'endocrinologo» o «ridurre la L-tiroxina».
+- Osteo Help (pagina principale): stessi livelli per ipertiroidismo e L-tiroxina soppressiva («Da approfondire»), schede e pagina dei tre livelli aggiornate.

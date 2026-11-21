@@ -270,7 +270,10 @@ function pzSecondary(p){
 /* gerarchia delle forme secondarie, per quello che cambiano nella cura:
    1 prima di trattare (correggere o escludere prima del farmaco, o cambia il farmaco), 2 da approfondire (si tratta intanto),
    3 fattori noti: si tratta comunque (alcuni da rivedere se possibile) */
-const SEC_L1 = new Set(["tiroxina", "ipertiroidismo", "gen_ipofosfatasia",
+/* tiroide: non blocca il farmaco per l'osso; si cura la tiroide (endocrinologo, o meno L-tiroxina) e, se il rischio è alto, intanto si tratta l'osso */
+const SEC_TIR = { tiroxina:"ridurre la L-tiroxina, se la soppressione non è voluta", ipertiroidismo:"da curare con l'endocrinologo", ipertiroid:"da curare con l'endocrinologo" };
+const TIR_COSA = "Non blocca il farmaco per l'osso. La tiroide la cura l'endocrinologo (o si riduce la L-tiroxina): con rischio alto si tratta subito anche l'osso, altrimenti si rivaluta l'osso a funzione tiroidea normale.";
+const SEC_L1 = new Set(["gen_ipofosfatasia",
   "ipofosfatasia", "deficitD", "osteomalIpoP", "fanconi", "ipopara", "ipomagne"]);
 const SEC_RIVEDI = new Set(["op_ipp", "op_ssri", "op_diuretici", "op_glitazoni", "op_sglt2", "op_oppioidi", "op_dmpa", "op_tenofovir", "vita_fumo", "vita_alcol", "vita_basso_peso", "vita_immobilizzazione", "vita_anoressia", "op_calo"]);
 const SEC_LEV = [{ t:"Urgenza medica", s:"se il calcio è molto alto (oltre 14 mg/dL) o ci sono sintomi: subito in ospedale, idratazione e bisfosfonato endovena", k:"r" },
@@ -279,17 +282,17 @@ const SEC_LEV = [{ t:"Urgenza medica", s:"se il calcio è molto alto (oltre 14 m
   { t:"Fattori noti", s:"spiegano il rischio, si tratta comunque", k:"g" }];
 function secLevels(p, S){
   S = S || pzSecondary(p); const eg = num(p.egfr), out = [], seen = new Set();
-  const add = (nome, lev, src, href, riv) => { if(seen.has(nome)) return; seen.add(nome); out.push({ nome, lev, src, href, riv: !!riv }); };
+  const add = (nome, lev, src, href, riv, id) => { if(seen.has(nome)) return; seen.add(nome); out.push({ nome, lev, src, href, riv: !!riv, tir: SEC_TIR[id] || "" }); };
   const ircLev = 2;   /* le soglie di eGFR per i farmaci sono nelle controindicazioni */
-  S.N.note.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 3, "anam", OH + "#causa-" + x.f.id, SEC_RIVEDI.has(x.f.id)));
-  S.N.sosp.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 2, "anam", OH + "#causa-" + x.f.id));
-  S.A.forms.forEach(x => add(COND[x.cid], x.cid === "ipercalcemiaMaligna" ? 0 : x.cid === "irc" ? ircLev : SEC_L1.has(x.cid) ? 1 : 2, "esami", OH + "#forma-" + x.cid));
+  S.N.note.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : SEC_TIR[x.f.id] ? 2 : 3, "anam", OH + "#causa-" + x.f.id, SEC_RIVEDI.has(x.f.id), x.f.id));
+  S.N.sosp.forEach(x => add(x.f.nome, SEC_L1.has(x.f.id) ? 1 : 2, "anam", OH + "#causa-" + x.f.id, false, x.f.id));
+  S.A.forms.forEach(x => add(COND[x.cid], x.cid === "ipercalcemiaMaligna" ? 0 : x.cid === "irc" ? ircLev : SEC_L1.has(x.cid) ? 1 : 2, "esami", OH + "#forma-" + x.cid, false, x.cid));
   if((p.ci || {}).irc) add(COND.irc, ircLev, "anam", OH + "#forma-irc");
   return out.sort((a, b) => a.lev - b.lev);
 }
 /* le forme secondarie in una riga, per livello */
 const secGroups = (p, S) => { const it = secLevels(p, S); return [0, 1, 2, 3].map(l => [l, it.filter(x => x.lev === l)]).filter(g => g[1].length); };
-const secText = (p, S) => secGroups(p, S).map(([l, xs]) => SEC_LEV[l].t + ": " + xs.map(x => x.nome + (x.riv ? " (da rivedere se possibile)" : "")).join(", ")).join("; ");
+const secText = (p, S) => secGroups(p, S).map(([l, xs]) => SEC_LEV[l].t + ": " + xs.map(x => x.nome + (x.riv ? " (da rivedere se possibile)" : x.tir ? " (" + x.tir + ")" : "")).join(", ")).join("; ");
 function drugFlags(p, F, S){
   const lab = p.lab || {}, eg = num(p.egfr), vd = num(p.vitd), ci = p.ci || {}, fl = {};
   const add = (ids, kind, why) => ids.forEach(id => { (fl[id] = fl[id] || { ci:[], warn:[] })[kind].push(why); });
@@ -1264,7 +1267,7 @@ function vPazReport(p){
   const ll = labLine(p), td = pzTodo(p, F), dec = p.decisione && DECISIONI[p.decisione.tipo];
   const body = sec("Fratture da fragilità", F.fx.length ? F.fx.map(fxTxt) : p.nessunaFx ? ["Nessuna"] : [], "fratture")
     + sec("Anamnesi e terapie", anam, anamDone(p) ? "" : "anamnesi")
-    + sec("Forme secondarie", secGroups(p, S).map(([l, xs]) => SEC_LEV[l].t + " (" + SEC_LEV[l].s + "): " + xs.map(x => x.nome + (x.riv ? " — da rivedere se possibile" : "")).join("; ")), "")
+    + sec("Forme secondarie", secGroups(p, S).map(([l, xs]) => SEC_LEV[l].t + " (" + SEC_LEV[l].s + "): " + xs.map(x => x.nome + (x.riv ? " — da rivedere se possibile" : x.tir ? " — " + x.tir : "")).join("; ")), "")
     + sec("Esami di I livello" + (p.labData ? " (" + fmtD(p.labData) + ")" : ""), ll ? [ll] : [], "esami")
     + (S.A.byForm.length ? `<p class="note">${S.A.byForm.length ? "Esami di II livello, solo su sospetto clinico, partendo da " + COND[S.A.byForm[0][0]].toLowerCase() + ": " + S.A.byForm[0][1].join("; ") + "." : ""}</p>` : "")
     + (S.hpp ? `<p class="note"><b>Fosfatasi alcalina bassa:</b> escludere l'ipofosfatasia; bisfosfonati controindicati.</p>` : "")
@@ -1292,7 +1295,7 @@ function letterReasons(p, F, S){
   if(F.recent.length) r.push("frattura da fragilità recente, con rischio imminente di rifrattura");
   if(F.fxInTerapia) r.push("nuova frattura nonostante la terapia in corso");
   if(S.hpp) r.push("fosfatasi alcalina bassa, sospetta ipofosfatasia");
-  const sec = secLevels(p, S).filter(x => x.lev < 3).map(x => x.nome);
+  const sec = secLevels(p, S).filter(x => x.lev < 3 && !x.tir).map(x => x.nome);
   if(sec.length) r.push("inquadramento di una possibile forma secondaria (" + sec.slice(0, 4).join(", ") + ")");
   if(!r.length) r.push("valutazione specialistica dell'osteoporosi e indicazione alla terapia");
   return r;

@@ -46,8 +46,8 @@ const FIG_SHEETS = {
   defra: { t:"DeFRA", ic:secIcon("defra"), k:"defra", body: p => noHead(vPazDefra(p).html) },
   sec:   { t:"Osteoporosi secondaria", ic:secIcon("sec"), k:"anamnesi", body: p => { const S = pzSecondary(p), G = secGroups(p, S);
     const SRC = { anam:"da malattie e farmaci", esami:"compatibile con gli esami" };
-    return (G.length ? G.map(([l, xs]) => `<div class="seclev sl${l}"><p class="lbl">${SEC_LEV[l].t}</p><p class="small">${SEC_LEV[l].s[0].toUpperCase() + SEC_LEV[l].s.slice(1)}.</p><div class="stack">${xs.map(x => `<a class="entry" href="${x.href}" target="_blank" rel="noopener"><div><b>${x.nome}</b><small>${SRC[x.src]}${x.riv ? " · da rivedere se possibile" : ""}</small></div>${CHEV}</a>`).join("")}</div></div>`).join("")
-      : `<p class="hint">Nessuna forma secondaria.</p>`) +
+    return (G.length ? G.map(([l, xs]) => `<div class="seclev sl${l}"><p class="lbl">${SEC_LEV[l].t}</p><p class="small">${SEC_LEV[l].s[0].toUpperCase() + SEC_LEV[l].s.slice(1)}.</p><div class="stack">${xs.map(x => `<a class="entry" href="${x.href}" target="_blank" rel="noopener"><div><b>${x.nome}</b><small>${SRC[x.src]}${x.riv ? " · da rivedere se possibile" : x.tir ? " · " + x.tir : ""}</small></div>${CHEV}</a>`).join("")}</div></div>`).join("")
+      : `<p class="hint">Nessuna forma secondaria.</p>`) + (G.some(([, xs]) => xs.some(x => x.tir)) ? `<p class="small">Tiroide: ${TIR_COSA.replace(/^./, c => c.toLowerCase())}</p>` : "") +
       `<div class="btns"><button type="button" class="btn sec" data-fsheet="anam">Anamnesi e farmaci</button><button type="button" class="btn sec" data-fsheet="esami">Esami del sangue</button></div>`; } },
   storico:{ t:"Controlli nel tempo", ic:secIcon("storico"), k:"storico", body: p => noHead(vPazStorico(p).html) },
   /* su PC la decisione si apre nel pannello di destra; sul telefono resta la sua pagina */
@@ -372,7 +372,9 @@ function vDecidi(p, inPanel){
   { const G = secGroups(p, S), g = l => (G.find(x => x[0] === l) || [, []])[1];
     if(g(0).length) c("w", "Urgenza medica", g(0).map(x => x.nome).join(", ") + ": invio urgente in ospedale");
     if(g(1).length) c("w", "Prima di trattare", g(1).map(x => x.nome).join(", "));
-    if(g(2).length) c("i", "Da approfondire, intanto si può trattare", g(2).map(x => x.nome).join(", ")); }
+    const g2 = g(2).filter(x => !x.tir), tr = g(2).filter(x => x.tir);
+    if(g2.length) c("i", "Da approfondire, intanto si può trattare", g2.map(x => x.nome).join(", "));
+    if(tr.length) c("i", "Tiroide da curare: " + tr.map(x => x.nome.replace(/^Osteoporosi da /, "")).join(", "), TIR_COSA); }
   if(S.hpp) c("w", "Escludi l'ipofosfatasia", "fosfatasi alcalina bassa: bisfosfonati controindicati");
   if(vd === null && lab.D !== "norm") c("w", "Dosa la 25-OH-vitamina D", "sotto 75 nmol/L è rimborsabile (Nota 96) e va corretta prima di iniziare il farmaco");
   else if(vdLow(vd) || lab.D === "basso") c("w", "Correggi la vitamina D", (vd !== null ? vdTxt(vd) + ": " : "") + "sotto 75 nmol/L, il valore da raggiungere (Nota 96)");
