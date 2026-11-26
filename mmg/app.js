@@ -1551,6 +1551,7 @@ function vFarmaco(id){
   const d = DRUGS[id]; if(!d) return { redirect:"guida" };
   return { bar:"Farmaco", html: `<div class="katrow"><span class="kat k-amber">${d.classe}</span></div><h1>${d.nome}</h1><div class="rule"></div>
     <p class="lbl">Come agisce</p><p class="note">${d.come}</p>
+    ${id === Z_ ? `<div class="rows"><a class="rowlink" href="fpps.html"><span>Guarda come agisce<small>Animazione 3D: blocco della FPPS, apoptosi dell'osteoclasta e reazione di fase acuta</small></span>${CHEV}</a></div>` : ""}
     <p class="lbl">Efficacia</p><p class="note">${d.efficacia}</p>
     <p class="lbl">Dose</p><p class="note">${d.via}</p>
     <p class="lbl">Come si prende</p><p class="note">${d.assunzione}</p>
