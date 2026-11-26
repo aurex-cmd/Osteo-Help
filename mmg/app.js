@@ -1469,13 +1469,26 @@ const N79_NOTE = [
   ["g", "Teriparatide: su diagnosi e piano terapeutico specialistico di 6 mesi, rinnovabile per altri 6 mesi non più di tre volte (24 mesi in tutto)."],
   ["h", "Abaloparatide: su diagnosi e piano terapeutico specialistico di 6 mesi, rinnovabile per altri 6 mesi non più di due volte (18 mesi in tutto)."]
 ];
+/* resa grafica della Nota 79: i testi sono quelli di N79_GUIDA e N79_NOTE, qui cambia solo l'impaginazione */
+const N79_LIV = [["I scelta", "nv1"], ["II scelta", "nv2"], ["III scelta", "nv3"]];
+/* le lettere tra parentesi diventano pulsanti che portano alla nota */
+const n79Ref = s => s.replace(/\(([a-h])\)/g, (m, k) => `<button type="button" class="n79ref" data-scroll="#n79n-${k}" aria-label="Vai alla nota ${k}">${k}</button>`);
+/* un'etichetta per farmaco: si divide sulle virgole fuori dalle parentesi; «seguito da…» resta con il farmaco che lo precede */
+const n79Drugs = s => s.split(/, (?![^(]*\))/).reduce((a, x) => { if(/^seguito/.test(x) && a.length) a[a.length - 1] += ", " + x; else a.push(x); return a; }, [])
+  .map(x => `<span class="n79d">${n79Ref(x.charAt(0).toUpperCase() + x.slice(1))}</span>`).join("");
+/* la condizione va a capo a ogni «+»: un criterio per riga */
+const n79Cond = c => c.split(" + ").map((x, i) => `<span class="n79k">${i ? `<b class="n79plus" aria-hidden="true">+</b>` : ""}<span>${n79Ref(x)}</span></span>`).join("");
+const N79_SEZ = sez => { const [t, s] = sez.split(" · "); return `<span><span class="n79st">${t}</span><small>${s}</small></span>`; };
 const NOTA79_HTML = `
-    <p class="note">La Nota 79 limita la prescrizione a carico del SSN dei farmaci per l'osteoporosi alle condizioni qui sotto. Per ogni condizione: <b>I scelta</b>, poi <b>II</b> e <b>III</b> solo nei casi della nota (a). Le lettere rimandano alle note in fondo.</p>
-    ${N79_GUIDA.map(([sez, rows]) => `<p class="lbl">${sez}</p><div class="n79g">${rows.map(([c, i1, i2, i3]) => `<div class="n79r"><p class="n79c">${c}</p><dl>${[["I scelta", i1], ["II scelta", i2], ["III scelta", i3]].filter(x => x[1]).map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl></div>`).join("")}</div>`).join("")}
+    <p class="note">La Nota 79 limita la prescrizione a carico del SSN dei farmaci per l'osteoporosi alle condizioni qui sotto. Per ogni condizione: <b>I scelta</b>, poi <b>II</b> e <b>III</b> solo nei casi della nota <button type="button" class="n79ref" data-scroll="#n79n-a" aria-label="Vai alla nota a">a</button>. Le lettere rimandano alle note in fondo.</p>
+    <div class="n79leg" aria-hidden="true">${N79_LIV.map(([t, c]) => `<span class="n79lv ${c}">${t}</span>`).join("")}</div>
+    ${N79_GUIDA.map(([sez, rows], si) => `<details class="n79s"${si === 0 ? " open" : ""}><summary>${N79_SEZ(sez)}<em>${rows.length}</em>${CHEV}</summary>
+      <div class="n79g">${rows.map(([c, ...liv], ri) => `<article class="n79r"><div class="n79c"><i class="n79i">${ri + 1}</i><div class="n79cr">${n79Cond(c)}</div></div>
+        <div class="n79t">${liv.map((v, li) => v ? `<div class="n79tier ${N79_LIV[li][1]}"><span class="n79lv ${N79_LIV[li][1]}">${N79_LIV[li][0]}</span><div class="n79ds">${n79Drugs(v)}</div></div>` : "").join("")}</div></article>`).join("")}</div></details>`).join("")}
     <p class="lbl">Note</p>
-    <ul class="list n79n">${N79_NOTE.map(([k, t]) => `<li><i>${k}</i><span>${t}</span></li>`).join("")}</ul>
+    <ul class="n79n">${N79_NOTE.map(([k, t]) => `<li id="n79n-${k}"><i>${k}</i><span>${t}</span></li>`).join("")}</ul>
     <div class="alert info"><b>Prima di iniziare</b>In tutte le indicazioni è raccomandato un adeguato apporto di calcio e vitamina D (vedi la pagina sulla Nota 96), attività fisica, sospensione del fumo e prevenzione delle cadute; prima di trattare vanno escluse le forme secondarie.</div>
-    <p class="small">Fonte: Nota AIFA 79, allegato alla determina del Presidente AIFA n. 1127 dell'8 settembre 2025. Nella scheda di ogni paziente, in «Decidi la terapia», l'app indica per ciascun farmaco la condizione e il livello di scelta. Verifica sempre il testo vigente.</p>`;
+    <p class="small n79src">Fonte: Nota AIFA 79, allegato alla determina del Presidente AIFA n. 1127 dell'8 settembre 2025. Nella scheda di ogni paziente, in «Decidi la terapia», l'app indica per ciascun farmaco la condizione e il livello di scelta. Verifica sempre il testo vigente.</p>`;
 const GUIDA = [
   { k:"cosa", t:"Cos'è l'osteoporosi", s:"In parole semplici", html:`
     <p class="note">È una malattia dello scheletro in cui l'osso diventa meno denso e più fragile, fino a rompersi per traumi minimi: una caduta dalla propria altezza, un colpo di tosse, sollevare un peso. Non dà sintomi finché non compare una frattura.</p>
@@ -1511,7 +1524,7 @@ const GUIDA = [
     <li><i>6</i><span><b>25-OH-vitamina D</b>: carenza da correggere prima della terapia</span></li>
     <li><i>7</i><span><b>TSH e PTH</b>: a rigore di II livello, ma utili quasi sempre</span></li>
     <li><i>8</i><span>Nell'uomo <b>testosterone totale</b>; in base alla clinica anti-transglutaminasi con IgA totali</span></li></ul>` },
-  { k:"defra", t:"DeFRA e Nota 79", s:"Dal rischio di frattura alla prescrizione", html:`
+  { k:"defra", t:"DeFRA", s:"Dal rischio di frattura alla prescrizione", html:`
     <p class="note">Il <b>DeFRA</b> è il calcolatore italiano del rischio di frattura a 10 anni, sviluppato da SIOMMMS e SIR a partire dal FRAX. Rispetto al FRAX considera numero e sede delle fratture, la dose dei glucocorticoidi, più malattie e la densità di colonna e femore. Si usa dai 50 anni.</p>
     <p class="note">Il risultato cade in una di <b>quattro zone</b>, con soglie che salgono con l'età: <b>verde</b> (basso rischio) solo vitamina D, calcio e stile di vita; <b>gialla</b> (rischio moderato) terapia antiriassorbitiva (bisfosfonati orali o denosumab) senza necessità di intervento specialistico; <b>arancione</b> (alto) e <b>rossa</b> (altissimo) invio allo specialista: terapia anabolica o con romosozumab, prescrivibili dallo specialista su piano terapeutico. La stima del rischio aiuta così sia a scegliere la terapia più appropriata sia a decidere chi deve prescriverla.</p>
     <p class="note">Servono: età, sesso, peso, altezza, fratture da fragilità (sede, numero), familiarità per frattura di femore o vertebre, fumo, alcol, glucocorticoidi, malattie (artrite reumatoide e connettiviti, diabete, BPCO, MICI, HIV, Parkinson, sclerosi multipla, grave disabilità motoria), terapia ormonale adiuvante, T-score di colonna e femore.</p>

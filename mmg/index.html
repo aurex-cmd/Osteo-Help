@@ -627,14 +627,45 @@ button.fcal{border:0;font:inherit;color:inherit;cursor:pointer;width:100%;transi
 .fn79 em{font-style:normal;opacity:.85}
 .fpanel #pzGrid{display:block}
 .reb{margin-top:6px} .freb{margin:-2px 0 6px;font-size:.78rem;color:#6B4A00;background:#FBF1DD;border-radius:8px;padding:6px 10px}
-.n79g{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
-.n79r{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
-.n79c{margin:0 0 8px;font-weight:700;font-size:.92rem;line-height:1.4}
-.n79r dl{margin:0;display:flex;flex-direction:column;gap:5px}
-.n79r dl div{display:grid;grid-template-columns:78px 1fr;gap:8px;align-items:baseline}
-.n79r dt{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pri)}
-.n79r dd{margin:0;font-size:.88rem;line-height:1.4}
-.n79n i{font-style:normal}
+/* Nota 79 nella guida: sezioni apribili, una scheda per condizione, farmaci come etichette colorate per livello di scelta */
+.n79leg{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
+.n79lv{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;white-space:nowrap}
+.n79lv.nv1{background:var(--teal-box);color:var(--teal)} .n79lv.nv2{background:var(--blue-box);color:var(--blue)} .n79lv.nv3{background:#F8EEDC;color:var(--amber)}
+details.n79s{border:1px solid var(--line);border-radius:14px;background:var(--bg);margin-top:10px;overflow:hidden}
+details.n79s > summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--box)}
+details.n79s > summary::-webkit-details-marker{display:none}
+details.n79s > summary > span{flex:1;min-width:0}
+.n79st{display:block;font-weight:700;font-size:.95rem}
+details.n79s > summary small{display:block;color:var(--muted);font-size:.82rem;line-height:1.35}
+details.n79s > summary em{font-style:normal;font-weight:700;font-size:.78rem;color:var(--blue);background:var(--bg);border:1px solid var(--line);border-radius:999px;min-width:26px;text-align:center;padding:2px 7px;font-variant-numeric:tabular-nums}
+details.n79s > summary .chev{width:18px;height:18px;color:var(--muted);transition:transform .2s;flex:0 0 auto}
+details.n79s[open] > summary .chev{transform:rotate(90deg)}
+details.n79s .n79g{padding:10px;display:flex;flex-direction:column;gap:10px;margin:0}
+.n79r{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
+.n79c{display:flex;gap:10px;align-items:flex-start;margin:0}
+.n79i{font-style:normal;flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--box);color:var(--muted);font-size:.72rem;font-weight:700;display:grid;place-items:center;margin-top:1px;font-variant-numeric:tabular-nums}
+.n79cr{display:flex;flex-direction:column;gap:4px;min-width:0;font-weight:600;font-size:.92rem;line-height:1.4}
+.n79k{display:flex;gap:6px;align-items:baseline}
+.n79plus{flex:0 0 auto;font-weight:800;color:var(--blue);font-size:.9rem;width:12px;text-align:center}
+.n79t{display:flex;flex-direction:column;gap:6px}
+.n79tier{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-radius:10px;border-left:3px solid}
+.n79tier.nv1{background:#F3FAF9;border-color:var(--teal)} .n79tier.nv2{background:#F8F6FD;border-color:var(--blue)} .n79tier.nv3{background:#FCF7EE;border-color:var(--amber)}
+.n79tier .n79lv{align-self:flex-start;padding:0;background:none}
+.n79ds{display:flex;flex-wrap:wrap;gap:5px}
+.n79d{display:inline-block;font-size:.86rem;line-height:1.3;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+.n79ref{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:0;padding:0;margin:0 1px;vertical-align:1px;background:var(--blue-box);color:var(--blue);font-size:.66rem;font-weight:800;line-height:1;cursor:pointer}
+.n79ref:hover{background:var(--blue);color:#fff}
+.n79n{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.n79n li{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:var(--box);font-size:.9rem;line-height:1.45;scroll-margin:90px}
+.n79n li i{font-style:normal;flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:.74rem;font-weight:800;display:grid;place-items:center}
+@media (min-width:744px){
+  .n79t{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .n79r{padding:14px}
+}
+@media print{ details.n79s > summary .chev{display:none} .n79r{break-inside:avoid} }
+/* testi della Nota 79 giustificati, con la sillabazione italiana per evitare buchi tra le parole */
+.n79n li span,.n79k > span,.n79src{text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.n79k > span{flex:1;min-width:0}
 .leag{display:flex;flex-direction:column;background:var(--bg);border-radius:10px;padding:2px 12px;margin-bottom:6px}
 .leag .ck small{display:block;color:var(--muted);font-size:.8rem;font-weight:400;margin-top:2px}
 #leaSx{margin:2px 0 8px}
