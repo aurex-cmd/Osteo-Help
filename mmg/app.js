@@ -1488,7 +1488,7 @@ const NOTA79_HTML = `
     <p class="lbl">Note</p>
     <ul class="n79n">${N79_NOTE.map(([k, t]) => `<li id="n79n-${k}"><i>${k}</i><span>${t}</span></li>`).join("")}</ul>
     <div class="alert info"><b>Prima di iniziare</b>In tutte le indicazioni è raccomandato un adeguato apporto di calcio e vitamina D (vedi la pagina sulla Nota 96), attività fisica, sospensione del fumo e prevenzione delle cadute; prima di trattare vanno escluse le forme secondarie.</div>
-    <p class="small">Fonte: Nota AIFA 79, allegato alla determina del Presidente AIFA n. 1127 dell'8 settembre 2025. Nella scheda di ogni paziente, in «Decidi la terapia», l'app indica per ciascun farmaco la condizione e il livello di scelta. Verifica sempre il testo vigente.</p>`;
+    <p class="small n79src">Fonte: Nota AIFA 79, allegato alla determina del Presidente AIFA n. 1127 dell'8 settembre 2025. Nella scheda di ogni paziente, in «Decidi la terapia», l'app indica per ciascun farmaco la condizione e il livello di scelta. Verifica sempre il testo vigente.</p>`;
 const GUIDA = [
   { k:"cosa", t:"Cos'è l'osteoporosi", s:"In parole semplici", html:`
     <p class="note">È una malattia dello scheletro in cui l'osso diventa meno denso e più fragile, fino a rompersi per traumi minimi: una caduta dalla propria altezza, un colpo di tosse, sollevare un peso. Non dà sintomi finché non compare una frattura.</p>
