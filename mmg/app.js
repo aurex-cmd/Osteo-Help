@@ -1475,7 +1475,7 @@ const N79_LIV = [["I scelta", "nv1"], ["II scelta", "nv2"], ["III scelta", "nv3"
 const n79Ref = s => s.replace(/\(([a-h])\)/g, (m, k) => `<button type="button" class="n79ref" data-scroll="#n79n-${k}" aria-label="Vai alla nota ${k}"><span class="lt">${k}</span></button>`);
 /* un'etichetta per farmaco: si divide sulle virgole fuori dalle parentesi; «seguito da…» resta con il farmaco che lo precede */
 const n79Drugs = s => s.split(/, (?![^(]*\))/).reduce((a, x) => { if(/^seguito/.test(x) && a.length) a[a.length - 1] += ", " + x; else a.push(x); return a; }, [])
-  .map(x => `<span class="n79d">${n79Ref(x.charAt(0).toUpperCase() + x.slice(1))}</span>`).join("");
+  .map(x => { x = n79Ref(x.charAt(0).toUpperCase() + x.slice(1)).replace(/ (per al massimo .*)$/, ' <span class="n79dx">$1</span>'); return `<span class="n79d">${x}</span>`; }).join("");
 /* la condizione va a capo a ogni «+»: un criterio per riga */
 const n79Cond = c => c.split(" + ").map((x, i) => `<span class="n79k">${i ? `<b class="n79plus" aria-hidden="true">+</b>` : ""}<span>${n79Ref(x)}</span></span>`).join("");
 /* in testa a ogni sezione la situazione del paziente da cui si parte; sotto, il nome della sezione nella Nota */
@@ -1485,7 +1485,6 @@ const N79_SEZ = (sez, i) => `<i class="n79ic ${N79_ENTRY[i][1]}" aria-hidden="tr
 const n79Prev = v => v.replace(/ \([a-h]\)/g, "").replace(/ per al massimo.*$/, "");
 const NOTA79_HTML = `
     <p class="note">La Nota 79 limita la prescrizione a carico del SSN dei farmaci per l'osteoporosi alle condizioni qui sotto. Per ogni condizione: <b>I scelta</b>, poi <b>II</b> e <b>III</b> solo nei casi della nota <button type="button" class="n79ref" data-scroll="#n79n-a" aria-label="Vai alla nota a"><span class="lt">a</span></button>. Le lettere rimandano alle note in fondo.</p>
-    <div class="n79leg" aria-hidden="true">${N79_LIV.map(([t, c]) => `<span class="n79lv ${c}">${t}</span>`).join("")}</div>
     ${N79_GUIDA.map(([sez, rows], si) => `<details class="n79s"><summary>${N79_SEZ(sez, si)}<em>${rows.length}</em>${CHEV}</summary>
       <div class="n79g">${rows.map(([c, ...liv], ri) => `<details class="n79r"><summary class="n79c"><i class="n79i">${ri + 1}</i><div class="n79cr">${n79Cond(c)}<small class="n79pv"><b>I scelta</b> ${n79Prev(liv[0])}</small></div>${CHEV}</summary>
         <div class="n79t">${liv.map((v, li) => v ? `<div class="n79tier ${N79_LIV[li][1]}"><span class="n79lv ${N79_LIV[li][1]}">${N79_LIV[li][0]}</span><div class="n79ds">${n79Drugs(v)}</div></div>` : "").join("")}</div></details>`).join("")}</div></details>`).join("")}
