@@ -1472,7 +1472,7 @@ const N79_NOTE = [
 /* resa grafica della Nota 79: i testi sono quelli di N79_GUIDA e N79_NOTE, qui cambia solo l'impaginazione */
 const N79_LIV = [["I scelta", "nv1"], ["II scelta", "nv2"], ["III scelta", "nv3"]];
 /* le lettere tra parentesi diventano pulsanti che portano alla nota */
-const n79Ref = s => s.replace(/\(([a-h])\)/g, (m, k) => `<button type="button" class="n79ref" data-scroll="#n79n-${k}" aria-label="Vai alla nota ${k}">${k}</button>`);
+const n79Ref = s => s.replace(/\(([a-h])\)/g, (m, k) => `<button type="button" class="n79ref" data-scroll="#n79n-${k}" aria-label="Vai alla nota ${k}"><span class="lt">${k}</span></button>`);
 /* un'etichetta per farmaco: si divide sulle virgole fuori dalle parentesi; «seguito da…» resta con il farmaco che lo precede */
 const n79Drugs = s => s.split(/, (?![^(]*\))/).reduce((a, x) => { if(/^seguito/.test(x) && a.length) a[a.length - 1] += ", " + x; else a.push(x); return a; }, [])
   .map(x => `<span class="n79d">${n79Ref(x.charAt(0).toUpperCase() + x.slice(1))}</span>`).join("");
@@ -1484,13 +1484,13 @@ const N79_SEZ = (sez, i) => `<i class="n79ic ${N79_ENTRY[i][1]}" aria-hidden="tr
 /* nella riga chiusa della condizione, un'anteprima della I scelta (senza le lettere delle note) */
 const n79Prev = v => v.replace(/ \([a-h]\)/g, "").replace(/ per al massimo.*$/, "");
 const NOTA79_HTML = `
-    <p class="note">La Nota 79 limita la prescrizione a carico del SSN dei farmaci per l'osteoporosi alle condizioni qui sotto. Per ogni condizione: <b>I scelta</b>, poi <b>II</b> e <b>III</b> solo nei casi della nota <button type="button" class="n79ref" data-scroll="#n79n-a" aria-label="Vai alla nota a">a</button>. Le lettere rimandano alle note in fondo.</p>
+    <p class="note">La Nota 79 limita la prescrizione a carico del SSN dei farmaci per l'osteoporosi alle condizioni qui sotto. Per ogni condizione: <b>I scelta</b>, poi <b>II</b> e <b>III</b> solo nei casi della nota <button type="button" class="n79ref" data-scroll="#n79n-a" aria-label="Vai alla nota a"><span class="lt">a</span></button>. Le lettere rimandano alle note in fondo.</p>
     <div class="n79leg" aria-hidden="true">${N79_LIV.map(([t, c]) => `<span class="n79lv ${c}">${t}</span>`).join("")}</div>
     ${N79_GUIDA.map(([sez, rows], si) => `<details class="n79s"><summary>${N79_SEZ(sez, si)}<em>${rows.length}</em>${CHEV}</summary>
       <div class="n79g">${rows.map(([c, ...liv], ri) => `<details class="n79r"><summary class="n79c"><i class="n79i">${ri + 1}</i><div class="n79cr">${n79Cond(c)}<small class="n79pv"><b>I scelta</b> ${n79Prev(liv[0])}</small></div>${CHEV}</summary>
         <div class="n79t">${liv.map((v, li) => v ? `<div class="n79tier ${N79_LIV[li][1]}"><span class="n79lv ${N79_LIV[li][1]}">${N79_LIV[li][0]}</span><div class="n79ds">${n79Drugs(v)}</div></div>` : "").join("")}</div></details>`).join("")}</div></details>`).join("")}
     <p class="lbl">Note</p>
-    <ul class="n79n">${N79_NOTE.map(([k, t]) => `<li id="n79n-${k}"><i>${k}</i><span>${t}</span></li>`).join("")}</ul>
+    <ul class="n79n">${N79_NOTE.map(([k, t]) => `<li id="n79n-${k}"><i><span class="lt">${k}</span></i><span>${t}</span></li>`).join("")}</ul>
     <div class="alert info"><b>Prima di iniziare</b>In tutte le indicazioni è raccomandato un adeguato apporto di calcio e vitamina D (vedi la pagina sulla Nota 96), attività fisica, sospensione del fumo e prevenzione delle cadute; prima di trattare vanno escluse le forme secondarie.</div>
     <p class="small n79src">Fonte: Nota AIFA 79, allegato alla determina del Presidente AIFA n. 1127 dell'8 settembre 2025. Nella scheda di ogni paziente, in «Decidi la terapia», l'app indica per ciascun farmaco la condizione e il livello di scelta. Verifica sempre il testo vigente.</p>`;
 const GUIDA = [
@@ -1817,6 +1817,32 @@ function commitPending(p){ if(!p) return false; let n = false; ["fratture", "dxa
 /* ---------- navigazione ---------- */
 const stack = [];
 let current = null, actFn = null, doneTo = null;
+/* lettere nei cerchi (note della Nota 79): come testo HTML la lettera non si centra (la x sta in basso,
+   le aste in alto e l'interlinea sposta tutto), quindi la si disegna in un piccolo SVG, dove la linea di base
+   è esatta, e la si centra sulla forma reale della lettera, misurata a 200 px e riportata in scala */
+const LT_CACHE = {};
+function centerLetters(){
+  const cv = centerLetters.cv || (centerLetters.cv = document.createElement("canvas")), g = cv.getContext("2d");
+  document.querySelectorAll(".lt").forEach(el => {
+    const L = el.dataset.l || (el.dataset.l = el.textContent.trim()), box = el.parentElement;
+    const cs = getComputedStyle(box), F = parseFloat(cs.fontSize), W = box.clientWidth, H = box.clientHeight;
+    if(!W || !H) return;
+    const key = L + "|" + cs.fontWeight + "|" + cs.fontFamily;
+    let m = LT_CACHE[key];
+    if(!m){
+      g.font = cs.fontWeight + " 200px " + cs.fontFamily;
+      const t = g.measureText(L);
+      if(t.actualBoundingBoxAscent === undefined) return;
+      m = LT_CACHE[key] = { w:(t.actualBoundingBoxRight - t.actualBoundingBoxLeft) / 200, h:(t.actualBoundingBoxAscent - t.actualBoundingBoxDescent) / 200 };
+    }
+    const x = W / 2 - F * m.w / 2, y = H / 2 + F * m.h / 2;
+    el.classList.add("lt-ok");
+    el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><text x="${x.toFixed(2)}" y="${y.toFixed(2)}" fill="currentColor" font-size="${F}" font-weight="${cs.fontWeight}" font-family='${cs.fontFamily.replace(/'/g, "")}'>${L}</text></svg>`;
+  });
+}
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => { for(const k in LT_CACHE) delete LT_CACHE[k]; centerLetters(); });
+/* le lettere dentro una sezione chiusa non hanno misure: si centrano quando la sezione si apre */
+document.addEventListener("toggle", e => { if(e.target.open && e.target.querySelector(".lt")) centerLetters(); }, true);
 function render(){
   if(locked) return;
   const route = routeNow();
@@ -1839,6 +1865,7 @@ function render(){
   if(home) $("#barT").innerHTML = `<span class="oh">OH</span>Osteo Help <span class="mmg">MMG</span>`; else $("#barT").textContent = v.bar;
   $("#back").style.visibility = home ? "hidden" : "visible";
   if(changed) window.scrollTo(0, 0);
+  centerLetters();
 }
 function goBack(){ if(stack.length > 1) history.back(); else go(pzParent(current) || ""); }
 $("#back").addEventListener("click", goBack);
