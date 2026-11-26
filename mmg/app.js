@@ -1478,13 +1478,17 @@ const n79Drugs = s => s.split(/, (?![^(]*\))/).reduce((a, x) => { if(/^seguito/.
   .map(x => `<span class="n79d">${n79Ref(x.charAt(0).toUpperCase() + x.slice(1))}</span>`).join("");
 /* la condizione va a capo a ogni «+»: un criterio per riga */
 const n79Cond = c => c.split(" + ").map((x, i) => `<span class="n79k">${i ? `<b class="n79plus" aria-hidden="true">+</b>` : ""}<span>${n79Ref(x)}</span></span>`).join("");
-const N79_SEZ = sez => { const [t, s] = sez.split(" · "); return `<span><span class="n79st">${t}</span><small>${s}</small></span>`; };
+/* in testa a ogni sezione la situazione del paziente da cui si parte; sotto, il nome della sezione nella Nota */
+const N79_ENTRY = [["Anamnesi positiva per frattura vertebrale o di femore", "si"], ["Anamnesi positiva per altre fratture (non vertebrali e non femorali)", "si"], ["Nessuna frattura: donna in menopausa o uomo di almeno 50 anni", "no"]];
+const N79_SEZ = (sez, i) => `<i class="n79ic ${N79_ENTRY[i][1]}" aria-hidden="true"></i><span><span class="n79st">${N79_ENTRY[i][0]}</span><small>${sez}</small></span>`;
+/* nella riga chiusa della condizione, un'anteprima della I scelta (senza le lettere delle note) */
+const n79Prev = v => v.replace(/ \([a-h]\)/g, "").replace(/ per al massimo.*$/, "");
 const NOTA79_HTML = `
     <p class="note">La Nota 79 limita la prescrizione a carico del SSN dei farmaci per l'osteoporosi alle condizioni qui sotto. Per ogni condizione: <b>I scelta</b>, poi <b>II</b> e <b>III</b> solo nei casi della nota <button type="button" class="n79ref" data-scroll="#n79n-a" aria-label="Vai alla nota a">a</button>. Le lettere rimandano alle note in fondo.</p>
     <div class="n79leg" aria-hidden="true">${N79_LIV.map(([t, c]) => `<span class="n79lv ${c}">${t}</span>`).join("")}</div>
-    ${N79_GUIDA.map(([sez, rows], si) => `<details class="n79s"${si === 0 ? " open" : ""}><summary>${N79_SEZ(sez)}<em>${rows.length}</em>${CHEV}</summary>
-      <div class="n79g">${rows.map(([c, ...liv], ri) => `<article class="n79r"><div class="n79c"><i class="n79i">${ri + 1}</i><div class="n79cr">${n79Cond(c)}</div></div>
-        <div class="n79t">${liv.map((v, li) => v ? `<div class="n79tier ${N79_LIV[li][1]}"><span class="n79lv ${N79_LIV[li][1]}">${N79_LIV[li][0]}</span><div class="n79ds">${n79Drugs(v)}</div></div>` : "").join("")}</div></article>`).join("")}</div></details>`).join("")}
+    ${N79_GUIDA.map(([sez, rows], si) => `<details class="n79s"><summary>${N79_SEZ(sez, si)}<em>${rows.length}</em>${CHEV}</summary>
+      <div class="n79g">${rows.map(([c, ...liv], ri) => `<details class="n79r"><summary class="n79c"><i class="n79i">${ri + 1}</i><div class="n79cr">${n79Cond(c)}<small class="n79pv"><b>I scelta</b> ${n79Prev(liv[0])}</small></div>${CHEV}</summary>
+        <div class="n79t">${liv.map((v, li) => v ? `<div class="n79tier ${N79_LIV[li][1]}"><span class="n79lv ${N79_LIV[li][1]}">${N79_LIV[li][0]}</span><div class="n79ds">${n79Drugs(v)}</div></div>` : "").join("")}</div></details>`).join("")}</div></details>`).join("")}
     <p class="lbl">Note</p>
     <ul class="n79n">${N79_NOTE.map(([k, t]) => `<li id="n79n-${k}"><i>${k}</i><span>${t}</span></li>`).join("")}</ul>
     <div class="alert info"><b>Prima di iniziare</b>In tutte le indicazioni è raccomandato un adeguato apporto di calcio e vitamina D (vedi la pagina sulla Nota 96), attività fisica, sospensione del fumo e prevenzione delle cadute; prima di trattare vanno escluse le forme secondarie.</div>
@@ -1654,7 +1658,7 @@ document.addEventListener("click", e => {
   if(t.closest("#pzLockOff")){ removePin(); return; }
   if(t.closest("#pzLockNow")){ showLock(); return; }
   if(t.closest("#lockForgot")){ if(confirm("Senza il codice l'unico modo per riaprire l'app è cancellare l'archivio di questo browser (potrai poi ripristinare un backup). Cancellare tutto?")){ try{ localStorage.removeItem(PZ_KEY); localStorage.removeItem(PIN_KEY); }catch(e){} location.hash = ""; location.reload(); } return; }
-  const sc = t.closest("[data-scroll]"); if(sc){ const el = $(sc.dataset.scroll); if(el){ el.scrollIntoView({ behavior:"smooth", block:"center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } return; }
+  const sc = t.closest("[data-scroll]"); if(sc){ e.preventDefault(); const el = $(sc.dataset.scroll); if(el){ el.scrollIntoView({ behavior:"smooth", block:"center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } return; }
   const pdel = t.closest("[data-pzdel]");
   if(pdel){ const q = PZ.find(x => String(x.id) === pdel.dataset.pzdel); if(q && confirm("Eliminare questo paziente senza nome e i dati inseriti?")){ PZ.splice(PZ.indexOf(q), 1); savePz(); render(); } return; }
   if(t.closest("#pzNew")){ const p = pzBlank(); PZ.push(p); savePz(); go("paz-" + p.id + "-figura"); return; }
