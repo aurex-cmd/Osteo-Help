@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Animazione 3D: come lo zoledronato blocca la FPPS, con l'apoptosi dell'osteoclasta (effetto terapeutico) e la reazione di fase acuta (effetto collaterale).">
+<link rel="icon" href="icone/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icone/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icone/apple-touch-icon-180.png">
+<meta name="theme-color" content="#070d18">
+<!-- Animazione 3D dello zoledronato, aperta dalla scheda del farmaco (app.js, vFarmaco). Pagina autonoma: usa three.js r128 da cdnjs, quindi serve la connessione. -->
+<title>Inibizione della FPPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: scena 3D cartoon a tutto schermo; titolo in alto, didascalia + comandi in basso come un lettore video.
+   Scelta deliberata di un solo aspetto chiaro (azzurro a sinistra, pesca a destra, come lo schema originale). */
+:root{
+  --bg:#eef4fb;
+  --ink:#1e2747;
+  --muted:#55617f;
+  --paper:#ffffff;
+  --via1:#3d8bff;
+  --via1-soft:#d6e8ff;
+  --via2:#ff5a4a;
+  --via2-soft:#ffe0d8;
+  --gold:#ffc531;
+  --ok:#2fb866;
+  --warn:#ff8a2a;
+  --f-display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+html{height:100%;box-sizing:border-box}
+body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--f-body);-webkit-font-smoothing:antialiased}
+#bgwash{position:fixed;inset:0;background:
+  radial-gradient(circle at 1px 1px, rgba(30,39,71,.07) 1.2px, transparent 1.6px) 0 0/22px 22px,
+  linear-gradient(90deg,#cfe5ff 0%,#e4effc 45%,#fbe9df 55%,#ffd9c6 100%)}
+#heat{position:fixed;inset:0;pointer-events:none;opacity:0;background:radial-gradient(50% 55% at 75% 50%, rgba(255,110,40,.45), transparent 70%)}
+#stage{position:fixed;inset:0;touch-action:none;cursor:grab}
+#stage:active{cursor:grabbing}
+#stage canvas{display:block;width:100%;height:100%}
+
+.top{position:fixed;left:0;right:0;top:0;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
+.top h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,3.2vw,32px);line-height:1;margin:0;text-wrap:balance;color:var(--ink)}
+.top h1 span{display:block;font-size:.55em;font-weight:500;color:var(--muted);margin-top:6px}
+.sides{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.side{font:800 11px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;border-radius:999px;border:2px solid var(--ink);background:var(--paper);color:var(--muted);opacity:.55;transition:opacity .4s,background .4s,color .4s}
+.side.v1.on{opacity:1;background:var(--via1);color:#fff}
+.side.v2.on{opacity:1;background:var(--via2);color:#fff}
+
+#labels{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;white-space:nowrap;font:800 12.5px/1.2 var(--f-body);padding:5px 10px;border-radius:10px;background:var(--paper);border:2px solid var(--ink);box-shadow:2px 3px 0 var(--ink);color:var(--ink);opacity:0;transition:opacity .6s;will-change:transform}
+.lbl.on{opacity:1}
+.lbl small{display:block;font-weight:700;color:var(--muted);font-size:11px}
+.lbl.gold{background:#fff3c9}
+.lbl.v1{background:var(--via1-soft)}
+.lbl.v2{background:var(--via2-soft)}
+.lbl.ok{background:#d5f5e0}
+.lbl.warn{background:#ffe3c9}
+.lbl.res{font-family:var(--f-display);font-weight:600;font-size:16px;padding:8px 12px}
+
+.panel{position:fixed;left:0;right:0;bottom:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);pointer-events:none}
+.card{pointer-events:auto;max-width:780px;margin:0 auto;background:rgba(255,255,255,.94);border:2.5px solid var(--ink);box-shadow:4px 5px 0 var(--ink);border-radius:18px;padding:14px 16px 12px;display:grid;gap:10px}
+.meta{display:flex;align-items:center;gap:10px;font:800 11px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tag{padding:5px 9px;border-radius:999px;background:var(--gold);color:var(--ink);border:2px solid var(--ink)}
+.tag.v1{background:var(--via1);color:#fff}
+.tag.v2{background:var(--via2);color:#fff}
+.count{margin-left:auto;font-variant-numeric:tabular-nums}
+.txt{transition:opacity .35s}
+.txt.fade{opacity:0}
+.txt h2{font-family:var(--f-display);font-weight:600;font-size:clamp(22px,3vw,28px);line-height:1.1;margin:0 0 6px;text-wrap:balance}
+.txt p{margin:0;font-size:15px;line-height:1.5;color:#2c3656;max-width:68ch}
+.txt p b{color:var(--ink);font-weight:800}
+.ctrl{display:flex;align-items:center;gap:8px}
+.btn{appearance:none;border:2px solid var(--ink);background:var(--paper);color:var(--ink);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none;box-shadow:2px 2px 0 var(--ink);transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--ink)}
+.btn:focus-visible,.seg:focus-visible{outline:3px solid var(--via1);outline-offset:2px}
+.btn.play{width:46px;height:46px;background:var(--gold)}
+.btn svg{width:18px;height:18px;fill:currentColor}
+.tl{flex:1;display:flex;gap:4px;min-width:0}
+.seg{appearance:none;border:0;padding:8px 0;background:none;flex:1;cursor:pointer;min-width:0}
+.seg i{display:block;height:7px;border-radius:4px;background:#e3e7ef;border:1.5px solid var(--ink);overflow:hidden;position:relative}
+.seg i b{position:absolute;inset:0;width:0;background:var(--gold)}
+.seg.done i b{width:100%}
+.seg.v1 i{background:var(--via1-soft)}
+.seg.v2 i{background:var(--via2-soft)}
+.hint{font-size:11.5px;font-weight:700;color:var(--muted);text-align:center}
+.no3d .hint{display:none}
+#fallback{position:fixed;inset:30% 16px auto;text-align:center;color:var(--muted);font-size:14px}
+@media (max-width:560px){
+  .txt p{font-size:14px}
+  .side{font-size:10px;padding:5px 8px}
+  .lbl{font-size:11px}
+  .lbl small{font-size:10px}
+  .hint{display:none}
+  .card{padding:12px 12px 10px;gap:8px}
+  .txt h2{font-size:21px}
+}
+
+/* stile illustrazione medica: fondo scuro, interfaccia in vetro */
+:root{color-scheme:dark}
+body{background:#070d18;color:#e9eef8}
+#bgwash{background:radial-gradient(60% 55% at 22% 55%,rgba(70,110,200,.28),transparent 70%),radial-gradient(55% 55% at 80% 50%,rgba(200,90,70,.18),transparent 70%),radial-gradient(120% 90% at 50% 40%,#0d1a30,#05080f)}
+#heat{background:radial-gradient(50% 55% at 75% 50%,rgba(255,110,40,.25),transparent 70%)}
+.top h1{color:#fff}.top h1 span{color:#9fb0cc}
+.side{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:#c8d3e6;box-shadow:none}
+.lbl{background:rgba(8,14,26,.72);border:1px solid rgba(160,190,235,.35);box-shadow:0 4px 18px rgba(0,0,0,.35);color:#eef3fb;border-radius:6px;font-weight:700;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lbl small{color:#9fb0cc}
+.lbl.gold,.lbl.v1,.lbl.v2,.lbl.ok,.lbl.warn{background:rgba(8,14,26,.72)}
+.lbl.gold{border-color:#ffc531}.lbl.v1{border-color:#5f9dff}.lbl.v2{border-color:#ff6f5f}.lbl.ok{border-color:#3fd07a}.lbl.warn{border-color:#ff9a3a}
+.card{background:rgba(10,18,32,.78);border:1px solid rgba(160,190,235,.22);box-shadow:0 20px 50px rgba(0,0,0,.45);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.txt p{color:#cfd9ea}.txt p b{color:#fff}.txt h2{color:#fff}.meta,.hint{color:#8fa0bd}
+.tag{border:0}
+.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;box-shadow:none}
+.btn.play{background:#ffc531;color:#1b1405;border-color:#ffc531}
+.seg i{border:0;background:rgba(255,255,255,.14)}
+@media (prefers-reduced-motion:reduce){.txt,.lbl{transition:none}}
+.top .back{pointer-events:auto;display:inline-block;margin-bottom:10px;font:700 13px/1 var(--f-body);color:#fff;text-decoration:none;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22)}
+.top .back:focus-visible{outline:3px solid #5f9dff;outline-offset:2px}
+.top > :first-child{display:flex;flex-direction:column;align-items:flex-start}
+</style>
+</head>
+<body>
+
+<div id="bgwash"></div>
+<div id="heat"></div>
+<div id="stage" aria-label="Scena 3D: trascina per ruotare"></div>
+<div id="labels" aria-hidden="true"></div>
+
+<header class="top">
+  <div><a class="back" href="./#farmaco-zoledronato" aria-label="Torna alla scheda dello zoledronato">‹ Zoledronato</a>
+  <h1>Inibizione della FPPS<span>Due vie parallele, due effetti</span></h1></div>
+  <div class="sides">
+    <span class="side v1" id="sideV1">Osteoclasta</span>
+    <span class="side v2" id="sideV2">Cellula immunitaria</span>
+  </div>
+</header>
+
+<section class="panel">
+  <div class="card">
+    <div class="meta"><span class="tag" id="tag">Panoramica</span><span class="count" id="count">01 / 14</span></div>
+    <div class="txt" id="txt" aria-live="polite"><h2 id="h"></h2><p id="p"></p></div>
+    <div class="ctrl">
+      <button class="btn" id="prev" aria-label="Passaggio precedente"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="btn play" id="play" aria-label="Pausa"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+      <button class="btn" id="next" aria-label="Passaggio successivo"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      <div class="tl" id="tl"></div>
+    </div>
+    <div class="hint">Trascina la scena per ruotarla · frecce o barra spaziatrice da tastiera</div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+/* ---------------- Passaggi ---------------- */
+const STEPS=[
+ {via:0,tag:"Panoramica",h:"Un bersaglio, due conseguenze",
+  p:"I bifosfonati azotati, come lo <b>zoledronato</b>, bloccano un solo enzima: la <b>farnesil difosfato sintasi (FPPS)</b>. Nell'osteoclasta il blocco porta all'apoptosi ed è l'effetto terapeutico. Nelle cellule immunitarie fa accumulare IPP e scatena la reazione di fase acuta.",
+  cam:[0,3.4,18],look:[0,1.0,0],set:{},labels:["fpps","oc","tc","bone"]},
+ {via:0,tag:"Via del mevalonato",h:"Dall'acetil-CoA all'IPP, poi FPP e GGPP",
+  p:"L'acetil-CoA diventa HMG-CoA, poi mevalonato e quindi <b>isopentenil pirofosfato (IPP)</b>. La FPPS usa l'IPP per costruire il <b>farnesil difosfato (FPP)</b>, da cui deriva il <b>geranilgeranil difosfato (GGPP)</b>.",
+  cam:[-1.6,6.2,9.5],look:[-1.8,4,0],set:{},labels:["acoa","hmg","mev","ipp","fpps","fppggpp"]},
+ {via:1,tag:"Osteoclasta · condizioni normali",h:"La prenilazione delle piccole GTPasi",
+  p:"FPP e GGPP forniscono le catene lipidiche che si legano a una cisteina delle piccole GTPasi (<b>Ras, Rho, Rac</b>): farnesilazione e geranilgeranilazione. Con la catena lipidica le GTPasi si ancorano alla membrana e possono funzionare.",
+  cam:[-7.8,1.2,8],look:[-5,-0.5,0],set:{xray:1},labels:["gtp","prenyl","fppggpp"]},
+ {via:0,tag:"Il farmaco",h:"Arriva il bifosfonato azotato",
+  p:"Il bifosfonato si fissa all'osso e viene assorbito dall'osteoclasta mentre riassorbe. Il suo gruppo azotato si inserisce nel <b>sito attivo della FPPS</b>.",
+  cam:[2.4,5.6,9],look:[0.4,4.4,0],set:{mol:1,xray:0},labels:["mol","fpps"]},
+ {via:0,tag:"Il blocco",h:"La FPPS è bloccata",
+  p:"Con l'enzima bloccato <b>non si formano più FPP e GGPP</b>. A monte del blocco il substrato, l'<b>IPP</b>, si accumula.",
+  cam:[0,5.8,11],look:[-0.4,4.3,0],set:{mol:2,block:1,ipp:1},labels:["fpps","ipp","ippacc","stop"]},
+ {via:1,tag:"Via 1 · Osteoclasta",h:"Senza FPP e GGPP la prenilazione non avviene",
+  p:"Le GTPasi restano senza catena lipidica (cisteina libera, <b>Cys–SH</b>). Non si ancorano alla membrana e restano nel citoplasma, inattive.",
+  cam:[-7.8,1.2,8],look:[-5,-0.5,0],set:{prenyl:1,xray:1},labels:["gtpfree"]},
+ {via:1,tag:"Via 1 · Osteoclasta",h:"Perdita di funzione delle GTPasi",
+  p:"Senza Ras, Rho e Rac attive l'osteoclasta perde il <b>citoscheletro e la polarità</b>, l'<b>anello di actina</b> che sigilla la zona di riassorbimento e il <b>traffico delle vescicole</b> verso l'orletto a spazzola.",
+  cam:[-2.6,0.6,9.6],look:[-5,-0.7,0],set:{func:1},labels:["actin","ves","pit"]},
+ {via:1,tag:"Via 1 · Risultato",h:"Apoptosi dell'osteoclasta",
+  p:"L'osteoclasta che non funziona va incontro ad <b>apoptosi</b>: si frammenta in tanti <b>corpi apoptotici</b>, ognuno con un pezzo di nucleo. Il riassorbimento osseo si riduce: è l'<b>effetto terapeutico</b>.",
+  cam:[-5,2.6,10.5],look:[-5,-0.9,0],set:{apop:1,xray:0},labels:["res1","bodies"]},
+ {via:2,tag:"Via 2 · Cellula immunitaria",h:"L'IPP accumulato diventa un segnale",
+  p:"Lo stesso blocco avviene nei <b>monociti</b> circolanti, che captano il farmaco soprattutto dopo un'infusione endovenosa. L'IPP che si accumula a monte della FPPS viene riconosciuto dal sistema immunitario.",
+  cam:[1.8,5,10],look:[1.4,3,0],set:{spill:1},labels:["ippacc","tc"]},
+ {via:2,tag:"Via 2 · Cellula immunitaria",h:"Attivazione dei linfociti T γδ",
+  p:"I linfociti <b>T γδ Vγ9Vδ2</b> riconoscono l'IPP attraverso il loro recettore (<b>TCR</b>), con la mediazione delle butirrofiline BTN3A1 e BTN2A1. Si attivano e si moltiplicano.",
+  cam:[7.4,1.4,5.6],look:[5.5,0,0],set:{tact:1},labels:["tcr","tc"]},
+ {via:2,tag:"Via 2 · Cellula immunitaria",h:"Rilascio di citochine",
+  p:"I linfociti attivati liberano <b>IFN-γ</b> e <b>TNF-α</b>; insieme ai monociti fanno salire anche <b>IL-6</b> e altre citochine infiammatorie.",
+  cam:[5.5,0.6,11],look:[5.5,-1.3,0],set:{cyto:1},labels:["cyto","tc"]},
+ {via:2,tag:"Via 2 · Effetto collaterale",h:"Reazione di fase acuta",
+  p:"Le citochine causano <b>febbre, mialgie, malessere e astenia</b>. Compaiono di solito entro 1–3 giorni dalla prima infusione, durano pochi giorni e sono molto meno frequenti alle infusioni successive.",
+  cam:[4,0.8,14],look:[4.6,-1.4,0],set:{fever:1},labels:["symp","res2"]},
+ {via:2,tag:"Via 2 · Modulazione",h:"Modulazione con glucocorticoidi",
+  p:"Un glucocorticoide come il <b>desametasone</b> riduce la produzione di citochine (IL-1, IL-6, TNF-α, IFN-γ) e attenua i sintomi della fase acuta. <b>Non interferisce</b> con l'effetto del farmaco sugli osteoclasti.",
+  cam:[7,1.2,11.5],look:[6,-0.8,0],set:{ster:1},labels:["dex","cyto"]},
+ {via:0,tag:"Sintesi",h:"Unico bersaglio, due conseguenze",
+  p:"<b>1)</b> Apoptosi dell'osteoclasta = <b>efficacia terapeutica</b>. <b>2)</b> Attivazione immunitaria = <b>reazione di fase acuta</b>, transitoria.",
+  cam:[0,3.4,18.5],look:[0,1.2,0],set:{},labels:["fpps","res1","res2"]}
+];
+const ZERO={xray:0,mol:0,block:0,ipp:0,spill:0,prenyl:0,func:0,apop:0,tact:0,cyto:0,fever:0,ster:0};
+const TARGETS=STEPS.map((s,i)=>Object.assign({},ZERO,...STEPS.slice(0,i+1).map(x=>x.set)));
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- UI ---------------- */
+const $=id=>document.getElementById(id);
+const tl=$("tl"), segs=[];
+STEPS.forEach((s,i)=>{const b=document.createElement("button");b.className="seg"+(s.via===1?" v1":s.via===2?" v2":"");b.setAttribute("aria-label","Vai al passaggio "+(i+1)+": "+s.h);b.innerHTML="<i><b></b></i>";b.onclick=()=>go(i,true);tl.appendChild(b);segs.push(b)});
+let step=0, playing=!reduce, elapsed=0;
+const dur=i=>Math.min(14000,Math.max(8000,4500+STEPS[i].p.replace(/<[^>]+>/g,"").length*32));
+function setPlayIcon(){$("playIcon").innerHTML=playing?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M7 4v16l13-8z"/>';$("play").setAttribute("aria-label",playing?"Pausa":"Riproduci")}
+function render(){
+  const s=STEPS[step];
+  const t=$("txt");t.classList.add("fade");
+  setTimeout(()=>{$("h").textContent=s.h;$("p").innerHTML=s.p;t.classList.remove("fade");},reduce?0:250);
+  const tag=$("tag");tag.textContent=s.tag;tag.className="tag"+(s.via===1?" v1":s.via===2?" v2":"");
+  $("count").textContent=String(step+1).padStart(2,"0")+" / "+STEPS.length;
+  $("sideV1").classList.toggle("on",s.via===1||step===0||step===STEPS.length-1);
+  $("sideV2").classList.toggle("on",s.via===2||step===0||step===STEPS.length-1);
+  segs.forEach((g,i)=>{g.classList.toggle("done",i<step);g.querySelector("b").style.width=i<step?"100%":"0"});
+}
+function go(i,user){
+  i=Math.max(0,Math.min(STEPS.length-1,i));
+  if(i===step&&!user)return;
+  step=i;elapsed=0;render();if(window.__onStep)window.__onStep();
+}
+$("prev").onclick=()=>go(step-1,true);
+$("next").onclick=()=>go(step+1,true);
+$("play").onclick=()=>{if(!playing&&step===STEPS.length-1&&elapsed>=dur(step))go(0,true);playing=!playing;setPlayIcon()};
+addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"){go(step+1,true)}else if(e.key==="ArrowLeft"){go(step-1,true)}
+  else if(e.key===" "&&e.target.tagName!=="BUTTON"){e.preventDefault();$("play").click()}
+});
+setPlayIcon();
+$("h").textContent=STEPS[0].h;$("p").innerHTML=STEPS[0].p;render();
+
+function tickTimeline(dt){
+  if(!playing)return;
+  elapsed+=dt*1000;
+  const d=dur(step);
+  segs[step].querySelector("b").style.width=Math.min(100,elapsed/d*100)+"%";
+  if(elapsed>=d){
+    if(step<STEPS.length-1)go(step+1,false);
+    else{playing=false;setPlayIcon();}
+  }
+}
+
+/* ---------------- 3D ---------------- */
+let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch(e){renderer=null}
+if(!renderer||!window.THREE){
+  document.body.classList.add("no3d");
+  const f=document.createElement("div");f.id="fallback";f.textContent="La scena 3D non è disponibile su questo dispositivo. I passaggi restano leggibili qui sotto.";document.body.appendChild(f);
+  let last=performance.now();(function loop(now){tickTimeline(Math.max(0,(now-last)/1000));last=now;requestAnimationFrame(loop)})(last);
+  return;
+}
+const stage=$("stage");
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.outputEncoding=THREE.sRGBEncoding;
+stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0x070d18,26,60);
+const camera=new THREE.PerspectiveCamera(38,1,0.1,200);
+scene.add(new THREE.HemisphereLight(0x9cc4ff,0x2a1a12,0.35));
+const sun=new THREE.DirectionalLight(0xfff0dc,2.2);sun.position.set(5,11,8);
+sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-13,right:13,top:10,bottom:-8,near:1,far:40});sun.shadow.bias=-0.0006;sun.shadow.normalBias=0.03;scene.add(sun);
+const back=new THREE.DirectionalLight(0x5aa0ff,1.6);back.position.set(-4,5,-10);scene.add(back);
+const fill=new THREE.PointLight(0xff9a6a,0.6,30);fill.position.set(8,-1,8);scene.add(fill);
+const warmL=new THREE.PointLight(0xff8a4a,0.0,14);warmL.position.set(5.5,1.5,4);scene.add(warmL);
+
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+function noiseTex(n,fn){const c=document.createElement("canvas");c.width=c.height=n;const g=c.getContext("2d"),im=g.createImageData(n,n);
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){const v=fn(x/n,y/n),i=(y*n+x)*4;im.data[i]=v[0];im.data[i+1]=v[1];im.data[i+2]=v[2];im.data[i+3]=255}
+ g.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+const hsh=(x,y)=>{const s=Math.sin(x*127.1+y*311.7)*43758.5453;return s-Math.floor(s)};
+const vn=(x,y)=>{const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy);
+ return (hsh(ix,iy)*(1-u)+hsh(ix+1,iy)*u)*(1-v)+(hsh(ix,iy+1)*(1-u)+hsh(ix+1,iy+1)*u)*v};
+const fbm=(x,y,o)=>{let a=0,f=1,w=.5;for(let i=0;i<o;i++){a+=w*vn(x*f,y*f);f*=2;w*=.5}return a};
+const skinBump=noiseTex(256,(x,y)=>{const v=fbm(x*24,y*24,4)*255;return[v,v,v]});
+/* materiali cartoon: 3 bande di luce + contorno scuro */
+const grad=new THREE.DataTexture(new Uint8Array([110,190,255]),3,1,THREE.LuminanceFormat);
+grad.minFilter=THREE.NearestFilter;grad.magFilter=THREE.NearestFilter;grad.generateMipmaps=false;grad.needsUpdate=true;
+function mat(c,o){o=Object.assign({roughness:.5,metalness:0},o||{});const m=new THREE.MeshPhysicalMaterial(Object.assign({color:c,clearcoat:.4,clearcoatRoughness:.4,bumpMap:skinBump,bumpScale:.012},o));m.userData.base=o.opacity!==undefined?o.opacity:1;return m}
+const INK=0x1e2747;
+const inkMat=new THREE.MeshBasicMaterial({color:INK,side:THREE.BackSide});inkMat.userData.ink=true;
+function ink(m){return m}
+const RIM_VS="varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){vP=position;vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}";
+const RIM_FS="uniform vec3 uCol;uniform vec3 uInk;uniform float uOp;uniform float uLine;varying vec3 vN;varying vec3 vV;varying vec3 vP;float h(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}float n3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}float fb(vec3 p){return .55*n3(p)+.3*n3(p*2.1)+.15*n3(p*4.3);}void main(){vec3 p=vP*3.2;float e=.08;vec3 g=vec3(fb(p+vec3(e,0,0))-fb(p-vec3(e,0,0)),fb(p+vec3(0,e,0))-fb(p-vec3(0,e,0)),fb(p+vec3(0,0,e))-fb(p-vec3(0,0,e)));vec3 n=normalize(vN-.9*g);vec3 v=normalize(vV);float f=pow(1.-abs(dot(n,v)),2.2);vec3 L=normalize(vec3(.4,.8,.55));float d=max(dot(n,L),0.);float sp=pow(max(dot(reflect(-L,n),v),0.),28.)*.5;vec3 c=uCol*(.22+.8*d)+mix(uCol,vec3(.75,.88,1.),.5)*f*1.1+sp;float a=uOp*(.28+.72*f)+sp*.5;gl_FragColor=vec4(c,clamp(a,0.,1.));}";
+function rimMat(col,op,line){return new THREE.ShaderMaterial({uniforms:{uCol:{value:new THREE.Color(col)},uInk:{value:new THREE.Color(INK)},uOp:{value:op},uLine:{value:line||.72}},vertexShader:RIM_VS,fragmentShader:RIM_FS,transparent:true,depthWrite:false})}
+function fade(obj,a){obj.visible=a>0.01;obj.traverse(n=>{if(n.material&&!n.material.userData.ink){n.material.transparent=true;n.material.opacity=(n.material.userData.base??1)*a}})}
+function bond(a,b,r,m){const d=new THREE.Vector3().subVectors(b,a),L=d.length();const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,8),m);c.position.copy(a).addScaledVector(d,.5);c.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return c}
+const sph=(r,m,d)=>new THREE.Mesh(new THREE.SphereGeometry(r,d||16,d?Math.round(d*.75):12),m);
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646};
+const clamp01=x=>Math.max(0,Math.min(1,x));
+const smooth=x=>{x=clamp01(x);return x*x*(3-2*x)};
+
+/* --- osso: solo la superficie, con la lacuna di Howship --- */
+const BONE_TOP=-2.25, CORT=.42, BOT=BONE_TOP-CORT;
+const topN=(x,z)=>.035*Math.sin(1.3*x+.7*z)+.025*Math.sin(2.9*z-1.1*x)+.012*Math.sin(5.3*x+3.1*z);
+const pitF=(x,z)=>{const r=Math.hypot(x+5,z)/1.85;return r<1?(1-r*r)*(1-r*r):0};
+const IVORY=new THREE.Color(0xe9c98a),PITC=new THREE.Color(0xc27f45),tc3=new THREE.Color();
+const cortGeo=new THREE.BoxGeometry(10,CORT,6,110,1,66);
+const cortBase=cortGeo.attributes.position.array.slice();
+cortGeo.setAttribute("color",new THREE.Float32BufferAttribute(new Float32Array(cortBase.length),3));
+const boneCol=noiseTex(512,(x,y)=>{const a=fbm(x*10,y*10,5),p=fbm(x*48,y*48,3);const pore=p<.32?.55:1;const v=(.78+.3*a)*pore;return[235*v,214*v,178*v]});
+const boneBump=noiseTex(512,(x,y)=>{const a=fbm(x*10,y*10,5),p=fbm(x*48,y*48,3);const v=(a*.6+(p<.32?0:.4))*255;return[v,v,v]});
+boneCol.repeat.set(2,1.2);boneBump.repeat.set(2,1.2);
+const cort=new THREE.Mesh(cortGeo,mat(0xffffff,{vertexColors:true,map:boneCol,bumpMap:boneBump,bumpScale:.05,roughness:.85,clearcoat:0}));
+cort.position.set(-5,BONE_TOP-CORT/2,0);scene.add(cort);
+let pitDepth=-1;
+function shapeBone(depth){
+  if(Math.abs(depth-pitDepth)<.002)return;pitDepth=depth;
+  const pa=cortGeo.attributes.position.array,ca=cortGeo.attributes.color.array;
+  for(let i=0;i<pa.length;i+=3){
+    const x=cortBase[i],y=cortBase[i+1],z=cortBase[i+2],wx=x-5;
+    let c=IVORY;
+    if(y>0){const p=pitF(wx,z);pa[i+1]=y+topN(wx,z)-depth*p;tc3.copy(IVORY).lerp(PITC,Math.min(1,p*1.6)).multiplyScalar(1-.6*Math.max(0,-topN(wx,z)));c=tc3}
+    ca[i]=c.r;ca[i+1]=c.g;ca[i+2]=c.b;
+  }
+  cortGeo.attributes.position.needsUpdate=true;cortGeo.attributes.color.needsUpdate=true;cortGeo.computeVertexNormals();
+}
+shapeBone(.32);
+// contorni a fumetto del blocco
+{const L=[];const seg=(x0,z0,x1,z1,top)=>{for(let k=0;k<60;k++){const u0=k/60,u1=(k+1)/60;const xa=x0+(x1-x0)*u0,za=z0+(z1-z0)*u0,xb=x0+(x1-x0)*u1,zb=z0+(z1-z0)*u1;
+   const ya=top?BONE_TOP+topN(xa,za):BOT,yb=top?BONE_TOP+topN(xb,zb):BOT;L.push(xa,ya,za,xb,yb,zb)}};
+ [[-10,3,0,3],[0,3,0,-3],[0,-3,-10,-3],[-10,-3,-10,3]].forEach(e=>{seg(...e,true);seg(...e,false)});
+ [[-10,3],[0,3],[0,-3],[-10,-3]].forEach(([x,z])=>L.push(x,BONE_TOP+topN(x,z),z,x,BOT,z));
+ const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(L,3));}
+
+/* --- osteoclasta --- */
+const OC=V(-5,0,0), R=2.35, TOPH=R*.95, BOTH=R*.55, FING=.2;
+const oc=new THREE.Group();scene.add(oc);
+const ocGeo=new THREE.IcosahedronGeometry(R,5);
+{const p=ocGeo.attributes.position.array;for(let i=0;i<p.length;i+=3){if(p[i+1]>=0)p[i+1]*=.95;else p[i+1]*=.55}}
+const ocBase=ocGeo.attributes.position.array.slice();
+const ocMat=rimMat(0x9a86e8,.95,.8);
+const OC_COL=new THREE.Color(0x9a86e8),OC_DYING=new THREE.Color(0x8a7aa8);
+const ocMesh=new THREE.Mesh(ocGeo,ocMat);ocMesh.renderOrder=2;oc.add(ocMesh);
+// nuclei: ovali scuri appena sotto la cupola, come nel disegno
+const nucMat=mat(0x4b2fb0,{roughness:.35});
+const nuclei=[[-.55,.55,.62],[.15,.75,.6],[.75,.5,.45],[-.2,.62,-.7],[.65,.55,-.55],[-.85,.45,-.1]].map(a=>{
+  const d=V(a[0],a[1],a[2]).normalize();const p=V(d.x*R*.74,d.y*TOPH*.74,d.z*R*.74);
+  const n=ink(sph(1,nucMat,22),1.1);n.quaternion.setFromUnitVectors(V(0,1,0),V(d.x/R,d.y/TOPH,d.z/R).normalize());
+  n.position.copy(p);n.userData.p=p.clone();n.scale.set(.42,.13,.3);oc.add(n);return n});
+const gtpMat=mat(0xb07cff);
+const tailMat=mat(0x3fd27a);
+const gtps=[];
+for(let i=0;i<9;i++){
+  const a=i/9*Math.PI*2+.3, el=-.15-((i%3)*.18);
+  const dir=V(Math.cos(a)*Math.cos(el),Math.sin(el),Math.sin(a)*Math.cos(el)).normalize();
+  const surf=V(dir.x*R*.98,dir.y*(dir.y<0?BOTH:TOPH)*.93,dir.z*R*.98);
+  const g=new THREE.Group();
+  const body=ink(sph(.17,gtpMat,14),1.18);body.scale.set(1.35,.9,.9);g.add(body);
+  const pts=[];for(let k=0;k<=12;k++){const u=k/12;pts.push(V(.18+u*.42,Math.sin(u*Math.PI*3)*.05,0))}
+  const tail=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),24,.035,6),tailMat);g.add(tail);
+  const out=surf.clone().normalize();
+  g.quaternion.setFromUnitVectors(V(1,0,0),out);
+  g.position.copy(surf).addScaledVector(out,-.32);
+  oc.add(g);
+  gtps.push({g,tail,anchor:g.position.clone(),free:V(dir.x*.9,-.1+rnd()*.5,dir.z*.9),ph:rnd()*6});
+}
+const actinMat=mat(0xff5fa2,{transparent:true,opacity:1});
+const actin=new THREE.Mesh(new THREE.TorusGeometry(1.55,.1,10,64),actinMat);
+actin.rotation.x=Math.PI/2;actin.position.y=-BOTH-FING+.1;oc.add(actin);
+// orletto a spazzola: "dita" che scendono sull'osso
+const fingers=[];
+{const fG=new THREE.CylinderGeometry(.42,.27,1,18,1,true),tG=new THREE.SphereGeometry(.27,18,12);
+ const add=(ang,rad,y0,tilt)=>{const out=V(Math.cos(ang),0,Math.sin(ang));const g=new THREE.Group();g.position.set(out.x*rad,y0,out.z*rad);
+   const dir=V(0,-Math.cos(tilt),0).addScaledVector(out,Math.sin(tilt)).normalize();g.quaternion.setFromUnitVectors(V(0,-1,0),dir);
+   const L=(FING+BOTH+y0-.27)/Math.cos(tilt);const c=new THREE.Mesh(fG,ocMat),t=new THREE.Mesh(tG,ocMat);c.renderOrder=t.renderOrder=2;
+   g.add(c);g.add(t);oc.add(g);fingers.push({c,t,L,ph:rnd()*6})};
+ const y0=r=>-BOTH*Math.sqrt(1-(r/R)*(r/R))*.55;
+ for(let i=0;i<9;i++)add(i/9*Math.PI*2,1.45,y0(1.45),.22);
+ for(let i=0;i<5;i++)add(i/5*Math.PI*2+.6,.72,y0(.72),.06);
+ add(0,0,y0(0),0);}
+const filPos=[];for(let i=0;i<46;i++){const a=V(rnd()*2-1,rnd()*.9-.5,rnd()*2-1).multiplyScalar(1.5);const d=V(rnd()-.5,rnd()-.5,rnd()-.5).normalize().multiplyScalar(.5+rnd()*.5);filPos.push(a.x,a.y,a.z,a.x+d.x,a.y+d.y,a.z+d.z)}
+const filGeo=new THREE.BufferGeometry();filGeo.setAttribute("position",new THREE.Float32BufferAttribute(filPos,3));
+const filMat=new THREE.LineBasicMaterial({color:0xff5fa2,transparent:true,opacity:.7});
+const fils=new THREE.LineSegments(filGeo,filMat);oc.add(fils);
+const vesMat=mat(0xffd84a);
+const ves=[];for(let i=0;i<10;i++){const v=ink(sph(.11,vesMat,10),1.22);oc.add(v);ves.push({m:v,x:(rnd()-.5)*1.8,z:(rnd()-.5)*1.8,ph:rnd(),stuck:null})}
+// corpi apoptotici: la cellula si divide in palline, ognuna con un frammento di nucleo
+const bodyMat=rimMat(0xa797ee,2.6,.62);
+const fragMat=mat(0x7d6cd6);
+const bodies=[];
+for(let i=0;i<8;i++){
+  const a=i/8*Math.PI*2+rnd()*.35;
+  const dir=V(Math.cos(a)*.85,.2+rnd()*.45,Math.sin(a)*.85).normalize();
+  const rb=.42+rnd()*.3, dist=1.5+rnd()*1.5;
+  const fin=V(OC.x+Math.cos(a)*dist,BONE_TOP+rb,OC.z+Math.sin(a)*dist*.85);
+  const m=new THREE.Mesh(new THREE.SphereGeometry(1,28,20),bodyMat);m.renderOrder=3;
+  const frag=ink(sph(.36,fragMat,14),1.14);frag.position.set(.1,-.1,.05);m.add(frag);
+  m.scale.setScalar(.001);m.visible=false;scene.add(m);
+  bodies.push({m,dir,rb,fin,ph:rnd()*6,delay:rnd()*.15});
+}
+const crumbMat=mat(0xfff0c8);
+const crumbs=[];for(let i=0;i<16;i++){const c=ink(sph(.06,crumbMat,8),1.3);scene.add(c);crumbs.push({c,x:-5+(rnd()-.5)*2.4,z:(rnd()-.5)*2.4,ph:rnd()})}
+
+/* --- via del mevalonato + FPPS --- */
+const P_A=V(-4.6,5.3,-.6),P_H=V(-3.2,5.95,-.5),P_M=V(-1.8,6.0,-.3),P_I=V(-.9,5.1,0),FP=V(0,3.85,0);
+const nodeMat=mat(0xffffff);
+[P_A,P_H,P_M].forEach(p=>{const n=ink(sph(.18,nodeMat,16),1.18);n.position.copy(p);scene.add(n)});
+const ippNode=ink(sph(.22,mat(0xff4f4f),16),1.15);ippNode.position.copy(P_I);scene.add(ippNode);
+const curveA=new THREE.CatmullRomCurve3([P_A,P_H,P_M,P_I]);
+const pathTube=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([P_A,P_H,P_M,P_I,FP]),80,.03,6),mat(0x8b9bc0,{transparent:true,opacity:.55}));scene.add(pathTube);
+const curveB=new THREE.CatmullRomCurve3([FP,V(-1.6,3.0,.6),V(-3.4,1.9,.6),V(-4.6,1.05,.3)]);
+const curveC=new THREE.CatmullRomCurve3([P_I,V(1.6,5.9,.8),V(4.2,3.6,.7),V(5.5,1.55,0)]);
+const fpps=new THREE.Group();fpps.position.copy(FP);scene.add(fpps);
+const fppsMat=mat(0xffc531);
+const FPPS_COL=new THREE.Color(0xffc531),FPPS_OFF=new THREE.Color(0xe0965a);
+[[-.35,.1,0,.5],[.35,.1,0,.5],[-.55,-.3,.25,.34],[.55,-.3,.25,.34],[0,.45,.15,.32],[-.2,-.35,-.3,.3],[.2,-.35,-.3,.3],[0,.05,.45,.28]].forEach(a=>{const s=ink(sph(a[3],fppsMat,24),1.09);s.position.set(a[0],a[1],a[2]);fpps.add(s)});
+const siteGlow=sph(.16,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true}),12);siteGlow.position.set(0,.55,.45);fpps.add(siteGlow);
+const halo=new THREE.Mesh(new THREE.TorusGeometry(1.05,.07,8,64),new THREE.MeshBasicMaterial({color:0xff3b30,transparent:true,opacity:0,depthWrite:false}));halo.position.copy(FP);scene.add(halo);
+const SITE=FP.clone().add(V(0,.62,.55));
+
+const upMat=mat(0xffffff);
+const ups=[];for(let i=0;i<30;i++){const m=ink(sph(.08,upMat,8),1.3);scene.add(m);ups.push(m)}
+const fppMat=mat(0x5fe08a),ggMat=mat(0x2cc6c0);
+const downs=[];for(let i=0;i<26;i++){const m=ink(sph(.095,i%2?ggMat:fppMat,8),1.28);scene.add(m);downs.push(m)}
+const ippMat=mat(0xff4f4f);
+const ippCl=[];for(let i=0;i<46;i++){const m=ink(sph(1,ippMat,8),1.22);const o=V(rnd()-.5,rnd()-.5,rnd()-.5).normalize().multiplyScalar(.25+rnd()*.55);m.scale.setScalar(.001);scene.add(m);ippCl.push({m,o,ph:rnd()*6})}
+const spills=[];for(let i=0;i<30;i++){const m=ink(sph(1,ippMat,8),1.22);m.scale.setScalar(.001);scene.add(m);spills.push(m)}
+
+/* --- bifosfonato azotato --- */
+const mol=new THREE.Group();scene.add(mol);
+{const pM=mat(0xff8a1f),oM=mat(0xff4545),cM=mat(0xd5dbe6),nM=mat(0x3d6bff),bM=mat(0x1e2747);
+ const P1=V(-.42,.15,0),P2=V(.42,.15,0),C=V(0,-.05,0);
+ [[P1,pM,.17],[P2,pM,.17],[C,cM,.13]].forEach(a=>{const s=ink(sph(a[2],a[1],14),1.15);s.position.copy(a[0]);mol.add(s)});
+ mol.add(bond(P1,C,.035,bM));mol.add(bond(P2,C,.035,bM));
+ [[P1,-1],[P2,1]].forEach(([P,sg])=>{[V(sg*.25,.15,0),V(0,.3,.12),V(0,.08,-.26)].forEach(d=>{const q=P.clone().add(d);const s=ink(sph(.1,oM,10),1.2);s.position.copy(q);mol.add(s);mol.add(bond(P,q,.025,bM))})});
+ const ring=[];for(let k=0;k<5;k++){const a=k/5*Math.PI*2-Math.PI/2;ring.push(V(Math.cos(a)*.2,-.6+Math.sin(a)*.2,0))}
+ const top=V(0,-.33,0);mol.add(bond(C,top,.03,bM));
+ ring.forEach((p,k)=>{const s=ink(sph(.085,k%2?nM:cM,10),1.2);s.position.copy(p);mol.add(s);mol.add(bond(p,ring[(k+1)%5],.022,bM))});
+ mol.add(bond(top,ring[0],.022,bM));
+}
+const M_HID=V(1.5,10,4),M_HOV=V(1.6,5.4,1.8);
+
+/* --- linfocita T γδ --- */
+const TC=V(5.5,-.2,0);
+const tc=new THREE.Group();tc.position.copy(TC);scene.add(tc);
+const tcMat=rimMat(0xd49bff,.5,.72);
+const TC_COL=new THREE.Color(0xd49bff),TC_HOT=new THREE.Color(0xff8fd8);
+const tcMem=sph(1.5,tcMat,48);tcMem.renderOrder=2;tc.add(tcMem);
+const tcNucMat=mat(0x8a3fd1);
+tc.add(ink(sph(1.02,tcNucMat,32),1.05));
+const tcrMat=mat(0x4f8dff);
+const tcrs=[];
+for(let i=0;i<14;i++){
+  const y=1-(i+.5)/14*1.4, r=Math.sqrt(1-y*y), a=i*2.399;
+  const n=V(Math.cos(a)*r,y,Math.sin(a)*r).normalize();
+  const g=new THREE.Group();
+  g.add(bond(V(0,0,0),V(0,.26,0),.045,tcrMat));g.add(bond(V(0,.26,0),V(.13,.43,0),.04,tcrMat));g.add(bond(V(0,.26,0),V(-.13,.43,0),.04,tcrMat));
+  g.quaternion.setFromUnitVectors(V(0,1,0),n);g.position.copy(n).multiplyScalar(1.46);tc.add(g);tcrs.push(g);
+}
+// citochine: escono solo verso il basso
+const ckCols=[0x3d8bff,0xff9a1f,0x2fcf6a,0x9b5cff,0xffd21f];
+const ckMats=ckCols.map(c=>mat(c));
+const cks=[];for(let i=0;i<110;i++){const m=ink(sph(1,ckMats[i%5],10),1.25);m.scale.setScalar(.001);scene.add(m);
+  const d=V((rnd()*2-1)*.55,-(.75+rnd()*.5),(rnd()*2-1)*.45).normalize();
+  cks.push({m,d,ph:rnd()})}
+const dex=new THREE.Group();scene.add(dex);
+{const dM=mat(0x2fb866);[[0,0],[.4,.23],[.8,0],[1.18,.22]].forEach(([x,y],k)=>{const t=new THREE.Mesh(new THREE.TorusGeometry(k===3?.2:.23,.055,6,k===3?5:6),dM);t.position.set(x,y,0);dex.add(t)});const f=ink(sph(.09,mat(0xb6ffc8),8),1.25);f.position.set(.4,-.25,0);dex.add(f)}
+const D_HID=V(12,5,3),D_ON=V(7.6,1.9,1.4);
+const steroHalo=new THREE.Mesh(new THREE.TorusGeometry(2.1,.05,8,80),new THREE.MeshBasicMaterial({color:0x2fb866,transparent:true,opacity:0,depthWrite:false}));steroHalo.position.copy(TC);scene.add(steroHalo);
+
+scene.traverse(o=>{if(o.isMesh&&o.material&&!o.material.isMeshBasicMaterial&&!o.material.isShaderMaterial){o.castShadow=true;o.receiveShadow=true}});
+/* ---------------- Etichette ---------------- */
+const LBL={
+ fpps:{t:"FPPS<small>farnesil difosfato sintasi</small>",c:"gold",p:()=>FP.clone().add(V(0,-1.05,0))},
+ acoa:{t:"Acetil-CoA",p:()=>P_A.clone().add(V(0,.34,0))},
+ hmg:{t:"HMG-CoA",p:()=>P_H.clone().add(V(0,.34,0))},
+ mev:{t:"Mevalonato",p:()=>P_M.clone().add(V(0,.34,0))},
+ ipp:{t:"IPP<small>isopentenil pirofosfato</small>",c:"v2",p:()=>P_I.clone().add(V(.15,.4,0))},
+ fppggpp:{t:"FPP · GGPP",c:"ok",p:()=>curveB.getPointAt(.45).add(V(0,.3,0))},
+ oc:{t:"Osteoclasta",c:"v1",p:()=>OC.clone().add(V(0,BONE_TOP+(FING+BOTH+TOPH)*ocScale+.35,0))},
+ tc:{t:"Linfocita T γδ<small>Vγ9Vδ2</small>",c:"v2",p:()=>TC.clone().add(V(0,2.25,0))},
+ gtp:{t:"GTPasi ancorate<small>Ras · Rho · Rac</small>",c:"v1",p:()=>oc.localToWorld(gtps[1].g.position.clone()).add(V(0,-.25,0))},
+ prenyl:{t:"Catena prenilica",c:"ok",p:()=>oc.localToWorld(gtps[2].anchor.clone().multiplyScalar(1.12))},
+ gtpfree:{t:"GTPasi non prenilate<small>Cys–SH, nel citoplasma</small>",c:"v1",p:()=>oc.localToWorld(gtps[1].g.position.clone()).add(V(0,.2,0))},
+ mol:{t:"Bifosfonato azotato<small>es. zoledronato</small>",c:"v2",p:()=>mol.position.clone().add(V(0,.55,0))},
+ stop:{t:"Blocco",c:"v2",p:()=>FP.clone().add(V(1.15,.3,0))},
+ ippacc:{t:"Accumulo di IPP",c:"v2",p:()=>P_I.clone().add(V(0,.95,0))},
+ actin:{t:"Anello di actina",c:"v1",p:()=>oc.localToWorld(V(2.0,actin.position.y,0))},
+ ves:{t:"Vescicole",c:"v1",p:()=>oc.localToWorld(V(-.6,.1,1.1))},
+ pit:{t:"Lacuna di riassorbimento<small>di Howship</small>",p:()=>V(-3.3,BONE_TOP+.05,1.5)},
+ bone:{t:"Superficie ossea",p:()=>V(-8.6,BOT-.15,3)},
+ bodies:{t:"Corpi apoptotici",c:"v1",p:()=>bodies[2].m.position.clone().add(V(0,bodies[2].rb+.45,0))},
+ res1:{t:"Riduzione del riassorbimento osseo<small>effetto terapeutico</small>",c:"ok res",p:()=>V(-5,1.0,0)},
+ tcr:{t:"TCR",c:"v2",p:()=>tc.localToWorld(tcrs[3].position.clone().multiplyScalar(1.3))},
+ cyto:{t:"Citochine<small>IFN-γ · TNF-α · IL-6</small>",c:"v2",p:()=>TC.clone().add(V(2.3,-2.4,0))},
+ symp:{t:"Febbre · mialgie · malessere · astenia",c:"warn",p:()=>TC.clone().add(V(0,-4.9,0))},
+ res2:{t:"Sintomi transitori di fase acuta<small>effetto collaterale</small>",c:"warn res",p:()=>TC.clone().add(V(0,2.3,0))},
+ dex:{t:"Desametasone<small>↓ IL-1 · IL-6 · TNF-α · IFN-γ</small>",c:"ok",p:()=>dex.position.clone().add(V(.6,.7,0))}
+};
+const layer=$("labels");
+for(const k in LBL){const d=document.createElement("div");d.className="lbl "+(LBL[k].c||"");d.innerHTML=LBL[k].t;layer.appendChild(d);LBL[k].el=d}
+
+/* ---------------- Stato animato ---------------- */
+const S=Object.assign({},ZERO);
+let ocScale=1;
+const camPos=V(...STEPS[0].cam),camLook=V(...STEPS[0].look);
+let uYaw=0,uPitch=0,drag=null;
+stage.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};stage.setPointerCapture(e.pointerId)});
+stage.addEventListener("pointermove",e=>{if(!drag)return;uYaw-=(e.clientX-drag.x)*.006;uPitch=Math.max(-.7,Math.min(.7,uPitch+(e.clientY-drag.y)*.004));drag={x:e.clientX,y:e.clientY}});
+const endDrag=()=>{drag=null};stage.addEventListener("pointerup",endDrag);stage.addEventListener("pointercancel",endDrag);
+
+let W=0,H=0,yOff=0;
+function resize(){
+  W=innerWidth;H=innerHeight;renderer.setSize(W,H,false);
+  const ph=document.querySelector(".card").getBoundingClientRect().height+16;
+  const th=document.querySelector(".top").getBoundingClientRect().height;
+  yOff=Math.max(0,(ph-th)/2);
+  camera.aspect=W/H;camera.setViewOffset(W,H,0,yOff,W,H);camera.updateProjectionMatrix();
+}
+addEventListener("resize",resize);resize();
+window.__onStep=()=>setTimeout(resize,300);
+
+const tmp=V(0,0,0),sp=new THREE.Spherical(),tv=V(0,0,0);
+let last=performance.now(),time=0;
+const ease=(cur,tg,rate,dt)=>cur+(tg-cur)*(1-Math.exp(-rate*dt));
+
+function frame(now){
+  const dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;time+=dt;
+  tickTimeline(dt);
+  const tg=TARGETS[step];
+  for(const k in S)S[k]=ease(S[k],tg[k],k==="apop"?.75:k==="mol"?1.3:1.6,dt);
+
+  const cs=STEPS[step];
+  camPos.set(ease(camPos.x,cs.cam[0],1.1,dt),ease(camPos.y,cs.cam[1],1.1,dt),ease(camPos.z,cs.cam[2],1.1,dt));
+  camLook.set(ease(camLook.x,cs.look[0],1.1,dt),ease(camLook.y,cs.look[1],1.1,dt),ease(camLook.z,cs.look[2],1.1,dt));
+  if(!drag){uYaw=ease(uYaw,0,.35,dt);uPitch=ease(uPitch,0,.35,dt)}
+  const asp=W/H,k=Math.min(2.4,Math.max(1.12,1.12*Math.pow(1.5/asp,.8)));
+  scene.fog.near=26*k;scene.fog.far=60*k;
+  tmp.subVectors(camPos,camLook).multiplyScalar(k);
+  sp.setFromVector3(tmp);sp.theta+=uYaw+(reduce?0:Math.sin(time*.18)*.05);sp.phi=Math.max(.25,Math.min(2.6,sp.phi-uPitch));
+  tmp.setFromSpherical(sp);camera.position.copy(camLook).add(tmp);camera.lookAt(camLook);
+
+  // osteoclasta: prima si gonfia di bolle, poi si divide in palline
+  const pre=smooth(S.apop/.35), split=smooth((S.apop-.3)/.7);
+  ocScale=1-.97*split;
+  oc.visible=ocScale>.05;
+  oc.scale.setScalar(ocScale);oc.position.set(OC.x,BONE_TOP+(FING+BOTH)*ocScale,0);
+  if(oc.visible){
+    const pa=ocGeo.attributes.position.array,ruff=(1-S.func)*(1-pre);
+    for(let i=0;i<pa.length;i+=3){
+      const x=ocBase[i],y=ocBase[i+1],z=ocBase[i+2];
+      let n=1+.04*Math.sin(x*1.6+time*.8)*Math.cos(z*1.3+time*.6)+.025*Math.sin(y*2.2-time*.9);
+      if(y<-R*.55)n+=.05*ruff*Math.sin(x*7+time*3)*Math.cos(z*7+time*2.4);
+      n+=pre*.16*Math.max(0,Math.sin(x*2.4+time*1.5)*Math.sin(z*2.1-time*1.1)*Math.sin(y*2.8+1.3));
+      pa[i]=x*n;pa[i+1]=y*n;pa[i+2]=z*n;
+    }
+    ocGeo.attributes.position.needsUpdate=true;ocGeo.computeVertexNormals();
+  }
+  ocMat.uniforms.uCol.value.copy(OC_COL).lerp(OC_DYING,pre);
+  nuclei.forEach(n=>{const c=1-.45*pre;n.scale.set(.42*c,.13+.15*pre,.3*c);n.position.copy(n.userData.p).multiplyScalar(1-.4*pre)});
+  ocMat.uniforms.uOp.value=1.7-.9*S.xray;
+  fingers.forEach(f=>{const L=f.L*(1-.45*S.func)*(1+.05*Math.sin(time*2.2+f.ph)*(1-S.func));f.c.scale.y=L;f.c.position.y=-L/2;f.t.position.y=-L});
+  bodies.forEach((b,i)=>{
+    const grow=smooth((S.apop-b.delay)/.4), go=smooth((S.apop-.3-b.delay)/.6);
+    b.m.visible=grow>.01;
+    if(!b.m.visible)return;
+    tv.set(b.dir.x*R*ocScale,b.dir.y*TOPH*ocScale,b.dir.z*R*ocScale).add(oc.position);
+    b.m.position.copy(tv).lerp(b.fin,go);
+    b.m.position.y+=Math.sin(go*Math.PI)*1.1;
+    const wob=1+.06*Math.sin(time*2.5+b.ph);
+    b.m.scale.setScalar(Math.max(.001,b.rb*grow*(.55+.45*go)*wob));
+  });
+  gtps.forEach(o=>{
+    const p=S.prenyl;
+    const free=o.free.clone().add(V(Math.sin(time*.7+o.ph)*.2,Math.cos(time*.5+o.ph)*.15,Math.cos(time*.6+o.ph)*.2));
+    o.g.position.copy(o.anchor).lerp(free,p);
+    o.tail.scale.setScalar(Math.max(.001,1-p));
+    if(p>.05)o.g.rotation.z+=dt*.4*p;
+  });
+  const fl=S.func;
+  actinMat.opacity=1-.85*fl;actin.scale.setScalar(1.28+.25*fl);actin.rotation.z=time*.05;
+  actin.visible=actinMat.opacity>.02;
+  filMat.opacity=.7*(1-.8*fl);fils.rotation.y=fl*.6;fils.scale.setScalar(1+.25*fl);
+  ves.forEach(v=>{
+    if(fl<.5){v.stuck=null;const u=(v.ph+time*.22)%1;v.m.position.set(v.x*(1-u*.2),.5-u*(.5+BOTH-.2),v.z*(1-u*.2));v.m.scale.setScalar(u>.92?(1-u)*12.5:1)}
+    else{if(!v.stuck)v.stuck=v.m.position.clone();v.m.position.copy(v.stuck).add(V(Math.sin(time+v.ph*9)*.08,Math.cos(time*.8+v.ph*7)*.06,0));v.m.scale.setScalar(1)}
+  });
+  shapeBone(.32*(1-.45*S.apop));
+  const crumbRate=(1-S.func*.85)*(1-S.apop);
+  crumbs.forEach(c=>{const u=(c.ph+time*.25)%1;c.c.position.set(c.x,BONE_TOP+.05+u*1.2,c.z);c.c.scale.setScalar(Math.max(.001,crumbRate*(u<.85?1:(1-u)*6.6)))});
+
+  // FPPS
+  fpps.rotation.y=time*.25;
+  fppsMat.color.copy(FPPS_COL).lerp(FPPS_OFF,S.block);
+  siteGlow.material.opacity=.95*(1-S.block)*(.5+.5*Math.sin(time*3));
+  halo.material.opacity=.9*S.block;halo.visible=S.block>.01;halo.rotation.set(1.0+.2*Math.sin(time*.7),time*.4,0);halo.scale.setScalar(1+.04*Math.sin(time*3));
+
+  // flussi
+  ups.forEach((m,i)=>{
+    const t=(i/ups.length+time*.11)%1;
+    if(t<.8)m.position.copy(curveA.getPointAt(t/.8));else m.position.lerpVectors(P_I,FP,(t-.8)/.2);
+    let s=1;if(t>.8)s=1-S.block;if(t<.04)s=t/.04;if(t>.96)s=Math.min(s,(1-t)/.04);
+    m.scale.setScalar(Math.max(.001,s));
+  });
+  downs.forEach((m,i)=>{const t=(i/downs.length+time*.13)%1;m.position.copy(curveB.getPointAt(t));const s=(1-S.block)*Math.min(1,t/.06,(1-t)/.06);m.scale.setScalar(Math.max(.001,s))});
+  ippCl.forEach((o,i)=>{const v=clamp01(S.ipp*ippCl.length-i);o.m.position.copy(P_I).add(o.o).add(V(Math.sin(time*1.3+o.ph)*.05,Math.cos(time*1.1+o.ph)*.05,0));o.m.scale.setScalar(Math.max(.001,v*.09))});
+  ippNode.scale.setScalar(1+.6*S.ipp);
+  spills.forEach((m,i)=>{const t=(i/spills.length+time*.12)%1;m.position.copy(curveC.getPointAt(t));m.scale.setScalar(Math.max(.001,S.spill*.085*Math.min(1,t/.05,(1-t)/.05)))});
+
+  // farmaco
+  const mv=S.mol;
+  if(mv<1)mol.position.lerpVectors(M_HID,M_HOV,mv);else mol.position.lerpVectors(M_HOV,SITE,mv-1);
+  mol.rotation.y+=dt*(1.4-1.2*clamp01(mv-1));mol.rotation.x=Math.sin(time*.6)*.3*(2-mv)/2;
+  fade(mol,Math.min(1,mv));mol.scale.setScalar(1.1-.25*Math.max(0,mv-1));
+
+  // linfocita
+  const act=S.tact,pulse=.5+.5*Math.sin(time*3.2);
+  tcMat.uniforms.uCol.value.copy(TC_COL).lerp(TC_HOT,act*pulse*.8);
+  tc.scale.setScalar(1+.06*act*Math.sin(time*3.2));
+  tcrMat.color.setRGB(.31+.6*act*pulse,.55+.2*act*pulse,1);
+  warmL.intensity=1.0*act+1.2*S.fever*(1-.6*S.ster);
+  const ckLevel=S.cyto*(1-.72*S.ster);
+  cks.forEach((c,i)=>{const u=(c.ph+time*.16)%1;const r=1.55+u*3.6;c.m.position.copy(TC).addScaledVector(c.d,r);c.m.position.x+=Math.sin(time*1.5+c.ph*20)*.08*u;const vis=i/cks.length<ckLevel?1:0;c.m.scale.setScalar(Math.max(.001,vis*.08*(u<.82?Math.min(1,u*8):(1-u)/.18)))});
+  dex.position.lerpVectors(D_HID,D_ON,S.ster);dex.rotation.y=time*.5;dex.rotation.z=Math.sin(time*.7)*.2;fade(dex,S.ster);
+  steroHalo.material.opacity=.7*S.ster;steroHalo.visible=S.ster>.01;steroHalo.rotation.set(Math.PI/2+.3*Math.sin(time*.5),time*.3,0);
+  $("heat").style.opacity=(S.fever*(1-.6*S.ster)).toFixed(3);
+
+  renderer.render(scene,camera);
+
+  const on=STEPS[step].labels;
+  for(const key in LBL){
+    const L=LBL[key],el=L.el,vis=on.includes(key);
+    el.classList.toggle("on",vis);
+    const p=L.p().project(camera);
+    if(p.z>1){el.style.transform="translate(-9999px,0)";continue}
+    const x=(p.x*.5+.5)*W,y=(-p.y*.5+.5)*H;
+    el.style.transform="translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px) translate(-50%,-100%)";
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
